@@ -22,7 +22,7 @@
 
   programs.neovim = {
     enable = true;
-    defaultEditor = true;
+    package =  inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
   };
 
   programs.zoxide.enable = true;
@@ -58,6 +58,7 @@
 
     zsh-syntax-highlighting.enable = true;
     atuin.enable = true;
+    nvim.enable = false;
   };
 
   programs.git = {
@@ -82,3 +83,4 @@
   };
 }
   
+

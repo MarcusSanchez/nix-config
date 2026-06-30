@@ -9,6 +9,9 @@
     };
     claude-code.url = "github:sadjow/claude-code-nix";
     catppuccin.url = "github:catppuccin/nix";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    zig-overlay.url = "github:mitchellh/zig-overlay";
+    zls-overlay.url = "github:zigtools/zls";
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -23,6 +26,7 @@
           ./modules/wsl.nix
           ./modules/home-manager.nix
           ./modules/claude-code.nix
+          ./modules/zig-zls.nix
         ];
       };
     };
