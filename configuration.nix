@@ -10,12 +10,13 @@
     gzip
     gnutar
     tree
-  
+
     nodejs_latest
-    nodePackages.npm
-    nodePackages.typescript
+
     go
     gopls
+
+    rustup # all you need for rust development
   ];
 
   programs.zsh.enable = true;

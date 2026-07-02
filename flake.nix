@@ -11,7 +11,7 @@
     catppuccin.url = "github:catppuccin/nix";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     zig-overlay.url = "github:mitchellh/zig-overlay";
-    zls-overlay.url = "github:zigtools/zls";
+    zls-overlay.url = "github:zigtools/zls/0.16.0";
   };
 
   outputs = inputs@{ flake-parts, ... }:
