@@ -53,6 +53,54 @@ Auto-upgrade rebuilds this flake weekly against its lockfile; inputs only
 move when you run `nix flake update`. Garbage collection runs daily and
 keeps the last 10 days.
 
+## Bootstrapping a new machine
+
+A fresh instance boots as the stock `nixos` user; the first rebuild creates
+`marcus`, so there's one restart in the middle.
+
+**On Windows** — download the latest `nixos.wsl` from
+[NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then:
+
+```powershell
+wsl --install --from-file nixos.wsl --name <instance-name>
+wsl -d <instance-name>
+```
+
+**Inside, as the default `nixos` user:**
+
+```sh
+sudo nix run nixpkgs#git -- clone https://github.com/MarcusSanchez/nixos.git /tmp/nixos-config
+sudo nixos-rebuild switch --flake /tmp/nixos-config#nixos
+
+# Move the repo home and recreate the /etc/nixos symlink (not managed by
+# the config; autoUpgrade depends on it)
+sudo mv /tmp/nixos-config /home/marcus/nixos-config
+sudo chown -R marcus:users /home/marcus/nixos-config
+sudo ln -sfn /home/marcus/nixos-config /etc/nixos
+exit
+```
+
+If the tarball predates flakes being enabled by default, prefix the rebuild
+with `NIX_CONFIG="experimental-features = nix-command flakes"`.
+
+**On Windows again:**
+
+```powershell
+wsl -t <instance-name>   # restart so wsl.defaultUser takes effect
+wsl -d <instance-name>   # lands as marcus
+```
+
+**First login as marcus** — the neovim config is already cloned to
+`~/.config/nvim` by the Home Manager bootstrap; what's left is per-machine
+state:
+
+1. `gh auth login` (gh is the git credential helper — needed to push)
+2. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
+3. `atuin login` if syncing shell history
+
+Leave both `stateVersion`s at `"25.05"` even on a newer install — they are
+compatibility markers, not the running version.
+
 ## Adding things
 
 - A system package → `modules/nixos/packages.nix`
