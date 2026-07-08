@@ -3,8 +3,9 @@
 { inputs, pkgs, ... }:
 
 let
-  zig = inputs.zig-overlay.packages.${pkgs.system}."0.16.0";
-  zls = inputs.zls-overlay.packages.${pkgs.system}.zls.overrideAttrs (_: {
+  system = pkgs.stdenv.hostPlatform.system;
+  zig = inputs.zig-overlay.packages.${system}."0.16.0";
+  zls = inputs.zls-overlay.packages.${system}.zls.overrideAttrs (_: {
     nativeBuildInputs = [ zig ];
   });
 in

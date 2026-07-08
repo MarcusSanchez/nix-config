@@ -6,6 +6,9 @@
 
   catppuccin = {
     enable = true;
+    # Explicit to match the upcoming default; today `enable = true` already
+    # auto-enrolls every port (hence the nvim opt-out below).
+    autoEnable = true;
     flavor = "mocha";
     accent = "blue";
 
