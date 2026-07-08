@@ -1,26 +1,20 @@
-# Neovim nightly + the external tools LazyVim expects on PATH.
+# Neovim (stable, from nixpkgs) + the external tools LazyVim expects on PATH.
 # The editor config itself is marcus's own LazyVim fork, bootstrapped below —
 # deliberately NOT programs.neovim, which generates its own init.lua and
 # symlinks it over the checkout.
-{
-  inputs,
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, lib, ... }:
 
 {
-  home.packages = [
-    inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ]
-  ++ (with pkgs; [
+  home.packages = with pkgs; [
+    neovim
+
     # lazyvim deps
     tree-sitter
     ripgrep
     fd
     fzf
     xclip
-  ]);
+  ];
 
   # First-run bootstrap: clone the editor config if it isn't there yet.
   # It stays a normal mutable git checkout, so lazy.nvim can write

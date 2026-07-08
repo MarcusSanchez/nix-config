@@ -24,7 +24,7 @@ home/marcus/               Home Manager (per-user) modules
   default.nix              Entry point — identity, stateVersion, imports
   packages.nix             Standalone user tools
   shell.nix                zsh + oh-my-zsh, zoxide, atuin
-  neovim.nix               Neovim nightly; clones marcussanchez/neovim-config
+  neovim.nix               Neovim (stable); clones marcussanchez/neovim-config
                            to ~/.config/nvim on first activation (stays a
                            normal mutable git checkout, not nix-managed)
   git.nix                  Git identity + gh
