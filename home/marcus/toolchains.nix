@@ -1,19 +1,17 @@
 # Real-directory toolchain copies for Windows-side IDEs, plus rustup repair.
 #
 # JetBrains on Windows browses WSL files over \\wsl$, which exposes Linux
-# symlinks as reparse points its file picker can't traverse — so anything
-# the IDE must select has to be a real directory with real files, not a
-# link into /nix/store. The hook below dereference-copies each toolchain
-# into ~/.toolchains and only re-copies when its store path changes.
-# rustup's toolchains are already real directories, so RustRover works
-# against ~/.rustup as-is.
+# symlinks as reparse points its file picker can't traverse. Toolchains the
+# IDE needs as a *directory* (GOROOT) must therefore be real dereferenced
+# copies, not links into /nix/store. Plain executables (node, buf, ...)
+# work fine straight from /run/current-system/sw/bin, and rustup's
+# toolchains are already real directories, so RustRover works against
+# ~/.rustup as-is.
 { pkgs, lib, ... }:
 
 let
   ideToolchains = {
     go = "${pkgs.go}/share/go"; # GOROOT
-    node = "${pkgs.nodejs_latest}";
-    buf = "${pkgs.buf}";
   };
 in
 {
