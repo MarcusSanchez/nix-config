@@ -52,16 +52,6 @@ Auto-upgrade rebuilds this flake weekly against its lockfile; inputs only
 move when you run `nix flake update`. Garbage collection runs daily and
 keeps the last 10 days.
 
-### If cargo/rustc suddenly report "No such file or directory"
-
-rustup-downloaded toolchains are patched to use a specific glibc from the
-Nix store. When an upgrade bumps glibc and GC later deletes the old one,
-existing toolchains break with ENOENT even though the files exist. Fix:
-
-```sh
-rustup toolchain uninstall stable && rustup toolchain install stable
-```
-
 ## Bootstrapping a new machine
 
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
