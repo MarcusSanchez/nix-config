@@ -14,6 +14,10 @@
     fd
     fzf
     xclip
+
+    # nix editing (enable the `lang.nix` LazyVim extra in the nvim config)
+    nixd
+    nixfmt
   ];
 
   # First-run bootstrap: clone the editor config if it isn't there yet.

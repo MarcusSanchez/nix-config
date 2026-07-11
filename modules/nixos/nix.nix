@@ -24,6 +24,10 @@
     dates = "weekly";
     flake = "/etc/nixos";
   };
+  # WSL only runs timers while the VM is up; catch up missed windows on
+  # the next boot instead of silently skipping the week. (nix.gc's timer
+  # is already persistent by default.)
+  systemd.timers.nixos-upgrade.timerConfig.Persistent = true;
 
   nixpkgs.config.allowUnfree = true;
 }

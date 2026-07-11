@@ -53,7 +53,9 @@ nix flake check
 
 Auto-upgrade rebuilds this flake weekly against its lockfile; inputs only
 move when you run `nix flake update`. Garbage collection runs daily and
-keeps the last 10 days.
+keeps the last 10 days. Both timers only tick while the WSL VM is running;
+missed windows catch up on the next boot (`Persistent=true`). To see what
+a rebuild actually changed: `nvd diff /run/booted-system /run/current-system`.
 
 ## Bootstrapping a new machine
 

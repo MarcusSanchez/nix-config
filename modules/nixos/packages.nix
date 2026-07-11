@@ -4,11 +4,19 @@
 {
   environment.systemPackages = with pkgs; [
     gcc
+    gnumake
     curl
     unzip
     gzip
     gnutar
     tree
+    jq
+    file
+    htop
+
+    # what did a rebuild actually change: nvd diff /run/booted-system /run/current-system
+    nvd
+    nh
 
     nodejs_latest
 
