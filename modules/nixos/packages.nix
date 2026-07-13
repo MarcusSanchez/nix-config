@@ -20,6 +20,12 @@
 
     nodejs_latest
 
+    # scripting: global `pip install` can't work against the read-only
+    # store — use `uvx <tool>` for ad-hoc CLIs and `uv venv`/`uv run`
+    # for projects instead
+    python3
+    uv
+
     go
     gopls
 

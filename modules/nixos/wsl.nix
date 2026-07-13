@@ -6,6 +6,10 @@
 
   wsl.enable = true;
   wsl.defaultUser = "marcus";
+  # systemd-binfmt can wipe WSL's own handler for Windows .exe files, which
+  # breaks interop (powershell.exe: "Exec format error", wsl-open dies).
+  # Registering it declaratively keeps it in place.
+  wsl.interop.register = true;
 
   # Make xdg-open / $BROWSER reach the Windows browser, so CLI auth flows
   # (gh, flyctl, OAuth callbacks) open a page instead of printing a URL.
