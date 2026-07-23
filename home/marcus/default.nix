@@ -1,4 +1,5 @@
-# Home Manager entry point for marcus.
+# Shared Home Manager config for every machine. Per-host entry points
+# (wsl.nix, mac.nix) set identity and the platform-only imports.
 { ... }:
 
 {
@@ -8,11 +9,7 @@
     ./neovim.nix
     ./git.nix
     ./catppuccin.nix
-    ./toolchains.nix
   ];
-
-  home.username = "marcus";
-  home.homeDirectory = "/home/marcus";
 
   home.sessionVariables = {
     SUDO_EDITOR = "nvim";

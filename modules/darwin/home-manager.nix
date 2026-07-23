@@ -1,8 +1,8 @@
-# Bridges Home Manager into the NixOS build; per-user config lives in home/.
+# Bridges Home Manager into the nix-darwin build; per-user config lives in home/.
 { inputs, ... }:
 
 {
-  imports = [ inputs.home-manager.nixosModules.home-manager ];
+  imports = [ inputs.home-manager.darwinModules.home-manager ];
 
   home-manager = {
     useGlobalPkgs = true;
@@ -10,6 +10,6 @@
     extraSpecialArgs = { inherit inputs; };
     # If a target dotfile already exists, move it aside instead of aborting.
     backupFileExtension = "hm-backup";
-    users.marcus = import ../../home/marcus/wsl.nix;
+    users.marcussanchez = import ../../home/marcus/mac.nix;
   };
 }

@@ -5,16 +5,19 @@
 { pkgs, lib, ... }:
 
 {
-  home.packages = with pkgs; [
-    neovim
+  home.packages =
+    with pkgs;
+    [
+      neovim
 
-    # lazyvim deps
-    tree-sitter
-    ripgrep
-    fd
-    fzf
-    xclip
-  ];
+      # lazyvim deps
+      tree-sitter
+      ripgrep
+      fd
+      fzf
+    ]
+    # macOS's clipboard is pbcopy, built in; Linux needs xclip
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.xclip ];
 
   # First-run bootstrap: clone the editor config if it isn't there yet.
   # It stays a normal mutable git checkout, so lazy.nvim can write
