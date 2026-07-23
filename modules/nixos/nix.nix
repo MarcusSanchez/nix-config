@@ -17,12 +17,14 @@
     options = "--delete-older-than 10d";
   };
 
-  # Automatic updating: rebuilds /etc/nixos weekly, honouring flake.lock.
-  # Run `nix flake update` to actually bump inputs.
+  # Automatic updating: rebuilds weekly from pushed main, honouring the
+  # pushed flake.lock. Run `nix flake update` to actually bump inputs.
+  # Deliberately NOT /etc/nixos: that's the live working tree, and the
+  # timer would silently activate uncommitted work-in-progress.
   system.autoUpgrade = {
     enable = true;
     dates = "weekly";
-    flake = "/etc/nixos";
+    flake = "github:MarcusSanchez/nix-config";
   };
   # WSL only runs timers while the VM is up; catch up missed windows on
   # the next boot instead of silently skipping the week. (nix.gc's timer

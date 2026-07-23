@@ -3,9 +3,8 @@
 One flake, two machines:
 
 - **WSL** — NixOS (host `nixos`, user `marcus`). Repo at `~/nix-config`,
-  symlinked to `/etc/nixos` (that path is what `nixos-rebuild` and
-  `system.autoUpgrade` look for — the symlink name is fixed, the repo
-  location isn't).
+  symlinked to `/etc/nixos` (that path is what bare `nixos-rebuild` looks
+  for — the symlink name is fixed, the repo location isn't).
 - **MacBook Air** — nix-darwin on Determinate Nix (host `Marcuss-MacBook-Air`,
   user `marcussanchez`). Repo at `~/nix-config`, symlinked to
   `/etc/nix-darwin`, so bare `darwin-rebuild` finds it.
@@ -76,7 +75,8 @@ nix flake check                    # validate before switching
 nix flake init -t /etc/nixos       # scaffold a project dev shell (mac: -t ~/nix-config)
 ```
 
-On WSL, auto-upgrade rebuilds weekly against the lockfile and GC runs daily
+On WSL, auto-upgrade rebuilds weekly from pushed main on GitHub (never the
+local working tree, so uncommitted WIP can't get activated) and GC runs daily
 (both timers catch up after downtime). The mac has no autoUpgrade — update
 via `nh darwin switch -u`; user-level GC runs weekly as a launchd agent.
 To see what a rebuild changed: the diff `nh` prints on either machine, or
@@ -130,11 +130,11 @@ wsl -d nixos
 # The stock image has flakes disabled, so the first two commands pass the
 # feature flags explicitly (an env var would be stripped by sudo). After
 # the first switch the config enables flakes permanently.
-sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nixos.git /tmp/nixos-config
+sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
 sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#nixos
 
 # Move the repo home and recreate the /etc/nixos symlink (not managed by
-# the config; autoUpgrade depends on it)
+# the config; bare `nixos-rebuild` depends on it)
 sudo mv /tmp/nixos-config /home/marcus/nix-config
 sudo chown -R marcus:users /home/marcus/nix-config
 sudo ln -sfn /home/marcus/nix-config /etc/nixos
@@ -169,7 +169,7 @@ via the activation hook; what's left is per-machine state:
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
 
 # 3. Clone the config
-git clone https://github.com/MarcusSanchez/nixos.git ~/nix-config
+git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
 
 # 4. First activation (bootstraps darwin-rebuild itself; this is also where
 #    brew installs everything declared in homebrew.nix)
