@@ -178,6 +178,12 @@ sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config
 # 5. Symlink so bare `sudo darwin-rebuild switch` works — the analog of
 #    the WSL machine keeping its config at /etc/nixos
 sudo ln -s ~/nix-config /etc/nix-darwin
+
+# 6. Wire in the claude-code binary cache. Manual on the mac: daemon config
+#    is Determinate's, not nix-darwin's (WSL gets this declaratively in
+#    modules/nixos/nix.nix). The key is public — nothing secret here.
+printf 'extra-substituters = https://claude-code.cachix.org\nextra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=\n' | sudo tee -a /etc/nix/nix.custom.conf
+sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 ```
 
 Determinate Nix owns the daemon, so nix-darwin runs with `nix.enable = false`;
