@@ -9,18 +9,20 @@
     ];
     auto-optimise-store = true;
 
-    # Pull claude-code from its cachix cache instead of rebuilding it on
-    # every input bump. Purely build-vs-download: versions still come from
-    # flake.lock, and a cache miss just builds locally. Can't live in
-    # modules/common (darwin has nix.enable = false) — the mac gets the
-    # same two lines in /etc/nix/nix.custom.conf instead.
+    # Pull claude-code and devenv-built artifacts from their cachix caches
+    # instead of rebuilding locally. Purely build-vs-download: versions
+    # still come from the lockfiles, and a cache miss just builds locally.
+    # Can't live in modules/common (darwin has nix.enable = false) — the
+    # mac gets the same lines in /etc/nix/nix.custom.conf instead.
     substituters = [
       "https://cache.nixos.org"
       "https://claude-code.cachix.org"
+      "https://devenv.cachix.org"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
     ];
   };
 

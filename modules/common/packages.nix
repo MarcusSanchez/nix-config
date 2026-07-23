@@ -16,6 +16,11 @@
     nvd
     nh
 
+    # per-project dev environments with services (postgres, redis, ...):
+    # `devenv init` in the project repo. For plain package lists the
+    # devshell template (templates/devshell) is still the lighter tool.
+    devenv
+
     nodejs_latest
 
     # scripting: global `pip install` can't work against the read-only

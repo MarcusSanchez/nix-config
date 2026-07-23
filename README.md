@@ -112,8 +112,10 @@ direnv allow                   # opt in once; auto-loads on cd from then on
 Add the project's tools to `packages` in its flake.nix; the shell loads on
 `cd` in and unloads on `cd` out (`use flake` via direnv, cached by
 nix-direnv). If a project needs real services (postgres, redis) running
-per-project, reach for devenv.sh in that repo instead — same idea,
-batteries included.
+per-project, use devenv instead (installed on both machines): `devenv init`
+in that repo, enable `services.*` in the generated devenv.nix, and put
+`eval "$(devenv direnvrc)"` + `use devenv` in its .envrc for the same
+auto-load-on-cd behavior.
 
 ## Bootstrapping a new WSL machine
 
@@ -184,10 +186,10 @@ sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config
 #    the WSL machine keeping its config at /etc/nixos
 sudo ln -s ~/nix-config /etc/nix-darwin
 
-# 6. Wire in the claude-code binary cache. Manual on the mac: daemon config
-#    is Determinate's, not nix-darwin's (WSL gets this declaratively in
-#    modules/nixos/nix.nix). The key is public — nothing secret here.
-printf 'extra-substituters = https://claude-code.cachix.org\nextra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=\n' | sudo tee -a /etc/nix/nix.custom.conf
+# 6. Wire in the claude-code + devenv binary caches. Manual on the mac:
+#    daemon config is Determinate's, not nix-darwin's (WSL gets this
+#    declaratively in modules/nixos/nix.nix). Keys are public.
+printf 'extra-substituters = https://claude-code.cachix.org https://devenv.cachix.org\nextra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=\n' | sudo tee -a /etc/nix/nix.custom.conf
 sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 ```
 
