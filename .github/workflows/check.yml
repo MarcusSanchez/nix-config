@@ -8,6 +8,11 @@ name: check
 on:
   push:
     branches: [main]
+    # the zed sync hook auto-pushes chore commits touching only these
+    # mirrored JSON files; nix copies them without parsing, so they
+    # can't affect the build — skip the run
+    paths-ignore:
+      - "home/marcus/wsl/zed/**"
   pull_request:
 
 jobs:
