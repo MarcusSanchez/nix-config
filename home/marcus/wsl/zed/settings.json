@@ -21,6 +21,15 @@
   },
   "proxy": "",
   "semantic_tokens": "combined",
+  "lsp": {
+    "gopls": {
+      "initialization_options": {
+        // match nvim (LazyVim lang.go: goimports+gofumpt) and goland:
+        // stricter formatting incl. stdlib imports as their own group
+        "gofumpt": true
+      }
+    }
+  },
   "languages": {
     "Zig": {
       "tab_size": 4
