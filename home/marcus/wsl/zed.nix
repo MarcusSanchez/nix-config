@@ -6,11 +6,11 @@
 # Symlinks are impossible across this boundary (NTFS can't point into
 # WSL, Windows can't traverse Linux links), hence copies. Repo path
 # hardcoded: activation must write to the working tree, not the store.
-{ lib, ... }:
+{ config, lib, ... }:
 
 let
-  winZedDir = "/mnt/c/Users/marcus/AppData/Roaming/Zed";
-  repoZedDir = "/home/marcus/nix-config/home/marcus/wsl/zed";
+  winZedDir = "/mnt/c/Users/${config.windows.username}/AppData/Roaming/Zed";
+  repoZedDir = "${config.home.homeDirectory}/nix-config/home/marcus/wsl/zed";
 in
 {
   home.activation.zedConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

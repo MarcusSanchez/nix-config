@@ -5,6 +5,7 @@
 {
   imports = [
     ./common
+    ./wsl/windows.nix
     ./wsl/nix.nix
     ./wsl/toolchains.nix
     ./wsl/zed.nix
@@ -12,4 +13,5 @@
 
   home.username = "marcus";
   home.homeDirectory = "/home/marcus";
+  windows.username = "marcus";
 }

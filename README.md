@@ -51,6 +51,8 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     catppuccin.nix         Catppuccin Mocha theming
     comma.nix              comma + prebuilt nix-index database
   wsl/
+    windows.nix            windows.username option — the Windows account
+                           owning the distro, set per machine in wsl.nix
     nix.nix                NH_FLAKE for bare `nh os switch`
     toolchains.nix         ~/.toolchains/go real-dir GOROOT copy for
                            Windows IDEs (\\wsl$ can't traverse symlinks);
