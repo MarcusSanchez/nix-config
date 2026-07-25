@@ -49,13 +49,17 @@ in
           fi
         fi
       done
-      # commit is pathspec-scoped so unrelated dirty files never ride
-      # along; a failed push leaves the commit for the next manual push
+      # commit only the files this run actually pulled — a fixed pathspec
+      # once swept uncommitted repo-side edits to the OTHER zed file into
+      # a chore commit; a failed push leaves the commit for the next
+      # manual push
       if [ -n "$pulled" ]; then
+        paths=""
+        for p in $pulled; do paths="$paths home/marcus/wsl/zed/$p"; done
         echo "zed: pulled$pulled from Windows — committing" >&2
         if run ${pkgs.git}/bin/git -C "${repoDir}" commit -q \
           -m "chore(zed): sync config from the windows ui" \
-          -- home/marcus/wsl/zed/settings.json home/marcus/wsl/zed/keymap.json; then
+          -- $paths; then
           run ${pkgs.git}/bin/git -C "${repoDir}" push -q \
             || echo "zed: committed, but push failed (offline?) — push manually" >&2
         else
