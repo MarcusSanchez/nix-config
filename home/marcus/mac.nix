@@ -8,6 +8,7 @@
     ./mac/ghostty.nix
     ./mac/nix.nix
     ./mac/toolchains.nix
+    ./mac/zed.nix
   ];
 
   home.username = "marcussanchez";
