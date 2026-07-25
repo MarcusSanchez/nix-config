@@ -125,7 +125,9 @@
       "g shift-i": "editor::GoToImplementation",
       "g r": "editor::FindAllReferences",
       "g y": "editor::GoToTypeDefinition",
-      ", d": "editor::Fold",
+      // toggle, not Fold: Zed has no cursor-into-fold auto-expand, so
+      // the same key must undo the fold (z o / z R also work)
+      ", d": "editor::ToggleFold",
       // _ register delete left (backspace without yanking)
       "backspace": ["workspace::SendKeystrokes", "# p r _ d h"]
     }
