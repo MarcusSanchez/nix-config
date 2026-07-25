@@ -140,6 +140,16 @@
   // Not expressible here: global-vs-local variables, exported-vs-local
   // constants (Zed's captures don't distinguish them)
   "experimental.theme_overrides": {
+    // bracket-colorization cycle (colorize_brackets above), same colors
+    // and order as GoLand's *_BRACKETS_RAINBOW_COLOR0-5
+    "accents": [
+      "#f9e2af",
+      "#cba6f7",
+      "#f38ba8",
+      "#89b4fa",
+      "#89dceb",
+      "#fab387",
+    ],
     "syntax": {
       "keyword": { "color": "#cba6f7", "font_style": "italic" },
       "function": { "color": "#89b4fa" },
