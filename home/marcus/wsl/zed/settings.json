@@ -135,8 +135,13 @@
   "preferred_line_length": 120,
   "wrap_guides": [120],
 
+  // kept in step with the highlight_overrides in neovim-config's
+  // catppuccin.lua (nvim is the source of truth; the per-language lsp
+  // tweaks there have no Zed equivalent)
   "experimental.theme_overrides": {
     "syntax": {
+      "keyword": { "color": "#cba6f7", "font_style": "italic" },
+      "function.builtin": { "color": "#89b4fa" },
       "constants": { "color": "#74c7ec" },
       "field": { "color": "#f38ba8" },
       "property": { "color": "#f38ba8" },
