@@ -7,6 +7,7 @@
     ./common
     ./wsl/nix.nix
     ./wsl/toolchains.nix
+    ./wsl/zed.nix
   ];
 
   home.username = "marcus";

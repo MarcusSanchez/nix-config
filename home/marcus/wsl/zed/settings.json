@@ -1,0 +1,154 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "agent_ui_font_size": 16.0,
+  "ui_font_family": "JetBrainsMono Nerd Font",
+  "terminal": {
+    "font_size": 14.0
+  },
+  "format_on_save": "on",
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 300
+    }
+  },
+  "proxy": "",
+  "semantic_tokens": "combined",
+  "languages": {
+    "Zig": {
+      "tab_size": 4
+    },
+    "Nix": {
+      // nixd is installed system-wide on NixOS; nil isn't, and the
+      // extension's auto-downloaded nil binary can't run on NixOS
+      "language_servers": ["nixd", "!nil"]
+    }
+  },
+  "wsl_connections": [
+    {
+      "distro_name": "NixOS",
+      "user": null,
+      "projects": [
+        {
+          "paths": [
+            "/home/marcus/nix-config"
+          ]
+        },
+        {
+          "paths": [
+            "/home/marcus/projects/noted"
+          ]
+        },
+        {
+          "paths": [
+            "/home/marcus/projects/rustma"
+          ]
+        },
+        {
+          "paths": [
+            "/home/marcus/projects/zigma"
+          ]
+        }
+      ]
+    }
+  ],
+  "auto_install_extensions": {
+    "catppuccin": true,
+    "catppuccin-icons": true,
+  },
+  "enable_language_server": true,
+  "edit_predictions": {
+    "provider": "copilot",
+  },
+  "outline_panel": {
+    "dock": "left",
+  },
+  "collaboration_panel": {
+    "dock": "left",
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": [],
+  },
+  "git_panel": {
+    "dock": "left",
+  },
+  "colorize_brackets": true,
+  "icon_theme": "Catppuccin Mocha",
+  "diagnostics": {
+    "button": true,
+    "include_warnings": true,
+    "lsp_pull_diagnostics": {
+      "enabled": true,
+      "debounce_ms": 50,
+    },
+    "inline": {
+      "enabled": true,
+      "update_debounce_ms": 150,
+      "padding": 4,
+      "min_column": 0,
+      "max_severity": null,
+    },
+    "cargo": null,
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": false,
+    },
+  },
+  "project_panel": {
+    "dock": "right",
+  },
+  "tabs": {
+    "file_icons": true,
+  },
+  "relative_line_numbers": "enabled",
+  "base_keymap": "JetBrains",
+  "vim_mode": true,
+  // "ui_font_family": ".SystemUIFont",
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "ui_font_size": 16,
+  "buffer_font_size": 14.0,
+  "theme": {
+    "mode": "system",
+    "light": "Catppuccin Mocha",
+    "dark": "Catppuccin Mocha",
+  },
+
+  "vertical_scroll_margin": 5,
+  "scroll_beyond_last_line": "vertical_scroll_margin",
+
+  "buffer_font_features": {
+    "calt": false,
+  },
+
+  "extend_comment_on_newline": false,
+
+  "preferred_line_length": 120,
+  "wrap_guides": [120],
+
+  "experimental.theme_overrides": {
+    "syntax": {
+      "constants": { "color": "#74c7ec" },
+      "field": { "color": "#f38ba8" },
+      "property": { "color": "#f38ba8" },
+      "namespace": { "color": "#bac2de", "font_style": "italic" },
+      "variable": { "color": "#bac2de" },
+      "variable.member": { "color": "#f38ba8" },
+      "variable.parameter": { "color": "#dabb9b" },
+      "attribute": { "color": "#dabb9b" },
+      "number": { "color": "#74c7ec" },
+      "operator": { "color": "#ff6ca9" },
+      "type": { "color": "#f9e2af" },
+      "punctuation.delimiter": { "color": "#bac2de" },
+      "punctuation.special": { "color": "#ff6ca9" },
+    },
+  },
+}
