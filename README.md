@@ -55,11 +55,11 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     toolchains.nix         ~/.toolchains/go real-dir GOROOT copy for
                            Windows IDEs (\\wsl$ can't traverse symlinks);
                            rustup toolchain auto-repair on glibc bumps
-    zed.nix                mirrors the Windows-side Zed config (settings +
-                           keymap in %USERPROFILE%\AppData\Roaming\Zed)
-                           into zed/ on activation — the UI is the source
-                           of truth, commit the drift like lazy-lock.json;
-                           only seeds Windows when a file is missing there
+    zed.nix                two-way syncs zed/ with the Windows-side Zed
+                           config (%USERPROFILE%\AppData\Roaming\Zed) on
+                           activation: UI edits pull into the repo (commit
+                           like lazy-lock.json), repo edits push to
+                           Windows, both-changed warns and writes nothing
   mac/
     ghostty.nix            Ghostty config (app itself is a brew cask)
     nix.nix                user-level GC launchd agent + NH_FLAKE
