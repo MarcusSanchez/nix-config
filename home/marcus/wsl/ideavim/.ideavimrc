@@ -1,0 +1,216 @@
+" ================================================================
+" .ideavimrc
+" ================================================================
+
+" Leader is <space> (set before any <leader> mappings)
+let mapleader = " "
+
+" ----------------------------------------------------------------
+" General settings
+" ----------------------------------------------------------------
+set visualbell              " Disable bell sound
+set clipboard=unnamed       " Use system clipboard
+set whichwrap+=<,>,[,],h,l  " Move to the next line with these keys
+set scrolloff=5             " Show a few lines of context around the cursor
+set incsearch               " Incremental search
+set ignorecase              " Case-insensitive search...
+set smartcase               " ...unless the pattern has a capital letter
+set shortmess+=S            " Hide the [x/y] search count (its whole-file
+                            " scan lagged the w/e search motions on 2.39+)
+set showmode                " Show current mode
+
+" ----------------------------------------------------------------
+" IDEA-specific settings
+" ----------------------------------------------------------------
+set ideajoin                " Use IDEA to intelligently join lines
+set ideastatusicon=enabled  " Always show the IdeaVim icon
+set ideavimsupport=dialog   " Use IdeaVim in dialogs
+set idearefactormode=keep   " Keep mode when starting a refactor
+set ideaput                 " Use IDEA to paste
+set ideamarks               " Use IDEA to set marks
+
+" ----------------------------------------------------------------
+" Plugins
+" ----------------------------------------------------------------
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-repeat'
+Plug 'chrisbra/matchit'
+Plug 'machakann/vim-highlightedyank'
+Plug 'vim-scripts/argtextobj.vim'       " ia/aa: function-argument text objects
+Plug 'kana/vim-textobj-entire'          " ie/ae: whole-buffer text objects
+Plug 'michaeljsmith/vim-indent-object'  " ii/ai: indentation-block text objects
+
+" Which-Key popup for leader mappings (requires the 'Which-Key' IDE plugin)
+set which-key
+" Keep the popup open until a key is chosen (side effect: a lone 'j' in
+" insert mode doesn't render until the next keystroke, because of the
+" jj-to-Esc mapping — harmless, just cosmetic)
+set notimeout
+
+" Flash-style jump (requires the Flash IDE plugin)
+nmap s <Action>(flash.search)
+
+" ----------------------------------------------------------------
+" Movement
+" ----------------------------------------------------------------
+" H/L jump to start/end of line
+noremap H ^
+noremap L $
+
+" J/K scroll half a page up/down
+noremap J <C-U>
+noremap K <C-D>
+
+" Swap j and k in normal and visual mode
+nnoremap j k
+nnoremap k j
+vnoremap j k
+vnoremap k j
+
+" ...and keep dj/dk consistent with the swap (black-hole, like d below)
+nnoremap dj "_dk
+nnoremap dk "_dj
+
+" N joins lines (J's original job, now on <S-J> duty above)
+nnoremap N J
+
+" Word motions: skip over non-alphanumeric characters with w and e.
+" Original implementation, restored verbatim: normal mode only (dw/cw/de keep
+" the builtin motions), incsearch suppressed during the hop, highlight
+" cleared after. shortmess+=S above keeps the 2.39+ match-count scan from
+" lagging these. Do not rewrite as character-scan functions: that was tried
+" and misbehaved in tab-indented files (Go).
+nnoremap <silent> w :set noincsearch<CR>?\w\+<CR>:set incsearch<CR>:noh<CR>
+nnoremap <silent> e :set noincsearch<CR>/\w\+<CR>:set incsearch<CR>:noh<CR>
+
+" Visual mode falls back to builtin motions (w backward = b, e forward = w)
+vnoremap w b
+vnoremap e w
+
+noremap b e
+noremap W B
+noremap E W
+noremap B E
+
+" ----------------------------------------------------------------
+" Editing
+" ----------------------------------------------------------------
+" jj exits insert mode
+imap jj <Esc>
+
+" Prevent cursor movement when exiting insert mode
+inoremap <Esc> <Esc>`^
+
+" U redoes
+nnoremap U <C-R>
+
+" Tab indents; in visual mode, keep the selection anchored to the same text
+vmap <Tab> >gv4lo4lo
+" Dedent via the IDE action: it shifts the selection with the text per line,
+" clamping at the line start and handling lines with less than a full indent
+vmap <S-Tab> <Action>(EditorUnindentSelection)
+" Fallback if the action drops out of visual mode — repaired manual version:
+" vmap <S-Tab> <:<C-u>set whichwrap-=h,l<CR>gv4ho4ho<Esc>:<C-u>set whichwrap+=h,l<CR>gvo
+nmap <S-Tab> <<
+nnoremap <Tab> i<Tab>
+
+" Wrap the visual selection in a delimiter and reselect the contents
+vmap " S"lvi"
+vmap ' S'lvi'
+vmap ` S`lvi`
+vmap ( S)v%holo
+vmap { S}v%holo
+vmap [ S]v%holo
+
+" ----------------------------------------------------------------
+" Delete without yanking (black-hole register)
+" ----------------------------------------------------------------
+nnoremap d "_d
+vnoremap d "_d
+noremap D "_D
+noremap <BS> "_dh
+noremap <Del> "_<Del>
+
+" Paste over a selection without clobbering the register
+vnoremap p "_dP
+vnoremap P "_dP
+
+" ----------------------------------------------------------------
+" IDE actions
+" ----------------------------------------------------------------
+" Quick documentation / error info
+nmap gk <Action>(ShowHoverInfo)
+nmap ge <Action>(ShowErrorDescription)
+
+" Goto family (gI = same as Ctrl+Alt+B)
+nmap gI <Action>(GotoImplementation)
+nmap gr <Action>(ShowUsages)
+nmap gy <Action>(GotoTypeDeclaration)
+nmap gs <Action>(GotoSuperMethod)
+
+" Jump between errors (ge shows the description once you're there)
+nmap ]e <Action>(GotoNextError)
+nmap [e <Action>(GotoPreviousError)
+
+" Double-space opens fuzzy search in project files
+nmap <leader><leader> <Action>(GotoFile)
+
+" Recently opened files
+nmap <leader>e <Action>(RecentFiles)
+
+" Git (<leader>gh...)
+nmap <leader>ghr <Action>(Vcs.RollbackChangedLines)
+nmap <leader>ghl <Action>(Vcs.QuickListPopupAction)
+nmap <leader>ghd <Action>(VcsShowCurrentChangeMarker)
+
+" ',' as a secondary leader
+nmap ,r <Action>(Run)
+nmap ,x <Action>(RunConfiguration)
+nmap ,v <Action>(Debug)
+nmap ,b <Action>(ToggleLineBreakpoint)
+nmap ,s <Action>(Stop)
+nmap ,t <Action>(ActivateTerminalToolWindow)
+nmap ,a <Action>(ActivateProjectToolWindow)
+nmap ,c <Action>(CloseActiveTab)
+nmap ,f <Action>(ReformatCode)
+nmap ,g <Action>(ShowIntentionActions)
+nmap ,d <Action>(CollapseRegion)
+nnoremap ,q :q<CR>
+
+" ',' as a secondary leader in visual mode
+vmap ,r <Action>(RenameElement)
+
+" Alternative: route undo/redo through IDEA
+" nnoremap u :action $Undo<CR><Esc>
+" nnoremap U :action $Redo<CR><Esc><Esc>
+
+" ----------------------------------------------------------------
+" Ctrl-key ownership (vim vs IDE)
+" ----------------------------------------------------------------
+sethandler <C-A> a:vim
+sethandler <C-E> a:vim
+sethandler <C-G> a:vim
+sethandler <C-H> a:vim
+sethandler <C-L> a:vim
+sethandler <C-M> a:vim
+sethandler <C-N> a:vim
+sethandler <C-O> a:vim
+sethandler <C-R> a:vim
+sethandler <C-S> a:vim
+sethandler <C-U> a:vim
+
+sethandler <C-C> a:ide
+sethandler <C-D> a:ide
+sethandler <C-F> a:ide
+sethandler <C-I> a:ide
+sethandler <C-J> a:ide
+sethandler <C-K> a:ide
+sethandler <C-Q> a:ide
+sethandler <C-V> a:ide
+sethandler <C-W> a:ide
+sethandler <C-X> a:ide
+sethandler <C-Y> a:ide
+sethandler <C-[> a:ide
+sethandler <C-]> a:ide
+sethandler <S-CR> a:ide

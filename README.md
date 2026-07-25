@@ -57,11 +57,12 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     toolchains.nix         ~/.toolchains/go real-dir GOROOT copy for
                            Windows IDEs (\\wsl$ can't traverse symlinks);
                            rustup toolchain auto-repair on glibc bumps
-    zed.nix                two-way syncs zed/ with the Windows-side Zed
-                           config (%USERPROFILE%\AppData\Roaming\Zed) on
-                           activation: UI edits pull into the repo and
-                           auto-commit (chore:) + push, repo edits push
-                           to Windows, both-changed warns, writes nothing
+    win-sync.nix           two-way sync engine for Windows-side configs:
+                           UI edits pull into the repo and auto-commit
+                           (chore:) + push, repo edits push to Windows,
+                           both-changed warns and writes nothing
+    zed.nix                Zed (%APPDATA%\Zed settings+keymap) ↔ zed/
+    ideavim.nix            JetBrains .ideavimrc (%USERPROFILE%) ↔ ideavim/
   mac/
     ghostty.nix            Ghostty config (app itself is a brew cask)
     nix.nix                user-level GC launchd agent + NH_FLAKE

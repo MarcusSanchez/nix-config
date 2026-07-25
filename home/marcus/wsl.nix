@@ -9,6 +9,7 @@
     ./wsl/nix.nix
     ./wsl/toolchains.nix
     ./wsl/zed.nix
+    ./wsl/ideavim.nix
   ];
 
   home.username = "marcus";
