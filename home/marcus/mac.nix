@@ -9,6 +9,8 @@
     ./mac/nix.nix
     ./mac/toolchains.nix
     ./mac/zed.nix
+    ./mac/ideavim.nix
+    ./mac/auto-commit.nix
   ];
 
   home.username = "marcussanchez";

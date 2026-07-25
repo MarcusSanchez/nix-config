@@ -13,7 +13,7 @@ on:
     # can't affect the build — skip the run
     paths-ignore:
       - "home/marcus/wsl/zed/**"
-      - "home/marcus/wsl/ideavim/**"
+      - "home/marcus/common/ideavim/**"
       - "home/marcus/mac/zed/**"
   pull_request:
 
