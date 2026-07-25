@@ -50,11 +50,11 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     git.nix                Git identity + gh
     catppuccin.nix         Catppuccin Mocha theming
     comma.nix              comma + prebuilt nix-index database
-    zed/                   the shared Zed settings.json + keymap.json
-                           (one config, both machines — keymap carries
-                           cmd- and ctrl- variants; WSL syncs copies
-                           via win-sync, the mac symlinks)
-    ideavim/               the shared .ideavimrc (same arrangement)
+    dotfiles/              shared UI-managed configs, one flat dir:
+                           zed.settings.json + zed.keymap.json (keymap
+                           carries cmd- and ctrl- variants) and
+                           .ideavimrc. WSL syncs copies via win-sync,
+                           the mac symlinks
   wsl/
     windows.nix            windows.username option — the Windows account
                            owning the distro, set per machine in wsl.nix
@@ -67,18 +67,17 @@ home/marcus/               Home Manager (per-user), same shape as modules/
                            (chore:) + push, repo edits push to Windows,
                            both-changed warns and writes nothing
     zed.nix                Zed (%APPDATA%\Zed settings+keymap) ↔
-                           common/zed/ via win-sync
+                           common/dotfiles/zed.* via win-sync
     ideavim.nix            JetBrains .ideavimrc (%USERPROFILE%) ↔
-                           common/ideavim/ via win-sync
+                           common/dotfiles/ via win-sync
   mac/
     ghostty.nix            Ghostty config (app itself is a brew cask)
     nix.nix                user-level GC launchd agent + NH_FLAKE
     toolchains.nix         rustup first-run bootstrap
     zed.nix                ~/.config/zed/{settings,keymap}.json →
-                           per-file symlinks to common/zed/
-    ideavim.nix            ~/.ideavimrc → symlink to common/ideavim/'s
-    auto-commit.nix        commits + pushes drift in the ui-managed
-                           paths (common/zed, common/ideavim) on
+                           per-file symlinks to common/dotfiles/zed.*
+    ideavim.nix            ~/.ideavimrc → symlink to common/dotfiles/'s
+    auto-commit.nix        commits + pushes common/dotfiles drift on
                            activation
 templates/devshell/        Per-project dev shell scaffold (both platforms)
 ```

@@ -1,7 +1,7 @@
 # ~/.config/zed is a REAL directory; only settings.json and keymap.json
-# are out-of-store symlinks into the SHARED ../common/zed/ (one config
-# for both machines; keymap carries both cmd- and ctrl- variants —
-# stow's --no-folding idea). Writes to the two files flow through the
+# are out-of-store symlinks into the SHARED ../common/dotfiles/ (one
+# config for both machines; keymap carries both cmd- and ctrl- variants
+# — stow's --no-folding idea). Writes to the two files flow through the
 # links into the repo as git drift — committed by auto-commit.nix —
 # while anything else Zed creates next to them (prompt-library db,
 # themes) lands in the real directory and can never reach the repo.
@@ -12,9 +12,11 @@
 { config, ... }:
 
 let
-  repoZed = "${config.home.homeDirectory}/nix-config/home/marcus/common/zed";
+  dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
 in
 {
-  xdg.configFile."zed/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${repoZed}/settings.json";
-  xdg.configFile."zed/keymap.json".source = config.lib.file.mkOutOfStoreSymlink "${repoZed}/keymap.json";
+  xdg.configFile."zed/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/zed.settings.json";
+  xdg.configFile."zed/keymap.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/zed.keymap.json";
 }

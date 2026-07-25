@@ -19,8 +19,10 @@ in
   home.activation.ideavimConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (winSync {
     name = "ideavim";
     winDir = "/mnt/c/Users/${config.windows.username}";
-    repoSubdir = "home/marcus/common/ideavim";
-    files = [ ".ideavimrc" ];
-    witness = ../common/ideavim;
+    repoSubdir = "home/marcus/common/dotfiles";
+    files = {
+      ".ideavimrc" = ".ideavimrc";
+    };
+    witness = ../common/dotfiles;
   });
 }

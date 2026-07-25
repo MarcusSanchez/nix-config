@@ -12,10 +12,7 @@
 
 let
   repo = "${config.home.homeDirectory}/nix-config";
-  paths = [
-    "home/marcus/common/zed"
-    "home/marcus/common/ideavim"
-  ];
+  paths = [ "home/marcus/common/dotfiles" ];
   pathArgs = lib.concatMapStringsSep " " (p: "\"${p}\"") paths;
 in
 {

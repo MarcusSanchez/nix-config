@@ -12,8 +12,7 @@ on:
     # mirrored config files; nix copies them without parsing, so they
     # can't affect the build — skip the run
     paths-ignore:
-      - "home/marcus/common/zed/**"
-      - "home/marcus/common/ideavim/**"
+      - "home/marcus/common/dotfiles/**"
   pull_request:
 
 jobs:

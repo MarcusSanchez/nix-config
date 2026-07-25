@@ -21,11 +21,11 @@ in
   home.activation.zedConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (winSync {
     name = "zed";
     winDir = "/mnt/c/Users/${config.windows.username}/AppData/Roaming/Zed";
-    repoSubdir = "home/marcus/common/zed";
-    files = [
-      "settings.json"
-      "keymap.json"
-    ];
-    witness = ../common/zed;
+    repoSubdir = "home/marcus/common/dotfiles";
+    files = {
+      "settings.json" = "zed.settings.json";
+      "keymap.json" = "zed.keymap.json";
+    };
+    witness = ../common/dotfiles;
   });
 }
