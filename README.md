@@ -69,9 +69,10 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     toolchains.nix         rustup first-run bootstrap
     zed.nix                ~/.config/zed → symlink into mac/zed/ (out-of-
                            store, whole dir): UI edits are git drift in
-                           the working tree, commit like lazy-lock.json.
-                           One-time: move existing ~/.config/zed contents
-                           into mac/zed/, rm the dir, rebuild
+                           the working tree; activation auto-commits them
+                           (chore:) + pushes. One-time: move existing
+                           ~/.config/zed contents into mac/zed/, rm the
+                           dir, rebuild
 templates/devshell/        Per-project dev shell scaffold (both platforms)
 ```
 
