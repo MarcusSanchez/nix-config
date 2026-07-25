@@ -135,25 +135,31 @@
   "preferred_line_length": 120,
   "wrap_guides": [120],
 
-  // kept in step with the highlight_overrides in neovim-config's
-  // catppuccin.lua (nvim is the source of truth; the per-language lsp
-  // tweaks there have no Zed equivalent)
+  // ported from GoLand's "M's Mocha" scheme (the source of truth for
+  // syntax colors — AppData\Roaming\JetBrains\GoLand*\colors\M_s Mocha.icls).
+  // Not expressible here: global-vs-local variables, exported-vs-local
+  // constants (Zed's captures don't distinguish them)
   "experimental.theme_overrides": {
     "syntax": {
       "keyword": { "color": "#cba6f7", "font_style": "italic" },
+      "function": { "color": "#89b4fa" },
       "function.builtin": { "color": "#89b4fa" },
-      "constants": { "color": "#74c7ec" },
-      "field": { "color": "#f38ba8" },
+      "type": { "color": "#f9e2af" },
+      "type.builtin": { "color": "#cba6f7" },
+      "constructor": { "color": "#f9e2af" },
+      "enum": { "color": "#fab387" },
+      "constant": { "color": "#fab387" },
+      "number": { "color": "#89dceb" },
       "property": { "color": "#f38ba8" },
-      "namespace": { "color": "#bac2de", "font_style": "italic" },
-      "variable": { "color": "#bac2de" },
+      "field": { "color": "#f38ba8" },
       "variable.member": { "color": "#f38ba8" },
+      "variable": { "color": "#bac2de" },
       "variable.parameter": { "color": "#dabb9b" },
       "attribute": { "color": "#dabb9b" },
-      "number": { "color": "#74c7ec" },
+      "namespace": { "color": "#bac2de", "font_style": "italic" },
       "operator": { "color": "#ff6ca9" },
-      "type": { "color": "#f9e2af" },
-      "punctuation.delimiter": { "color": "#bac2de" },
+      "punctuation.delimiter": { "color": "#9399b2" },
+      "punctuation.bracket": { "color": "#9399b2" },
       "punctuation.special": { "color": "#ff6ca9" },
     },
   },
