@@ -23,6 +23,13 @@
   "semantic_tokens": "combined",
   "global_lsp_settings": {
     "semantic_token_rules": [
+      // every `const` local is readonly in tsserver's eyes — keep those
+      // plain (first match wins), so only module-level consts go peach
+      {
+        "token_type": "variable",
+        "token_modifiers": ["readonly", "local"],
+        "style": ["variable"]
+      },
       // tsserver flags consts as readonly; Zed's default rule only
       // maps the "constant" modifier, so consts rendered as plain
       // variables. GoLand truth: constants peach
