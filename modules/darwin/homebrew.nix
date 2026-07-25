@@ -26,11 +26,17 @@
     ];
 
     casks = [
-      "firefox"
       "ghostty"
       "google-chrome"
+      # IDE manager only — the JetBrains IDEs themselves are installed and
+      # updated inside Toolbox (declaring them as casks would just drift
+      # against their self-updater)
+      "jetbrains-toolbox"
       "localsend"
+      "spotify"
+      "stremio"
       "zed"
+      "zen"
     ];
   };
 }
