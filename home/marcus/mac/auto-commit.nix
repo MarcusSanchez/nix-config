@@ -1,5 +1,5 @@
-# UI-managed configs living in the repo working tree (zed dir symlink,
-# shared .ideavimrc): commit and push their drift at activation.
+# UI-managed configs living in the repo working tree (zed settings/keymap
+# file symlinks, shared .ideavimrc): commit and push their drift at activation.
 # Pathspec-scoped so unrelated dirty work never rides along; activation
 # never fails over git; a failed push (offline, clone behind origin)
 # warns and leaves the commit for the next manual push.

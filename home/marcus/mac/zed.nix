@@ -1,16 +1,18 @@
-# ~/.config/zed is a symlink into this repo's working tree
-# (mkOutOfStoreSymlink, deliberately not a store path): Zed's UI writes
-# land directly in mac/zed/ as git drift — commit like lazy-lock.json.
-# Whole-directory link on purpose; per-file links can be clobbered by
-# atomic saves. The WSL machine can't do any of this (Windows can't
-# traverse Linux symlinks) — it uses win-sync.nix copies instead.
-#
-# One-time on a machine with an existing ~/.config/zed: move its
-# contents into mac/zed/ here, delete the now-empty directory, rebuild.
+# ~/.config/zed is a REAL directory; only settings.json and keymap.json
+# are out-of-store symlinks into ./zed/ (stow's --no-folding idea). Writes
+# to the two files flow through the links into the repo as git drift —
+# committed by auto-commit.nix — while anything else Zed creates next to
+# them (prompt-library db, themes) lands in the real directory and can
+# never reach the repo. Same single-file caveat as mac/ideavim.nix: an
+# atomic save could replace a link with a plain file; HM re-links and
+# hm-backups it on the next switch. The WSL machine can't use links at
+# all (Windows can't traverse them) — it syncs copies via win-sync.nix.
 { config, ... }:
 
+let
+  repoZed = "${config.home.homeDirectory}/nix-config/home/marcus/mac/zed";
+in
 {
-  # UI edits accumulate as working-tree drift through this symlink;
-  # auto-commit.nix commits and pushes them at activation.
-  xdg.configFile."zed".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/mac/zed";
+  xdg.configFile."zed/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${repoZed}/settings.json";
+  xdg.configFile."zed/keymap.json".source = config.lib.file.mkOutOfStoreSymlink "${repoZed}/keymap.json";
 }
