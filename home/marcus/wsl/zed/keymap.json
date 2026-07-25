@@ -92,7 +92,10 @@
       ", t": "terminal_panel::ToggleFocus",
       // autosave writes the buffer after the format edits land
       ", f": "editor::Format",
-      ", r": ["workspace::SendKeystrokes", "ctrl-shift-r"],
+      // rerun last task / pick a task — the ideavimrc Run and
+      // RunConfiguration equivalents
+      ", r": "task::Rerun",
+      ", x": "task::Spawn",
       ", p": "projects::OpenRecent",
 
       // _ register del line (delete without yanking)
