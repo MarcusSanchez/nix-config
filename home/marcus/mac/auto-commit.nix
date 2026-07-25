@@ -13,7 +13,7 @@
 let
   repo = "${config.home.homeDirectory}/nix-config";
   paths = [
-    "home/marcus/mac/zed"
+    "home/marcus/common/zed"
     "home/marcus/common/ideavim"
   ];
   pathArgs = lib.concatMapStringsSep " " (p: "\"${p}\"") paths;

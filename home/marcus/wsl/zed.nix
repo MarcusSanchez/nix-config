@@ -1,6 +1,9 @@
 # Zed runs on the Windows side; its config under %APPDATA%\Zed and the
-# vendored copies in ./zed/ are two-way synced by the win-sync engine —
-# see win-sync.nix for the contract.
+# SHARED copies in ../common/zed/ (one settings.json + one keymap.json
+# for both machines — cmd-* bindings are inert-ish super-key combos on
+# Windows, ctrl-* extras are harmless on the mac) are two-way synced by
+# the win-sync engine — see win-sync.nix for the contract. The mac
+# symlinks the same files (mac/zed.nix).
 {
   config,
   lib,
@@ -18,11 +21,11 @@ in
   home.activation.zedConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (winSync {
     name = "zed";
     winDir = "/mnt/c/Users/${config.windows.username}/AppData/Roaming/Zed";
-    repoSubdir = "home/marcus/wsl/zed";
+    repoSubdir = "home/marcus/common/zed";
     files = [
       "settings.json"
       "keymap.json"
     ];
-    witness = ./zed;
+    witness = ../common/zed;
   });
 }
