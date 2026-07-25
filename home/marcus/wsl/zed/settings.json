@@ -21,6 +21,26 @@
   },
   "proxy": "",
   "semantic_tokens": "combined",
+  "global_lsp_settings": {
+    "semantic_token_rules": [
+      // tsserver flags consts as readonly; Zed's default rule only
+      // maps the "constant" modifier, so consts rendered as plain
+      // variables. GoLand truth: constants peach
+      {
+        "token_type": "variable",
+        "token_modifiers": ["readonly"],
+        "style": ["constant"]
+      },
+      {
+        "token_type": "enumMember",
+        "style": ["enum", "constant"]
+      },
+      {
+        "token_type": "parameter",
+        "style": ["variable.parameter", "attribute"]
+      }
+    ]
+  },
   "lsp": {
     "gopls": {
       "initialization_options": {
