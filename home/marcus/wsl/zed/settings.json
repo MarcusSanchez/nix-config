@@ -22,21 +22,34 @@
   "proxy": "",
   "semantic_tokens": "combined",
   "global_lsp_settings": {
+    // first match wins. GoLand truth: const locals and module-level
+    // consts (STORE_URL) plain; stdlib builtins (Go nil/iota) peach à la
+    // GO_BUILTIN_VARIABLE; whatever remains without modifiers is a true
+    // global (__DEV__, ambient) → DEFAULT_GLOBAL_VARIABLE red
     "semantic_token_rules": [
-      // every `const` local is readonly in tsserver's eyes — keep those
-      // plain (first match wins), so only module-level consts go peach
       {
         "token_type": "variable",
         "token_modifiers": ["readonly", "local"],
         "style": ["variable"]
       },
-      // tsserver flags consts as readonly; Zed's default rule only
-      // maps the "constant" modifier, so consts rendered as plain
-      // variables. GoLand truth: constants peach
+      {
+        "token_type": "variable",
+        "token_modifiers": ["readonly", "defaultLibrary"],
+        "style": ["constant"]
+      },
       {
         "token_type": "variable",
         "token_modifiers": ["readonly"],
-        "style": ["constant"]
+        "style": ["variable"]
+      },
+      {
+        "token_type": "variable",
+        "token_modifiers": ["local"],
+        "style": ["variable"]
+      },
+      {
+        "token_type": "variable",
+        "foreground_color": "#f38ba8"
       },
       {
         "token_type": "enumMember",
@@ -195,6 +208,9 @@
       "constructor": { "color": "#f9e2af" },
       "enum": { "color": "#fab387" },
       "constant": { "color": "#fab387" },
+      // true/false/null/undefined read as keywords in GoLand
+      "boolean": { "color": "#cba6f7", "font_style": "italic" },
+      "constant.builtin": { "color": "#cba6f7", "font_style": "italic" },
       "number": { "color": "#89dceb" },
       "property": { "color": "#f38ba8" },
       "field": { "color": "#f38ba8" },
