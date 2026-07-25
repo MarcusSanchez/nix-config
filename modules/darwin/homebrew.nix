@@ -12,8 +12,11 @@
     enable = true;
 
     onActivation = {
-      autoUpdate = false;
-      upgrade = false;
+      autoUpdate = true;
+      # upgrade what brew tracks, but no greedy: self-updating casks
+      # (spotify, zed, zen, toolbox) own their update channel — greedy
+      # would downgrade any app whose self-updater is ahead of the index
+      upgrade = true;
       cleanup = "zap";
     };
 
