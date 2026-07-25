@@ -30,6 +30,7 @@
       "ghostty"
       "google-chrome"
       "localsend"
+      "zed"
     ];
   };
 }
