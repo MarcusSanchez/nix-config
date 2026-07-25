@@ -157,6 +157,10 @@
       "variable.parameter": { "color": "#dabb9b" },
       "attribute": { "color": "#dabb9b" },
       "namespace": { "color": "#bac2de", "font_style": "italic" },
+      // GoLand: components yellow via class-reference resolution; Zed's
+      // single tag capture can't split components from <div>s, so all
+      // JSX tags go yellow
+      "tag": { "color": "#f9e2af" },
       "operator": { "color": "#ff6ca9" },
       "punctuation.delimiter": { "color": "#9399b2" },
       "punctuation.bracket": { "color": "#9399b2" },
