@@ -112,9 +112,22 @@
       "d a": ["workspace::SendKeystrokes", "# p r _ # p d a"],
 
       "tab": ["workspace::SendKeystrokes", "i tab"],
+      "shift-tab": "editor::Outdent",
       "shift-u": "vim::Redo",
       "shift-n": "vim::JoinLines",
-      "space space": "file_finder::Toggle"
+      "space space": "file_finder::Toggle",
+      "space e": "tab_switcher::Toggle",
+
+      // ideavimrc ports (2026-07-25)
+      "s": "vim::PushSneak", // flash.search stand-in: 2-char jump
+      "] e": "editor::GoToDiagnostic",
+      "[ e": "editor::GoToPreviousDiagnostic",
+      "g shift-i": "editor::GoToImplementation",
+      "g r": "editor::FindAllReferences",
+      "g y": "editor::GoToTypeDefinition",
+      ", d": "editor::Fold",
+      // _ register delete left (backspace without yanking)
+      "backspace": ["workspace::SendKeystrokes", "# p r _ d h"]
     }
   },
 
@@ -123,6 +136,7 @@
     "bindings": {
       "\"": ["workspace::SendKeystrokes", "S \" l v i \""],
       "'": ["workspace::SendKeystrokes", "S ' l v i '"],
+      "`": ["workspace::SendKeystrokes", "S ` l v i `"],
       // "S <closing bracket>" wraps tight (no padding spaces), so no cleanup
       // dance needed — wrap, then reselect inside
       "(": ["workspace::SendKeystrokes", "S ) v i ("],
@@ -140,7 +154,11 @@
       "P": ["workspace::SendKeystrokes", "# p r _ d P"],
 
       "alt-L": "vim::SelectNext",
-      "alt-H": "editor::UndoSelection"
+      "alt-H": "editor::UndoSelection",
+
+      // ideavimrc ports (2026-07-25): indent/dedent keeping the selection
+      "tab": "editor::Indent",
+      "shift-tab": "editor::Outdent"
     }
   },
 
