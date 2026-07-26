@@ -19,6 +19,9 @@
     # per-project dev environments (packages, languages, services):
     # `devenv init` + `devenv allow` in the project repo
     devenv
+    # declarative secrets for those projects (secretspec.toml declares,
+    # a provider — keyring/dotenv/env — supplies; devenv reads it natively)
+    secretspec
 
     nodejs_latest
 
