@@ -30,11 +30,12 @@
       config.global.log_filter = "error";
       # Same idea for devenv projects: its direnv shim honors DEVENV_BIN,
       # so route only direnv-driven runs through a wrapper that drops the
-      # TUI progress tree. Failures still print (red ×, exit 1); manual
-      # `devenv` invocations keep the TUI.
+      # TUI and its plain-log fallback (--tui false alone still prints
+      # the •/✓ step lines). Failures still print (red ×, exit 1);
+      # manual `devenv` invocations keep the TUI.
       stdlib = ''
-        export DEVENV_BIN=${pkgs.writeShellScript "devenv-no-tui" ''
-          exec ${lib.getExe pkgs.devenv} --tui false "$@"
+        export DEVENV_BIN=${pkgs.writeShellScript "devenv-quiet" ''
+          exec ${lib.getExe pkgs.devenv} --tui false --quiet "$@"
         ''}
       '';
     };
