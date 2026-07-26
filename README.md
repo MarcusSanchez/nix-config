@@ -79,7 +79,6 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     ideavim.nix            ~/.ideavimrc → symlink to common/dotfiles/'s
     auto-commit.nix        commits + pushes common/dotfiles drift on
                            activation
-templates/devshell/        Per-project dev shell scaffold (both platforms)
 ```
 
 Two nixpkgs inputs on purpose: Linux rides `nixos-unstable`, the mac rides
@@ -97,7 +96,6 @@ sudo nixos-rebuild switch          sudo darwin-rebuild switch
 # Both
 nix fmt                            # format all nix files
 nix flake check                    # validate before switching
-nix flake init -t /etc/nixos       # scaffold a project dev shell (mac: -t ~/nix-config)
 ```
 
 On WSL, auto-upgrade rebuilds weekly from pushed main on GitHub (never the
@@ -121,24 +119,15 @@ nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos.config.system.build.to
 
 ## Per-project dev shells
 
-Project-specific tools belong in the project, not in this config. Scaffold
-a dev shell in any repo:
-
-```sh
-nix flake init -t /etc/nixos   # drops flake.nix + .envrc (works on both machines)
-direnv allow                   # opt in once; auto-loads on cd from then on
-```
-
-Add the project's tools to `packages` in its flake.nix; the shell loads on
-`cd` in and unloads on `cd` out (`use flake` via direnv, cached by
-nix-direnv). If a project needs real services (postgres, redis) running
-per-project, use devenv instead (installed on both machines): `devenv init`
-in that repo, enable `services.*` in the generated devenv.nix, then
+Project-specific tools belong in the project, not in this config. Use
+devenv (installed on both machines): `devenv init` in that repo, add
+`packages`/`languages.*`/`services.*` in the generated devenv.nix, then
 `devenv allow` once — the zsh hook auto-activates on cd from then on
 (native devenv activation: entering spawns a `devenv shell` subshell,
-leaving exits it; no .envrc involved). A devenv project can still ride
-direnv instead (`eval "$(devenv direnvrc)"` + `use devenv` in an .envrc)
-if in-place env without a subshell is preferred.
+leaving exits it; no .envrc involved). direnv is still installed for
+projects that ship their own flake devShell (`use flake` in an .envrc,
+cached by nix-direnv) or prefer in-place env without a subshell
+(`eval "$(devenv direnvrc)"` + `use devenv`).
 
 ## Bootstrapping a new WSL machine
 

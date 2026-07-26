@@ -42,13 +42,6 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
       formatter.aarch64-darwin = nixpkgs-darwin.legacyPackages.aarch64-darwin.nixfmt-tree;
 
-      # Scaffold a per-project dev shell: nix flake init -t /etc/nixos
-      # (or -t ~/nix-config on the mac)
-      templates.default = {
-        path = ./templates/devshell;
-        description = "mkShell dev environment with direnv auto-load";
-      };
-
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [ ./hosts/wsl ];

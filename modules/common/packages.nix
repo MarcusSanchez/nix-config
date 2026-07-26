@@ -16,9 +16,8 @@
     nvd
     nh
 
-    # per-project dev environments with services (postgres, redis, ...):
-    # `devenv init` in the project repo. For plain package lists the
-    # devshell template (templates/devshell) is still the lighter tool.
+    # per-project dev environments (packages, languages, services):
+    # `devenv init` + `devenv allow` in the project repo
     devenv
 
     nodejs_latest
