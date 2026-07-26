@@ -21,6 +21,22 @@
   },
   "proxy": "",
   "semantic_tokens": "combined",
+  "global_lsp_settings": {
+    // one narrow rule, not the old variable taxonomy: gopls marks
+    // true/false/nil readonly+defaultLibrary and Zed's built-in gopls
+    // rule already paints them constant-peach — this only strips the
+    // italic bleeding in from the boolean/constant.builtin syntax
+    // overrides below (a TS-only look; tsserver emits no tokens for
+    // its literals, so TS/TSX keeps mauve italic from syntax alone)
+    "semantic_token_rules": [
+      {
+        "token_type": "variable",
+        "token_modifiers": ["readonly", "defaultLibrary"],
+        "style": ["constant"],
+        "font_style": "normal"
+      }
+    ]
+  },
   "lsp": {
     "gopls": {
       "initialization_options": {
