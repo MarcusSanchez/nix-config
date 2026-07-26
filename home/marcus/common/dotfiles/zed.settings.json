@@ -168,6 +168,10 @@
       "constructor": { "color": "#f9e2af" },
       "enum": { "color": "#fab387" },
       "constant": { "color": "#fab387" },
+      // true/false (boolean) and null/undefined/nil (constant.builtin)
+      // read as keywords, per GoLand
+      "boolean": { "color": "#cba6f7", "font_style": "italic" },
+      "constant.builtin": { "color": "#cba6f7", "font_style": "italic" },
       "number": { "color": "#89dceb" },
       "property": { "color": "#f38ba8" },
       "field": { "color": "#f38ba8" },
