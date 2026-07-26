@@ -21,38 +21,6 @@
   },
   "proxy": "",
   "semantic_tokens": "combined",
-  "global_lsp_settings": {
-    // first match wins. GoLand truth: const locals and module-level
-    // consts (STORE_URL) plain; stdlib builtins peach à la
-    // GO_BUILTIN_VARIABLE. No catch-all rules: modifier vocabularies
-    // differ per server (gopls has no "local"), and a bare
-    // {variable} rule once painted every Go variable red
-    "semantic_token_rules": [
-      {
-        "token_type": "variable",
-        "token_modifiers": ["readonly", "defaultLibrary"],
-        "style": ["constant"]
-      },
-      {
-        "token_type": "variable",
-        "token_modifiers": ["readonly", "local"],
-        "style": ["variable"]
-      },
-      {
-        "token_type": "variable",
-        "token_modifiers": ["readonly"],
-        "style": ["variable"]
-      },
-      {
-        "token_type": "enumMember",
-        "style": ["enum", "constant"]
-      },
-      {
-        "token_type": "parameter",
-        "style": ["variable.parameter", "attribute"]
-      }
-    ]
-  },
   "lsp": {
     "gopls": {
       "initialization_options": {
@@ -200,9 +168,6 @@
       "constructor": { "color": "#f9e2af" },
       "enum": { "color": "#fab387" },
       "constant": { "color": "#fab387" },
-      // true/false/null/undefined read as keywords in GoLand
-      "boolean": { "color": "#cba6f7", "font_style": "italic" },
-      "constant.builtin": { "color": "#cba6f7", "font_style": "italic" },
       "number": { "color": "#89dceb" },
       "property": { "color": "#f38ba8" },
       "field": { "color": "#f38ba8" },
