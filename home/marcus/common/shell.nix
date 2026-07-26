@@ -1,5 +1,10 @@
 # Interactive shell: zsh + oh-my-zsh, plus the CLI helpers hooked into it.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # Let `npm install -g` work natively: install into a writable prefix
@@ -23,6 +28,15 @@
       # survive, so a broken .envrc still shows up loud. (The old
       # DIRENV_LOG_FORMAT="" trick no longer silences direnv 2.37+.)
       config.global.log_filter = "error";
+      # Same idea for devenv projects: its direnv shim honors DEVENV_BIN,
+      # so route only direnv-driven runs through a wrapper that drops the
+      # TUI progress tree. Failures still print (red ×, exit 1); manual
+      # `devenv` invocations keep the TUI.
+      stdlib = ''
+        export DEVENV_BIN=${pkgs.writeShellScript "devenv-no-tui" ''
+          exec ${lib.getExe pkgs.devenv} --tui false "$@"
+        ''}
+      '';
     };
 
     zsh = {
