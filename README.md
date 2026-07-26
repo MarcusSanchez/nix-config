@@ -133,9 +133,12 @@ Add the project's tools to `packages` in its flake.nix; the shell loads on
 `cd` in and unloads on `cd` out (`use flake` via direnv, cached by
 nix-direnv). If a project needs real services (postgres, redis) running
 per-project, use devenv instead (installed on both machines): `devenv init`
-in that repo, enable `services.*` in the generated devenv.nix, and put
-`eval "$(devenv direnvrc)"` + `use devenv` in its .envrc for the same
-auto-load-on-cd behavior.
+in that repo, enable `services.*` in the generated devenv.nix, then
+`devenv allow` once — the zsh hook auto-activates on cd from then on
+(native devenv activation: entering spawns a `devenv shell` subshell,
+leaving exits it; no .envrc involved). A devenv project can still ride
+direnv instead (`eval "$(devenv direnvrc)"` + `use devenv` in an .envrc)
+if in-place env without a subshell is preferred.
 
 ## Bootstrapping a new WSL machine
 
