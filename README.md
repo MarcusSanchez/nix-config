@@ -161,13 +161,16 @@ A fresh instance boots as the stock `nixos` user; the first rebuild creates
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
-(substituting the name from the table — WSL refuses a `--name` that already
-exists on this PC):
+run one of these (WSL refuses a `--name` that already exists on this PC):
 
 ```powershell
-$Distro = "nixos"   # or "nixos-lite"
-wsl --install --from-file nixos.wsl --name $Distro
-wsl -d $Distro
+# the dev machine
+wsl --install --from-file nixos.wsl --name nixos
+wsl -d nixos
+
+# ...or the headless one
+wsl --install --from-file nixos.wsl --name nixos-lite
+wsl -d nixos-lite
 ```
 
 **Inside, as the default `nixos` user:**
@@ -189,12 +192,15 @@ sudo ln -sfn /home/marcus/nix-config /etc/nixos
 exit
 ```
 
-**On Windows again** (`$Distro` is still set if this is the same PowerShell
-window; otherwise set it again):
+**On Windows again:**
 
 ```powershell
-wsl -t $Distro   # restart so wsl.defaultUser takes effect
-wsl -d $Distro   # lands as marcus
+wsl -t nixos   # restart so wsl.defaultUser takes effect
+wsl -d nixos   # lands as marcus
+
+# ...or the headless one
+wsl -t nixos-lite
+wsl -d nixos-lite
 ```
 
 **First login as marcus** — the neovim config is already cloned to
