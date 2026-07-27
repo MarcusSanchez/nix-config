@@ -60,9 +60,7 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     windows.nix            windows.username option — the Windows account
                            owning the distro, set per machine in wsl.nix
     nix.nix                NH_FLAKE for bare `nh os switch`
-    toolchains.nix         ~/.toolchains/go real-dir GOROOT copy for
-                           Windows IDEs (\\wsl$ can't traverse symlinks);
-                           rustup toolchain auto-repair on glibc bumps
+    toolchains.nix         rustup toolchain auto-repair on glibc bumps
     win-sync.nix           two-way sync engine for Windows-side configs:
                            UI edits pull into the repo and auto-commit
                            (chore:) + push, repo edits push to Windows,
