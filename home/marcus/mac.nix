@@ -9,6 +9,7 @@
     ./mac/nix.nix
     ./mac/toolchains.nix
     ./mac/dotfiles.nix
+    ./mac/manual.nix
     ./mac/auto-commit.nix
   ];
 
