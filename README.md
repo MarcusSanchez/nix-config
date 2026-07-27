@@ -165,20 +165,21 @@ A fresh instance boots as the stock `nixos` user; the first rebuild creates
 exists on this PC):
 
 ```powershell
-wsl --install --from-file nixos.wsl --name nixos    # or nixos-lite
-wsl -d nixos
+$Distro = "nixos"   # or "nixos-lite"
+wsl --install --from-file nixos.wsl --name $Distro
+wsl -d $Distro
 ```
 
 **Inside, as the default `nixos` user:**
 
 ```sh
-HOST=nixos   # or nixos-lite — must match the --name above
+CFG=nixos   # or nixos-lite — must match the --name above
 
 # The stock image has flakes disabled, so the first two commands pass the
 # feature flags explicitly (an env var would be stripped by sudo). After
 # the first switch the config enables flakes permanently.
 sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
-sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$HOST
+sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$CFG
 
 # Move the repo home and recreate the /etc/nixos symlink (not managed by
 # the config; bare `nixos-rebuild` depends on it)
@@ -188,11 +189,12 @@ sudo ln -sfn /home/marcus/nix-config /etc/nixos
 exit
 ```
 
-**On Windows again:**
+**On Windows again** (`$Distro` is still set if this is the same PowerShell
+window; otherwise set it again):
 
 ```powershell
-wsl -t nixos   # restart so wsl.defaultUser takes effect
-wsl -d nixos   # lands as marcus
+wsl -t $Distro   # restart so wsl.defaultUser takes effect
+wsl -d $Distro   # lands as marcus
 ```
 
 **First login as marcus** — the neovim config is already cloned to
