@@ -2,3 +2,7 @@ result
 result-*
 .idea/
 .zed/
+
+# Determinate Nix drops a sentry crashpad scratch dir in $PWD when a
+# root-run nix crashes (root-owned, so it also makes git status noisy)
+.cache/
