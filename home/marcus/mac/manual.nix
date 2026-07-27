@@ -12,8 +12,13 @@
 # registered, so a GC that collects that nixpkgs source breaks the next
 # rebuild of the manpage. Verified 2026-07-27 that this is the only trigger:
 # nix-darwin's documentation.man/doc.enable and Determinate's lazy-trees are
-# both innocent. Off here, left ON in home/marcus/wsl — that machine keeps
-# the local option reference and just wears the warning.
+# both innocent.
+#
+# Mac only because the warning is mac only: checked from WSL the same day —
+# neither a full toplevel eval nor `nix flake check` emits it there — so the
+# trigger is Determinate's Nix, not the option. The WSL hosts keep their
+# manpages. If a WSL rebuild ever does die on options.json, this file is the
+# fix to copy (GC runs daily there vs weekly here, so it would bite sooner).
 { ... }:
 
 {
