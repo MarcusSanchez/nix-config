@@ -144,28 +144,41 @@ env, no subshell, silenced the same way direnv itself is). Plain flake
 devShells work the same way (`use flake` in an .envrc, cached by
 nix-direnv).
 
-## Bootstrapping a new WSL machine
+## Bootstrapping a WSL machine
+
+Both WSL boxes install the same way — the only thing that differs is **one
+name**, used in three places (the `--name` you give WSL, the `#attr` in the
+first rebuild, and the hostname the config then sets, which is what makes bare
+`nixos-rebuild` resolve afterwards). Pick it up front:
+
+| name | what you get |
+|---|---|
+| `nixos` | the dev machine: go, rustup, zig+zls, node, python, devenv, claude-code, nix-ld, and the Zed/IdeaVim sync with Windows |
+| `nixos-lite` | the binaries box: nvim, shell, git, comma and the archive basics — none of the toolchains, no dotfile syncing |
 
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
 
 **On Windows** — download the latest `nixos.wsl` from
-[NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then:
+[NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
+(substituting the name from the table — WSL refuses a `--name` that already
+exists on this PC):
 
 ```powershell
-# (pick a different --name if this PC already has a NixOS instance)
-wsl --install --from-file nixos.wsl --name nixos
+wsl --install --from-file nixos.wsl --name nixos    # or nixos-lite
 wsl -d nixos
 ```
 
 **Inside, as the default `nixos` user:**
 
 ```sh
+HOST=nixos   # or nixos-lite — must match the --name above
+
 # The stock image has flakes disabled, so the first two commands pass the
 # feature flags explicitly (an env var would be stripped by sudo). After
 # the first switch the config enables flakes permanently.
 sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
-sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#nixos
+sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$HOST
 
 # Move the repo home and recreate the /etc/nixos symlink (not managed by
 # the config; bare `nixos-rebuild` depends on it)
@@ -183,44 +196,16 @@ wsl -d nixos   # lands as marcus
 ```
 
 **First login as marcus** — the neovim config is already cloned to
-`~/.config/nvim` by the Home Manager bootstrap, and rust installed itself
-via the activation hook; what's left is per-machine state:
+`~/.config/nvim` by the Home Manager bootstrap; `hostname` should now print the
+name you chose, so bare `nh os switch` resolves the right config with no
+`#name`. What's left is per-machine state:
 
 1. `gh auth login` (gh is the git credential helper — needed to push)
 2. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
 3. `atuin login` if syncing shell history
 
-## Bootstrapping the lite WSL box
-
-Same procedure as above with two substitutions: the distro name and the flake
-attribute are `nixos-lite`, and the hostname the config sets is `nixos-lite`
-(that's what makes bare `nixos-rebuild` resolve the right one afterwards).
-
-```powershell
-wsl --install --from-file nixos.wsl --name nixos-lite
-wsl -d nixos-lite
-```
-
-```sh
-# as the stock `nixos` user
-sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
-sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#nixos-lite
-
-sudo mv /tmp/nixos-config /home/marcus/nix-config
-sudo chown -R marcus:users /home/marcus/nix-config
-sudo ln -sfn /home/marcus/nix-config /etc/nixos
-exit
-```
-
-```powershell
-wsl -t nixos-lite   # restart so wsl.defaultUser takes effect
-wsl -d nixos-lite   # lands as marcus
-```
-
-Then `hostname` should print `nixos-lite`, and bare `nh os switch` /
-`sudo nixos-rebuild switch --flake /etc/nixos` resolve without a `#name`.
-`gh auth login` if you want to push from this box; there's no rustup and no
-Windows dotfile syncing here by design.
+On `nixos` only, rust also installed itself via the activation hook. The lite
+box has no rustup and no Windows dotfile syncing by design.
 
 ## Bootstrapping a new Mac
 

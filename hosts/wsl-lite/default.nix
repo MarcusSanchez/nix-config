@@ -1,7 +1,7 @@
 # Host definition: the lite WSL box — a place to drop simple binaries,
 # not a dev machine. Imports modules/nixos/base.nix rather than the full
-# aggregator, so it skips the language toolchains, claude-code and the
-# keyring.
+# aggregator, so it skips the language toolchains, claude-code, nix-ld
+# and the keyring.
 { ... }:
 
 {

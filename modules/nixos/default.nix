@@ -8,6 +8,7 @@
   imports = [
     ./base.nix
     ../common
+    ./nix-ld.nix
     ./keyring.nix
   ];
 }
