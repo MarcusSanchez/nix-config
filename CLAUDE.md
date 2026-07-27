@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for two machines: a WSL NixOS box (host `nixos`, user `marcus`) and a MacBook Air on nix-darwin + Determinate Nix (host `Marcuss-MacBook-Air`, user `marcussanchez`). On both machines the repo lives at `~/nix-config`; on WSL `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on WSL builds from pushed main there, never from the working tree.
+Flake-based Nix configuration for three machines: a WSL NixOS dev box (host `nixos`, user `marcus`), a second lightweight WSL instance on the same PC (host `nixos-lite`, same user — just for holding simple binaries), and a MacBook Air on nix-darwin + Determinate Nix (host `Marcuss-MacBook-Air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on WSL `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on both WSL boxes builds from pushed main there, never from the working tree — so one push deploys to two machines.
 
-Claude Code sessions run on either machine (`uname` disambiguates). Each machine can build and activate only its own platform; the *other* platform's config can still be fully evaluated — do that after touching shared files, and flag cross-platform changes for marcus to activate on the other machine.
+**Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal, or those fail quietly. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees.
+
+Claude Code sessions run on any of them — `uname` separates darwin from Linux, `hostname` separates the two WSL boxes (`uname` alone cannot). Each machine can build and activate only its own platform; the *other* platform's config can still be fully evaluated — do that after touching shared files, and flag cross-platform changes for marcus to activate on the other machine.
 
 ## Commands
 
@@ -21,7 +23,9 @@ sudo darwin-rebuild switch                     # apply — sudo pops a Touch ID 
                                                # even from Claude's non-interactive shell; marcus
                                                # approves it by fingerprint
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos.config.system.build.toplevel.drvPath'
-                                               # eval the WSL system after touching nixos/ or home/
+nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos-lite.config.system.build.toplevel.drvPath'
+                                               # eval the WSL systems after touching nixos/ or home/
+                                               # (on WSL, `nix flake check` already covers both)
 
 # Both
 nix flake check                                # validate before switching — always do this after edits
@@ -29,17 +33,17 @@ nix fmt                                        # format all nix files (nixfmt-tr
 nix flake update                               # bump all inputs (autoUpgrade never does this)
 ```
 
-There are no tests; `nix flake check` + the darwin eval + a successful switch is the verification story.
+There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry, both WSL hosts included) + the darwin eval + a successful switch is the verification story.
 
 ## Architecture
 
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
-1. `hosts/wsl/` and `hosts/mac/` — the entries in `flake.nix`. Host-specific values only (hostname, platform, `system.stateVersion`).
-2. `modules/common/` (shared — only options that exist on both platforms), `modules/nixos/`, and `modules/darwin/` — system layer, one concern per file. Each platform aggregator imports `../common` plus its own files: **a new module does nothing until added to an imports list.** Each platform's `home-manager.nix` bridges to layer 3 (`backupFileExtension = "hm-backup"`).
-3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `wsl/` and `mac/` (platform-only concern files), and `wsl.nix` / `mac.nix` as the per-host entry points (identity + `./common` + their platform dir's files). The bridges import the entry points, never `common/` directly.
+1. `hosts/wsl/`, `hosts/wsl-lite/`, and `hosts/mac/` — the entries in `flake.nix`. Host-specific values only (hostname, platform, `system.stateVersion`, and `homeEntryPoint` — the option `modules/nixos/home-manager.nix` reads to decide which home config this host's marcus gets).
+2. `modules/common/` (shared — only options that exist on both platforms), `modules/nixos/`, and `modules/darwin/` — system layer, one concern per file. Each platform aggregator imports `../common` plus its own files: **a new module does nothing until added to an imports list.** On the NixOS side there are *two* lists: `modules/nixos/base.nix` (the floor both WSL boxes share) and `modules/nixos/default.nix` (base + `../common` + dev-machine extras, imported only by the full host) — putting a module in base.nix puts it on the lite box too. Each platform's `home-manager.nix` bridges to layer 3 (`backupFileExtension = "hm-backup"`).
+3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `wsl/` and `mac/` (platform-only concern files), and `wsl.nix` / `wsl-lite.nix` / `mac.nix` as the per-host entry points (identity + `./common` + whichever platform files that host wants). The bridges import the entry points, never `common/` directly.
 
-Where things go: CLI tool for both machines → `modules/common/packages.nix`, or `home/marcus/packages.nix` if user-scoped; Linux-only build tools → `modules/nixos/packages.nix`; mac GUI app → cask in `modules/darwin/homebrew.nix`; new concern → new file + aggregator entry in `common/` (both platforms) or the platform dir; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; platform-only user config → file in `home/marcus/wsl/` or `home/marcus/mac/`, imported from the `wsl.nix` or `mac.nix` entry point.
+Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/packages.nix` if user-scoped; Linux-only build tools → `modules/nixos/packages.nix` (note: that file is in `base.nix`, so it lands on the lite box as well); mac GUI app → cask in `modules/darwin/homebrew.nix`; new concern → new file + aggregator entry in `common/` (both platforms) or the platform dir; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; platform-only user config → file in `home/marcus/wsl/` or `home/marcus/mac/`, imported from the relevant entry point.
 
 ## Constraints that are easy to violate
 

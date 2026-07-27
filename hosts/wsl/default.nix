@@ -9,6 +9,8 @@
 
   networking.hostName = "nixos";
 
+  homeEntryPoint = ../../home/marcus/wsl.nix;
+
   # Do not change after initial install.
   system.stateVersion = "25.05";
 }

@@ -1,7 +1,7 @@
-# Push-to-main is the deploy for the WSL box (system.autoUpgrade builds
-# pushed main weekly), so catch a broken commit here — days before the
-# Saturday timer meets it. Mirrors the local verification story:
-# `nix flake check` fully evaluates the WSL system, then the mac system
+# Push-to-main is the deploy for both WSL boxes (system.autoUpgrade builds
+# pushed main weekly on each), so catch a broken commit here — days before
+# the Saturday timer meets it. Mirrors the local verification story:
+# `nix flake check` fully evaluates every NixOS host, then the mac system
 # is evaluated the same way either machine evals the other's platform.
 name: check
 
@@ -27,6 +27,7 @@ jobs:
         run: |
           nix run --inputs-from . nixpkgs#statix -- check .
           nix run --inputs-from . nixpkgs#deadnix -- --fail .
+      # evaluates both nixosConfigurations (nixos, nixos-lite)
       - name: nix flake check
         run: nix flake check
       - name: evaluate the mac system

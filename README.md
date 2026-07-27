@@ -1,34 +1,48 @@
 # nix-config
 
-One flake, two machines:
+One flake, three machines:
 
-- **WSL** — NixOS (host `nixos`, user `marcus`). Repo at `~/nix-config`,
-  symlinked to `/etc/nixos` (that path is what bare `nixos-rebuild` looks
-  for — the symlink name is fixed, the repo location isn't).
+- **WSL** — NixOS (host `nixos`, user `marcus`). The dev machine. Repo at
+  `~/nix-config`, symlinked to `/etc/nixos` (that path is what bare
+  `nixos-rebuild` looks for — the symlink name is fixed, the repo location
+  isn't).
+- **WSL lite** — NixOS (host `nixos-lite`, same user). A second instance on
+  the same PC for holding simple binaries: no language toolchains, no
+  Windows dotfile syncing. Same repo layout, its own clone.
 - **MacBook Air** — nix-darwin on Determinate Nix (host `Marcuss-MacBook-Air`,
   user `marcussanchez`). Repo at `~/nix-config`, symlinked to
   `/etc/nix-darwin`, so bare `darwin-rebuild` finds it.
+
+Each NixOS box picks its own config **by hostname**: `nixos-rebuild --flake
+/etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, so the
+attribute name and `networking.hostName` must stay equal. (`system.autoUpgrade`
+and `NH_FLAKE` resolve the same way — if the two ever drift, the weekly timer
+fails quietly.) The Windows-side WSL distro name is a separate identifier: it's
+what `wsl -d <name>` takes, and NixOS never sees it.
 
 ## Layout
 
 ```
 flake.nix                  Inputs + both host wirings
 hosts/
-  wsl/default.nix          WSL host: hostname, stateVersion
+  wsl/default.nix          WSL dev host: hostname, home entry point, stateVersion
+  wsl-lite/default.nix     WSL lite host: same, but imports modules/nixos/base.nix
   mac/default.nix          Mac host: hostname, platform, stateVersion
 modules/common/            Shared system layer (options must exist on both platforms)
   packages.nix             Dev toolchains for every machine (go, rustup,
                            zig+zls, node, buf, python+uv, nix LSP, ...)
   claude-code.nix          Claude Code (claude-code-nix overlay)
 modules/nixos/             WSL system layer (one concern per file)
-  default.nix              Aggregator — imports ../common + everything below
+  default.nix              Full dev machine: base.nix + ../common + keyring
+  base.nix                 The floor every WSL box shares — a module added
+                           here lands on the lite host too
   nix.nix                  Nix settings, GC, auto-upgrade
   packages.nix             Linux-only: build essentials the mac gets from Xcode CLT
   nix-ld.nix               Run unpatched dynamic binaries on NixOS
   keyring.nix              gnome-keyring as the Secret Service (secretspec)
   users.nix                User accounts + login shell
   wsl.nix                  NixOS-WSL integration
-  home-manager.nix         HM bridge → home/marcus/wsl.nix
+  home-manager.nix         HM bridge → each host's homeEntryPoint
 modules/darwin/            Mac system layer
   default.nix              Aggregator — imports ../common + everything below
   nix.nix                  nix.enable = false — Determinate Nix owns the daemon
@@ -38,7 +52,9 @@ modules/darwin/            Mac system layer
   fonts.nix                JetBrainsMono Nerd Font
   home-manager.nix         HM bridge → home/marcus/mac.nix
 home/marcus/               Home Manager (per-user), same shape as modules/
-  wsl.nix                  WSL entry: identity + common/ + wsl/ imports
+  wsl.nix                  WSL dev entry: identity + common/ + wsl/ imports
+  wsl-lite.nix             WSL lite entry: identity + common/ only (no
+                           dotfile syncing — see the file for why)
   mac.nix                  Mac entry: identity + common/ + mac/ imports
   common/                  Shared concern files (default.nix aggregates)
     packages.nix           Standalone user tools
@@ -79,7 +95,7 @@ home/marcus/               Home Manager (per-user), same shape as modules/
 
 Two nixpkgs inputs on purpose: Linux rides `nixos-unstable`, the mac rides
 `nixpkgs-unstable` (same trunk; darwin binary caches populate there first).
-One `nix flake update` moves both machines.
+One `nix flake update` moves every machine.
 
 ## Common operations
 
@@ -94,23 +110,27 @@ nix fmt                            # format all nix files
 nix flake check                    # validate before switching
 ```
 
-On WSL, auto-upgrade rebuilds weekly from pushed main on GitHub (never the
-local working tree, so uncommitted WIP can't get activated) and GC runs daily
-(both timers catch up after downtime). The mac has no autoUpgrade — update
+On both WSL boxes, auto-upgrade rebuilds weekly from pushed main on GitHub
+(never the local working tree, so uncommitted WIP can't get activated; each
+box resolves its own attribute by hostname) and GC runs daily (both timers
+catch up after downtime). So a push to main deploys to two machines. The mac
+has no autoUpgrade — update
 via `nh darwin switch -u`; user-level GC runs weekly as a launchd agent.
 To see what a rebuild changed: the diff `nh` prints on either machine, or
 `nvd diff /run/booted-system /run/current-system` on WSL /
 `nvd diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2)` on the mac
 (no booted-system there — nix-darwin doesn't own the boot).
 
-Each machine can *evaluate* (not build) the other's config — do this after
-touching shared files:
+Each machine can *evaluate* (not build) the others' configs — do this after
+touching shared files. `nix flake check` already covers every
+`nixosConfigurations` entry, so on WSL only the mac needs the explicit eval:
 
 ```sh
 # from WSL:
 nix eval --raw '/etc/nixos#darwinConfigurations."Marcuss-MacBook-Air".system.drvPath'
-# from the mac:
+# from the mac (one per NixOS host):
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos.config.system.build.toplevel.drvPath'
+nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos-lite.config.system.build.toplevel.drvPath'
 ```
 
 ## Per-project dev shells
@@ -170,6 +190,38 @@ via the activation hook; what's left is per-machine state:
 2. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
 3. `atuin login` if syncing shell history
 
+## Bootstrapping the lite WSL box
+
+Same procedure as above with two substitutions: the distro name and the flake
+attribute are `nixos-lite`, and the hostname the config sets is `nixos-lite`
+(that's what makes bare `nixos-rebuild` resolve the right one afterwards).
+
+```powershell
+wsl --install --from-file nixos.wsl --name nixos-lite
+wsl -d nixos-lite
+```
+
+```sh
+# as the stock `nixos` user
+sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
+sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#nixos-lite
+
+sudo mv /tmp/nixos-config /home/marcus/nix-config
+sudo chown -R marcus:users /home/marcus/nix-config
+sudo ln -sfn /home/marcus/nix-config /etc/nixos
+exit
+```
+
+```powershell
+wsl -t nixos-lite   # restart so wsl.defaultUser takes effect
+wsl -d nixos-lite   # lands as marcus
+```
+
+Then `hostname` should print `nixos-lite`, and bare `nh os switch` /
+`sudo nixos-rebuild switch --flake /etc/nixos` resolve without a `#name`.
+`gh auth login` if you want to push from this box; there's no rustup and no
+Windows dotfile syncing here by design.
+
 ## Bootstrapping a new Mac
 
 ```sh
@@ -213,7 +265,10 @@ running version.
 - A CLI tool for both machines → `modules/common/packages.nix` (or
   `home/marcus/packages.nix` if it's user-scoped)
 - A Linux-only or mac-only system package → that platform's `packages.nix`
-  (darwin currently has none — create the file if one appears)
+  (darwin currently has none — create the file if one appears). Note
+  `modules/nixos/packages.nix` is in `base.nix`, so it lands on the lite
+  box too; dev-machine-only tooling belongs in `modules/common/` or a file
+  listed in `modules/nixos/default.nix`
 - A GUI app on the mac → a cask in `modules/darwin/homebrew.nix`
   (`cleanup = "zap"`: anything not declared gets uninstalled)
 - A new concern → new file in `modules/common/`, `modules/nixos/`, or

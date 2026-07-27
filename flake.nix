@@ -42,9 +42,16 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
       formatter.aarch64-darwin = nixpkgs-darwin.legacyPackages.aarch64-darwin.nixfmt-tree;
 
+      # Attribute names match each box's hostname: that's how bare
+      # `nixos-rebuild --flake /etc/nixos` and system.autoUpgrade pick one.
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [ ./hosts/wsl ];
+      };
+
+      nixosConfigurations.nixos-lite = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
+        modules = [ ./hosts/wsl-lite ];
       };
 
       # Activate with: sudo darwin-rebuild switch --flake ~/nix-config
