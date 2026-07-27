@@ -8,8 +8,7 @@
     ./mac/ghostty.nix
     ./mac/nix.nix
     ./mac/toolchains.nix
-    ./mac/zed.nix
-    ./mac/ideavim.nix
+    ./mac/dotfiles.nix
     ./mac/auto-commit.nix
   ];
 

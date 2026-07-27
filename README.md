@@ -65,17 +65,14 @@ home/marcus/               Home Manager (per-user), same shape as modules/
                            UI edits pull into the repo and auto-commit
                            (chore:) + push, repo edits push to Windows,
                            both-changed warns and writes nothing
-    zed.nix                Zed (%APPDATA%\Zed settings+keymap) ↔
-                           common/dotfiles/zed.* via win-sync
-    ideavim.nix            JetBrains .ideavimrc (%USERPROFILE%) ↔
-                           common/dotfiles/ via win-sync
+    dotfiles.nix           common/dotfiles/ ↔ Windows via win-sync: Zed
+                           (%APPDATA%\Zed) and .ideavimrc (%USERPROFILE%)
   mac/
     ghostty.nix            Ghostty config (app itself is a brew cask)
     nix.nix                user-level GC launchd agent + NH_FLAKE
     toolchains.nix         rustup first-run bootstrap
-    zed.nix                ~/.config/zed/{settings,keymap}.json →
-                           per-file symlinks to common/dotfiles/zed.*
-    ideavim.nix            ~/.ideavimrc → symlink to common/dotfiles/'s
+    dotfiles.nix           per-file symlinks into common/dotfiles/:
+                           ~/.config/zed/{settings,keymap}.json, ~/.ideavimrc
     auto-commit.nix        commits + pushes common/dotfiles drift on
                            activation
 ```

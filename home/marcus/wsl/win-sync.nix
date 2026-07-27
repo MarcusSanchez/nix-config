@@ -4,8 +4,8 @@
 # push, repo edits push to Windows, both-changed warns and writes
 # nothing, missing files seed toward the side that lacks them. Symlinks
 # are impossible across this boundary (NTFS can't point into WSL, Windows
-# can't traverse Linux links), hence copies. Instantiated per config by
-# zed.nix and ideavim.nix.
+# can't traverse Linux links), hence copies. Instantiated once per synced
+# app by dotfiles.nix.
 { pkgs, repoDir }:
 {
   name, # sync id: state dir, log prefix, chore scope

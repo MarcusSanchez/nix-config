@@ -8,8 +8,7 @@
     ./wsl/windows.nix
     ./wsl/nix.nix
     ./wsl/toolchains.nix
-    ./wsl/zed.nix
-    ./wsl/ideavim.nix
+    ./wsl/dotfiles.nix
   ];
 
   home.username = "marcus";
