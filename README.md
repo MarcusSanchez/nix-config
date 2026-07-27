@@ -224,12 +224,12 @@ one thing a paste-the-whole-section run gets wrong. Each block on its own can
 be copied blindly.
 
 ```sh
-# 1. Install Homebrew — it also installs the Xcode Command Line Tools,
-#    which provide the git used below (a fresh Mac has neither). nix-darwin
-#    drives brew declaratively but never installs it.
+# Install Homebrew — it also installs the Xcode Command Line Tools, which
+# provide the git used below (a fresh Mac has neither). nix-darwin drives
+# brew declaratively but never installs it.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 2. Install Determinate Nix (needs sudo)
+# Install Determinate Nix (needs sudo)
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
 ```
 
@@ -237,27 +237,29 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confi
 >
 > The installer puts `nix` on `PATH` through a shell profile, but *this* shell
 > read its profile before that existed — so `nix` is still "command not found"
-> here, and step 3 dies on it. Quit the terminal and open a fresh one.
+> here, and the next block dies on it. Quit the terminal and open a fresh one.
 
 ```sh
-# 3. Clone the config and run the first activation — this bootstraps
-#    darwin-rebuild itself, and is where brew installs everything declared in
-#    homebrew.nix (so it's slow). The symlink is what makes bare
-#    `sudo darwin-rebuild switch` work afterwards — the analog of the WSL
-#    machines keeping their config at /etc/nixos.
+# Clone the config
 git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
+
+# First activation (bootstraps darwin-rebuild itself; this is also where
+# brew installs everything declared in homebrew.nix, so it's slow)
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config
+
+# Symlink so bare `sudo darwin-rebuild switch` works — the analog of the
+# WSL machines keeping their config at /etc/nixos
 sudo ln -s ~/nix-config /etc/nix-darwin
 
-# 4. Wire in the claude-code + devenv binary caches. Manual on the mac: the
-#    daemon config belongs to Determinate, not nix-darwin (the WSL boxes get
-#    this declaratively in modules/nixos/nix.nix). Keys are public.
+# Wire in the claude-code + devenv binary caches. Manual on the mac: daemon
+# config is Determinate's, not nix-darwin's (the WSL boxes get this
+# declaratively in modules/nixos/nix.nix). Keys are public.
 printf 'extra-substituters = https://claude-code.cachix.org https://devenv.cachix.org\nextra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=\n' | sudo tee -a /etc/nix/nix.custom.conf
 sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 ```
 
-Then open one more terminal — step 3 replaced your login shell and Home
-Manager's session variables only land in a shell started after it. Determinate
+Then open one more terminal — that activation replaced your login shell, and
+Home Manager's session variables only land in a shell started after it. Determinate
 Nix owns the daemon, so nix-darwin runs with `nix.enable = false`; daemon
 tweaks go in /etc/nix/nix.custom.conf. Then the same per-machine state as WSL:
 `gh auth login`, open `nvim`, `atuin login`.
