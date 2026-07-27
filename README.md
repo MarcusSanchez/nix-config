@@ -121,13 +121,12 @@ nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos.config.system.build.to
 
 Project-specific tools belong in the project, not in this config. Use
 devenv (installed on both machines): `devenv init` in that repo, add
-`packages`/`languages.*`/`services.*` in the generated devenv.nix, then
-`devenv allow` once — the zsh hook auto-activates on cd from then on
-(native devenv activation: entering spawns a `devenv shell` subshell,
-leaving exits it; no .envrc involved). direnv is still installed for
-projects that ship their own flake devShell (`use flake` in an .envrc,
-cached by nix-direnv) or prefer in-place env without a subshell
-(`eval "$(devenv direnvrc)"` + `use devenv`).
+`packages`/`languages.*`/`services.*` in the generated devenv.nix, and
+either enter manually with `devenv shell` or auto-load on cd via direnv
+(`eval "$(devenv direnvrc)"` + `use devenv` in its .envrc — in-place
+env, no subshell, silenced the same way direnv itself is). Plain flake
+devShells work the same way (`use flake` in an .envrc, cached by
+nix-direnv).
 
 ## Bootstrapping a new WSL machine
 

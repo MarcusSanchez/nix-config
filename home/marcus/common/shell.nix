@@ -69,11 +69,6 @@
 
         bindkey '^I' autosuggest-accept
         bindkey "$terminfo[kcbt]" expand-or-complete
-
-        # Native devenv auto-activation (no .envrc needed): cd into a
-        # `devenv allow`-ed project spawns a `devenv shell` subshell —
-        # TUI and all, deliberately unquieted — and cd out exits it.
-        eval "$(${lib.getExe pkgs.devenv} hook zsh)"
       '';
     };
   };
