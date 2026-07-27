@@ -1,5 +1,5 @@
 # JetBrains IdeaVim: %USERPROFILE%\.ideavimrc two-way synced with the
-# SHARED copy in ../common/ideavim/ by the win-sync engine (see
+# SHARED copy in ../common/dotfiles/ by the win-sync engine (see
 # win-sync.nix for the contract). The mac symlinks the same file
 # (mac/ideavim.nix) — this one file serves both machines.
 {

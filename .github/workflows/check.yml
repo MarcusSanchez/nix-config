@@ -8,9 +8,9 @@ name: check
 on:
   push:
     branches: [main]
-    # the win-sync hooks auto-push chore commits touching only these
-    # mirrored config files; nix copies them without parsing, so they
-    # can't affect the build — skip the run
+    # win-sync (WSL) and auto-commit.nix (mac) auto-push chore commits
+    # touching only these mirrored config files; nix copies them without
+    # parsing, so they can't affect the build — skip the run
     paths-ignore:
       - "home/marcus/common/dotfiles/**"
   pull_request:

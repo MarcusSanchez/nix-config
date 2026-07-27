@@ -17,7 +17,7 @@
     nh
 
     # per-project dev environments (packages, languages, services):
-    # `devenv init` + `devenv allow` in the project repo
+    # `devenv init` in the project repo, auto-loaded on cd via direnv
     devenv
     # declarative secrets for those projects (secretspec.toml declares,
     # a provider — keyring/dotenv/env — supplies; devenv reads it natively)

@@ -1,9 +1,9 @@
 # Zed runs on the Windows side; its config under %APPDATA%\Zed and the
-# SHARED copies in ../common/zed/ (one settings.json + one keymap.json
-# for both machines — cmd-* bindings are inert-ish super-key combos on
-# Windows, ctrl-* extras are harmless on the mac) are two-way synced by
-# the win-sync engine — see win-sync.nix for the contract. The mac
-# symlinks the same files (mac/zed.nix).
+# SHARED copies in ../common/dotfiles/ (one settings.json + one
+# keymap.json for both machines — cmd-* bindings are inert-ish super-key
+# combos on Windows, ctrl-* extras are harmless on the mac) are two-way
+# synced by the win-sync engine — see win-sync.nix for the contract.
+# The mac symlinks the same files (mac/zed.nix).
 {
   config,
   lib,

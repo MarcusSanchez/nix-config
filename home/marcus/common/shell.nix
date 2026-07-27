@@ -7,11 +7,17 @@
 }:
 
 {
-  # Let `npm install -g` work natively: install into a writable prefix
-  # instead of the read-only nix store. Deliberately impure — global npm
-  # CLIs are throwaway convenience tools here, and nix-ld covers any
-  # native binaries they ship.
-  home.sessionVariables.NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+  home.sessionVariables = {
+    # NixOS ships nano as the default $EDITOR; make git/rebase/etc. open nvim
+    EDITOR = "nvim";
+    SUDO_EDITOR = "nvim";
+
+    # Let `npm install -g` work natively: install into a writable prefix
+    # instead of the read-only nix store. Deliberately impure — global npm
+    # CLIs are throwaway convenience tools here, and nix-ld covers any
+    # native binaries they ship.
+    NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+  };
   home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
 
   programs = {

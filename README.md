@@ -25,6 +25,7 @@ modules/nixos/             WSL system layer (one concern per file)
   nix.nix                  Nix settings, GC, auto-upgrade
   packages.nix             Linux-only: build essentials the mac gets from Xcode CLT
   nix-ld.nix               Run unpatched dynamic binaries on NixOS
+  keyring.nix              gnome-keyring as the Secret Service (secretspec)
   users.nix                User accounts + login shell
   wsl.nix                  NixOS-WSL integration
   home-manager.nix         HM bridge → home/marcus/wsl.nix

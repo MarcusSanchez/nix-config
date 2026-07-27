@@ -13,12 +13,6 @@
     ./comma.nix
   ];
 
-  home.sessionVariables = {
-    # NixOS ships nano as the default $EDITOR; make git/rebase/etc. open nvim
-    EDITOR = "nvim";
-    SUDO_EDITOR = "nvim";
-  };
-
   # Do not change after initial install.
   home.stateVersion = "25.05";
 }
