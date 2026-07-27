@@ -6,9 +6,10 @@ One flake, three machines:
   `~/nix-config`, symlinked to `/etc/nixos` (that path is what bare
   `nixos-rebuild` looks for — the symlink name is fixed, the repo location
   isn't).
-- **WSL lite** — NixOS (host `nixos-lite`, same user). A second instance on
-  the same PC for holding simple binaries: no language toolchains, no
-  Windows dotfile syncing. Same repo layout, its own clone.
+- **WSL lite** — NixOS (host `nixos-lite`, same user). A headless second
+  instance: same toolchains, but none of the Windows integration (no Zed /
+  IdeaVim syncing). For pulling a repo down on some other PC and poking at
+  it from a terminal. Same repo layout, its own clone.
 - **MacBook Air** — nix-darwin on Determinate Nix (host `Marcuss-MacBook-Air`,
   user `marcussanchez`). Repo at `~/nix-config`, symlinked to
   `/etc/nix-darwin`, so bare `darwin-rebuild` finds it.
@@ -26,16 +27,15 @@ what `wsl -d <name>` takes, and NixOS never sees it.
 flake.nix                  Inputs + both host wirings
 hosts/
   wsl/default.nix          WSL dev host: hostname, home entry point, stateVersion
-  wsl-lite/default.nix     WSL lite host: same, but imports modules/nixos/base.nix
+  wsl-lite/default.nix     WSL headless host: same, different home entry point
   mac/default.nix          Mac host: hostname, platform, stateVersion
 modules/common/            Shared system layer (options must exist on both platforms)
   packages.nix             Dev toolchains for every machine (go, rustup,
                            zig+zls, node, buf, python+uv, nix LSP, ...)
   claude-code.nix          Claude Code (claude-code-nix overlay)
 modules/nixos/             WSL system layer (one concern per file)
-  default.nix              Full dev machine: base.nix + ../common + keyring
-  base.nix                 The floor every WSL box shares — a module added
-                           here lands on the lite host too
+  default.nix              Aggregator — imports ../common + everything below;
+                           both WSL hosts use it unchanged
   nix.nix                  Nix settings, GC, auto-upgrade
   packages.nix             Linux-only: build essentials the mac gets from Xcode CLT
   nix-ld.nix               Run unpatched dynamic binaries on NixOS
@@ -52,9 +52,9 @@ modules/darwin/            Mac system layer
   fonts.nix                JetBrainsMono Nerd Font
   home-manager.nix         HM bridge → home/marcus/mac.nix
 home/marcus/               Home Manager (per-user), same shape as modules/
-  wsl.nix                  WSL dev entry: identity + common/ + wsl/ imports
-  wsl-lite.nix             WSL lite entry: identity + common/ only (no
-                           dotfile syncing — see the file for why)
+  wsl.nix                  WSL dev entry: identity + common/ + all of wsl/
+  wsl-lite.nix             Headless entry: same minus the Windows dotfile
+                           syncing (see the file for why)
   mac.nix                  Mac entry: identity + common/ + mac/ imports
   common/                  Shared concern files (default.nix aggregates)
     packages.nix           Standalone user tools
@@ -153,8 +153,8 @@ first rebuild, and the hostname the config then sets, which is what makes bare
 
 | name | what you get |
 |---|---|
-| `nixos` | the dev machine: go, rustup, zig+zls, node, python, devenv, claude-code, nix-ld, and the Zed/IdeaVim sync with Windows |
-| `nixos-lite` | the binaries box: nvim, shell, git, comma and the archive basics — none of the toolchains, no dotfile syncing |
+| `nixos` | the dev machine — everything, including the Zed/IdeaVim two-way sync with the Windows side |
+| `nixos-lite` | headless: the same toolchains and shell, minus that sync (and the `windows.username` it needs) |
 
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
@@ -204,8 +204,10 @@ name you chose, so bare `nh os switch` resolves the right config with no
 2. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
 3. `atuin login` if syncing shell history
 
-On `nixos` only, rust also installed itself via the activation hook. The lite
-box has no rustup and no Windows dotfile syncing by design.
+Rust installs itself via the activation hook on either box. The only thing
+`nixos-lite` lacks is the Windows dotfile syncing — by design, since it's
+meant to run somewhere that has no JetBrains or Zed on the other side of
+`/mnt/c`.
 
 ## Bootstrapping a new Mac
 
@@ -250,10 +252,9 @@ running version.
 - A CLI tool for both machines → `modules/common/packages.nix` (or
   `home/marcus/packages.nix` if it's user-scoped)
 - A Linux-only or mac-only system package → that platform's `packages.nix`
-  (darwin currently has none — create the file if one appears). Note
-  `modules/nixos/packages.nix` is in `base.nix`, so it lands on the lite
-  box too; dev-machine-only tooling belongs in `modules/common/` or a file
-  listed in `modules/nixos/default.nix`
+  (darwin currently has none — create the file if one appears). Anything in
+  `modules/nixos/` lands on *both* WSL hosts; per-host differences live in
+  the home entry points (`home/marcus/wsl.nix` vs `wsl-lite.nix`)
 - A GUI app on the mac → a cask in `modules/darwin/homebrew.nix`
   (`cleanup = "zap"`: anything not declared gets uninstalled)
 - A new concern → new file in `modules/common/`, `modules/nixos/`, or

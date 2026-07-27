@@ -1,11 +1,12 @@
-# Host definition: the lite WSL box — a place to drop simple binaries,
-# not a dev machine. Imports modules/nixos/base.nix rather than the full
-# aggregator, so it skips the language toolchains, claude-code, nix-ld
-# and the keyring.
+# Host definition: the second WSL box — headless, portable, "just a
+# terminal": clone a repo on some other machine, poke at it with node or
+# go, croc things around. Same system layer as the dev box (same
+# toolchains, same nix-ld for npm's prebuilt binaries); what it skips is
+# the Windows integration in the home layer — see home/marcus/wsl-lite.nix.
 { ... }:
 
 {
-  imports = [ ../../modules/nixos/base.nix ];
+  imports = [ ../../modules/nixos ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
 

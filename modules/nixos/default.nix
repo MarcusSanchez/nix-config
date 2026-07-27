@@ -1,14 +1,18 @@
-# Aggregator for a full WSL dev machine: the shared floor (./base.nix)
-# plus everything only a workstation needs. A minimal host imports
-# base.nix directly instead — so a new module goes here if it's
-# dev-machine tooling, and in base.nix only if every WSL box needs it.
+# Aggregator for all system-level modules. Both WSL hosts import this —
+# they differ only in hostname and which home entry point they point
+# homeEntryPoint at, since what makes the dev box a dev box lives in the
+# home layer (the Windows dotfile syncing), not here.
 { ... }:
 
 {
   imports = [
-    ./base.nix
     ../common
+    ./nix.nix
+    ./packages.nix
     ./nix-ld.nix
     ./keyring.nix
+    ./users.nix
+    ./wsl.nix
+    ./home-manager.nix
   ];
 }

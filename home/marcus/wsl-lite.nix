@@ -1,19 +1,23 @@
-# Home Manager entry point for the lite WSL box: identity + the shared
-# config, and nothing else.
+# Home Manager entry point for the headless WSL box: everything the dev
+# machine has except the Windows integration.
 #
-# Deliberately NOT imported here (don't add them back without reading
-# this): ./wsl/dotfiles.nix — both WSL instances see the same
-# /mnt/c/Users/marcus, but win-sync's direction stamp is per-box, so two
-# syncers over one set of Windows files produce spurious pulls, duplicate
-# chore commits and two clones racing to push. ./wsl/windows.nix — only
-# dotfiles.nix consumes it. ./wsl/toolchains.nix — rustup glibc repair,
-# and there's no rustup here.
+# Deliberately NOT imported (don't add them back without reading this):
+# ./wsl/dotfiles.nix — this box has no JetBrains or Zed on the other side
+# of /mnt/c, and worse, if it ever ran on the same PC as the dev box both
+# would see the same /mnt/c/Users/marcus while win-sync's direction stamp
+# stays per-box, producing spurious pulls and two clones racing to push.
+# ./wsl/windows.nix — only dotfiles.nix consumes it.
+#
+# toolchains.nix IS here: rustup comes with ../common, and its downloaded
+# binaries break with ENOENT after a glibc bump + GC on any NixOS box,
+# not just the one with RustRover attached.
 { ... }:
 
 {
   imports = [
     ./common
     ./wsl/nix.nix
+    ./wsl/toolchains.nix
   ];
 
   home.username = "marcus";
