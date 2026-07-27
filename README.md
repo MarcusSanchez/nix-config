@@ -219,20 +219,17 @@ meant to run somewhere that has no JetBrains or Zed on the other side of
 
 ## Bootstrapping a new Mac
 
-Four steps — **run them one block at a time.** There's a mandatory new
-terminal between 2 and 3; pasting the whole section at once fails there.
-
-**1. Homebrew** — it also installs the Xcode Command Line Tools, which provide
-the `git` used below (a fresh Mac has neither). nix-darwin drives brew
-declaratively but never installs it.
+Two blocks with a **mandatory new terminal between them** — that gap is the
+one thing a paste-the-whole-section run gets wrong. Each block on its own can
+be copied blindly.
 
 ```sh
+# 1. Install Homebrew — it also installs the Xcode Command Line Tools,
+#    which provide the git used below (a fresh Mac has neither). nix-darwin
+#    drives brew declaratively but never installs it.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
 
-**2. Determinate Nix** (needs sudo):
-
-```sh
+# 2. Install Determinate Nix (needs sudo)
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
 ```
 
@@ -242,23 +239,19 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confi
 > read its profile before that existed — so `nix` is still "command not found"
 > here, and step 3 dies on it. Quit the terminal and open a fresh one.
 
-**3. Clone and activate** — bootstraps `darwin-rebuild` itself, and this is
-where brew installs everything declared in `homebrew.nix` (so it's slow):
-
 ```sh
+# 3. Clone the config and run the first activation — this bootstraps
+#    darwin-rebuild itself, and is where brew installs everything declared in
+#    homebrew.nix (so it's slow). The symlink is what makes bare
+#    `sudo darwin-rebuild switch` work afterwards — the analog of the WSL
+#    machines keeping their config at /etc/nixos.
 git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config
-
-# so bare `sudo darwin-rebuild switch` works from now on — the analog of the
-# WSL machines keeping their config at /etc/nixos
 sudo ln -s ~/nix-config /etc/nix-darwin
-```
 
-**4. Binary caches** — manual on the mac because the daemon config belongs to
-Determinate, not nix-darwin (the WSL boxes get this declaratively in
-`modules/nixos/nix.nix`). Keys are public.
-
-```sh
+# 4. Wire in the claude-code + devenv binary caches. Manual on the mac: the
+#    daemon config belongs to Determinate, not nix-darwin (the WSL boxes get
+#    this declaratively in modules/nixos/nix.nix). Keys are public.
 printf 'extra-substituters = https://claude-code.cachix.org https://devenv.cachix.org\nextra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=\n' | sudo tee -a /etc/nix/nix.custom.conf
 sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 ```
