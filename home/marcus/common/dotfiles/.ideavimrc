@@ -12,13 +12,17 @@ set visualbell              " Disable bell sound
 set clipboard=unnamed       " Use system clipboard
 set whichwrap+=<,>,[,],h,l  " Move to the next line with these keys
 set scrolloff=5             " Show a few lines of context around the cursor
-set incsearch               " Incremental search
+                            " The w/e motions below run a real search on every
+                            " keypress, so anything that makes a search scan
+                            " or paint the whole file is paid per keystroke.
+                            " All three of these exist to keep that cheap:
+set noincsearch             "   no live preview while the pattern is typed
+set nohlsearch              "   no highlighting every \w\+ match in the file
+set shortmess+=S            "   no [x/y] count (it scans the whole file)
+                            " Flash (s) is the fast-jump path, so losing the
+                            " live preview on real searches costs little.
 set ignorecase              " Case-insensitive search...
 set smartcase               " ...unless the pattern has a capital letter
-set shortmess+=S            " Hide the [x/y] search count. Originally to stop
-                            " its whole-file scan lagging the w/e motions;
-                            " those no longer search, so this is only a
-                            " preference now — drop it to get the count back
 set showmode                " Show current mode
 
 " ----------------------------------------------------------------
@@ -80,25 +84,26 @@ nnoremap N J
 " Word motions: skip over non-alphanumeric characters with w and e.
 " Normal mode only, so dw/cw/de keep the builtin motions.
 "
-" These are the IDE's own caret moves (what ctrl-left/right do), not vim
-" motions: IdeaVim has no search(), so the nvim version of this — a bare
-" vim.fn.search('\w\+') that touches no search state — can't be ported.
-" Driving a real ?\w\+ / /\w\+ per keypress was the old approach and put
-" IntelliJ's whole find subsystem in the hot path; it lagged on 2.39+
-" (worked around then with shortmess+=S) and regressed again later. An
-" action can't regress that way because no search runs at all.
+" A real search is the only way to get these semantics here. Two rejected
+" alternatives, both verified against IdeaVim 2.44.1 — don't re-try them:
 "
-" Stop positions follow the IDE's word rules, incl. Settings > Editor >
-" General > Smart Keys > "Use CamelHumps words" — swap in
-" EditorNextWordInDifferentHumpsMode to get the opposite of that setting.
+"   * nvim does this with vim.fn.search('\w\+'), which moves the caret and
+"     touches no search state. IdeaVim ships no search(), and no cursor()
+"     or setpos() either, so VimScript cannot move the caret at all.
+"   * <Action>(EditorNextWord/EditorPreviousWord) is native and instant but
+"     stops on spaces and punctuation like ctrl-arrow does, which is the
+"     whole thing these motions exist to avoid.
+"
+" So the cost is managed at the source instead: noincsearch + nohlsearch +
+" shortmess+=S above mean the search neither paints nor rescans the file,
+" which leaves nothing per-keypress but the match itself. (Don't restore
+" the old per-press `:set noincsearch<CR>...<CR>:set incsearch<CR>:noh<CR>`
+" wrapper — those options are simply off now, so it is pure overhead.)
+"
 " Do not rewrite as character-scan functions: tried, misbehaved in
 " tab-indented files (Go).
-"
-" nmap, NOT nnoremap: <Action> is only expanded by the recursive map
-" commands. With nnoremap IdeaVim types the literal text instead (same
-" reason `nmap s <Action>(flash.search)` above isn't nnoremap either).
-nmap w <Action>(EditorPreviousWord)
-nmap e <Action>(EditorNextWord)
+nnoremap <silent> w ?\w\+<CR>
+nnoremap <silent> e /\w\+<CR>
 
 " Visual mode falls back to builtin motions (w backward = b, e forward = w)
 vnoremap w b
