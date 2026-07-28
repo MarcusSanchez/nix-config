@@ -12,17 +12,22 @@ set visualbell              " Disable bell sound
 set clipboard=unnamed       " Use system clipboard
 set whichwrap+=<,>,[,],h,l  " Move to the next line with these keys
 set scrolloff=5             " Show a few lines of context around the cursor
-                            " The w/e motions below run a real search on every
-                            " keypress, so anything that makes a search scan
-                            " or paint the whole file is paid per keystroke.
-                            " All three of these exist to keep that cheap:
-set noincsearch             "   no live preview while the pattern is typed
-set nohlsearch              "   no highlighting every \w\+ match in the file
-set shortmess+=S            "   no [x/y] count (it scans the whole file)
-                            " Flash (s) is the fast-jump path, so losing the
-                            " live preview on real searches costs little.
+set incsearch               " Incremental search
 set ignorecase              " Case-insensitive search...
 set smartcase               " ...unless the pattern has a capital letter
+
+                            " The w/e motions below run a real ?\w\+ search on
+                            " every keypress, and \w\+ matches every word in
+                            " the file — so anything the search does per match
+                            " is paid per keystroke, on the whole file:
+set maxsearchcount=1        "   IdeaVim 2.40 added the [2/4] match counter and
+                            "   counts up to 'maxsearchcount' matches (default
+                            "   999) after every search. 1 is the minimum the
+                            "   option accepts; 0 is rejected as E474. This is
+                            "   THE fix for the w/e lag — `set shortmess+=S`,
+                            "   vim's way to hide that count, does nothing
+                            "   because IdeaVim implements no shortmess at all.
+set nohlsearch              "   and don't highlight all those matches either
 set showmode                " Show current mode
 
 " ----------------------------------------------------------------
@@ -94,11 +99,11 @@ nnoremap N J
 "     stops on spaces and punctuation like ctrl-arrow does, which is the
 "     whole thing these motions exist to avoid.
 "
-" So the cost is managed at the source instead: noincsearch + nohlsearch +
-" shortmess+=S above mean the search neither paints nor rescans the file,
-" which leaves nothing per-keypress but the match itself. (Don't restore
-" the old per-press `:set noincsearch<CR>...<CR>:set incsearch<CR>:noh<CR>`
-" wrapper — those options are simply off now, so it is pure overhead.)
+" The cost is handled by maxsearchcount/nohlsearch above rather than by
+" wrapping each press, so these stay bare. (Don't restore the old
+" `:set noincsearch<CR>...<CR>:set incsearch<CR>:noh<CR>` wrapper: it was
+" written before the 2.40 match counter existed and never addressed it —
+" four ex-commands per keystroke that treated the wrong symptom.)
 "
 " Do not rewrite as character-scan functions: tried, misbehaved in
 " tab-indented files (Go).
