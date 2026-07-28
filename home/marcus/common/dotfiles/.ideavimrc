@@ -107,8 +107,13 @@ nnoremap N J
 "
 " Do not rewrite as character-scan functions: tried, misbehaved in
 " tab-indented files (Go).
-nnoremap <silent> w ?\w\+<CR>
-nnoremap <silent> e /\w\+<CR>
+"
+" The trailing :echo '' wipes the "/\w\+  [1/>1]" the search leaves in the
+" status line. It can't be suppressed at the source: IdeaVim has no :silent
+" command, and cmdheight=0 (vim's way to hide the line) is rejected as E487
+" — the option's minimum is 1.
+nnoremap <silent> w ?\w\+<CR>:echo ''<CR>
+nnoremap <silent> e /\w\+<CR>:echo ''<CR>
 
 " Visual mode falls back to builtin motions (w backward = b, e forward = w)
 vnoremap w b
