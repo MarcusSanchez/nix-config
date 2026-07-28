@@ -93,8 +93,12 @@ nnoremap N J
 " EditorNextWordInDifferentHumpsMode to get the opposite of that setting.
 " Do not rewrite as character-scan functions: tried, misbehaved in
 " tab-indented files (Go).
-nnoremap <silent> w <Action>(EditorPreviousWord)
-nnoremap <silent> e <Action>(EditorNextWord)
+"
+" nmap, NOT nnoremap: <Action> is only expanded by the recursive map
+" commands. With nnoremap IdeaVim types the literal text instead (same
+" reason `nmap s <Action>(flash.search)` above isn't nnoremap either).
+nmap w <Action>(EditorPreviousWord)
+nmap e <Action>(EditorNextWord)
 
 " Visual mode falls back to builtin motions (w backward = b, e forward = w)
 vnoremap w b
