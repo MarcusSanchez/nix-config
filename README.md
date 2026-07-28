@@ -31,7 +31,7 @@ hosts/
   mac/default.nix          Mac host: hostname, platform, stateVersion
 modules/common/            Shared system layer (options must exist on both platforms)
   packages.nix             Dev toolchains for every machine (go, rustup,
-                           zig+zls, node, buf, python+uv, nix LSP, ...)
+                           zig+zls, node, python+uv, nix LSP, ...)
   claude-code.nix          Claude Code (claude-code-nix overlay)
 modules/nixos/             WSL system layer (one concern per file)
   default.nix              Aggregator — imports ../common + everything below;

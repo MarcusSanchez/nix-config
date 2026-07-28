@@ -40,8 +40,6 @@
     # first-run bootstrap on the mac).
     rustup
 
-    buf # protobuf tooling, JetBrains plugin points at it
-
     # nix: LSP + formatter (the lang.nix LazyVim extra uses these)
     nixd
     nixfmt
