@@ -28,6 +28,16 @@ set maxsearchcount=1        "   IdeaVim 2.40 added the [2/4] match counter and
                             "   vim's way to hide that count, does nothing
                             "   because IdeaVim implements no shortmess at all.
 set nohlsearch              "   and don't highlight all those matches either
+set messagesopt=hit-enter,history:500,wait:1
+                            "   ...and don't leave "/\w\+ [1/>1]" sitting in
+                            "   the status line afterwards. 2.40 made single
+                            "   line messages auto-hide after 'messagesopt'
+                            "   wait: ms — but the default is 10000, i.e. ten
+                            "   seconds, so it never looked like it faded at
+                            "   all. Raise wait: if ex messages matter more
+                            "   than a clean status line (errors are
+                            "   unaffected: they use the hit-enter prompt,
+                            "   which this doesn't govern). Max is 10000.
 set showmode                " Show current mode
 
 " ----------------------------------------------------------------
@@ -108,12 +118,14 @@ nnoremap N J
 " Do not rewrite as character-scan functions: tried, misbehaved in
 " tab-indented files (Go).
 "
-" The trailing :echo '' wipes the "/\w\+  [1/>1]" the search leaves in the
-" status line. It can't be suppressed at the source: IdeaVim has no :silent
-" command, and cmdheight=0 (vim's way to hide the line) is rejected as E487
-" — the option's minimum is 1.
-nnoremap <silent> w ?\w\+<CR>:echo ''<CR>
-nnoremap <silent> e /\w\+<CR>:echo ''<CR>
+" The status-line text the search leaves behind is dealt with by
+" messagesopt's wait: above, not here. Things that do NOT work, all checked
+" against 2.44.1: <silent> on the mapping (the string "silent" appears
+" nowhere in the plugin — it's parsed and ignored), a :silent command (not
+" implemented), cmdheight=0 (rejected, E487, minimum 1), and a trailing
+" :echo '' (writes a SECOND message rather than clearing the first).
+nnoremap <silent> w ?\w\+<CR>
+nnoremap <silent> e /\w\+<CR>
 
 " Visual mode falls back to builtin motions (w backward = b, e forward = w)
 vnoremap w b
