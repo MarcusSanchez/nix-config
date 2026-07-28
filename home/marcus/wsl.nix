@@ -5,7 +5,6 @@
 {
   imports = [
     ./common
-    ./common/goroot.nix # not in common/default.nix — wsl-lite skips it
     ./wsl/windows.nix
     ./wsl/nix.nix
     ./wsl/toolchains.nix

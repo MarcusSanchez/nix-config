@@ -67,9 +67,8 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     git.nix                Git identity + gh
     catppuccin.nix         Catppuccin Mocha theming
     comma.nix              comma + prebuilt nix-index database
-    goroot.nix             ~/.toolchains/go real-dir GOROOT for JetBrains
-                           (stable path, no symlinks). NOT in default.nix:
-                           imported by wsl.nix + mac.nix only
+    goroot.nix             ~/.toolchains/go -> the store, a stable GOROOT
+                           path for JetBrains to point at
     dotfiles/              shared UI-managed configs, one flat dir:
                            zed.settings.json + zed.keymap.json (keymap
                            carries cmd- and ctrl- variants) and

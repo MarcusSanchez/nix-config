@@ -5,7 +5,6 @@
 {
   imports = [
     ./common
-    ./common/goroot.nix # not in common/default.nix — wsl-lite skips it
     ./mac/ghostty.nix
     ./mac/nix.nix
     ./mac/toolchains.nix
