@@ -15,29 +15,6 @@ set scrolloff=5             " Show a few lines of context around the cursor
 set incsearch               " Incremental search
 set ignorecase              " Case-insensitive search...
 set smartcase               " ...unless the pattern has a capital letter
-
-                            " The w/e motions below run a real ?\w\+ search on
-                            " every keypress, and \w\+ matches every word in
-                            " the file — so anything the search does per match
-                            " is paid per keystroke, on the whole file:
-set maxsearchcount=1        "   IdeaVim 2.40 added the [2/4] match counter and
-                            "   counts up to 'maxsearchcount' matches (default
-                            "   999) after every search. 1 is the minimum the
-                            "   option accepts; 0 is rejected as E474. This is
-                            "   THE fix for the w/e lag — `set shortmess+=S`,
-                            "   vim's way to hide that count, does nothing
-                            "   because IdeaVim implements no shortmess at all.
-set nohlsearch              "   and don't highlight all those matches either
-set messagesopt=hit-enter,history:500,wait:1
-                            "   ...and don't leave "/\w\+ [1/>1]" sitting in
-                            "   the status line afterwards. 2.40 made single
-                            "   line messages auto-hide after 'messagesopt'
-                            "   wait: ms — but the default is 10000, i.e. ten
-                            "   seconds, so it never looked like it faded at
-                            "   all. Raise wait: if ex messages matter more
-                            "   than a clean status line (errors are
-                            "   unaffected: they use the hit-enter prompt,
-                            "   which this doesn't govern). Max is 10000.
 set showmode                " Show current mode
 
 " ----------------------------------------------------------------
@@ -96,38 +73,29 @@ nnoremap dk "_dj
 " N joins lines (J's original job, now on <S-J> duty above)
 nnoremap N J
 
-" Word motions: skip over non-alphanumeric characters with w and e.
-" Normal mode only, so dw/cw/de keep the builtin motions.
+" Word motions, mirrored like j/k above: w goes back a word, e goes forward.
+" Plain builtins, so they cost nothing. Normal + visual only, so dw/cw/de
+" keep the builtin motions unchanged.
 "
-" A real search is the only way to get these semantics here. Two rejected
-" alternatives, both verified against IdeaVim 2.44.1 — don't re-try them:
+" These stop on punctuation groups, which nvim's version skips — it hops
+" \w\+ runs via vim.fn.search(), a pure caret move that touches no search
+" state. That is not reproducible in IdeaVim at any acceptable price, and
+" the following were all tried and reverted against 2.44.1 — don't reopen:
 "
-"   * nvim does this with vim.fn.search('\w\+'), which moves the caret and
-"     touches no search state. IdeaVim ships no search(), and no cursor()
-"     or setpos() either, so VimScript cannot move the caret at all.
-"   * <Action>(EditorNextWord/EditorPreviousWord) is native and instant but
-"     stops on spaces and punctuation like ctrl-arrow does, which is the
-"     whole thing these motions exist to avoid.
-"
-" The cost is handled by maxsearchcount/nohlsearch above rather than by
-" wrapping each press, so these stay bare. (Don't restore the old
-" `:set noincsearch<CR>...<CR>:set incsearch<CR>:noh<CR>` wrapper: it was
-" written before the 2.40 match counter existed and never addressed it —
-" four ex-commands per keystroke that treated the wrong symptom.)
-"
-" Do not rewrite as character-scan functions: tried, misbehaved in
-" tab-indented files (Go).
-"
-" The status-line text the search leaves behind is dealt with by
-" messagesopt's wait: above, not here. Things that do NOT work, all checked
-" against 2.44.1: <silent> on the mapping (the string "silent" appears
-" nowhere in the plugin — it's parsed and ignored), a :silent command (not
-" implemented), cmdheight=0 (rejected, E487, minimum 1), and a trailing
-" :echo '' (writes a SECOND message rather than clearing the first).
-nnoremap <silent> w ?\w\+<CR>
-nnoremap <silent> e /\w\+<CR>
-
-" Visual mode falls back to builtin motions (w backward = b, e forward = w)
+"   * a real ?\w\+ / /\w\+ per keypress. Correct, but every press paid for
+"     IntelliJ's find machinery and lagged the whole IDE. Nothing tuned
+"     around it helped: maxsearchcount (the 2.40 [2/4] counter scans up to
+"     999 matches), hlsearch, messagesopt's wait: (status text lingers 10s
+"     by default), the old per-press :set noincsearch/:noh wrapper. And
+"     `shortmess` doesn't exist in IdeaVim at all — that line was inert.
+"   * VimScript: no search(), and no cursor()/setpos() either, so it cannot
+"     move the caret.
+"   * <Action>(EditorNextWord/EditorPreviousWord): instant, but stops on
+"     spaces as well as punctuation. Also needs nmap — nnoremap does not
+"     expand <Action> and types the literal text instead.
+"   * character-scan functions: misbehaved in tab-indented files (Go).
+nnoremap w b
+nnoremap e w
 vnoremap w b
 vnoremap e w
 
