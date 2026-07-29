@@ -9,6 +9,11 @@
 # automated: it's unlocked by the master password marcus actually
 # remembers, which is what makes it the root of the whole chain.
 #
+# Note the bootstrap order — this package arrives WITH the rebuild, and a
+# machine missing the age key can't complete one. So on a fresh box rbw
+# comes from `nix shell nixpkgs#rbw` instead; see the README's Secrets
+# section. Installing it here is for every day after that.
+#
 #   rbw login    # once per machine
 #   rbw unlock   # once per agent lifetime (lock_timeout below)
 #   rbw get <name>

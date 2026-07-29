@@ -9,9 +9,13 @@
 # The one thing that can't be automated is the key itself: the private
 # half must reach the machine out of band BEFORE the first rebuild, or
 # activation fails here with "age: no identity matched any of the
-# recipients". Put it at ~/.config/sops/age/keys.txt (mode 600) — either
-# `croc send ~/.config/sops/age/keys.txt` from a machine that already has
-# it, or paste it out of Bitwarden. Never commit it.
+# recipients". Put it at ~/.config/sops/age/keys.txt (mode 600). Never
+# commit it.
+#
+# Watch the ordering: croc and rbw are installed BY the rebuild, so a
+# machine that hasn't rebuilt has neither, and it can't rebuild without
+# the key. Use `nix shell nixpkgs#croc` / `nixpkgs#rbw`, which need
+# nothing installed — the README's Secrets section has the commands.
 #
 # To change a credential: `sops secrets/secrets.yaml` opens the plaintext
 # in $EDITOR and re-encrypts on save. To add a machine with its own key,

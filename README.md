@@ -303,20 +303,38 @@ sops updatekeys secrets/secrets.yaml   # after adding a key to .sops.yaml
 ```
 
 **The one manual step on a new machine** is the private key, which by
-definition can't live in the repo. Put it at `~/.config/sops/age/keys.txt`,
-mode 600, *before the first activation as `marcus`*:
+definition can't live in the repo. It has to be at `~/.config/sops/age/keys.txt`
+(mode 600) *before the first activation as `marcus`*, because that activation
+is what decrypts the secrets.
+
+That ordering matters more than it looks: `croc` and `rbw` are installed *by*
+the rebuild, so on a machine that hasn't rebuilt yet, neither exists — and it
+can't rebuild until the key is there. **Run them straight from nixpkgs
+instead**, which needs nothing installed:
 
 ```sh
-croc send ~/.config/sops/age/keys.txt   # from a machine that has it
+# from a machine that already has the key:
+nix shell nixpkgs#croc -c croc send ~/.config/sops/age/keys.txt
 
-# ...or, when no machine has it, out of Bitwarden (rbw, see bitwarden.nix)
-rbw login && rbw unlock
+# on the new machine — receive it:
+nix shell nixpkgs#croc -c croc <code>
+
+# ...or, if no machine has it, pull it out of Bitwarden:
+nix shell nixpkgs#rbw -c sh -c '
+  rbw config set email marcussanchez031@gmail.com
+  rbw login
+  rbw get --full "sops age key — nix-config (all machines)"
+'
+
+# either way, land it and lock it down:
 mkdir -p ~/.config/sops/age
-rbw get --full "sops age key — nix-config (all machines)" \
-  | grep -A99 '^# created:' > ~/.config/sops/age/keys.txt
-
+$EDITOR ~/.config/sops/age/keys.txt      # paste all three lines
 chmod 600 ~/.config/sops/age/keys.txt
 ```
+
+On a stock NixOS-WSL image flakes are still off, so prefix those with
+`nix --extra-experimental-features 'nix-command flakes' shell ...` until the
+first switch enables them permanently.
 
 One key is shared by every machine — they all get the same credentials
 anyway, and since the repo is public a leaked key means rotating at
