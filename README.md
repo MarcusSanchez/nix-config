@@ -79,8 +79,6 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     comma.nix              comma + prebuilt nix-index database
     secrets.nix            user-side wiring for /run/secrets: FLY_API_TOKEN
                            export + atuin's one-time login
-    ssh.nix                `ssh mac` / `ssh nixos` aliases carrying the
-                           right per-machine username
     bitwarden.nix          rbw — Bitwarden from the terminal; where the
                            personal (editing) age key is backed up
     goroot.nix             ~/.toolchains/go -> the store, a stable GOROOT
