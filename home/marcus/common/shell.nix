@@ -26,10 +26,9 @@
     atuin = {
       enable = true;
       settings = {
-        # The E2E key comes from sops (modules/nixos/secrets.nix) rather
-        # than being written by `atuin login`. NOTE: the file must have no
-        # trailing newline or atuin fails with "failed to parse header
-        # value" — sops writes the value verbatim, so keep it one line.
+        # E2E key comes from sops (modules/nixos/secrets.nix), not from
+        # whatever `atuin login` last wrote. NOTE: no trailing newline in
+        # the secret or atuin fails with "failed to parse header value".
         key_path = "/run/secrets/atuin_key";
 
         # With sync on, history is pooled across machines — but a mac
