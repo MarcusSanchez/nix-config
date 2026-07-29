@@ -11,6 +11,15 @@
     package = null; # installed as a brew cask
 
     settings = {
+      # Ghostty sets TERM=xterm-ghostty, which remote hosts generally don't
+      # have — the line editor then redraws wrong and typing comes out
+      # duplicated. ssh-terminfo makes Ghostty install its terminfo on the
+      # remote on first connect (cached; `ghostty +ssh-cache` inspects it);
+      # ssh-env falls back to a sane TERM where it can't. modules/nixos/
+      # terminfo.nix fixes this from the other side for our own machines,
+      # so this is what covers everything else.
+      shell-integration-features = "ssh-env,ssh-terminfo";
+
       font-family = "JetBrainsMono Nerd Font Mono";
       window-title-font-family = "JetBrainsMono Nerd Font Mono";
       font-size = 17;
