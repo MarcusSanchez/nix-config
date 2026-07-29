@@ -42,6 +42,14 @@
         mode = "0600";
       };
 
+      # Holds an ORG token (`fly tokens create org`) under its
+      # access_token key — NOT what `fly auth login` leaves behind, which
+      # is a session macaroon carrying a 10-minute discharge that flyctl
+      # re-issues and that dies with the session, so a stored copy goes
+      # stale. An org token is static, and authenticates as a token
+      # identity (…@tokens.fly.io) rather than as the user.
+      fly_config = { };
+
       # atuin is the odd one out: it keeps its session as a `hub_session`
       # row inside meta.db, not a file, so there's nothing to drop into
       # place. Instead it logs itself in below from these three. (Its
@@ -53,16 +61,22 @@
     };
   };
 
-  # flyctl is deliberately NOT here. What `fly auth login` produces is a
-  # session macaroon, not a static token: it carries a 10-minute
-  # discharge that flyctl silently re-issues, and the whole credential is
-  # replaced whenever the session is invalidated. Storing a snapshot of
-  # it means shipping something that quietly goes stale — and there's no
-  # good way to install one anyway. `fly auth login -t <token>` lists the
-  # flag in --help but ignores it and opens a browser (tested
-  # 2026-07-29); FLY_API_TOKEN works but pins the same perishable value.
-  # So flyctl keeps its own ~/.fly/config.yml and a new machine runs
-  # `fly auth login` once, which is the one exception to no-CLI-logins.
+  # flyctl reads FLY_API_TOKEN ahead of its config file, so this
+  # authenticates without us ever touching ~/.fly/config.yml — that file
+  # is flyctl's own scratch space (wireguard peer state, refreshed
+  # session tokens), and owning it means clobbering those writes on every
+  # activation. Installing the token via `fly auth login -t <token>`
+  # isn't an option either: the flag is listed in --help but ignored, and
+  # it opens a browser instead (tested 2026-07-29).
+  #
+  # Sourced by every shell via hm-session-vars.sh; guarded so a machine
+  # that hasn't decrypted yet starts without the variable rather than
+  # erroring.
+  home.sessionVariablesExtra = ''
+    if [ -r "${config.sops.secrets.fly_config.path}" ]; then
+      export FLY_API_TOKEN="$(sed -n 's/^access_token: //p' "${config.sops.secrets.fly_config.path}")"
+    fi
+  '';
 
   # Hands atuin its credentials through its own login flag, and skips
   # entirely once the machine is authenticated. Never fails the rebuild:
