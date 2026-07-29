@@ -178,9 +178,12 @@ first rebuild, and the hostname the config then sets, which is what makes bare
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
 
-> **Nothing to pre-place.** This machine generates its own SSH host key on
-> first boot and decrypts with that; you just add its public key to
-> `.sops.yaml` afterwards. See [Secrets](#secrets).
+> **Nothing to pre-place, and one expected error.** This machine generates its
+> own SSH host key and decrypts with that, so no key is copied here. Until its
+> public key is registered, the rebuild below prints
+> `Activation script snippet 'setupSecrets' failed` — harmless: activation
+> records it and carries on, so packages install and the host key gets
+> created. Register it afterwards per [Secrets](#secrets) and rebuild again.
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
@@ -290,10 +293,12 @@ Home Manager's session variables only land in a shell started after it. Determin
 Nix owns the daemon, so nix-darwin runs with `nix.enable = false`; daemon
 tweaks go in /etc/nix/nix.custom.conf.
 
-The age key must be at `~/.config/sops/age/keys.txt` **before** the step-3
-activation, or it fails on the secrets — see [Secrets](#secrets). After that
-the only thing left is opening `nvim` once (and `fly auth login` if you
-use fly); `gh` and `atuin` come up already authenticated.
+Until this mac's host key is registered, step 3 prints
+`Activation script snippet 'setupSecrets' failed` — harmless: activation
+records it and carries on. macOS generates `/etc/ssh/ssh_host_ed25519_key`
+itself, so there's nothing to create; register it per [Secrets](#secrets)
+and switch again. After that the only thing left is opening `nvim` once —
+`gh`, `flyctl` and `atuin` all come up authenticated.
 
 Leave `home.stateVersion` at `"25.05"` and darwin's `system.stateVersion`
 at `6` even on newer installs — they are compatibility markers, not the
@@ -330,27 +335,13 @@ and push as normal.
 
 ### Adding a new machine
 
-**Step 1 — on the NEW machine**, clone and rebuild once. That rebuild will
-report `Activation script snippet 'setupSecrets' failed` — expected, since
-this machine isn't a recipient yet. Activation continues regardless: every
-other snippet runs, packages install, and sshd generates the host key we're
-about to use.
-
-```sh
-git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
-sudo ln -sfn ~/nix-config /etc/nixos
-sudo nixos-rebuild switch --flake /etc/nixos     # or: nh darwin switch
-```
-
-Then print its age public key — a *public* key, safe to paste anywhere:
+**Step 1 — on the NEW machine**, once it's been through the bootstrap above,
+print its age public key. It's a *public* key: safe to paste anywhere.
 
 ```sh
 sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 # -> age1abc123...
 ```
-
-(On a Mac, macOS generates the host key rather than sshd; if it's missing,
-toggle System Settings > General > Sharing > Remote Login once.)
 
 **Step 2 — on a machine that ALREADY decrypts** (any existing one), edit
 `~/nix-config/.sops.yaml`. The new key goes in **two** places — define it under
