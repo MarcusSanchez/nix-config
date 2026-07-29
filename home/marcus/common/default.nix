@@ -13,6 +13,7 @@
     ./comma.nix
     ./goroot.nix
     ./secrets.nix
+    ./ssh.nix
     ./bitwarden.nix
   ];
 
