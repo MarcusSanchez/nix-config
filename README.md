@@ -168,11 +168,26 @@ first rebuild, and the hostname the config then sets, which is what makes bare
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
 
-> **The age key has to be in place before the *second* rebuild.** Once
-> `marcus` exists, `home/marcus/common/secrets.nix` decrypts credentials at
-> every activation, and with no key that step fails the rebuild with
-> `age: no identity matched any of the recipients`. Land it first — see
-> [Secrets](#secrets) below.
+> **There's a chicken-and-egg with the age key.** It has to live at
+> `/home/marcus/.config/sops/age/keys.txt`, but `marcus` doesn't exist until
+> the first rebuild creates them — and that same rebuild runs the decryption.
+> Two ways through, both fine:
+>
+> - **Pre-place it** as the stock `nixos` user, before the first rebuild (the
+>   uid/gid are pinned in the config, so this is safe):
+>   ```sh
+>   sudo install -d -m 700 -o 1000 -g 100 /home/marcus/.config/sops/age
+>   # write the key to /home/marcus/.config/sops/age/keys.txt, then:
+>   sudo chown 1000:100 /home/marcus/.config/sops/age/keys.txt
+>   sudo chmod 600 /home/marcus/.config/sops/age/keys.txt
+>   ```
+> - **Or let the first rebuild fail.** It exits 4 with
+>   `home-manager-marcus.service failed`, but the system generation *does*
+>   activate and `marcus` is created — packages, dotfiles and links all land.
+>   Only the secrets are missing. Place the key as `marcus` afterwards and
+>   rebuild; the second one exits 0.
+>
+> See [Secrets](#secrets) for how to get the key onto the machine.
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
@@ -306,8 +321,13 @@ sops updatekeys secrets/secrets.yaml   # after adding a key to .sops.yaml
 
 **The one manual step on a new machine** is the private key, which by
 definition can't live in the repo. It has to be at `~/.config/sops/age/keys.txt`
-(mode 600) *before the first activation as `marcus`*, because that activation
-is what decrypts the secrets.
+(mode 600) before an activation can decrypt anything — see the bootstrap
+section above for the ordering, since `marcus`'s home doesn't exist until the
+first rebuild.
+
+A machine without it isn't bricked, just uncredentialed: activation reports
+`home-manager-marcus.service failed`, `nixos-rebuild` exits 4, and everything
+except the secrets still lands. Add the key, rebuild, done.
 
 That ordering matters more than it looks: `croc` and `rbw` are installed *by*
 the rebuild, so on a machine that hasn't rebuilt yet, neither exists — and it
