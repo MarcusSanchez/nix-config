@@ -101,7 +101,12 @@
         precmd() { echo }
 
         bindkey '^I' autosuggest-accept
-        bindkey "$terminfo[kcbt]" expand-or-complete
+        # kcbt (back-tab) is undefined on terminals that don't report it —
+        # notably over ssh, where the client's TERM may be missing or
+        # unknown to the remote terminfo db. Binding an empty sequence
+        # errors out with "cannot bind to an empty key sequence" on every
+        # login, so only bind it when the terminal actually has one.
+        [[ -n "$terminfo[kcbt]" ]] && bindkey "$terminfo[kcbt]" expand-or-complete
       '';
     };
   };

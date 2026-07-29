@@ -11,6 +11,7 @@
     ./packages.nix
     ./nix-ld.nix
     ./ssh.nix
+    ./terminfo.nix
     ./secrets.nix
     ./keyring.nix
     ./users.nix
