@@ -225,9 +225,11 @@ name you chose, so bare `nh os switch` resolves the right config with no
 
 1. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
 
-`gh` and `flyctl` are already authenticated — sops-nix put their
-credentials in place during activation. That's the point of it: no
-`auth login` on any machine, ever.
+`gh` and `atuin` are already authenticated — sops-nix put their
+credentials in place during activation. The one exception is
+`fly auth login`: what flyctl issues is a session macaroon that
+re-discharges and is replaced when the session ends, so a stored copy
+goes stale rather than staying useful.
 
 Rust installs itself via the activation hook on either box. The only thing
 `nixos-lite` lacks is the Windows dotfile syncing — by design, since it's
@@ -282,8 +284,8 @@ tweaks go in /etc/nix/nix.custom.conf.
 
 The age key must be at `~/.config/sops/age/keys.txt` **before** the step-3
 activation, or it fails on the secrets — see [Secrets](#secrets). After that
-the only thing left is opening `nvim` once; `gh` and `flyctl` come up already
-authenticated.
+the only thing left is opening `nvim` once (and `fly auth login` if you
+use fly); `gh` and `atuin` come up already authenticated.
 
 Leave `home.stateVersion` at `"25.05"` and darwin's `system.stateVersion`
 at `6` even on newer installs — they are compatibility markers, not the
@@ -351,7 +353,7 @@ first switch enables them permanently.
 
 One key is shared by every machine — they all get the same credentials
 anyway, and since the repo is public a leaked key means rotating at
-GitHub/fly regardless, so per-machine keys would add re-keying without
+GitHub regardless, so per-machine keys would add re-keying without
 shrinking the blast radius. It's backed up in Bitwarden; losing it costs
 only the effort of reissuing tokens, since old ciphertext is inert to
 anyone who doesn't have it.

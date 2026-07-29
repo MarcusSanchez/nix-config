@@ -42,11 +42,6 @@
         mode = "0600";
       };
 
-      fly_config = {
-        path = "${config.home.homeDirectory}/.fly/config.yml";
-        mode = "0600";
-      };
-
       # atuin is the odd one out: it keeps its session as a `hub_session`
       # row inside meta.db, not a file, so there's nothing to drop into
       # place. Instead it logs itself in below from these three. (Its
@@ -58,17 +53,38 @@
     };
   };
 
-  # Log in only when this machine isn't already — atuin then writes its
-  # own session, and later activations no-op. Never fails the rebuild:
-  # offline is a normal state and sync catches up on its own.
+  # flyctl is deliberately NOT here. What `fly auth login` produces is a
+  # session macaroon, not a static token: it carries a 10-minute
+  # discharge that flyctl silently re-issues, and the whole credential is
+  # replaced whenever the session is invalidated. Storing a snapshot of
+  # it means shipping something that quietly goes stale — and there's no
+  # good way to install one anyway. `fly auth login -t <token>` lists the
+  # flag in --help but ignores it and opens a browser (tested
+  # 2026-07-29); FLY_API_TOKEN works but pins the same perishable value.
+  # So flyctl keeps its own ~/.fly/config.yml and a new machine runs
+  # `fly auth login` once, which is the one exception to no-CLI-logins.
+
+  # Hands atuin its credentials through its own login flag, and skips
+  # entirely once the machine is authenticated. Never fails the rebuild:
+  # offline is a normal state and the next activation retries.
   #
+  # entryAfter "reloadSystemd", NOT "sops-nix": the sops-nix activation
+  # entry only asks systemd to restart the unit, and when the user daemon
+  # isn't running from the activation context it skips — the secrets are
+  # actually decrypted later, when reloadSystemd starts sops-nix.service.
+  # Ordering after sops-nix ran this against secrets that didn't exist
+  # yet. The readability guard makes that failure mode explicit instead
+  # of surfacing as a bogus "stale password".
+
   # atuin_key is the one credential here that can't be reissued: it's the
-  # E2E key for the synced history, so losing every copy makes the server
+  # E2E key for the synced history, so losing every copy leaves the server
   # side permanently unreadable. This is its backup as much as its
   # deployment.
-  home.activation.atuinLogin = lib.hm.dag.entryAfter [ "sops-nix" ] ''
+  home.activation.atuinLogin = lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
     atuin=${config.programs.atuin.package}/bin/atuin
-    if ! timeout 10 "$atuin" status 2>/dev/null | grep -q '^Username:'; then
+    if [ ! -r "${config.sops.secrets.atuin_password.path}" ]; then
+      echo "atuin: secrets not decrypted yet — skipping, next activation will do it" >&2
+    elif ! timeout 10 "$atuin" status 2>/dev/null | grep -q '^Username:'; then
       echo "atuin: not logged in on this machine — logging in" >&2
       # -p puts the password in argv for the length of one exec; these are
       # single-user machines, and atuin offers no stdin or env alternative
