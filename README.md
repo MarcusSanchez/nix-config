@@ -323,21 +323,27 @@ mkdir -p ~/.config/sops/age
 nix shell nixpkgs#croc -c croc --yes --overwrite --out ~/.config/sops/age <code>
 
 # ...or, if no machine has it, straight out of Bitwarden — `-f notes`
-# prints the note body alone, so it can be redirected as-is:
+# prints the note body alone, so it redirects as-is (verified: the extra
+# trailing newline it adds is ignored by age):
 mkdir -p ~/.config/sops/age
 nix shell nixpkgs#rbw -c sh -c '
   rbw config set email marcussanchez031@gmail.com
   rbw login
-  rbw get -f notes "sops age key — nix-config (all machines)"
+  rbw get -f notes "sops age key - nix-config (all machines)"
 ' > ~/.config/sops/age/keys.txt
 
 chmod 600 ~/.config/sops/age/keys.txt    # don't trust the transferred mode
 ```
 
-If that comes out empty or oddly wrapped, `rbw get -l "<name>"` lists the
-entry's fields and `--raw` gives JSON to pick from. Only the
-`AGE-SECRET-KEY-1…` line actually matters — the two `#` comments are
-ignored by age, so `| grep '^AGE-SECRET-KEY-'` is a safe fallback.
+Bitwarden's 2FA has to be a factor a terminal can *type* — an emailed PIN
+or an authenticator code. With none configured, Bitwarden falls back to
+new-device verification, which rbw doesn't implement and which fails as an
+opaque `api request returned error: 400`. Passkeys and WebAuthn can't work
+here at all: no browser, no authenticator.
+
+If the note ever comes out empty, `rbw get -l "<name>"` lists that entry's
+fields. Only the `AGE-SECRET-KEY-1…` line matters — age ignores the two `#`
+comments — so `| grep '^AGE-SECRET-KEY-'` is a safe fallback.
 
 On a stock NixOS-WSL image flakes are still off, so prefix those with
 `nix --extra-experimental-features 'nix-command flakes' shell ...` until the
