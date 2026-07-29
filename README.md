@@ -24,7 +24,9 @@ what `wsl -d <name>` takes, and NixOS never sees it.
 ## Layout
 
 ```
-flake.nix                  Inputs + both host wirings
+flake.nix                  Inputs + every host wiring
+.sops.yaml                 Which age keys can decrypt secrets/
+secrets/secrets.yaml       Credentials, age-encrypted (safe to push)
 hosts/
   wsl/default.nix          WSL dev host: hostname, home entry point, stateVersion
   wsl-lite/default.nix     WSL headless host: same, different home entry point
@@ -67,6 +69,9 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     git.nix                Git identity + gh
     catppuccin.nix         Catppuccin Mocha theming
     comma.nix              comma + prebuilt nix-index database
+    secrets.nix            sops-nix: decrypts secrets/ at activation and
+                           drops each credential where its CLI expects it,
+                           so no machine ever runs a `... auth login`
     goroot.nix             ~/.toolchains/go -> the store, a stable GOROOT
                            path for JetBrains to point at
     dotfiles/              shared UI-managed configs, one flat dir:
@@ -161,6 +166,12 @@ first rebuild, and the hostname the config then sets, which is what makes bare
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
 
+> **The age key has to be in place before the *second* rebuild.** Once
+> `marcus` exists, `home/marcus/common/secrets.nix` decrypts credentials at
+> every activation, and with no key that step fails the rebuild with
+> `age: no identity matched any of the recipients`. Land it first — see
+> [Secrets](#secrets) below.
+
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
 run one of these (WSL refuses a `--name` that already exists on this PC):
@@ -210,9 +221,11 @@ wsl -d nixos-lite
 name you chose, so bare `nh os switch` resolves the right config with no
 `#name`. What's left is per-machine state:
 
-1. `gh auth login` (gh is the git credential helper — needed to push)
-2. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
-3. `atuin login` if syncing shell history
+1. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
+
+`gh` and `flyctl` are already authenticated — sops-nix put their
+credentials in place during activation. That's the point of it: no
+`auth login` on any machine, ever.
 
 Rust installs itself via the activation hook on either box. The only thing
 `nixos-lite` lacks is the Windows dotfile syncing — by design, since it's
@@ -263,12 +276,50 @@ sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 Then open one more terminal — that activation replaced your login shell, and
 Home Manager's session variables only land in a shell started after it. Determinate
 Nix owns the daemon, so nix-darwin runs with `nix.enable = false`; daemon
-tweaks go in /etc/nix/nix.custom.conf. Then the same per-machine state as WSL:
-`gh auth login`, open `nvim`, `atuin login`.
+tweaks go in /etc/nix/nix.custom.conf.
+
+The age key must be at `~/.config/sops/age/keys.txt` **before** the step-3
+activation, or it fails on the secrets — see [Secrets](#secrets). After that
+the only thing left is opening `nvim` once; `gh` and `flyctl` come up already
+authenticated.
 
 Leave `home.stateVersion` at `"25.05"` and darwin's `system.stateVersion`
 at `6` even on newer installs — they are compatibility markers, not the
 running version.
+
+## Secrets
+
+Credentials live age-encrypted in `secrets/secrets.yaml`, which is why this
+repo can be public. sops-nix decrypts them at every activation and every
+boot, writing each one where its CLI looks for it — so no machine ever runs
+`gh auth login`. Only the values are encrypted; the keys stay readable, so
+diffs show *that* a credential changed without showing it.
+
+```sh
+sops secrets/secrets.yaml        # edit in $EDITOR, re-encrypts on save
+sops updatekeys secrets/secrets.yaml   # after adding a key to .sops.yaml
+```
+
+**The one manual step on a new machine** is the private key, which by
+definition can't live in the repo. Put it at `~/.config/sops/age/keys.txt`,
+mode 600, *before the first activation as `marcus`*:
+
+```sh
+croc send ~/.config/sops/age/keys.txt   # from a machine that has it
+# ...or paste it out of Bitwarden
+chmod 600 ~/.config/sops/age/keys.txt
+```
+
+One key is shared by every machine — they all get the same credentials
+anyway, and since the repo is public a leaked key means rotating at
+GitHub/fly regardless, so per-machine keys would add re-keying without
+shrinking the blast radius. It's backed up in Bitwarden; losing it costs
+only the effort of reissuing tokens, since old ciphertext is inert to
+anyone who doesn't have it.
+
+Losing it is cheap. **Leaking it is not** — git history is permanent, so
+anyone with the key can decrypt every version ever committed. That means
+revoking at the provider, not re-encrypting.
 
 ## Adding things
 

@@ -12,6 +12,7 @@
     ./catppuccin.nix
     ./comma.nix
     ./goroot.nix
+    ./secrets.nix
   ];
 
   # Do not change after initial install.

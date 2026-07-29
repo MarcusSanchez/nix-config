@@ -22,7 +22,29 @@
 
   programs = {
     zoxide.enable = true;
-    atuin.enable = true;
+
+    atuin = {
+      enable = true;
+      settings = {
+        # With sync on, history is pooled across machines — but a mac
+        # command surfacing in a WSL Ctrl-R is just noise. Default the
+        # search to this host and cycle out to global with another Ctrl-R
+        # inside the search UI when you actually want it. Hostnames are
+        # distinct per box, so the split is exact rather than heuristic.
+        # (The inline grey suggestion is zsh-autosuggestions reading the
+        # local $HISTFILE — atuin never feeds it, synced or not.)
+        filter_mode = "host";
+        # up-arrow behaves like plain shell history: this session only
+        filter_mode_shell_up_key_binding = "session";
+        # sync ships history end-to-end encrypted, but a command with a
+        # secret pasted inline still leaves the machine — don't record those
+        history_filter = [
+          "(TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|APIKEY|API_KEY)=[^ ]"
+          "AGE-SECRET-KEY-"
+          "^\\s*(sops|age|age-keygen|atuin (login|register))\\b"
+        ];
+      };
+    };
 
     # Auto-load per-project dev shells: a project with an .envrc saying
     # `use flake` gets its devShell on cd-in, dropped on cd-out.

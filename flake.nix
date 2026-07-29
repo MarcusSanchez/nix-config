@@ -28,6 +28,12 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # decrypts secrets/ into place at activation, so CLIs come up already
+    # authenticated — see home/marcus/common/secrets.nix
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
