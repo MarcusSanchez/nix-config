@@ -23,9 +23,15 @@
     enable = true;
     settings = {
       email = "marcussanchez031@gmail.com";
-      # pinentry-curses, not a GUI one: the WSL boxes are headless, and a
-      # graphical prompt there just fails to draw
-      pinentry = pkgs.pinentry-curses;
+      # Per platform, because rbw-agent is reached differently on each.
+      # WSL is headless, so a graphical prompt just fails to draw — curses
+      # there, invoked from the terminal the agent can still reach. On the
+      # mac the agent is a detached daemon with no controlling terminal, so
+      # pinentry-curses has no TTY it owns: it spins at 100% CPU forever
+      # retrying a read that returns EIO (and `--timeout 0` means it never
+      # gives up), one stuck process per terminal that triggered an unlock.
+      # A native Cocoa dialog needs no TTY.
+      pinentry = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
       lock_timeout = 3600;
     };
   };
