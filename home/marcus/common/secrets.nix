@@ -43,9 +43,15 @@
       echo "atuin: secrets not decrypted — skipping login" >&2
     elif ! timeout 10 "$atuin" status 2>/dev/null | grep -q '^Username:'; then
       echo "atuin: not logged in on this machine — logging in" >&2
+      # </dev/null is load-bearing: even with -u and -p, `atuin login`
+      # still prompts "enter encryption key [blank to use existing key
+      # file]". With no stdin it hangs until the timeout kills it, which
+      # is why this silently did nothing on the mac. Feeding it EOF takes
+      # the blank default — i.e. the key from key_path, which is the sops
+      # secret.
       timeout 30 "$atuin" login \
         -u "$(cat /run/secrets/atuin_username)" \
-        -p "$(cat /run/secrets/atuin_password)" >/dev/null 2>&1 \
+        -p "$(cat /run/secrets/atuin_password)" </dev/null >/dev/null 2>&1 \
         || echo "atuin: login failed (offline, or the stored password is stale)" >&2
     fi
   '';
