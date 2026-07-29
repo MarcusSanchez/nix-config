@@ -125,14 +125,12 @@ wsl -d nixos-lite
 
 **First login as marcus.** `hostname` now prints the name you chose, so bare
 `nh os switch` resolves with no `#name`. The neovim config is already cloned to
-`~/.config/nvim`. Two things left:
+`~/.config/nvim`. The only thing left is to open `nvim` once, so lazy.nvim
+installs plugins from `lazy-lock.json`.
 
-1. Open `nvim` once so lazy.nvim installs plugins from `lazy-lock.json`
-2. `fly auth login` — flyctl issues a session macaroon that's replaced when the
-   session ends, so a stored copy goes stale rather than staying useful
-
-`gh` and `atuin` come up authenticated; sops-nix put their credentials in place
-during activation.
+`gh`, `flyctl` and `atuin` all come up authenticated — sops-nix puts their
+credentials in place during activation, and flyctl picks up `FLY_API_TOKEN`
+from the decrypted secret.
 
 ## Bootstrapping a new Mac
 
