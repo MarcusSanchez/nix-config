@@ -5,6 +5,7 @@
   imports = [
     ../common
     ./nix.nix
+    ./secrets.nix
     ./homebrew.nix
     ./users.nix
     ./macos.nix

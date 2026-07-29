@@ -21,8 +21,8 @@
 keys:
   - &marcus age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
   - &nixos age1dqh47zgvsvqaw734wf2kmad42s8pscyfvckdhnlwhce6p3rlfcdqx7m2dn
+  - &mac age1nux0jf7fgvca80e4hdh2veq3mgj9j7a4zcz5asgld5tgj05r752qnhxtzv
   # - &nixos-lite ...   # add when that instance is built
-  # - &mac ...          # macOS generates /etc/ssh/ssh_host_ed25519_key itself
 
 creation_rules:
   - path_regex: secrets/[^/]+\.yaml$
@@ -30,3 +30,4 @@ creation_rules:
       - age:
           - *marcus
           - *nixos
+          - *mac
