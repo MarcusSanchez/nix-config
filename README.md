@@ -316,20 +316,20 @@ instead**, which needs nothing installed:
 # from a machine that already has the key:
 nix shell nixpkgs#croc -c croc send ~/.config/sops/age/keys.txt
 
-# on the new machine — receive it:
-nix shell nixpkgs#croc -c croc <code>
+# on the new machine — --out lands it straight at the right path, so
+# there's nothing to move afterwards (flags go BEFORE the code):
+mkdir -p ~/.config/sops/age
+nix shell nixpkgs#croc -c croc --yes --overwrite --out ~/.config/sops/age <code>
 
-# ...or, if no machine has it, pull it out of Bitwarden:
+# ...or, if no machine has it, pull it out of Bitwarden and paste the
+# three lines into that file by hand:
 nix shell nixpkgs#rbw -c sh -c '
   rbw config set email marcussanchez031@gmail.com
   rbw login
   rbw get --full "sops age key — nix-config (all machines)"
 '
 
-# either way, land it and lock it down:
-mkdir -p ~/.config/sops/age
-$EDITOR ~/.config/sops/age/keys.txt      # paste all three lines
-chmod 600 ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt    # don't trust the transferred mode
 ```
 
 On a stock NixOS-WSL image flakes are still off, so prefix those with
