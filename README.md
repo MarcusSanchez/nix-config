@@ -47,6 +47,8 @@ modules/nixos/             WSL system layer (one concern per file)
   secrets.nix              sops-nix (system module): decrypts secrets/ with
                            the host key into /run/secrets
   keyring.nix              gnome-keyring as the Secret Service (secretspec)
+  tailscale.nix            NOT in the aggregator — imported by hosts/wsl only,
+                           since one WSL distro per PC can be a tailnet node
   users.nix                User accounts + login shell
   wsl.nix                  NixOS-WSL integration
   home-manager.nix         HM bridge → each host's homeEntryPoint
@@ -103,6 +105,7 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     ghostty.nix            Ghostty config (app itself is a brew cask)
     nix.nix                user-level GC launchd agent + NH_FLAKE
     toolchains.nix         rustup first-run bootstrap
+    manual.nix             HM's own manpages off — they warn on every eval
     dotfiles.nix           per-file symlinks into common/dotfiles/:
                            ~/.config/zed/{settings,keymap}.json, ~/.ideavimrc
     auto-commit.nix        commits + pushes common/dotfiles drift on
@@ -395,7 +398,7 @@ not re-encrypting.
 ## Adding things
 
 - A CLI tool for both machines → `modules/common/packages.nix` (or
-  `home/marcus/packages.nix` if it's user-scoped)
+  `home/marcus/common/packages.nix` if it's user-scoped)
 - A Linux-only or mac-only system package → that platform's `packages.nix`
   (darwin currently has none — create the file if one appears). Anything in
   `modules/nixos/` lands on *both* WSL hosts; per-host differences live in
