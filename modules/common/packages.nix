@@ -50,9 +50,12 @@
     deadnix
 
     # `sops secrets/secrets.yaml` to edit credentials; age is what it
-    # encrypts to (see home/marcus/common/secrets.nix)
+    # encrypts to, and ssh-to-age converts a machine's SSH host key into
+    # the age identity that decrypts for it — the one command onboarding
+    # a new machine needs (see the README's Secrets section)
     sops
     age
+    ssh-to-age
 
     # zls is built against this same nixpkgs zig, so the compiler and
     # language server stay on matching versions automatically

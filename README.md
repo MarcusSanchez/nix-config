@@ -33,7 +33,7 @@ hosts/
   mac/default.nix          Mac host: hostname, platform, stateVersion
 modules/common/            Shared system layer (options must exist on both platforms)
   packages.nix             Dev toolchains for every machine (go, rustup,
-                           zig+zls, node, python+uv, nix LSP, ...)
+                           zig+zls, node, python+uv, nix LSP, sops, ...)
   claude-code.nix          Claude Code (claude-code-nix overlay)
 modules/nixos/             WSL system layer (one concern per file)
   default.nix              Aggregator — imports ../common + everything below;
@@ -330,19 +330,27 @@ and push as normal.
 
 ### Adding a new machine
 
-**Step 1 — on the NEW machine**, print its age public key. This is a *public*
-key: safe to paste anywhere.
+**Step 1 — on the NEW machine**, clone and rebuild once. That rebuild will
+report `Activation script snippet 'setupSecrets' failed` — expected, since
+this machine isn't a recipient yet. Activation continues regardless: every
+other snippet runs, packages install, and sshd generates the host key we're
+about to use.
 
 ```sh
-nix shell nixpkgs#ssh-to-age -c sh -c \
-  'sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
+sudo ln -sfn ~/nix-config /etc/nixos
+sudo nixos-rebuild switch --flake /etc/nixos     # or: nh darwin switch
+```
+
+Then print its age public key — a *public* key, safe to paste anywhere:
+
+```sh
+sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 # -> age1abc123...
 ```
 
-(If `/etc/ssh/ssh_host_ed25519_key.pub` doesn't exist yet, the machine hasn't
-rebuilt yet — do that first, sshd generates it. On a Mac, macOS generates it;
-if it's missing, toggle System Settings > General > Sharing > Remote Login
-once.)
+(On a Mac, macOS generates the host key rather than sshd; if it's missing,
+toggle System Settings > General > Sharing > Remote Login once.)
 
 **Step 2 — on a machine that ALREADY decrypts** (any existing one), edit
 `~/nix-config/.sops.yaml`. The new key goes in **two** places — define it under
