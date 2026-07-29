@@ -72,6 +72,8 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     secrets.nix            sops-nix: decrypts secrets/ at activation and
                            drops each credential where its CLI expects it,
                            so no machine ever runs a `... auth login`
+    bitwarden.nix          rbw — Bitwarden from the terminal; where the
+                           age key is stored when no machine has it
     goroot.nix             ~/.toolchains/go -> the store, a stable GOROOT
                            path for JetBrains to point at
     dotfiles/              shared UI-managed configs, one flat dir:
@@ -306,7 +308,13 @@ mode 600, *before the first activation as `marcus`*:
 
 ```sh
 croc send ~/.config/sops/age/keys.txt   # from a machine that has it
-# ...or paste it out of Bitwarden
+
+# ...or, when no machine has it, out of Bitwarden (rbw, see bitwarden.nix)
+rbw login && rbw unlock
+mkdir -p ~/.config/sops/age
+rbw get --full "sops age key — nix-config (all machines)" \
+  | grep -A99 '^# created:' > ~/.config/sops/age/keys.txt
+
 chmod 600 ~/.config/sops/age/keys.txt
 ```
 

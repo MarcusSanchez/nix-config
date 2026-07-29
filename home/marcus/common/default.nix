@@ -13,6 +13,7 @@
     ./comma.nix
     ./goroot.nix
     ./secrets.nix
+    ./bitwarden.nix
   ];
 
   # Do not change after initial install.
