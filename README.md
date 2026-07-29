@@ -298,51 +298,99 @@ running version.
 
 ## Secrets
 
-Credentials live age-encrypted in `secrets/secrets.yaml`, which is why this
-repo can be public. sops-nix decrypts them at every activation and every
-boot, writing each one where its CLI looks for it — so no machine ever runs
-`gh auth login`. Only the values are encrypted; the keys stay readable, so
-diffs show *that* a credential changed without showing it.
+Credentials live age-encrypted in `secrets/secrets.yaml` (in this repo), which
+is why the repo can be public. sops-nix decrypts them at every activation and
+every boot into `/run/secrets/`, and each tool is pointed at its file — so no
+machine ever runs `gh auth login`. Only the *values* are encrypted; the keys
+stay readable, so a diff shows *that* a credential changed without showing it.
+
+**Every machine decrypts using its own SSH host key**
+(`/etc/ssh/ssh_host_ed25519_key`, which is why `modules/nixos/ssh.nix` runs
+sshd). No private key is ever copied between machines. Two files control this,
+both at the root of this repo:
+
+| file | what it is |
+|---|---|
+| `~/nix-config/.sops.yaml` | the list of keys allowed to decrypt |
+| `~/nix-config/secrets/secrets.yaml` | the encrypted credentials |
+
+### Editing a credential
+
+From anywhere inside the repo, on a machine that can already decrypt:
 
 ```sh
-sops secrets/secrets.yaml        # edit in $EDITOR, re-encrypts on save
-sops updatekeys secrets/secrets.yaml   # after adding a key to .sops.yaml
+sops ~/nix-config/secrets/secrets.yaml
 ```
 
-**Each machine decrypts with its own identity**, derived from its SSH host
-key (`/etc/ssh/ssh_host_ed25519_key` — which is why `modules/nixos/ssh.nix`
-enables sshd, bound to loopback). No private key is ever copied between
-machines, and there is no bootstrap ordering problem: a fresh box generates
-its own key on first boot.
+It opens the decrypted file in `$EDITOR` and re-encrypts when you save. Commit
+and push as normal.
 
-Onboarding a machine means adding its **public** key. On the new machine:
+### Adding a new machine
+
+**Step 1 — on the NEW machine**, print its age public key. This is a *public*
+key: safe to paste anywhere.
 
 ```sh
 nix shell nixpkgs#ssh-to-age -c sh -c \
   'sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+# -> age1abc123...
 ```
 
-Paste that `age1...` into `.sops.yaml`, then from a machine that can already
-decrypt:
+(If `/etc/ssh/ssh_host_ed25519_key.pub` doesn't exist yet, the machine hasn't
+rebuilt yet — do that first, sshd generates it. On a Mac, macOS generates it;
+if it's missing, toggle System Settings > General > Sharing > Remote Login
+once.)
+
+**Step 2 — on a machine that ALREADY decrypts** (any existing one), edit
+`~/nix-config/.sops.yaml`. The new key goes in **two** places — define it under
+`keys:`, then reference it under `creation_rules:`:
+
+```yaml
+keys:
+  - &marcus age17fldh0l...          # your personal editing key
+  - &nixos age1dqh47zg...
+  - &mac age1nux0jf7...
+  - &lite age1abc123...             # <- 1. add here, pick any name
+
+creation_rules:
+  - path_regex: secrets/[^/]+\.yaml$
+    key_groups:
+      - age:
+          - *marcus
+          - *nixos
+          - *mac
+          - *lite                   # <- 2. and reference it here
+```
+
+**Step 3 — same machine**, re-encrypt so the new key can open the file, then
+push:
 
 ```sh
-sops updatekeys secrets/secrets.yaml   # re-wraps the data key for the new host
-git commit && git push
+cd ~/nix-config
+sops updatekeys secrets/secrets.yaml
+git add -A && git commit -m "secrets: add <machine>" && git push
 ```
 
-The new machine rebuilds and has every credential. `gh` reads a rendered
-`hosts.yml`, `atuin` gets its key via `key_path` (and logs itself in once for
-the session, which lives in sqlite and can't be placed as a file), and
-`flyctl` picks up `FLY_API_TOKEN` from the shell.
+**Step 4 — back on the new machine:**
 
-The personal age key at `~/.config/sops/age/keys.txt` is **only** for editing
-secrets — machines never need it. It's backed up in Bitwarden; losing it costs
-you the ability to change credentials until you re-key from a machine that can
-still decrypt, not access to them.
+```sh
+cd ~/nix-config && git pull
+sudo nixos-rebuild switch --flake /etc/nixos     # or: nh darwin switch
+```
 
-Losing a key is cheap. **Leaking one is not** — git history is permanent, so
-anyone with it can decrypt every version ever committed. That means revoking at
-the provider, not re-encrypting.
+Done. `gh`, `flyctl` and `atuin` are all authenticated — atuin logs itself in
+during activation, so nothing is typed.
+
+### The personal key
+
+`~/.config/sops/age/keys.txt` is the identity that lets *you* run `sops` to
+edit secrets. Machines never need it — they use their host keys. It's backed
+up in Bitwarden (`rbw get -f notes "sops age key - nix-config (all machines)"`).
+
+Losing it is cheap: you can add a new personal key from any machine that still
+decrypts. **Leaking it is not** — git history is permanent, so anyone with it
+can decrypt every version ever committed. That means revoking at GitHub/fly,
+not re-encrypting.
 
 ## Adding things
 
