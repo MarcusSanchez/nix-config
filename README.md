@@ -335,7 +335,13 @@ and push as normal.
 
 ### Adding a new machine
 
-**Step 1 — on the NEW machine**, once it's been through the bootstrap above,
+Both routes below do the same three things: read the new machine's age key, add
+it to `.sops.yaml`, re-encrypt. They differ only in *where* the re-encrypt runs,
+because `sops updatekeys` has to decrypt first — so it needs a machine that
+already can. Route A makes the new machine that machine; route B borrows an
+existing one.
+
+**First, on the NEW machine**, once it's been through the bootstrap above,
 print its age public key. It's a *public* key: safe to paste anywhere.
 
 ```sh
@@ -343,9 +349,8 @@ sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 # -> age1abc123...
 ```
 
-**Step 2 — on a machine that ALREADY decrypts** (any existing one), edit
-`~/nix-config/.sops.yaml`. The new key goes in **two** places — define it under
-`keys:`, then reference it under `creation_rules:`:
+The `.sops.yaml` edit is identical either way. The new key goes in **two**
+places — define it under `keys:`, then reference it under `creation_rules:`:
 
 ```yaml
 keys:
@@ -364,24 +369,59 @@ creation_rules:
           - *lite                   # <- 2. and reference it here
 ```
 
-**Step 3 — same machine**, re-encrypt so the new key can open the file, then
-push:
+#### Route A — all on the new machine
+
+Use this when the new machine is all you have. It works over a terminal alone,
+no browser and no second machine, which is the `nixos-lite` case. The cost is
+fetching your personal key, since that's the only identity the new box can get
+hold of that already decrypts.
+
+rbw arrives with the first switch — the one that printed `setupSecrets failed`.
+
+```sh
+rbw login
+mkdir -p ~/.config/sops/age
+rbw get -f notes "sops age key - nix-config (all machines)" \
+  > ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt
+```
+
+That machine now decrypts, so everything else is local:
 
 ```sh
 cd ~/nix-config
+$EDITOR .sops.yaml                               # the edit shown above
+sops updatekeys secrets/secrets.yaml
+git add -A && git commit -m "secrets: add <machine>" && git push
+sudo nixos-rebuild switch --flake /etc/nixos     # or: nh darwin switch
+```
+
+The personal key has done its job at that point — the machine decrypts with its
+own host key from here on. Delete it if you'd rather not leave it on the box;
+you'd just fetch it again the next time you want to *edit* secrets there.
+
+#### Route B — from a machine that already decrypts
+
+No personal key needed: the existing machine decrypts with its own host key.
+
+**On the existing machine:**
+
+```sh
+cd ~/nix-config
+$EDITOR .sops.yaml                               # the edit shown above
 sops updatekeys secrets/secrets.yaml
 git add -A && git commit -m "secrets: add <machine>" && git push
 ```
 
-**Step 4 — back on the new machine:**
+**Back on the new machine:**
 
 ```sh
 cd ~/nix-config && git pull
 sudo nixos-rebuild switch --flake /etc/nixos     # or: nh darwin switch
 ```
 
-Done. `gh`, `flyctl` and `atuin` are all authenticated — atuin logs itself in
-during activation, so nothing is typed.
+Either way you're done. `gh`, `flyctl` and `atuin` are all authenticated —
+atuin logs itself in during activation, so nothing is typed.
 
 ### The personal key
 

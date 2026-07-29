@@ -10,8 +10,13 @@
 # automated: it's unlocked by the master password marcus actually
 # remembers, which is what makes it the root of the whole chain.
 #
-# On a box that hasn't rebuilt yet this package doesn't exist — use
-# `nix shell nixpkgs#rbw`, which needs nothing installed.
+# This is also what lets a new machine enroll itself with no second machine
+# on hand. Enrolling runs `sops updatekeys`, which has to decrypt — and a box
+# that isn't a recipient yet can't. The personal key breaks that cycle, and
+# rbw is how it gets there over a terminal alone (no browser, which is the
+# nixos-lite case). The first switch installs rbw already configured even
+# though secrets don't decrypt yet — that's the harmless `setupSecrets
+# failed` — so the whole loop closes on the one machine in front of you.
 #
 #   rbw login    # once per machine
 #   rbw unlock   # once per agent lifetime (lock_timeout below)
