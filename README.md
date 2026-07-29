@@ -52,6 +52,9 @@ modules/nixos/             WSL system layer (one concern per file)
 modules/darwin/            Mac system layer
   default.nix              Aggregator — imports ../common + everything below
   nix.nix                  nix.enable = false — Determinate Nix owns the daemon
+  ssh.nix                  Remote Login + the WSL box's authorized key
+  secrets.nix              sops-nix (darwin module): same as the NixOS one,
+                           mac paths and username
   homebrew.nix             Declarative brew: GUI casks + few formulae, cleanup=zap
   users.nix                marcussanchez + primaryUser
   macos.nix                macOS defaults; Touch ID for sudo
