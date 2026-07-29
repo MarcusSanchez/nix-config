@@ -26,6 +26,12 @@
     atuin = {
       enable = true;
       settings = {
+        # The E2E key comes from sops (modules/nixos/secrets.nix) rather
+        # than being written by `atuin login`. NOTE: the file must have no
+        # trailing newline or atuin fails with "failed to parse header
+        # value" — sops writes the value verbatim, so keep it one line.
+        key_path = "/run/secrets/atuin_key";
+
         # With sync on, history is pooled across machines — but a mac
         # command surfacing in a WSL Ctrl-R is just noise. Default the
         # search to this host and cycle out to global with another Ctrl-R

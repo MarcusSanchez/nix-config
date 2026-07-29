@@ -10,6 +10,8 @@
     ./nix.nix
     ./packages.nix
     ./nix-ld.nix
+    ./ssh.nix
+    ./secrets.nix
     ./keyring.nix
     ./users.nix
     ./wsl.nix

@@ -1,19 +1,32 @@
-# Which age recipients can decrypt what. `sops secrets/secrets.yaml` reads
-# this to know who to encrypt for; `sops updatekeys secrets/secrets.yaml`
-# re-wraps the data key after this list changes.
+# Who can decrypt secrets/.
 #
-# One shared key across all machines: they all get the same credentials
-# decrypted anyway, and because this repo is public a leak means rotating
-# at GitHub/atuin/fly regardless — per-machine keys would add re-keying
-# round-trips without shrinking that blast radius. The private half lives
-# at ~/.config/sops/age/keys.txt (mode 600, never committed) and is backed
-# up in Bitwarden; `croc send ~/.config/sops/age/keys.txt` moves it to a
-# new machine.
+# Each machine decrypts with its OWN identity, derived from its SSH host key
+# (sops-nix converts /etc/ssh/ssh_host_ed25519_key with ssh-to-age). That is
+# why no private key is ever copied between machines — adding a machine means
+# adding its *public* key below and re-encrypting the data key to it.
+#
+# The marcus key is a personal age key that only exists so secrets can be
+# EDITED (`sops secrets/secrets.yaml` needs to decrypt first). It lives at
+# ~/.config/sops/age/keys.txt and is backed up in Bitwarden. Machines do not
+# need it.
+#
+# To add a machine — on that machine:
+#   nix shell nixpkgs#ssh-to-age -c sh -c \
+#     'sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+# paste the age1... below, then from a machine that can already decrypt:
+#   sops updatekeys secrets/secrets.yaml
+#
+# NOTE: no `-` before `age:` in key_groups. With one, sops treats the groups
+# as Shamir shares and requires several keys to decrypt — nothing works.
 keys:
   - &marcus age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
+  - &nixos age1dqh47zgvsvqaw734wf2kmad42s8pscyfvckdhnlwhce6p3rlfcdqx7m2dn
+  # - &nixos-lite ...   # add when that instance is built
+  # - &mac ...          # macOS generates /etc/ssh/ssh_host_ed25519_key itself
 
 creation_rules:
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
       - age:
           - *marcus
+          - *nixos

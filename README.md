@@ -41,6 +41,10 @@ modules/nixos/             WSL system layer (one concern per file)
   nix.nix                  Nix settings, GC, auto-upgrade
   packages.nix             Linux-only: build essentials the mac gets from Xcode CLT
   nix-ld.nix               Run unpatched dynamic binaries on NixOS
+  ssh.nix                  sshd on loopback — mainly for the host key, which
+                           is this machine's sops identity
+  secrets.nix              sops-nix (system module): decrypts secrets/ with
+                           the host key into /run/secrets
   keyring.nix              gnome-keyring as the Secret Service (secretspec)
   users.nix                User accounts + login shell
   wsl.nix                  NixOS-WSL integration
@@ -69,11 +73,10 @@ home/marcus/               Home Manager (per-user), same shape as modules/
     git.nix                Git identity + gh
     catppuccin.nix         Catppuccin Mocha theming
     comma.nix              comma + prebuilt nix-index database
-    secrets.nix            sops-nix: decrypts secrets/ at activation and
-                           drops each credential where its CLI expects it,
-                           so no machine ever runs a `... auth login`
+    secrets.nix            user-side wiring for /run/secrets: FLY_API_TOKEN
+                           export + atuin's one-time login
     bitwarden.nix          rbw — Bitwarden from the terminal; where the
-                           age key is stored when no machine has it
+                           personal (editing) age key is backed up
     goroot.nix             ~/.toolchains/go -> the store, a stable GOROOT
                            path for JetBrains to point at
     dotfiles/              shared UI-managed configs, one flat dir:
@@ -168,26 +171,9 @@ first rebuild, and the hostname the config then sets, which is what makes bare
 A fresh instance boots as the stock `nixos` user; the first rebuild creates
 `marcus`, so there's one restart in the middle.
 
-> **There's a chicken-and-egg with the age key.** It has to live at
-> `/home/marcus/.config/sops/age/keys.txt`, but `marcus` doesn't exist until
-> the first rebuild creates them — and that same rebuild runs the decryption.
-> Two ways through, both fine:
->
-> - **Pre-place it** as the stock `nixos` user, before the first rebuild (the
->   uid/gid are pinned in the config, so this is safe):
->   ```sh
->   sudo install -d -m 700 -o 1000 -g 100 /home/marcus/.config/sops/age
->   # write the key to /home/marcus/.config/sops/age/keys.txt, then:
->   sudo chown 1000:100 /home/marcus/.config/sops/age/keys.txt
->   sudo chmod 600 /home/marcus/.config/sops/age/keys.txt
->   ```
-> - **Or let the first rebuild fail.** It exits 4 with
->   `home-manager-marcus.service failed`, but the system generation *does*
->   activate and `marcus` is created — packages, dotfiles and links all land.
->   Only the secrets are missing. Place the key as `marcus` afterwards and
->   rebuild; the second one exits 0.
->
-> See [Secrets](#secrets) for how to get the key onto the machine.
+> **Nothing to pre-place.** This machine generates its own SSH host key on
+> first boot and decrypts with that; you just add its public key to
+> `.sops.yaml` afterwards. See [Secrets](#secrets).
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
@@ -319,68 +305,40 @@ sops secrets/secrets.yaml        # edit in $EDITOR, re-encrypts on save
 sops updatekeys secrets/secrets.yaml   # after adding a key to .sops.yaml
 ```
 
-**The one manual step on a new machine** is the private key, which by
-definition can't live in the repo. It has to be at `~/.config/sops/age/keys.txt`
-(mode 600) before an activation can decrypt anything — see the bootstrap
-section above for the ordering, since `marcus`'s home doesn't exist until the
-first rebuild.
+**Each machine decrypts with its own identity**, derived from its SSH host
+key (`/etc/ssh/ssh_host_ed25519_key` — which is why `modules/nixos/ssh.nix`
+enables sshd, bound to loopback). No private key is ever copied between
+machines, and there is no bootstrap ordering problem: a fresh box generates
+its own key on first boot.
 
-A machine without it isn't bricked, just uncredentialed: activation reports
-`home-manager-marcus.service failed`, `nixos-rebuild` exits 4, and everything
-except the secrets still lands. Add the key, rebuild, done.
-
-That ordering matters more than it looks: `croc` and `rbw` are installed *by*
-the rebuild, so on a machine that hasn't rebuilt yet, neither exists — and it
-can't rebuild until the key is there. **Run them straight from nixpkgs
-instead**, which needs nothing installed:
+Onboarding a machine means adding its **public** key. On the new machine:
 
 ```sh
-# from a machine that already has the key:
-nix shell nixpkgs#croc -c croc send ~/.config/sops/age/keys.txt
-
-# on the new machine — --out lands it straight at the right path, so
-# there's nothing to move afterwards. The directory must already exist
-# (croc won't create it), and flags go BEFORE the code:
-mkdir -p ~/.config/sops/age
-nix shell nixpkgs#croc -c croc --yes --overwrite --out ~/.config/sops/age <code>
-
-# ...or, if no machine has it, straight out of Bitwarden — `-f notes`
-# prints the note body alone, so it redirects as-is (verified: the extra
-# trailing newline it adds is ignored by age):
-mkdir -p ~/.config/sops/age
-nix shell nixpkgs#rbw -c sh -c '
-  rbw config set email marcussanchez031@gmail.com
-  rbw login
-  rbw get -f notes "sops age key - nix-config (all machines)"
-' > ~/.config/sops/age/keys.txt
-
-chmod 600 ~/.config/sops/age/keys.txt    # don't trust the transferred mode
+nix shell nixpkgs#ssh-to-age -c sh -c \
+  'sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
 ```
 
-Bitwarden's 2FA has to be a factor a terminal can *type* — an emailed PIN
-or an authenticator code. With none configured, Bitwarden falls back to
-new-device verification, which rbw doesn't implement and which fails as an
-opaque `api request returned error: 400`. Passkeys and WebAuthn can't work
-here at all: no browser, no authenticator.
+Paste that `age1...` into `.sops.yaml`, then from a machine that can already
+decrypt:
 
-If the note ever comes out empty, `rbw get -l "<name>"` lists that entry's
-fields. Only the `AGE-SECRET-KEY-1…` line matters — age ignores the two `#`
-comments — so `| grep '^AGE-SECRET-KEY-'` is a safe fallback.
+```sh
+sops updatekeys secrets/secrets.yaml   # re-wraps the data key for the new host
+git commit && git push
+```
 
-On a stock NixOS-WSL image flakes are still off, so prefix those with
-`nix --extra-experimental-features 'nix-command flakes' shell ...` until the
-first switch enables them permanently.
+The new machine rebuilds and has every credential. `gh` reads a rendered
+`hosts.yml`, `atuin` gets its key via `key_path` (and logs itself in once for
+the session, which lives in sqlite and can't be placed as a file), and
+`flyctl` picks up `FLY_API_TOKEN` from the shell.
 
-One key is shared by every machine — they all get the same credentials
-anyway, and since the repo is public a leaked key means rotating at
-GitHub regardless, so per-machine keys would add re-keying without
-shrinking the blast radius. It's backed up in Bitwarden; losing it costs
-only the effort of reissuing tokens, since old ciphertext is inert to
-anyone who doesn't have it.
+The personal age key at `~/.config/sops/age/keys.txt` is **only** for editing
+secrets — machines never need it. It's backed up in Bitwarden; losing it costs
+you the ability to change credentials until you re-key from a machine that can
+still decrypt, not access to them.
 
-Losing it is cheap. **Leaking it is not** — git history is permanent, so
-anyone with the key can decrypt every version ever committed. That means
-revoking at the provider, not re-encrypting.
+Losing a key is cheap. **Leaking one is not** — git history is permanent, so
+anyone with it can decrypt every version ever committed. That means revoking at
+the provider, not re-encrypting.
 
 ## Adding things
 

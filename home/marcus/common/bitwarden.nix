@@ -1,18 +1,17 @@
 # rbw: Bitwarden from the terminal, without the web vault.
 #
-# `rbw get "sops age key — nix-config (all machines)"` is the recovery path
-# when no machine that already has the age key is alive — the one case
-# secrets.nix can't bootstrap itself out of (see its header). Day to day
-# it's just a password lookup that doesn't need a browser.
+# Holds the personal age key, which is the identity for *editing*
+# secrets/secrets.yaml — machines decrypt with their own SSH host keys and
+# never need it (see modules/nixos/secrets.nix). Lose it and you can re-key
+# from any machine that still decrypts; it is not a path to lockout.
+# Day to day this is just a password lookup that doesn't need a browser.
 #
 # Unlike the credentials in secrets.nix, this one deliberately isn't
 # automated: it's unlocked by the master password marcus actually
 # remembers, which is what makes it the root of the whole chain.
 #
-# Note the bootstrap order — this package arrives WITH the rebuild, and a
-# machine missing the age key can't complete one. So on a fresh box rbw
-# comes from `nix shell nixpkgs#rbw` instead; see the README's Secrets
-# section. Installing it here is for every day after that.
+# On a box that hasn't rebuilt yet this package doesn't exist — use
+# `nix shell nixpkgs#rbw`, which needs nothing installed.
 #
 #   rbw login    # once per machine
 #   rbw unlock   # once per agent lifetime (lock_timeout below)
