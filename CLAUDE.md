@@ -57,7 +57,7 @@ flake.nix                  inputs + all three host wirings
 
 hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only
 
-modules/common/            packages.nix, claude-code.nix
+modules/common/            default.nix packages.nix claude-code.nix
 modules/nixos/             lands on BOTH WSL hosts, unchanged
   default.nix              aggregator — a file here does nothing until listed
   ssh.nix                  exists to generate the host key (this box's sops
@@ -80,13 +80,13 @@ home/marcus/
   common/                  aggregated by its default.nix
     secrets.nix            user side of /run/secrets: FLY_API_TOKEN export +
                            atuin's one-time login
-    dotfiles/              flat dir of UI-managed configs; the Zed keymap
-                           carries both cmd- and ctrl- variants
+    dotfiles/              flat: zed.settings.json, zed.keymap.json (which
+                           carries both cmd- and ctrl- variants), .ideavimrc
     neovim.nix goroot.nix bitwarden.nix     see Constraints
     packages.nix shell.nix git.nix catppuccin.nix comma.nix
   wsl/
     win-sync.nix           two-way sync engine: UI-side edits pull into the
-                           repo and auto-commit (chore:) + push, repo-side
+                           repo and auto-commit (chore(<name>):) + push, repo-side
                            edits push out to Windows, and both-changed warns
                            and writes nothing
     dotfiles.nix           common/dotfiles/ ↔ Windows, via win-sync
