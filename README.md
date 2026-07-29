@@ -317,20 +317,27 @@ instead**, which needs nothing installed:
 nix shell nixpkgs#croc -c croc send ~/.config/sops/age/keys.txt
 
 # on the new machine — --out lands it straight at the right path, so
-# there's nothing to move afterwards (flags go BEFORE the code):
+# there's nothing to move afterwards. The directory must already exist
+# (croc won't create it), and flags go BEFORE the code:
 mkdir -p ~/.config/sops/age
 nix shell nixpkgs#croc -c croc --yes --overwrite --out ~/.config/sops/age <code>
 
-# ...or, if no machine has it, pull it out of Bitwarden and paste the
-# three lines into that file by hand:
+# ...or, if no machine has it, straight out of Bitwarden — `-f notes`
+# prints the note body alone, so it can be redirected as-is:
+mkdir -p ~/.config/sops/age
 nix shell nixpkgs#rbw -c sh -c '
   rbw config set email marcussanchez031@gmail.com
   rbw login
-  rbw get --full "sops age key — nix-config (all machines)"
-'
+  rbw get -f notes "sops age key — nix-config (all machines)"
+' > ~/.config/sops/age/keys.txt
 
 chmod 600 ~/.config/sops/age/keys.txt    # don't trust the transferred mode
 ```
+
+If that comes out empty or oddly wrapped, `rbw get -l "<name>"` lists the
+entry's fields and `--raw` gives JSON to pick from. Only the
+`AGE-SECRET-KEY-1…` line actually matters — the two `#` comments are
+ignored by age, so `| grep '^AGE-SECRET-KEY-'` is a safe fallback.
 
 On a stock NixOS-WSL image flakes are still off, so prefix those with
 `nix --extra-experimental-features 'nix-command flakes' shell ...` until the
