@@ -11,5 +11,12 @@
     unzip
     gzip
     gnutar
+
+    # Ghostty sets TERM=xterm-ghostty, so a session opened from the mac's
+    # Ghostty needs that entry here or the line editor redraws wrong and
+    # typing comes out duplicated. terminfo-only output — a few KB, not
+    # the emulator. (The other half of this is
+    # shell-integration-features = ssh-terminfo in home/marcus/mac/ghostty.nix.)
+    ghostty.terminfo
   ];
 }

@@ -39,7 +39,8 @@ modules/nixos/             WSL system layer (one concern per file)
   default.nix              Aggregator — imports ../common + everything below;
                            both WSL hosts use it unchanged
   nix.nix                  Nix settings, GC, auto-upgrade
-  packages.nix             Linux-only: build essentials the mac gets from Xcode CLT
+  packages.nix             Linux-only: build essentials the mac gets from
+                           Xcode CLT, + ghostty terminfo for ssh sessions
   nix-ld.nix               Run unpatched dynamic binaries on NixOS
   ssh.nix                  sshd on loopback — mainly for the host key, which
                            is this machine's sops identity
