@@ -49,6 +49,11 @@
     statix
     deadnix
 
+    # `sops secrets/secrets.yaml` to edit credentials; age is what it
+    # encrypts to (see home/marcus/common/secrets.nix)
+    sops
+    age
+
     # zls is built against this same nixpkgs zig, so the compiler and
     # language server stay on matching versions automatically
     zig
