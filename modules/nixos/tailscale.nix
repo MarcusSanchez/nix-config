@@ -32,18 +32,43 @@
 { ... }:
 
 {
-  services.tailscale.enable = true;
+  services = {
+    tailscale = {
+      enable = true;
 
-  # Tailscale SSH: tailscaled terminates SSH itself and authorizes from
-  # tailnet identity + the policy file's "ssh" rules, so there is no sshd,
-  # no authorized_keys and no key to distribute. This is why there is no
-  # ssh.nix here. Creates tailscaled-set.service, which runs
-  # `tailscale set --ssh` after tailscaled.
-  #
-  # Reaching this box needs a matching rule in the tailnet policy, and the
-  # action must be "accept" — "check" demands a periodic browser re-auth and
-  # presents as a connection that simply closes.
-  services.tailscale.extraSetFlags = [ "--ssh" ];
+      # Tailscale SSH: tailscaled terminates SSH itself and authorizes from
+      # tailnet identity + the policy file's "ssh" rules, so there is no
+      # sshd, no authorized_keys and no key to distribute. This is why there
+      # is no ssh.nix here. Creates tailscaled-set.service, which runs
+      # `tailscale set --ssh` after tailscaled.
+      #
+      # Reaching this box needs a matching rule in the tailnet policy, and
+      # the action must be "accept" — "check" demands a periodic browser
+      # re-auth and presents as a connection that simply closes.
+      extraSetFlags = [ "--ssh" ];
+    };
+
+    # MagicDNS needs somewhere to install the .ts.net route. tailscaled
+    # would normally rewrite /etc/resolv.conf, but on WSL that file belongs
+    # to the host — a symlink to /mnt/wsl/resolv.conf, regenerated at every
+    # distro start. So `tailscale dns status` reports DNS as enabled while
+    # no tailnet name resolves at all. Hand resolution to systemd-resolved,
+    # which tailscaled configures over D-Bus rather than by file.
+    #
+    # DNS= keeps WSL's own resolver (a stub on lo, proxying to the Windows
+    # resolvers) as the upstream, so ordinary lookups and any LAN/VPN split
+    # DNS behave exactly as before. It pairs with generateResolvConf below:
+    # dropping that alone leaves the box with no DNS whatsoever.
+    resolved = {
+      enable = true;
+      settings.Resolve.DNS = "10.255.255.254";
+    };
+  };
+
+  # Stop WSL owning /etc/resolv.conf so resolved can. Read only at distro
+  # start, so this needs `wsl -t nixos` from PowerShell after the switch —
+  # a rebuild alone changes nothing.
+  wsl.wslConf.network.generateResolvConf = false;
 
   # /dev/net/tun already exists on this kernel; belt and braces, since
   # without it tailscaled fails with CreateTUN("tailscale0") failed.
