@@ -20,7 +20,10 @@ $java\
 $kotlin\
 $haskell\
 $python\
+$zig\
 [](fg:green bg:sapphire)\
+$nix_shell\
+$docker_context\
 $conda\
 [](fg:sapphire bg:lavender)\
 $time\
@@ -41,6 +44,7 @@ Ubuntu = "󰕈"
 SUSE = ""
 Raspbian = "󰐿"
 Mint = "󰣭"
+NixOS = ""
 Macos = "󰀵"
 Manjaro = ""
 Linux = "󰌽"
@@ -152,8 +156,10 @@ time_format = "%R"
 style = "bg:lavender"
 format = '[[  $time ](fg:crust bg:lavender)]($style)'
 
+# the preset ships this disabled, which glues the cursor to the bar;
+# enabled, input goes on the line below
 [line_break]
-disabled = true
+disabled = false
 
 [character]
 disabled = false
@@ -283,3 +289,17 @@ surface0 = "#363a4f"
 base = "#24273a"
 mantle = "#1e2030"
 crust = "#181926"
+
+[zig]
+symbol = "↯"
+style = "bg:green"
+format = '[[ $symbol( $version) ](fg:crust bg:green)]($style)'
+
+# snowflake when inside a nix shell (direnv/devenv/`nix develop` set
+# IN_NIX_SHELL). heuristic stays off: it false-fires on NixOS, where
+# /nix/store is on every PATH
+[nix_shell]
+symbol = ""
+style = "bg:sapphire"
+format = '[[ $symbol ](fg:crust bg:sapphire)]($style)'
+heuristic = false
