@@ -64,7 +64,7 @@
             }
           )
           {
-            nixos = ./hosts/wsl;
+            bedroom-wsl = ./hosts/wsl;
             nixos-lite = ./hosts/wsl-lite;
           };
 

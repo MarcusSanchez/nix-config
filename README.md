@@ -7,7 +7,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
-| `nixos` | WSL, dev | `marcus` | `/etc/nixos` |
+| `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
 | `nixos-lite` | WSL, headless | `marcus` | `/etc/nixos` |
 | `Marcuss-MacBook-Air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
@@ -72,7 +72,7 @@ actually decides what this box becomes.
 
 | name | what you get |
 |---|---|
-| `nixos` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
+| `bedroom-wsl` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
 | `nixos-lite` | headless: same toolchains and shell, minus that sync |
 
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
@@ -95,8 +95,8 @@ run one of these (WSL refuses a `--name` that already exists on this PC):
 
 ```powershell
 # the dev machine
-wsl --install --from-file nixos.wsl --name nixos
-wsl -d nixos
+wsl --install --from-file nixos.wsl --name bedroom-wsl
+wsl -d bedroom-wsl
 
 # ...or the headless one
 wsl --install --from-file nixos.wsl --name nixos-lite
@@ -130,14 +130,15 @@ exit
 
 **On Windows again.** This restart is mandatory, and it's what applies both
 `wsl.defaultUser` *and* the hostname — WSL reads `/etc/wsl.conf` only at distro
-startup, so until now this box still calls itself `nixos` no matter what you
+startup, so until now this box still calls itself `nixos` (the stock image's
+name) no matter what you
 passed to `--name`. Don't run a bare `nh os switch` before it: with the old
-hostname it would resolve `nixosConfigurations.nixos` and build the dev config
-here, without erroring.
+hostname it would resolve `nixosConfigurations.nixos`, which does not exist,
+or worse a config meant for another box.
 
 ```powershell
-wsl -t nixos
-wsl -d nixos        # lands as marcus
+wsl -t bedroom-wsl
+wsl -d bedroom-wsl        # lands as marcus
 
 # ...or the headless one
 wsl -t nixos-lite
