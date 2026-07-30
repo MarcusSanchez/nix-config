@@ -1,15 +1,15 @@
 format = """
-[](#a3aed2)\
+[░▒▓](#a3aed2)\
 $os\
-[](bg:#769ff0 fg:#a3aed2)\
+[](bg:#769ff0 fg:#a3aed2)\
 $username\
 $hostname\
-[](bg:#394260 fg:#769ff0)\
+[](bg:#394260 fg:#769ff0)\
 $directory\
-[](bg:#212736 fg:#394260)\
+[](bg:#212736 fg:#394260)\
 $git_branch\
 $git_status\
-[](fg:#212736)\
+[ ](fg:#212736)\
 \n$character"""
 
 [os]
