@@ -1,16 +1,25 @@
-# Prompt. Deliberately plain: no powerline separators, no filled blocks, no
-# right-hand segment — just the facts, two lines so a long branch never
-# squeezes the cursor.
+# Prompt. Plain by design: no powerline separators, no filled blocks, no
+# right-hand segment. Two lines so a long branch never squeezes the cursor.
 #
-#   marcus@bedroom-wsl ~/nix-config  main ●
+#    marcus@bedroom-wsl ~/projects/noted  main ●
 #   ❯
 #
-# An explicit `format` means ONLY the modules listed there render. Starship
-# otherwise shows a language version for every toolchain it detects in the
-# directory, which is where these prompts start getting long.
+# Colour discipline is borrowed from the Pure preset, which is why it reads
+# calmly: exactly ONE accent — the directory — and everything else dimmed to
+# bright-black. Context (which box, which branch) shouldn't compete with the
+# thing you're actually looking at. Only $character is vivid, and only so
+# failure is obvious.
 #
-# Colours come from catppuccin (autoEnable in catppuccin.nix), so the names
-# below resolve to mocha rather than terminal ANSI.
+# Symbols are the codepoints from starship's own nerd-font-symbols preset
+# rather than hand-picked Unicode:  is U+F313, not the ❄ emoji, which
+# renders as a colour glyph and sits badly against text.
+#
+# An explicit `format` means ONLY these modules render — otherwise starship
+# prints a version badge for every toolchain it finds in the directory.
+#
+# nix_shell is deliberately absent. direnv loads devenv in every project, so
+# the marker would always be on and carry no information — and its symbol is
+# the same U+F313 as NixOS, so it showed twice.
 { ... }:
 
 {
@@ -25,57 +34,58 @@
         "$directory"
         "$git_branch"
         "$git_status"
-        "$nix_shell"
         "$cmd_duration"
         "$line_break"
         "$character"
       ];
 
-      # Which machine am I on. Off by default in starship.
+      # Which machine, at a glance. Dim — the glyph shape carries it.
       os = {
         disabled = false;
         format = "[$symbol]($style)";
-        style = "bold blue";
+        style = "bright-black";
         symbols = {
-          Macos = " ";
-          NixOS = "❄ ";
-          Linux = " ";
+          Macos = " ";
+          NixOS = " ";
+          Linux = " ";
         };
       };
 
-      # Always shown, not just over SSH — the point is knowing which of four
-      # boxes this is without thinking.
       username = {
         show_always = true;
         format = "[$user]($style)";
-        style_user = "bold blue";
+        style_user = "bright-black";
         style_root = "bold red";
       };
 
       hostname = {
         ssh_only = false;
         format = "[@$hostname]($style) ";
-        style = "bold blue";
+        style = "bright-black";
       };
 
+      # The one accent. Full path rather than truncate_to_repo, so you keep
+      # the context of where the repo lives.
       directory = {
         format = "[$path]($style)[$read_only]($read_only_style) ";
-        style = "bold cyan";
+        style = "bold blue";
         truncation_length = 3;
-        truncate_to_repo = true;
-        read_only = " ";
+        truncation_symbol = "…/";
+        read_only = " 󰌾";
+        read_only_style = "red";
       };
 
       git_branch = {
         format = "[$symbol$branch]($style) ";
-        symbol = " ";
-        style = "bold purple";
+        symbol = " ";
+        style = "bright-black";
       };
 
-      # Compact: symbols only, no counts. ● dirty, ⇡⇣ ahead/behind.
+      # Symbols only, no counts — yellow is the one thing allowed to catch
+      # your eye besides the prompt character.
       git_status = {
-        format = "([$all_status$ahead_behind]($style))";
-        style = "bold yellow";
+        format = "([$all_status$ahead_behind]($style) )";
+        style = "yellow";
         conflicted = "=";
         untracked = "?";
         modified = "●";
@@ -88,18 +98,10 @@
         diverged = "⇕";
       };
 
-      # devenv / nix develop, so it's obvious when a shell isn't the plain one.
-      nix_shell = {
-        format = "[$symbol$name]($style) ";
-        symbol = "❄ ";
-        style = "bold cyan";
-      };
-
-      # Only for commands slow enough that you'd want to know.
       cmd_duration = {
         min_time = 2000;
         format = "[$duration]($style) ";
-        style = "dimmed yellow";
+        style = "bright-black";
       };
 
       character = {
