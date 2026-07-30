@@ -1,22 +1,21 @@
-# Prompt: oh-my-zsh's robbyrussell, rebuilt in starship, plus an OS glyph.
+# Prompt: oh-my-zsh's robbyrussell, rebuilt in starship.
 #
-#   <os> ➜  nix-config git:(main) ✗
+#   ➜  nix-config git:(main) ✗
 #
-# That's the omz default marcus used before starship: a green arrow that
-# turns red on a failed command, the current directory's basename only, and
-# the branch wrapped as git:(name). Plain foreground colours — no
-# backgrounds, no powerline — so it inherits the terminal's catppuccin theme
-# rather than hardcoding hex.
+# The omz default marcus used before starship: a green arrow that turns red
+# on a failed command, the current directory's basename only, and the branch
+# wrapped as git:(name). Plain foreground colours — no backgrounds, no
+# powerline, no vendored preset — so it follows the terminal's catppuccin
+# theme instead of hardcoding hex.
 #
-# $character comes FIRST here, which is unusual for starship but is what
-# robbyrussell does: the arrow leads the line and doubles as the status
-# indicator, so there is no trailing prompt marker.
+# $character comes FIRST, which is unusual for starship but is what
+# robbyrussell does: the arrow is both the prompt marker and the exit-status
+# indicator, so nothing trails the line.
 #
-# Only two OS glyphs are defined; everything else falls through to
-# starship's defaults, which don't matter on a two-platform fleet. NixOS is
-# mapped to the generic tux on purpose — with no entry starship uses its
-# own default, an emoji-presentation snowflake that renders in colour and
-# sits badly against text.
+# The parens in git_branch are BACKSLASH-ESCAPED. Unescaped, `(` opens a
+# conditional group in starship's format grammar and the module dies with
+# "expected variable, string, textgroup, or conditional". Same applies to
+# $ \ [ ] ( ) anywhere a literal is meant.
 #
 # catppuccin.nix keeps its starship port opted out: it builds its theme at
 # EVALUATION time, so any eval that cannot build it fails outright (CI
@@ -35,7 +34,6 @@
       add_newline = true;
 
       format = builtins.concatStringsSep "" [
-        "$os"
         "$character"
         "$directory"
         "$git_branch"
@@ -43,18 +41,8 @@
         "$cmd_duration"
       ];
 
-      os = {
-        disabled = false;
-        format = "[$symbol ]($style)";
-        style = "bold blue";
-        symbols = {
-          Macos = "󰀵";
-          Linux = "󰌽";
-          NixOS = "󰌽";
-        };
-      };
-
-      # leads the line, robbyrussell-style; two spaces after, as omz has
+      # leads the line, robbyrussell-style; the trailing space plus the one
+      # in $directory give omz's two-space gap
       character = {
         success_symbol = "[➜ ](bold green)";
         error_symbol = "[➜ ](bold red)";
@@ -69,9 +57,9 @@
         truncate_to_repo = false;
       };
 
-      # git:(branch) — parens blue, branch red, exactly omz's colours
+      # git:(branch) in omz's colours — blue parens, red branch
       git_branch = {
-        format = "[git:(](bold blue)[$branch](red)[)](bold blue) ";
+        format = "[git:\\(](bold blue)[$branch](red)[\\)](bold blue) ";
       };
 
       git_status = {
