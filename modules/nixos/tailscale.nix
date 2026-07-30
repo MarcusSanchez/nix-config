@@ -1,12 +1,14 @@
 # Tailscale, so the machines reach each other from any network rather than
 # only over the LAN.
 #
-# **Imported by hosts/wsl/default.nix ONLY — never by modules/nixos/default.nix.**
+# **Imported by the host modules, never by modules/nixos/default.nix.**
 # Every WSL2 distro on a Windows PC shares ONE network namespace: same IP,
 # same ports, same routing table (microsoft/WSL#4304). Two tailscaled
 # instances there would fight over tailscale0, UDP 41641, and the
-# 100.64.0.0/10 route. One tailnet node per Windows PC, and this is it —
-# nixos-lite deliberately stays off the tailnet.
+# 100.64.0.0/10 route. So the rule is one importing distro per PC, which is
+# a per-machine fact the aggregator cannot express — hence host-level. Every
+# host module imports it today because each instance lives on its own PC; two
+# that shared one would need the second to drop this import.
 #
 # Also do NOT install Tailscale on Windows while this is enabled: traffic
 # would be encapsulated twice and Tailscale packets don't fit inside

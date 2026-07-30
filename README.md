@@ -8,7 +8,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
-| `nixos-lite` | WSL, headless | `marcus` | `/etc/nixos` |
+| `nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `Marcuss-MacBook-Air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
@@ -73,7 +73,7 @@ actually decides what this box becomes.
 | name | what you get |
 |---|---|
 | `bedroom-wsl` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
-| `nixos-lite` | headless: same toolchains and shell, minus that sync |
+| `nixos-lite`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any name listed in `flake.nix` works — add a line there first |
 
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
 `marcus`, which is why there's a restart in the middle.

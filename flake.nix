@@ -66,6 +66,8 @@
           {
             bedroom-wsl = ./hosts/wsl;
             nixos-lite = ./hosts/wsl-lite;
+            office-lite-wsl-1 = ./hosts/wsl-lite;
+            office-lite-wsl-2 = ./hosts/wsl-lite;
           };
 
       # Activate with: sudo darwin-rebuild switch --flake ~/nix-config
