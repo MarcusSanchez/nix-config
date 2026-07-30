@@ -1,11 +1,21 @@
 # Credentials, so no machine ever needs a CLI login.
 #
-# This machine decrypts with ITS OWN identity: sops-nix converts
-# /etc/ssh/ssh_host_ed25519_key (see ssh.nix, which exists to generate it)
-# into an age key. No private key is ever copied between machines —
-# onboarding one means adding its *public* key to .sops.yaml and running
-# `sops updatekeys secrets/secrets.yaml`. The personal age key in
-# ~/.config/sops/age/keys.txt is only for *editing* secrets.
+# Every machine decrypts with the SAME identity — the personal age key from
+# Bitwarden, at /var/lib/sops-nix/key.txt. .sops.yaml therefore has exactly
+# one recipient, so adding a machine never edits the recipient list and never
+# needs `sops updatekeys`: place the key, switch, done.
+#
+# The file has to be there before a switch that installs secrets —
+# sops-install-secrets treats a missing keyFile as fatal, not as a fallback,
+# so it aborts the whole step. On a fresh box the first switch fails it
+# harmlessly, then:
+#   sudo install -d -m 0700 /var/lib/sops-nix
+#   rbw get -f notes "sops age key - nix-config (all machines)" \
+#     | sudo tee /var/lib/sops-nix/key.txt >/dev/null
+#   sudo chmod 0400 /var/lib/sops-nix/key.txt
+# (tee, not `install /dev/stdin`: BSD install rejects a non-regular source,
+# so that form works on Linux and fails on the mac. The 0700 parent is what
+# keeps the file private between tee and chmod.)
 #
 # Secrets are decrypted to /run/secrets (tmpfs) owned by marcus; the home
 # layer wires each one to its tool. To change a credential:
@@ -18,14 +28,15 @@
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml;
 
-    # Explicit rather than relying on the default: that's derived from
-    # services.openssh.hostKeys and doesn't track changes reliably
-    # (sops-nix#203).
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    # Age only. Left at its default this looks for an RSA host key that
-    # ssh.nix doesn't generate, and activation dies with "Cannot read ssh
-    # key '/etc/ssh/ssh_host_rsa_key'" — the most common sops-nix
-    # first-boot failure.
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    # No SSH host key as a second identity: it isn't a recipient, so it would
+    # decrypt nothing, and leaving it set implies a fallback that doesn't
+    # exist.
+    age.sshKeyPaths = [ ];
+    # Age only. Left at its default this hunts for an RSA host key that isn't
+    # generated, and activation dies with "Cannot read ssh key
+    # '/etc/ssh/ssh_host_rsa_key'" — the most common sops-nix first-boot
+    # failure.
     gnupg.sshKeyPaths = [ ];
 
     secrets = {

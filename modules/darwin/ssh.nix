@@ -7,10 +7,10 @@
 # removing it here actually revokes access (the old authorized_keys.d
 # implementation didn't, hence nix-darwin's loud warning about it).
 #
-# Unlike the WSL boxes — where sshd exists only to generate a host key and
-# is bound to loopback — this really does listen. It's a laptop, so it
-# listens on whatever network it's on; macOS's firewall still applies, and
-# password auth isn't used because only this key is authorized.
+# The WSL boxes run no sshd at all, so this is the only inbound SSH in the
+# fleet and it really does listen. It's a laptop, so it listens on whatever
+# network it's on; macOS's firewall still applies, and password auth isn't
+# used because only this key is authorized.
 { ... }:
 
 {

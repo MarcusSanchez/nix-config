@@ -60,13 +60,13 @@ hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only
 modules/common/            default.nix packages.nix claude-code.nix
 modules/nixos/             lands on BOTH WSL hosts, unchanged
   default.nix              aggregator — a file here does nothing until listed
-  ssh.nix                  exists to generate the host key (this box's sops
-                           identity), not to serve logins
   packages.nix             Linux-only build tools + ghostty.terminfo, which
                            fixes TERM for sessions ssh-ing *into* this box
   keyring.nix              gnome-keyring as the Secret Service secretspec needs
   tailscale.nix            NOT in the aggregator — hosts/wsl only (Constraints)
   nix.nix nix-ld.nix secrets.nix users.nix wsl.nix home-manager.nix
+                           (no ssh.nix — it existed only to make the host key
+                           that sops used before the single-key move)
 modules/darwin/
   default.nix              aggregator
   nix.nix                  nix.enable = false (Constraints)
@@ -102,7 +102,7 @@ home/marcus/
 
 ## Constraints that are easy to violate
 
-- **Never commit a decrypted secret, and never print one.** Credentials live age-encrypted in `secrets/secrets.yaml` (`sops secrets/secrets.yaml` to edit; `.sops.yaml` lists recipients). The repo is public, so the ciphertext is world-readable — that's fine, but a plaintext slip is permanent in git history and means revoking at the provider. Each machine decrypts with **its own SSH host key** (`modules/nixos/secrets.nix`, via sops-nix's system module) — no private key is ever copied between machines, and there is no bootstrap ordering problem. Onboarding a machine = `ssh-to-age` its host *public* key into `.sops.yaml`, then `sops updatekeys secrets/secrets.yaml`. The personal key at `~/.config/sops/age/keys.txt` is only for editing.
+- **Never commit a decrypted secret, and never print one.** Credentials live age-encrypted in `secrets/secrets.yaml` (`sops secrets/secrets.yaml` to edit; `.sops.yaml` lists recipients). The repo is public, so the ciphertext is world-readable — that's fine, but a plaintext slip is permanent in git history and means revoking at the provider. **Every machine decrypts with the same key** — the personal age key from Bitwarden, at `/var/lib/sops-nix/key.txt` (`sops.age.keyFile`, sops-nix's system module on both platforms). `.sops.yaml` has one recipient, so onboarding a machine never edits the recipient list and never runs `sops updatekeys`: place the key, switch. The same key at `~/.config/sops/age/keys.txt` is what `sops` uses to edit. This replaced per-machine SSH host keys deliberately — marcus owns every box, and revoking a recipient never un-exposes what it already decrypted, so the per-machine scheme was paying real friction for protection it didn't deliver. **A missing `keyFile` is fatal, not a fallback** (`sops-install-secrets`: "cannot read keyfile"), so a machine that hasn't had the key placed fails the whole `setupSecrets` step — that's the expected first-switch error on a fresh box, and it's why the key must land before the second switch.
 
 - **`modules/nixos/tailscale.nix` is imported by `hosts/wsl/default.nix`, NOT the aggregator — never move it there.** Every WSL2 distro on a Windows PC shares one network namespace (same IP, ports, routing table), so two `tailscaled` instances fight over `tailscale0`, UDP 41641 and the `100.64.0.0/10` route. One tailnet node per PC; `nixos-lite` stays off. Also **never install Tailscale on Windows while this is on** — traffic would be encapsulated twice and Tailscale packets don't fit inside Tailscale packets. Running it inside WSL is viable only because mirrored networking gives `eth1` an MTU of 1500 (NAT mode's 1280 breaks SSH and TLS while ping keeps working) and NixOS-WSL runs systemd as PID 1. The node is up only while WSL is — that's accepted, not a bug.
 

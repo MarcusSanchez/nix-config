@@ -78,11 +78,10 @@ actually decides what this box becomes.
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
 `marcus`, which is why there's a restart in the middle.
 
-> **One expected error.** Until this box's key is registered, the rebuild prints
-> `Activation script snippet 'setupSecrets' failed`. Harmless — activation
-> records it and carries on, so packages install and the host key gets created.
-> Register it per [Secrets](#secrets) and rebuild again. Nothing needs
-> pre-placing: the machine decrypts with the host key it generates here.
+> **One expected error.** The rebuild prints `Activation script snippet
+> 'setupSecrets' failed`, because the age key isn't on this box yet. Harmless —
+> activation records it and carries on, so everything else installs. Place the
+> key per [Secrets](#secrets) and rebuild again.
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
@@ -192,11 +191,9 @@ sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 Then open **one more terminal** — that activation replaced your login shell, and
 Home Manager's session variables only land in a shell started after it.
 
-Same expected `setupSecrets failed` as on WSL, and the same fix: register this
-mac per [Secrets](#secrets) and switch again. macOS generates
-`/etc/ssh/ssh_host_ed25519_key` itself, so there's nothing to create. After that
-the only thing left is opening `nvim` once — `gh`, `flyctl` and `atuin` all come
-up authenticated.
+Same expected `setupSecrets failed` as on WSL, and the same fix: place the age
+key per [Secrets](#secrets) and switch again. After that the only thing left is
+opening `nvim` once — `gh`, `flyctl` and `atuin` all come up authenticated.
 
 ## Secrets
 
@@ -206,19 +203,20 @@ every boot into `/run/secrets/`, and each tool is pointed at its file — so no
 machine ever runs `gh auth login`. Only the *values* are encrypted; the keys
 stay readable, so a diff shows *that* a credential changed without showing it.
 
-**Every machine decrypts using its own SSH host key**
-(`/etc/ssh/ssh_host_ed25519_key`, which is why `modules/nixos/ssh.nix` runs
-sshd). No private key is ever copied between machines. Two files control this,
-both at the root of this repo:
+**Every machine decrypts with the same key** — your personal age key, backed up
+in Bitwarden. There is one recipient, so adding a machine never edits the
+recipient list and never re-encrypts anything.
 
 | file | what it is |
 |---|---|
-| `~/nix-config/.sops.yaml` | the list of keys allowed to decrypt |
+| `~/nix-config/.sops.yaml` | the one key allowed to decrypt |
 | `~/nix-config/secrets/secrets.yaml` | the encrypted credentials |
+| `/var/lib/sops-nix/key.txt` | that key, on each machine (root, 0400) |
+| `~/.config/sops/age/keys.txt` | the same key, for editing as your user |
 
 ### Editing a credential
 
-From anywhere inside the repo, on a machine that can already decrypt:
+From anywhere inside the repo:
 
 ```sh
 sops ~/nix-config/secrets/secrets.yaml
@@ -229,101 +227,49 @@ and push as normal.
 
 ### Adding a new machine
 
-Both routes do the same three things: read the new machine's age key, add it to
-`.sops.yaml`, re-encrypt. They differ only in *where* the re-encrypt runs,
-because `sops updatekeys` has to decrypt first — so it needs a machine that
-already can. Route A makes the new machine that machine; route B borrows an
-existing one.
-
-**First, on the NEW machine**, once it's been through the bootstrap above,
-print its age public key. It's a *public* key: safe to paste anywhere.
+Place the key. That's the whole procedure — nothing to paste into `.sops.yaml`,
+no `updatekeys`, no second machine involved.
 
 ```sh
-sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
-# -> age1abc123...
+rbw login                                   # once per machine
+sudo install -d -m 0700 /var/lib/sops-nix
+rbw get -f notes "sops age key - nix-config (all machines)" \
+  | sudo tee /var/lib/sops-nix/key.txt >/dev/null
+sudo chmod 0400 /var/lib/sops-nix/key.txt
+
+nh os switch                                # or: nh darwin switch
 ```
 
-The `.sops.yaml` edit is identical either way. The new key goes in **two**
-places — define it under `keys:`, then reference it under `creation_rules:`:
-
-```yaml
-keys:
-  - &marcus age17fldh0l...          # your personal editing key
-  - &nixos age1dqh47zg...
-  - &mac age1nux0jf7...
-  - &lite age1abc123...             # <- 1. add here, pick any name
-
-creation_rules:
-  - path_regex: secrets/[^/]+\.yaml$
-    key_groups:
-      - age:
-          - *marcus
-          - *nixos
-          - *mac
-          - *lite                   # <- 2. and reference it here
-```
-
-#### Route A — all on the new machine
-
-Use this when the new machine is all you have. It works over a terminal alone,
-no browser and no second machine, which is the `nixos-lite` case. The cost is
-fetching your personal key, since that's the only identity the new box can get
-hold of that already decrypts.
-
-rbw arrives with the first switch — the one that printed `setupSecrets failed`.
+Then, so you can *edit* secrets from this machine too:
 
 ```sh
-rbw login
 mkdir -p ~/.config/sops/age
 rbw get -f notes "sops age key - nix-config (all machines)" \
   > ~/.config/sops/age/keys.txt
 chmod 600 ~/.config/sops/age/keys.txt
 ```
 
-That machine now decrypts, so everything else is local:
+`gh`, `flyctl` and `atuin` come up authenticated on the next switch — atuin logs
+itself in during activation, so nothing is typed.
 
-```sh
-cd ~/nix-config
-$EDITOR .sops.yaml                  # the edit shown above
-sops updatekeys secrets/secrets.yaml
-git add -A && git commit -m "secrets: add <machine>" && git push
-nh os switch                        # or: nh darwin switch
-```
+> **The key must exist before the switch that installs secrets.** sops-nix
+> treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
+> back, so the whole `setupSecrets` step aborts. That's exactly the harmless
+> error the bootstrap sections mention — on a fresh box the first switch is
+> what installs `rbw` so you can fetch the key at all.
 
-The personal key has done its job at that point — the machine decrypts with its
-own host key from here on. Delete it if you'd rather not leave it on the box;
-you'd just fetch it again the next time you want to *edit* secrets there.
+### The key itself
 
-#### Route B — from a machine that already decrypts
+One age key does everything: machines decrypt with it, and you edit with it.
+Bitwarden holds the master copy —
+`rbw get -f notes "sops age key - nix-config (all machines)"`.
 
-No personal key needed: the existing machine decrypts with its own host key.
+Losing every copy is the one unrecoverable case, so Bitwarden is the backup
+that matters. Every machine also holds a copy, which makes that unlikely.
 
-**On the existing machine:**
-
-```sh
-cd ~/nix-config
-$EDITOR .sops.yaml                  # the edit shown above
-sops updatekeys secrets/secrets.yaml
-git add -A && git commit -m "secrets: add <machine>" && git push
-```
-
-**Back on the new machine:**
-
-```sh
-cd ~/nix-config && git pull
-nh os switch                        # or: nh darwin switch
-```
-
-Either way you're done. `gh`, `flyctl` and `atuin` are all authenticated —
-atuin logs itself in during activation, so nothing is typed.
-
-### The personal key
-
-`~/.config/sops/age/keys.txt` is the identity that lets *you* run `sops` to
-edit secrets. Machines never need it — they use their host keys. It's backed
-up in Bitwarden (`rbw get -f notes "sops age key - nix-config (all machines)"`).
-
-Losing it is cheap: you can add a new personal key from any machine that still
-decrypts. **Leaking it is not** — git history is permanent, so anyone with it
-can decrypt every version ever committed. That means revoking at GitHub/fly,
-not re-encrypting.
+**Leaking it is the real risk** — git history is permanent, so anyone with this
+key can decrypt every version ever committed, including credentials you've
+since rotated. Per-machine keys would have bounded that, and were dropped on
+purpose: revoking a recipient never un-exposes what it already read, so the
+only remediation that works is rotating the credential at GitHub/fly/atuin.
+Re-encrypting achieves nothing.

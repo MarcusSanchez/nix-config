@@ -1,28 +1,30 @@
 # Who can decrypt secrets/.
 #
-# Each machine decrypts with its OWN identity, derived from its SSH host key
-# (sops-nix converts /etc/ssh/ssh_host_ed25519_key with ssh-to-age). That is
-# why no private key is ever copied between machines — adding a machine means
-# adding its *public* key below and re-encrypting the data key to it.
+# One key for everything: the personal age key, backed up in Bitwarden. Every
+# machine gets a copy at /var/lib/sops-nix/key.txt (see modules/nixos/secrets.nix
+# for the two commands that place it), and the same key at
+# ~/.config/sops/age/keys.txt is what lets `sops secrets/secrets.yaml` edit.
 #
-# The marcus key is a personal age key that only exists so secrets can be
-# EDITED (`sops secrets/secrets.yaml` needs to decrypt first). It lives at
-# ~/.config/sops/age/keys.txt and is backed up in Bitwarden. Machines do not
-# need it.
+# So adding a machine touches nothing here — no ssh-to-age, no new recipient,
+# no `sops updatekeys`. However many boxes there are, the recipient list is
+# this one key.
 #
-# To add a machine — on that machine:
-#   nix shell nixpkgs#ssh-to-age -c sh -c \
-#     'sudo cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
-# paste the age1... below, then from a machine that can already decrypt:
-#   sops updatekeys secrets/secrets.yaml
+# The tradeoff, taken deliberately: that key decrypts every version of every
+# secret ever committed, and a per-machine key would have bounded that. It buys
+# nothing here because marcus owns every machine, and revoking a recipient
+# never un-exposes what it already read — rotating the credential at the
+# provider is the only real remediation.
 #
 # NOTE: no `-` before `age:` in key_groups. With one, sops treats the groups
 # as Shamir shares and requires several keys to decrypt — nothing works.
 keys:
   - &marcus age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
+  # Host keys from the previous per-machine scheme. Harmless while present.
+  # Drop both and re-key ONLY after every machine has switched to the config
+  # that reads /var/lib/sops-nix/key.txt, then:
+  #   sops updatekeys secrets/secrets.yaml
   - &nixos age1dqh47zgvsvqaw734wf2kmad42s8pscyfvckdhnlwhce6p3rlfcdqx7m2dn
   - &mac age1nux0jf7fgvca80e4hdh2veq3mgj9j7a4zcz5asgld5tgj05r752qnhxtzv
-  # - &nixos-lite ...   # add when that instance is built
 
 creation_rules:
   - path_regex: secrets/[^/]+\.yaml$

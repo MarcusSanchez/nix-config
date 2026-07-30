@@ -1,12 +1,8 @@
 # Credentials on the mac. Mirror of modules/nixos/secrets.nix — see that
 # file for why the system module is used rather than the home-manager one.
 #
-# This machine decrypts with its own identity, derived from
-# /etc/ssh/ssh_host_ed25519_key. nix-darwin has no services.openssh.enable
-# (macOS owns sshd), so unlike the WSL boxes there's nothing here to
-# generate that key — macOS does it. If it's ever missing, toggling
-# System Settings > General > Sharing > Remote Login on and off once
-# creates it permanently.
+# Same single identity as the WSL boxes: the personal age key from Bitwarden,
+# at /var/lib/sops-nix/key.txt. Place it with the commands in that file.
 { inputs, ... }:
 
 {
@@ -14,7 +10,8 @@
 
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml;
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.sshKeyPaths = [ ];
     # Age only — the default hunts for an RSA host key and fails activation.
     gnupg.sshKeyPaths = [ ];
 
