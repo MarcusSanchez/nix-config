@@ -70,11 +70,16 @@
             office-lite-wsl-2 = ./hosts/wsl-lite;
           };
 
-      # Activate with: sudo darwin-rebuild switch --flake ~/nix-config
-      # (name matches `scutil --get LocalHostName`, so no #attr needed)
-      darwinConfigurations."Marcuss-MacBook-Air" = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs; };
-        modules = [ ./hosts/mac ];
-      };
+      # Same shape as above: the attribute IS the hostname, passed down as
+      # `hostName`. Bare `sudo darwin-rebuild switch` resolves
+      # darwinConfigurations.<scutil --get LocalHostName>, so the two must
+      # agree — deriving it means they can't drift.
+      darwinConfigurations = nixpkgs.lib.mapAttrs (
+        hostName: hostModule:
+        nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit inputs hostName; };
+          modules = [ hostModule ];
+        }
+      ) { "Marcuss-MacBook-Air" = ./hosts/mac; };
     };
 }
