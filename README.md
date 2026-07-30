@@ -62,8 +62,13 @@ machines. The mac doesn't — update it by hand with `-u`.
 
 ## Bootstrapping a WSL machine
 
-Both boxes install identically. Pick the name first: it's the `--name`, the
-`#attr`, and the hostname, all the same string.
+Both boxes install identically. Pick the name first — you'll type it as the
+`--name` and as the `#attr`, and the config sets the hostname to match. Those
+are three separate identifiers we keep equal by convention: `--name` is only
+Windows' handle for the distro (`wsl -d`, `wsl -t`, `\\wsl$\<name>`), and it
+does **not** set the hostname. The hostname comes from `networking.hostName`
+via `/etc/wsl.conf`, which is why the `#attr` on the first rebuild is what
+actually decides what this box becomes.
 
 | name | what you get |
 |---|---|
@@ -104,15 +109,26 @@ CFG=nixos   # or nixos-lite — must match the --name above
 sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
 sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$CFG
 
-# Move the repo home and recreate the /etc/nixos symlink (not managed by the
-# config; bare `nixos-rebuild` depends on it)
+# Move the repo home and replace /etc/nixos with a symlink to it (not managed
+# by the config; bare `nixos-rebuild` and NH_FLAKE both depend on it).
+# The rm matters: /etc/nixos is a real directory on a fresh image, and
+# `ln -s` into an existing directory silently creates the link *inside* it
+# (/etc/nixos/nix-config) instead of replacing it. All it holds is the stock
+# configuration.nix, which is unused once we build from the flake.
 sudo mv /tmp/nixos-config /home/marcus/nix-config
 sudo chown -R marcus:users /home/marcus/nix-config
-sudo ln -sfn /home/marcus/nix-config /etc/nixos
+sudo rm -rf /etc/nixos
+sudo ln -s /home/marcus/nix-config /etc/nixos
+ls -ld /etc/nixos    # must print a symlink, not a directory
 exit
 ```
 
-**On Windows again** — restart so `wsl.defaultUser` takes effect:
+**On Windows again.** This restart is mandatory, and it's what applies both
+`wsl.defaultUser` *and* the hostname — WSL reads `/etc/wsl.conf` only at distro
+startup, so until now this box still calls itself `nixos` no matter what you
+passed to `--name`. Don't run a bare `nh os switch` before it: with the old
+hostname it would resolve `nixosConfigurations.nixos` and build the dev config
+here, without erroring.
 
 ```powershell
 wsl -t nixos
@@ -123,8 +139,9 @@ wsl -t nixos-lite
 wsl -d nixos-lite
 ```
 
-**First login as marcus.** `hostname` now prints the name you chose, so bare
-`nh os switch` resolves with no `#name`. The neovim config is already cloned to
+**First login as marcus.** Check `hostname` first — it must print the name you
+chose, which is what makes bare `nh os switch` resolve with no `#name`. The
+neovim config is already cloned to
 `~/.config/nvim`. The only thing left is to open `nvim` once, so lazy.nvim
 installs plugins from `lazy-lock.json`.
 
