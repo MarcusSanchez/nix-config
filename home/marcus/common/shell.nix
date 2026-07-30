@@ -86,7 +86,9 @@
 
       oh-my-zsh = {
         enable = true;
-        theme = "robbyrussell";
+        # empty: starship.nix owns the prompt (oh-my-zsh is here for its
+        # plugins). Restore "robbyrussell" if starship is ever dropped.
+        theme = "";
         plugins = [
           "git"
           "sudo"
