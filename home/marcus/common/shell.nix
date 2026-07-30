@@ -100,16 +100,30 @@
         alias cls='clear'
         precmd() { echo }
 
-        # robbyrussell verbatim, with %n@%m (user@host) inserted between the
+        # robbyrussell's layout, with %n@%m (user@host) inserted between the
         # arrow and the directory — four machines, and the theme has no
         # identity segment of its own.
         #
         # Reassigned here rather than forked into a custom theme file: omz
-        # sets PROMPT when it sources the theme, and this block is ordered
-        # 1200, so it lands afterwards and stays a two-line diff against
+        # sets these when it sources the theme, and this block is ordered
+        # 1200, so it lands afterwards and stays a small delta against
         # upstream instead of a copy that silently rots.
-        PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} )"
-        PROMPT+=' %{$fg_bold[green]%}%n@%m%{$reset_color%} %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
+        #
+        # Catppuccin Mocha by hex rather than $fg[...]. The ANSI names
+        # resolve against whatever palette the terminal carries — close, but
+        # not the same colours, and not identical across machines.
+        # %F{#rrggbb} is exact. Same hues as upstream robbyrussell; only
+        # user@host is new, in peach.
+        #
+        #   green a6e3a1   red f38ba8   peach  fab387
+        #   teal  94e2d5   blue 89b4fa  yellow f9e2af
+        PROMPT="%(?:%B%F{#a6e3a1}%1{➜%}%f%b :%B%F{#f38ba8}%1{➜%}%f%b )"
+        PROMPT+=' %B%F{#fab387}%n@%m%f%b %F{#94e2d5}%c%f $(git_prompt_info)'
+
+        ZSH_THEME_GIT_PROMPT_PREFIX="%B%F{#89b4fa}git:(%b%F{#f38ba8}"
+        ZSH_THEME_GIT_PROMPT_SUFFIX="%f "
+        ZSH_THEME_GIT_PROMPT_DIRTY="%F{#89b4fa}) %F{#f9e2af}✗%f"
+        ZSH_THEME_GIT_PROMPT_CLEAN="%F{#89b4fa})%f"
 
         bindkey '^I' autosuggest-accept
         # kcbt (back-tab) is undefined on terminals that don't report it —
