@@ -80,8 +80,9 @@ A fresh instance boots as the stock `nixos` user and the first rebuild creates
 
 > **One expected error.** The rebuild prints `Activation script snippet
 > 'setupSecrets' failed`, because the age key isn't on this box yet. Harmless —
-> activation records it and carries on, so everything else installs. Place the
-> key per [Secrets](#secrets) and rebuild again.
+> activation records it and carries on, so everything else installs, including
+> the `rbw` you'll use to fetch that key. You place it at the end of this
+> section, then switch once more.
 
 **On Windows** — download the latest `nixos.wsl` from
 [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
@@ -138,15 +139,50 @@ wsl -t nixos-lite
 wsl -d nixos-lite
 ```
 
-**First login as marcus.** Check `hostname` first — it must print the name you
-chose, which is what makes bare `nh os switch` resolve with no `#name`. The
-neovim config is already cloned to
-`~/.config/nvim`. The only thing left is to open `nvim` once, so lazy.nvim
-installs plugins from `lazy-lock.json`.
+**First login as marcus.** Check `hostname` before anything else — it must
+print the name you chose, since that's what makes bare `nh os switch` resolve
+with no `#name`.
 
-`gh`, `flyctl` and `atuin` all come up authenticated — sops-nix puts their
-credentials in place during activation, and flyctl picks up `FLY_API_TOKEN`
-from the decrypted secret.
+Nothing is authenticated yet. The first switch couldn't decrypt secrets, so
+`gh`, `flyctl` and `atuin` are all still logged out. Placing the age key is
+the whole remaining job:
+
+```sh
+rbw login                                   # your Bitwarden master password
+sudo install -d -m 0700 /var/lib/sops-nix
+rbw get -f notes "sops age key - nix-config (all machines)" \
+  | sudo tee /var/lib/sops-nix/key.txt >/dev/null
+sudo chmod 0400 /var/lib/sops-nix/key.txt
+
+nh os switch                                # no setupSecrets error this time
+```
+
+If `rbw get` can't find the item, the note's name has drifted — `rbw list |
+grep -i sops` gives the current one.
+
+Now they're all authenticated — atuin logs itself in during activation, so
+nothing is typed. To confirm, check the tools rather than the directory:
+`ls /run/secrets/` is *denied by design* (mode `751`, so nothing can enumerate
+what secrets exist) and looks like a failure when it isn't.
+
+```sh
+gh auth status
+atuin status | grep Username
+zsh -lc 'fly auth whoami'    # -l matters: FLY_API_TOKEN is set by a login
+                             # shell, so your current one won't have it yet
+```
+
+Last step: open `nvim` once so lazy.nvim installs plugins from
+`lazy-lock.json` — the config itself is already cloned to `~/.config/nvim`.
+
+Optionally, if you want to *edit* secrets from this box too:
+
+```sh
+mkdir -p ~/.config/sops/age
+rbw get -f notes "sops age key - nix-config (all machines)" \
+  > ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt
+```
 
 ## Bootstrapping a new Mac
 
@@ -191,9 +227,10 @@ sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 Then open **one more terminal** — that activation replaced your login shell, and
 Home Manager's session variables only land in a shell started after it.
 
-Same expected `setupSecrets failed` as on WSL, and the same fix: place the age
-key per [Secrets](#secrets) and switch again. After that the only thing left is
-opening `nvim` once — `gh`, `flyctl` and `atuin` all come up authenticated.
+Same expected `setupSecrets failed` as on WSL, and the same fix: run
+[Adding a new machine](#adding-a-new-machine) to place the age key, then
+`nh darwin switch` again. After that the only thing left is opening `nvim`
+once — `gh`, `flyctl` and `atuin` all come up authenticated.
 
 ## Secrets
 
