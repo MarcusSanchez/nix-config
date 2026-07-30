@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a WSL NixOS dev box (host `bedroom-wsl`, user `marcus`), a family of headless WSL instances sharing one config (`nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` — same user — same toolchains, no Windows integration; meant for pulling a repo down on some other PC and working from a terminal), and a MacBook Air on nix-darwin + Determinate Nix (host `Marcuss-MacBook-Air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on WSL `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on both WSL boxes builds from pushed main there, never from the working tree — so one push deploys to two machines. The mac has no autoUpgrade (`nh darwin switch -u` updates it by hand). GC runs daily on the WSL boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a WSL NixOS dev box (host `bedroom-wsl`, user `marcus`), a family of headless WSL instances sharing one config (`nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` — same user — same toolchains, no Windows integration; meant for pulling a repo down on some other PC and working from a terminal), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on WSL `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on both WSL boxes builds from pushed main there, never from the working tree — so one push deploys to two machines. The mac has no autoUpgrade (`nh darwin switch -u` updates it by hand). GC runs daily on the WSL boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees.
 
@@ -15,7 +15,7 @@ Claude Code sessions run on any of them — `uname` separates darwin from Linux,
 ```sh
 # WSL only
 sudo nixos-rebuild switch --flake /etc/nixos   # apply (passwordless sudo works)
-nix eval --raw '/etc/nixos#darwinConfigurations."Marcuss-MacBook-Air".system.drvPath'
+nix eval --raw '/etc/nixos#darwinConfigurations."macbook-air".system.drvPath'
                                                # eval the mac system after touching darwin/ or home/
 
 # Mac only

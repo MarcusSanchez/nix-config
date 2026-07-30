@@ -9,7 +9,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 |---|---|---|---|
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
 | `nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
-| `Marcuss-MacBook-Air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
+| `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
 `nixos-rebuild` / `darwin-rebuild` look for.
