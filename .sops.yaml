@@ -19,17 +19,9 @@
 # as Shamir shares and requires several keys to decrypt — nothing works.
 keys:
   - &marcus age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
-  # Host keys from the previous per-machine scheme. Harmless while present.
-  # Drop both and re-key ONLY after every machine has switched to the config
-  # that reads /var/lib/sops-nix/key.txt, then:
-  #   sops updatekeys secrets/secrets.yaml
-  - &nixos age1dqh47zgvsvqaw734wf2kmad42s8pscyfvckdhnlwhce6p3rlfcdqx7m2dn
-  - &mac age1nux0jf7fgvca80e4hdh2veq3mgj9j7a4zcz5asgld5tgj05r752qnhxtzv
 
 creation_rules:
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
       - age:
           - *marcus
-          - *nixos
-          - *mac
