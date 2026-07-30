@@ -86,9 +86,7 @@
 
       oh-my-zsh = {
         enable = true;
-        # empty: starship.nix owns the prompt (oh-my-zsh is here for its
-        # plugins). Restore "robbyrussell" if starship is ever dropped.
-        theme = "";
+        theme = "robbyrussell";
         plugins = [
           "git"
           "sudo"
@@ -101,6 +99,17 @@
       initContent = lib.mkOrder 1200 ''
         alias cls='clear'
         precmd() { echo }
+
+        # robbyrussell verbatim, with %n@%m (user@host) inserted between the
+        # arrow and the directory — four machines, and the theme has no
+        # identity segment of its own.
+        #
+        # Reassigned here rather than forked into a custom theme file: omz
+        # sets PROMPT when it sources the theme, and this block is ordered
+        # 1200, so it lands afterwards and stays a two-line diff against
+        # upstream instead of a copy that silently rots.
+        PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} )"
+        PROMPT+=' %{$fg_bold[green]%}%n@%m%{$reset_color%} %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
 
         bindkey '^I' autosuggest-accept
         # kcbt (back-tab) is undefined on terminals that don't report it —

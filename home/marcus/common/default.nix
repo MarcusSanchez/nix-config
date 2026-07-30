@@ -7,7 +7,6 @@
   imports = [
     ./packages.nix
     ./shell.nix
-    ./starship.nix
     ./neovim.nix
     ./git.nix
     ./catppuccin.nix

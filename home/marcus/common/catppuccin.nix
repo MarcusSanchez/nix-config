@@ -12,12 +12,6 @@
     flavor = "mocha";
     accent = "blue";
 
-    # the vendored tokyo-night preset hardcodes its own colours
-    # (starship.nix) — keep one source of truth, and the port
-    # builds a theme derivation at EVAL time, which no runner or
-    # cross-platform eval can build
-    starship.enable = false;
-
     nvim.enable = false;
   };
 }
