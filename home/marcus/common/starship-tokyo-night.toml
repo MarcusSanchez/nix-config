@@ -71,4 +71,6 @@ Debian = "󰣚"
 Redhat = "󱄛"
 RedHatEnterprise = "󱄛"
 Pop = ""
-NixOS = ""
+# NixOS resolves to its own symbol otherwise, and starship's default is
+# the ❄️ emoji. Use the generic Linux glyph instead.
+NixOS = "󰌽"

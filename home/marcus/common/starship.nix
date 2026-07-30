@@ -10,9 +10,10 @@
 #   * the toolchain segments (nodejs/bun/rust/golang/php) and $time are
 #     dropped, and the powerline colour chain re-stitched to close on
 #     git_status's #394260 instead of leaving a dangling separator
-#   * os.symbols gains NixOS. The preset omits it, so starship falls back
-#     to its default ❄️ — an emoji-presentation glyph that renders in
-#     colour and sits badly against text
+#   * os.symbols gains NixOS, mapped to the same generic Linux glyph the
+#     preset already uses. Without an entry starship falls back to its
+#     default ❄️, an emoji-presentation glyph that renders in colour and
+#     sits badly against text
 #
 # The preset hardcodes hex rather than using a palette, so catppuccin.nix
 # keeps its starship port opted out. That opt-out is load-bearing beyond
