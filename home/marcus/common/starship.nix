@@ -1,30 +1,27 @@
-# Prompt: starship's official tokyo-night preset, vendored as
-# starship-tokyo-night.toml. Regenerate with:
+# Prompt: oh-my-zsh's robbyrussell, rebuilt in starship, plus an OS glyph.
 #
-#   starship preset tokyo-night
+#   <os> ➜  nix-config git:(main) ✗
 #
-# then re-apply the three local edits, none of which the preset does:
+# That's the omz default marcus used before starship: a green arrow that
+# turns red on a failed command, the current directory's basename only, and
+# the branch wrapped as git:(name). Plain foreground colours — no
+# backgrounds, no powerline — so it inherits the terminal's catppuccin theme
+# rather than hardcoding hex.
 #
-#   * $username$hostname get their OWN segment after the icon, on the
-#     preset's second colour — the preset has no identity segment at all,
-#     so every later block shifts one step down the gradient:
-#     os #a3aed2 -> user@host #769ff0 -> directory #394260 -> git #212736
-#   * the toolchain segments (nodejs/bun/rust/golang/php) and $time are
-#     dropped, and the bar uses rounded caps —  U+E0B6 opening,  U+E0B4
-#     closing — instead of the preset's ░▒▓ gradient lead-in.  U+E0B0
-#     separates. Emit these by codepoint when regenerating; typed straight
-#     into a heredoc they vanish, which is how a version shipped today with
-#     no separators at all
-#   * os.symbols gains NixOS, mapped to the same generic Linux glyph the
-#     preset already uses. Without an entry starship falls back to its
-#     default ❄️, an emoji-presentation glyph that renders in colour and
-#     sits badly against text
+# $character comes FIRST here, which is unusual for starship but is what
+# robbyrussell does: the arrow leads the line and doubles as the status
+# indicator, so there is no trailing prompt marker.
 #
-# The preset hardcodes hex rather than using a palette, so catppuccin.nix
-# keeps its starship port opted out. That opt-out is load-bearing beyond
-# aesthetics: the port reads its palette from a derivation built at EVAL
-# time, so any evaluation that can't build it fails outright — CI runners,
-# and evaluating the mac config from Linux.
+# Only two OS glyphs are defined; everything else falls through to
+# starship's defaults, which don't matter on a two-platform fleet. NixOS is
+# mapped to the generic tux on purpose — with no entry starship uses its
+# own default, an emoji-presentation snowflake that renders in colour and
+# sits badly against text.
+#
+# catppuccin.nix keeps its starship port opted out: it builds its theme at
+# EVALUATION time, so any eval that cannot build it fails outright (CI
+# runners, and evaluating the mac config from Linux). Named colours make it
+# unnecessary anyway.
 #
 # Starship's zsh init runs after oh-my-zsh, so it owns the prompt; omz stays
 # for its plugins only (shell.nix sets theme = "").
@@ -36,7 +33,67 @@
     settings = {
       # blank line between prompts
       add_newline = true;
-    }
-    // builtins.fromTOML (builtins.readFile ./starship-tokyo-night.toml);
+
+      format = builtins.concatStringsSep "" [
+        "$os"
+        "$character"
+        "$directory"
+        "$git_branch"
+        "$git_status"
+        "$cmd_duration"
+      ];
+
+      os = {
+        disabled = false;
+        format = "[$symbol ]($style)";
+        style = "bold blue";
+        symbols = {
+          Macos = "󰀵";
+          Linux = "󰌽";
+          NixOS = "󰌽";
+        };
+      };
+
+      # leads the line, robbyrussell-style; two spaces after, as omz has
+      character = {
+        success_symbol = "[➜ ](bold green)";
+        error_symbol = "[➜ ](bold red)";
+      };
+
+      # basename only — omz's %c
+      directory = {
+        format = "[$path]($style) ";
+        style = "cyan";
+        truncation_length = 1;
+        truncation_symbol = "";
+        truncate_to_repo = false;
+      };
+
+      # git:(branch) — parens blue, branch red, exactly omz's colours
+      git_branch = {
+        format = "[git:(](bold blue)[$branch](red)[)](bold blue) ";
+      };
+
+      git_status = {
+        format = "([$all_status$ahead_behind]($style) )";
+        style = "yellow";
+        conflicted = "✗";
+        modified = "✗";
+        deleted = "✗";
+        untracked = "?";
+        staged = "+";
+        renamed = "»";
+        stashed = "≡";
+        ahead = "⇡";
+        behind = "⇣";
+        diverged = "⇕";
+      };
+
+      cmd_duration = {
+        min_time = 2000;
+        format = "[$duration]($style) ";
+        style = "dimmed yellow";
+      };
+    };
   };
 }
