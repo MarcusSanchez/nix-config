@@ -48,17 +48,25 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
       formatter.aarch64-darwin = nixpkgs-darwin.legacyPackages.aarch64-darwin.nixfmt-tree;
 
-      # Attribute names match each box's hostname: that's how bare
-      # `nixos-rebuild --flake /etc/nixos` and system.autoUpgrade pick one.
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [ ./hosts/wsl ];
-      };
-
-      nixosConfigurations.nixos-lite = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [ ./hosts/wsl-lite ];
-      };
+      # hostname -> which host module shapes it. Attribute names ARE the
+      # hostnames: each is passed to its module as `hostName` via specialArgs
+      # and assigned there, so the two can't drift the way they would if the
+      # module hardcoded its own name. Several entries may share a module —
+      # that's how a second identical WSL box gets added, as one line here
+      # and nothing else.
+      nixosConfigurations =
+        nixpkgs.lib.mapAttrs
+          (
+            hostName: hostModule:
+            nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit inputs hostName; };
+              modules = [ hostModule ];
+            }
+          )
+          {
+            nixos = ./hosts/wsl;
+            nixos-lite = ./hosts/wsl-lite;
+          };
 
       # Activate with: sudo darwin-rebuild switch --flake ~/nix-config
       # (name matches `scutil --get LocalHostName`, so no #attr needed)

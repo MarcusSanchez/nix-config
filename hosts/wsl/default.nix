@@ -1,6 +1,6 @@
 # Host definition: the WSL machine. Everything host-specific lives here;
 # everything reusable lives in modules/.
-{ ... }:
+{ hostName, ... }:
 
 {
   imports = [
@@ -12,7 +12,11 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  networking.hostName = "nixos";
+  # Supplied by flake.nix, which keys every entry by the hostname itself, so
+  # this cannot drift from the attribute that bare `nixos-rebuild --flake
+  # /etc/nixos` and system.autoUpgrade resolve. Several hostnames may point
+  # at this same module — that's how an identical second box is added.
+  networking.hostName = hostName;
 
   homeEntryPoint = ../../home/marcus/wsl.nix;
 

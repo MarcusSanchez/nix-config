@@ -3,16 +3,15 @@
 # go, croc things around. Same system layer as the dev box (same
 # toolchains, same nix-ld for npm's prebuilt binaries); what it skips is
 # the Windows integration in the home layer — see home/marcus/wsl-lite.nix.
-{ ... }:
+{ hostName, ... }:
 
 {
   imports = [ ../../modules/nixos ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Must match the flake attribute: bare `nixos-rebuild --flake /etc/nixos`
-  # and system.autoUpgrade both resolve nixosConfigurations.<hostname>.
-  networking.hostName = "nixos-lite";
+  # Supplied by flake.nix — see hosts/wsl/default.nix.
+  networking.hostName = hostName;
 
   homeEntryPoint = ../../home/marcus/wsl-lite.nix;
 
