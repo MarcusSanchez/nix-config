@@ -2,10 +2,6 @@
 # decrypts. The sops module itself is the SYSTEM one, not the home-manager
 # one — that choice matters:
 #
-#   * the system module derives its identity from the machine's SSH host
-#     key by default, so no private key is ever distributed. The HM module
-#     defaults sshKeyPaths to [ ], which forces a hand-copied age key onto
-#     every machine.
 #   * the HM module registers its activation entry as a bare string, which
 #     home-manager coerces to entryAnywhere — no ordering guarantees at
 #     all (sops-nix#581, open). Consumers routinely run before the secrets
@@ -23,9 +19,16 @@
   #
   # Guarded so a machine whose secrets aren't decrypted yet starts without
   # the variable rather than erroring.
+  # croc takes its code phrase from CROC_SECRET, so with the same value
+  # exported everywhere, bare `croc send <file>` and bare `croc` pair up
+  # across machines with no code to read out. $(cat) drops the trailing
+  # newline, which would otherwise make the phrases not match.
   home.sessionVariablesExtra = ''
     if [ -r /run/secrets/fly_config ]; then
       export FLY_API_TOKEN="$(sed -n 's/^access_token: //p' /run/secrets/fly_config)"
+    fi
+    if [ -r /run/secrets/croc_secret ]; then
+      export CROC_SECRET="$(cat /run/secrets/croc_secret)"
     fi
   '';
 

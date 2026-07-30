@@ -25,6 +25,13 @@
         owner = "marcussanchez";
         mode = "0400";
       };
+      # croc's code phrase. The home layer exports it as CROC_SECRET, which
+      # makes `croc send <file>` and bare `croc` pair without a code.
+      croc_secret = {
+        owner = "marcussanchez";
+        mode = "0400";
+      };
+
       atuin_key = {
         owner = "marcussanchez";
         mode = "0400";

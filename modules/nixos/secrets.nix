@@ -58,6 +58,13 @@
         mode = "0400";
       };
 
+      # croc's code phrase. The home layer exports it as CROC_SECRET, which
+      # makes `croc send <file>` and bare `croc` pair without a code.
+      croc_secret = {
+        owner = "marcus";
+        mode = "0400";
+      };
+
       # atuin points at this via programs.atuin.settings.key_path. It's the
       # E2E key for synced history and the one credential here that can't
       # be reissued — losing every copy leaves the server side unreadable.
