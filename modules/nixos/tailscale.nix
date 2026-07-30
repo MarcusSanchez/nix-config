@@ -34,6 +34,17 @@
 {
   services.tailscale.enable = true;
 
+  # Tailscale SSH: tailscaled terminates SSH itself and authorizes from
+  # tailnet identity + the policy file's "ssh" rules, so there is no sshd,
+  # no authorized_keys and no key to distribute. This is why there is no
+  # ssh.nix here. Creates tailscaled-set.service, which runs
+  # `tailscale set --ssh` after tailscaled.
+  #
+  # Reaching this box needs a matching rule in the tailnet policy, and the
+  # action must be "accept" — "check" demands a periodic browser re-auth and
+  # presents as a connection that simply closes.
+  services.tailscale.extraSetFlags = [ "--ssh" ];
+
   # /dev/net/tun already exists on this kernel; belt and braces, since
   # without it tailscaled fails with CreateTUN("tailscale0") failed.
   boot.kernelModules = [ "tun" ];

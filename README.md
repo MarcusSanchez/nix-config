@@ -244,7 +244,7 @@ rbw login                                   # your Bitwarden master password
 sudo install -d -m 0700 /var/lib/sops-nix
 rbw get -f notes "sops age key - nix-config (all machines)" \
   | sudo tee /var/lib/sops-nix/key.txt >/dev/null
-sudo chmod 0400 /var/lib/sops-nix/key.txt
+  sudo chmod 0400 /var/lib/sops-nix/key.txt
 
 nh os switch                                # or: nh darwin switch
 ```
@@ -260,7 +260,7 @@ Optionally, so you can *edit* secrets from this machine too:
 mkdir -p ~/.config/sops/age
 rbw get -f notes "sops age key - nix-config (all machines)" \
   > ~/.config/sops/age/keys.txt
-chmod 600 ~/.config/sops/age/keys.txt
+  chmod 600 ~/.config/sops/age/keys.txt
 ```
 
 To confirm it worked, check the tools rather than the directory — atuin logs
