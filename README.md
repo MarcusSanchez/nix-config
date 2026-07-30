@@ -298,3 +298,42 @@ since rotated. Per-machine keys would have bounded that, and were dropped on
 purpose: revoking a recipient never un-exposes what it already read, so the
 only remediation that works is rotating the credential at GitHub/fly/atuin.
 Re-encrypting achieves nothing.
+
+## Tailscale on a new PC
+
+Only relevant if that box will be a tailnet node. Both `hosts/wsl` and
+`hosts/wsl-lite` import `modules/nixos/tailscale.nix`, so every WSL host is
+one unless you drop the import.
+
+**Windows needs mirrored networking.** This is a Windows-side file the repo
+can't manage, and it's per-PC rather than per-distro:
+
+```powershell
+@"
+[wsl2]
+networkingMode=mirrored
+"@ | Set-Content $env:USERPROFILE\.wslconfig
+wsl --shutdown
+```
+
+Order doesn't matter — before or after installing the distro, it just needs
+the `wsl --shutdown` to take effect.
+
+Two things break without it. NAT mode's MTU is 1280, which breaks SSH and TLS
+while leaving `ping` working, so it looks like everything is fine until
+nothing you actually use works. And the MagicDNS fix in `tailscale.nix` points
+resolved at `10.255.255.254`, a resolver that only exists in mirrored mode —
+without it, DNS falls back to `1.1.1.1`/`8.8.8.8`, so the internet works and
+LAN and tailnet names quietly don't.
+
+**Then enrol the box**, which is interactive and stores nothing in the repo:
+
+```sh
+sudo tailscale up --ssh
+```
+
+**One node per PC.** Two WSL distros on one machine share a network namespace,
+so two `tailscaled` would fight over `tailscale0`, UDP 41641 and the
+`100.64.0.0/10` route. If a PC ever hosts two, the second one drops the
+`tailscale.nix` import from its host module. Also don't run Tailscale on the
+Windows side while a distro has it — the traffic gets encapsulated twice.
