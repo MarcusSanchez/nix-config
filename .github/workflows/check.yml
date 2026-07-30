@@ -27,8 +27,12 @@ jobs:
         run: |
           nix run --inputs-from . nixpkgs#statix -- check .
           nix run --inputs-from . nixpkgs#deadnix -- --fail .
-      # evaluates both nixosConfigurations (nixos, nixos-lite)
+      # evaluates every nixosConfigurations entry
       - name: nix flake check
         run: nix flake check
-      - name: evaluate the mac system
-        run: nix eval --raw '.#darwinConfigurations."Marcuss-MacBook-Air".system.drvPath'
+      # enumerated, not named: a hostname rename broke this once already,
+      # and flake check does not cover darwinConfigurations
+      - name: evaluate the darwin systems
+        run: |
+          nix eval --raw '.#darwinConfigurations' --apply \
+            'cfgs: builtins.concatStringsSep "\n" (map (n: "${n}: ${cfgs.${n}.system.drvPath}") (builtins.attrNames cfgs))'
