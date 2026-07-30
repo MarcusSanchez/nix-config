@@ -5,11 +5,16 @@
 #
 # then re-apply the three local edits, none of which the preset does:
 #
-#   * $username$hostname ride in the first block, right after the OS icon,
-#     styled to match it — the preset has no identity segment at all
+#   * $username$hostname get their OWN segment after the icon, on the
+#     preset's second colour — the preset has no identity segment at all,
+#     so every later block shifts one step down the gradient:
+#     os #a3aed2 -> user@host #769ff0 -> directory #394260 -> git #212736
 #   * the toolchain segments (nodejs/bun/rust/golang/php) and $time are
-#     dropped, and the powerline colour chain re-stitched to close on
-#     git_status's #394260 instead of leaving a dangling separator
+#     dropped, and the bar uses rounded caps —  U+E0B6 opening,  U+E0B4
+#     closing — instead of the preset's ░▒▓ gradient lead-in.  U+E0B0
+#     separates. Emit these by codepoint when regenerating; typed straight
+#     into a heredoc they vanish, which is how a version shipped today with
+#     no separators at all
 #   * os.symbols gains NixOS, mapped to the same generic Linux glyph the
 #     preset already uses. Without an entry starship falls back to its
 #     default ❄️, an emoji-presentation glyph that renders in colour and
