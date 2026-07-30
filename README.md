@@ -106,7 +106,8 @@ wsl -d nixos-lite
 **Inside, as the default `nixos` user:**
 
 ```sh
-CFG=nixos   # or nixos-lite — must match the --name above
+CFG=bedroom-wsl   # or nixos-lite / office-lite-wsl-1 / office-lite-wsl-2
+                  # — any attribute in flake.nix, must match the --name above
 
 # The stock image has flakes disabled, so these two pass the feature flags
 # explicitly (an env var would be stripped by sudo). After the first switch
