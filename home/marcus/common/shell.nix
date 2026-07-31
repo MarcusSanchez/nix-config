@@ -109,7 +109,7 @@
         # Two lines: an identity banner, then robbyrussell exactly as
         # upstream — so the status arrow sits next to what you type.
         #
-        #    marcus@bedroom-wsl        (tux on the WSL boxes)
+        #     marcus@bedroom-wsl       (tux on the WSL boxes)
         #   ➜  nix-config git:(main) ✗
         #
         # The OS glyph is picked at eval time and is a monochrome Nerd Font
@@ -130,7 +130,7 @@
         #
         #   green a6e3a1   red f38ba8    peach  fab387
         #   teal  94e2d5   blue 89b4fa   yellow f9e2af   mauve cba6f7
-        PROMPT="%B${if pkgs.stdenv.isDarwin then "" else ""} %F{#fab387}%n%F{#f38ba8}@%F{#cba6f7}%m%f%b"
+        PROMPT="%B${if pkgs.stdenv.isDarwin then "" else ""}  %F{#fab387}%n%F{#f38ba8}@%F{#cba6f7}%m%f%b"
         PROMPT+=$'\n'
         PROMPT+='%(?:%B%F{#a6e3a1}%1{➜%}%f%b :%B%F{#f38ba8}%1{➜%}%f%b ) %F{#94e2d5}%c%f $(git_prompt_info)'
 
