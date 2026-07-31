@@ -106,14 +106,13 @@ wsl -d nixos-lite
 **Inside, as the default `nixos` user:**
 
 ```sh
-CFG=bedroom-wsl   # or nixos-lite / office-lite-wsl-1 / office-lite-wsl-2
-                  # — any attribute in flake.nix, must match the --name above
+HOSTNAME=<host-name>   # any attribute in flake.nix, matching the --name above
 
 # The stock image has flakes disabled, so these two pass the feature flags
 # explicitly (an env var would be stripped by sudo). After the first switch
 # the config enables flakes permanently.
 sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git /tmp/nixos-config
-sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$CFG
+sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$HOSTNAME
 
 # Move the repo home and replace /etc/nixos with a symlink to it (not managed
 # by the config; bare `nixos-rebuild` and NH_FLAKE both depend on it).
