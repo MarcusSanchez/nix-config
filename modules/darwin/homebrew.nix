@@ -38,7 +38,6 @@
       "localsend"
       "spotify"
       "stremio"
-      "termius"
       "zed"
       "zen"
     ];
