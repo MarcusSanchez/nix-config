@@ -46,10 +46,7 @@ jobs:
             echo "inputs already current — nothing to push"
             exit 0
           fi
-          git commit -m "flake: weekly input bump (automated)
-
-Bumped by update-flake-lock.yml after the full eval gate passed:
-nix flake check across all nixosConfigurations plus the enumerated
-darwin evals. The autoUpgrade timers deliver this to the WSL boxes;
-the mac picks it up at the next pull + switch."
+          git commit \
+            -m "flake: weekly input bump (automated)" \
+            -m "Bumped by update-flake-lock.yml after the full eval gate passed: nix flake check across all nixosConfigurations plus the enumerated darwin evals. The autoUpgrade timers deliver this to the WSL boxes; the mac picks it up at the next pull + switch."
           git push
