@@ -12,6 +12,12 @@
     EDITOR = "nvim";
     SUDO_EDITOR = "nvim";
 
+    # Bare `nh os switch` / `nh darwin switch` find the flake here. The
+    # repo lives at ~/nix-config on every machine; /etc/nixos and
+    # /etc/nix-darwin are symlinks to it, so pointing nh at the working
+    # tree directly is the same target on both platforms.
+    NH_FLAKE = "${config.home.homeDirectory}/nix-config";
+
     # Let `npm install -g` work natively: install into a writable prefix
     # instead of the read-only nix store. Deliberately impure — global npm
     # CLIs are throwaway convenience tools here, and nix-ld covers any

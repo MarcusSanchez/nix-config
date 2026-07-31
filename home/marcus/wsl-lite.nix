@@ -11,10 +11,7 @@
 { ... }:
 
 {
-  imports = [
-    ./common
-    ./wsl/nix.nix
-  ];
+  imports = [ ./common ];
 
   home.username = "marcus";
   home.homeDirectory = "/home/marcus";

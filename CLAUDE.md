@@ -40,9 +40,9 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
-1. `hosts/wsl/`, `hosts/wsl-lite/`, and `hosts/mac/` — the entries in `flake.nix`. Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and on the NixOS hosts `homeEntryPoint` — the option `modules/nixos/home-manager.nix` reads to decide which home config this host's marcus gets).
-2. `modules/common/` (shared — only options that exist on both platforms), `modules/nixos/`, and `modules/darwin/` — system layer, one concern per file. Each platform aggregator imports `../common` plus its own files: **a new module does nothing until added to an imports list.** Every WSL host imports `modules/nixos` unchanged and adds `tailscale.nix` at host level; they differ only in hostname and `homeEntryPoint`, because what separates the dev box from the lite ones lives in the home layer. Each platform's `home-manager.nix` bridges to layer 3 (`backupFileExtension = "hm-backup"`).
-3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `wsl/` and `mac/` (platform-only concern files), and `wsl.nix` / `wsl-lite.nix` / `mac.nix` as the per-host entry points (identity + `./common` + whichever platform files that host wants). `wsl-lite.nix` is `wsl.nix` minus `windows.nix` + `dotfiles.nix` — **that omission is the whole difference between the two WSL boxes**; read its header before adding either back. The bridges import the entry points, never `common/` directly.
+1. `hosts/wsl/`, `hosts/wsl-lite/`, and `hosts/mac/` — the entries in `flake.nix`. Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it, the mac included).
+2. `modules/common/` (shared — only options that exist on both platforms), `modules/nixos/`, and `modules/darwin/` — system layer, one concern per file. Each platform aggregator imports `../common` plus its own files: **a new module does nothing until added to an imports list.** Every WSL host imports `modules/nixos` unchanged and adds `tailscale.nix` at host level; they differ only in hostname and `homeEntryPoint`, because what separates the dev box from the lite ones lives in the home layer. The HM bridge and the sops config live in `modules/common/` (`home-manager.nix`, `secrets.nix`), branching on `isDarwin` where the platforms differ; each platform's `home-manager.nix`/`secrets.nix` are one-line shims holding only the platform module import that makes those options exist. The bridge sets `backupFileExtension = "hm-backup"`.
+3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `wsl/` and `mac/` (platform-only concern files), and `wsl.nix` / `wsl-lite.nix` / `mac.nix` as the per-host entry points (identity + `./common` + whichever platform files that host wants). `wsl-lite.nix` imports only `./common` — it is `wsl.nix` minus the entire `wsl/` dir, **and that omission is the whole difference between the dev box and the lite kind**; read its header before adding anything back. The bridges import the entry points, never `common/` directly.
 
 Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; Linux-only build tools → `modules/nixos/packages.nix` (note: everything in `modules/nixos/` lands on *both* WSL hosts); mac GUI app → cask in `modules/darwin/homebrew.nix`; new concern → new file + aggregator entry in `common/` (both platforms) or the platform dir; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; platform-only user config → file in `home/marcus/wsl/` or `home/marcus/mac/`, imported from the relevant entry point. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
@@ -59,6 +59,8 @@ flake.nix                  inputs + all three host wirings
 hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only
 
 modules/common/            default.nix packages.nix claude-code.nix
+                           secrets.nix home-manager.nix — the shared sops
+                           config and HM bridge (platform files are shims)
 modules/nixos/             lands on EVERY WSL host, unchanged
   default.nix              aggregator — a file here does nothing until listed
   packages.nix             Linux-only build tools + ghostty.terminfo, which
@@ -67,7 +69,8 @@ modules/nixos/             lands on EVERY WSL host, unchanged
   tailscale.nix            NOT in the aggregator — host-level, and it carries
                            the systemd-resolved config MagicDNS needs on WSL
                            (Constraints)
-  nix.nix nix-ld.nix secrets.nix users.nix wsl.nix home-manager.nix
+  nix.nix nix-ld.nix users.nix wsl.nix
+  secrets.nix home-manager.nix            shims — see modules/common
                            (no ssh.nix — it existed only to make the host key
                            that sops used before the single-key move)
 modules/darwin/
@@ -83,7 +86,8 @@ modules/darwin/
   macos.nix                Touch ID sudo + Remote Login (the password-auth
                            fallback for when tailscaled is down — no
                            authorized_keys exist anywhere any more)
-  secrets.nix users.nix fonts.nix home-manager.nix
+  users.nix fonts.nix
+  secrets.nix home-manager.nix            shims — see modules/common
 
 home/marcus/
   wsl.nix wsl-lite.nix mac.nix   entry points — the HM bridges import these,
@@ -104,7 +108,6 @@ home/marcus/
                            and writes nothing
     dotfiles.nix           common/dotfiles/ ↔ Windows, via win-sync
     windows.nix            windows.username, set per host
-    nix.nix
   mac/
     dotfiles.nix           per-file symlinks into common/dotfiles/ (where the
                            WSL side copies instead)
