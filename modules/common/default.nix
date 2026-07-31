@@ -6,6 +6,7 @@
   imports = [
     ./packages.nix
     ./secrets.nix
+    ./home-manager.nix
     ./claude-code.nix
   ];
 }
