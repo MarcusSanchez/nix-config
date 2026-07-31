@@ -17,18 +17,21 @@ The repo lives at `~/nix-config` everywhere; the symlink is what bare
 ## Layout
 
 ```
-flake.nix                inputs + all host wirings
-devenv.nix               repo scripts: secrets:edit, secrets:status,
-                         age:place, config:check
-                         (on PATH inside the repo after `direnv allow`)
-.sops.yaml               which age keys can decrypt
-secrets/secrets.yaml     credentials, age-encrypted (safe to push)
-hosts/                   per-host values only — wsl/, wsl-lite/, mac/
-modules/common/          shared system layer
-modules/nixos/           WSL system layer — every WSL host, unchanged
-modules/darwin/          mac system layer
-home/marcus/             Home Manager: common/ + wsl/ + mac/, with
+home/
+  marcus/                Home Manager — common/ + wsl/ + mac/, with
                          wsl.nix / wsl-lite.nix / mac.nix as entry points
+hosts/                   per-host values only — mac/, wsl/, wsl-lite/
+modules/
+  common/                shared system layer
+  darwin/                mac system layer
+  nixos/                 WSL system layer — every WSL host, unchanged
+secrets/
+  secrets.yaml           credentials, age-encrypted (safe to push)
+.sops.yaml               which age keys can decrypt
+devenv.nix               repo scripts: secrets:edit, secrets:status,
+                         age:place, config:check — on PATH inside the
+                         repo after `direnv allow`
+flake.nix                inputs + all host wirings
 ```
 
 One concern per file, and a file does nothing until it's in its directory's
