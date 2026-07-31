@@ -58,9 +58,8 @@ nvd diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2)
 **Both**
 
 ```sh
-nix fmt                       # format
-nix flake check               # validate before switching
-nix flake update              # bump inputs
+config:check                  # fmt + lint + evaluate every host (the CI gate)
+nix flake update              # bump inputs by hand (CI does it Sundays)
 ```
 
 Every WSL box rebuilds weekly from pushed main, so one push deploys to all
@@ -232,9 +231,6 @@ scripts are on PATH whenever you're cd'd in):
 secrets:edit
 ```
 
-Which is just `sops ~/nix-config/secrets/secrets.yaml`, if the shell isn't
-loaded.
-
 It opens the decrypted file in `$EDITOR` and re-encrypts when you save. Commit
 and push as normal.
 
@@ -245,35 +241,15 @@ This is the whole of onboarding a machine — nothing to paste into
 (after `rbw login` and `direnv allow ~/nix-config`):
 
 ```sh
-age:place    # fetches from Bitwarden, places both copies, verifies
-             # against .sops.yaml, tells you the next step
+rbw login    # your Bitwarden master password, once per machine
+age:place    # fetches from Bitwarden, places the machine copy AND the
+             # editing copy, verifies against .sops.yaml, and tells you
+             # the next step (a switch)
 ```
 
-Or by hand:
-
-```sh
-rbw login                                   # your Bitwarden master password
-sudo install -d -m 0700 /var/lib/sops-nix
-rbw get -f notes "sops age key - nix-config (all machines)" \
-  | sudo tee /var/lib/sops-nix/key.txt >/dev/null
-  sudo chmod 0400 /var/lib/sops-nix/key.txt
-
-nh os switch                                # or: nh darwin switch
-```
-
-`tee` rather than `install /dev/stdin`, because BSD `install` rejects a
-non-regular source and that form fails on the mac. The `0700` parent is what
-keeps the file private in between. If `rbw get` can't find the item, the note's
-name has drifted — `rbw list | grep -i sops` gives the current one.
-
-Optionally, so you can *edit* secrets from this machine too:
-
-```sh
-mkdir -p ~/.config/sops/age
-rbw get -f notes "sops age key - nix-config (all machines)" \
-  > ~/.config/sops/age/keys.txt
-  chmod 600 ~/.config/sops/age/keys.txt
-```
+If `age:place` can't find the vault item, its name has drifted —
+`rbw list | grep -i sops` gives the current one. The verbose steps it wraps
+live in `devenv.nix`.
 
 To confirm it worked, check the tools rather than the directory — atuin logs
 itself in during activation, so nothing is typed:
