@@ -1,8 +1,11 @@
-# Host definition: the second WSL box — headless, portable, "just a
-# terminal": clone a repo on some other machine, poke at it with node or
-# go, croc things around. Same system layer as the dev box (same
-# toolchains, same nix-ld for npm's prebuilt binaries); what it skips is
-# the Windows integration in the home layer — see home/marcus/wsl-lite.nix.
+# Host definition: the lite KIND of WSL box, not one machine — every
+# headless instance points here (nixos-lite, office-lite-wsl-1/2 in
+# flake.nix), differing only in the hostName passed in. Headless,
+# portable, "just a terminal": clone a repo on some other machine, poke at
+# it with node or go, croc things around. Same system layer as the dev box
+# (same toolchains, same nix-ld for npm's prebuilt binaries); what it
+# skips is the Windows integration in the home layer — see
+# home/marcus/wsl-lite.nix.
 { hostName, ... }:
 
 {
