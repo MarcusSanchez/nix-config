@@ -184,8 +184,11 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confi
 git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
 
 # First activation (bootstraps darwin-rebuild itself; this is also where brew
-# installs everything declared in homebrew.nix, so it's slow)
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config
+# installs everything declared in homebrew.nix, so it's slow).
+# The #macbook-air is needed exactly once: bare resolution goes by
+# LocalHostName, which Apple autogenerates on a fresh mac — this switch is
+# what sets it to macbook-air, and bare works from then on.
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config#macbook-air
 
 # Symlink so bare `sudo darwin-rebuild switch` works — the analog of the WSL
 # machines keeping their config at /etc/nixos
@@ -331,6 +334,13 @@ LAN and tailnet names quietly don't.
 ```sh
 sudo tailscale up --ssh
 ```
+
+**The mac needs only this step.** Everything Windows-side above is
+WSL-specific; on a fresh mac the daemon, its launchd job, and the
+/etc/resolver/ts.net split-DNS hook all land with the first switch, and the
+activation hook re-asserts `--ssh` on every rebuild. No reboot either — that
+was only ever needed when migrating off the GUI app, whose network extension
+lingers until restart.
 
 **One node per PC.** Two WSL distros on one machine share a network namespace,
 so two `tailscaled` would fight over `tailscale0`, UDP 41641 and the
