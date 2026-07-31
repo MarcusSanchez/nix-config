@@ -7,7 +7,6 @@
     ./common
     ./wsl/windows.nix
     ./wsl/nix.nix
-    ./wsl/toolchains.nix
     ./wsl/dotfiles.nix
   ];
 

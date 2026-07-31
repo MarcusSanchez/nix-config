@@ -8,16 +8,12 @@
 # stays per-box, producing spurious pulls and two clones racing to push.
 # ./wsl/windows.nix — only dotfiles.nix consumes it.
 #
-# toolchains.nix IS here: rustup comes with ../common, and its downloaded
-# binaries break with ENOENT after a glibc bump + GC on any NixOS box,
-# not just the one with RustRover attached.
 { ... }:
 
 {
   imports = [
     ./common
     ./wsl/nix.nix
-    ./wsl/toolchains.nix
   ];
 
   home.username = "marcus";

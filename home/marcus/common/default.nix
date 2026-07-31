@@ -11,7 +11,7 @@
     ./git.nix
     ./catppuccin.nix
     ./comma.nix
-    ./goroot.nix
+    ./toolchains.nix
     ./secrets.nix
     ./bitwarden.nix
   ];
