@@ -109,8 +109,13 @@
         # Two lines: an identity banner, then robbyrussell exactly as
         # upstream — so the status arrow sits next to what you type.
         #
-        #     marcus@bedroom-wsl       (tux on the WSL boxes)
+        #   (NixOS) marcus@bedroom-wsl        (nix-darwin, in green, on the mac)
         #   ➜  nix-config git:(main) ✗
+        #
+        # The platform label is plain text on purpose — a third attempt at
+        # this slot. Nerd Font glyphs vanished when hand-typed and depended
+        # on the terminal's font; text needs neither. Sky for NixOS, green
+        # for the mac, resolved at eval so each .zshrc carries only its own.
         #
         # The OS glyph is picked at eval time and is a monochrome Nerd Font
         # codepoint — U+F179 apple / U+F17C tux — NOT starship's default ❄,
@@ -128,9 +133,11 @@
         # %F{#rrggbb} is exact. Same hues as upstream robbyrussell; the
         # identity line is new — peach user, red @, mauve host.
         #
-        #   green a6e3a1   red f38ba8    peach  fab387
+        #   green a6e3a1   red f38ba8    peach  fab387   sky   89dceb
         #   teal  94e2d5   blue 89b4fa   yellow f9e2af   mauve cba6f7
-        PROMPT="%B${if pkgs.stdenv.isDarwin then "" else ""}  %F{#fab387}%n%F{#f38ba8}@%F{#cba6f7}%m%f%b"
+        PROMPT="%B${
+          if pkgs.stdenv.isDarwin then "%F{#a6e3a1}(nix-darwin)" else "%F{#89dceb}(NixOS)"
+        } %F{#fab387}%n%F{#f38ba8}@%F{#cba6f7}%m%f%b"
         PROMPT+=$'\n'
         PROMPT+='%(?:%B%F{#a6e3a1}%1{➜%}%f%b :%B%F{#f38ba8}%1{➜%}%f%b ) %F{#94e2d5}%c%f $(git_prompt_info)'
 
