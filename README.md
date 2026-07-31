@@ -238,13 +238,13 @@ and push as normal.
 
 This is the whole of onboarding a machine — nothing to paste into
 `.sops.yaml`, no `updatekeys`, no second machine involved. As one command
-(after `rbw login` and `direnv allow ~/nix-config`):
+(after `direnv allow ~/nix-config`):
 
 ```sh
-rbw login    # your Bitwarden master password, once per machine
-age:place    # fetches from Bitwarden, places the machine copy AND the
-             # editing copy, verifies against .sops.yaml, and tells you
-             # the next step (a switch)
+age:place    # logs into Bitwarden if needed (your master password),
+             # fetches the key, places the machine copy AND the editing
+             # copy, verifies against .sops.yaml, and tells you the next
+             # step (a switch)
 ```
 
 If `age:place` can't find the vault item, its name has drifted —

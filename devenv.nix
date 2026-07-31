@@ -23,6 +23,10 @@
     # uses), then prove the key matches the recipient in .sops.yaml.
     "age:place".exec = ''
       set -euo pipefail
+      # no-op when already logged in (verified: silent exit 0); on a fresh
+      # box it prompts for the master password via pinentry, which works
+      # fine from a script — this runs in your terminal
+      rbw login
       note="sops age key - nix-config (all machines)"
 
       sudo install -d -m 0700 /var/lib/sops-nix
