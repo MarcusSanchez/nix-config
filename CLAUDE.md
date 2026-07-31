@@ -72,8 +72,6 @@ modules/nixos/             lands on EVERY WSL host, unchanged
 modules/darwin/
   default.nix              aggregator
   nix.nix                  nix.enable = false (Constraints)
-  ssh.nix                  Remote Login + the WSL box's authorized key —
-                           the fallback path; Tailscale SSH is primary
   tailscale.nix            OSS tailscaled as a launchd daemon, so the mac
                            serves Tailscale SSH like the WSL boxes (the
                            sandboxed GUI builds can't). NEVER re-add the
@@ -81,7 +79,10 @@ modules/darwin/
                            tailscaled per mac. nix-darwin#1688 recovery
                            command is in the file header
   homebrew.nix             cleanup = "zap" (Constraints)
-  secrets.nix users.nix macos.nix fonts.nix home-manager.nix
+  macos.nix                Touch ID sudo + Remote Login (the password-auth
+                           fallback for when tailscaled is down — no
+                           authorized_keys exist anywhere any more)
+  secrets.nix users.nix fonts.nix home-manager.nix
 
 home/marcus/
   wsl.nix wsl-lite.nix mac.nix   entry points — the HM bridges import these,
