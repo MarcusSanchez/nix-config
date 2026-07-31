@@ -6,6 +6,7 @@
     ../common
     ./nix.nix
     ./ssh.nix
+    ./tailscale.nix
     ./secrets.nix
     ./homebrew.nix
     ./users.nix

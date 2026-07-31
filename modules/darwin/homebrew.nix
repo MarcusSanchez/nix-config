@@ -38,12 +38,6 @@
       "localsend"
       "spotify"
       "stremio"
-      # The app, not nix-darwin's services.tailscale: that runs the bare
-      # tailscaled daemon, which Tailscale scopes to unattended headless
-      # installs, and nix-darwin#1688 has it hang and log you out on every
-      # darwin-rebuild switch. This is an interactive laptop — it wants the
-      # menu bar and the Apple network extension.
-      "tailscale-app"
       "termius"
       "zed"
       "zen"

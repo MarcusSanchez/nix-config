@@ -1,5 +1,6 @@
-# Remote Login, so the WSL box can reach this machine — for diagnostics and
-# `darwin-rebuild --target-host`.
+# Remote Login: Apple's sshd with the WSL box's key, kept as the fallback
+# path now that Tailscale SSH (tailscale.nix) is the primary way in — if
+# tailscaled is down (nix-darwin#1688), this still answers on the LAN.
 #
 # nix-darwin enables Apple's built-in sshd via launchctl rather than
 # `systemsetup -setremotelogin`, which would need Full Disk Access. The
