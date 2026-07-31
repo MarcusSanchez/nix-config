@@ -1,7 +1,7 @@
 # Credentials, so no machine ever needs a CLI login. One file for both
 # platforms — only the sops module import differs, and that lives in each
-# platform's secrets.nix shim (which is also what makes the sops.* options
-# exist here at all).
+# platform aggregator (which is what makes the sops.* options exist here
+# at all).
 #
 # Every machine decrypts with the SAME identity — the personal age key from
 # Bitwarden, at /var/lib/sops-nix/key.txt. .sops.yaml therefore has exactly

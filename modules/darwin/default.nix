@@ -1,16 +1,23 @@
 # Aggregator for all system-level modules.
-{ ... }:
+#
+# The two sops-nix/home-manager imports are the platform halves of
+# modules/common/secrets.nix and modules/common/home-manager.nix: they are
+# what make the sops.* and home-manager.* options exist for common to set.
+{ inputs, ... }:
 
 {
+  # Positions preserved from the retired ./secrets.nix and ./home-manager.nix
+  # shims: darwin concatenates equal-priority activation-script text in
+  # definition order, so moving these imports moves the script and the drv.
   imports = [
     ../common
     ./nix.nix
     ./tailscale.nix
-    ./secrets.nix
+    inputs.sops-nix.darwinModules.sops
     ./homebrew.nix
     ./users.nix
     ./macos.nix
     ./fonts.nix
-    ./home-manager.nix
+    inputs.home-manager.darwinModules.home-manager
   ];
 }

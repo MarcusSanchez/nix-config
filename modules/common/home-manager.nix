@@ -1,6 +1,6 @@
 # Bridges Home Manager into the system build; per-user config lives in
 # home/. One bridge for both platforms — only the HM module import differs,
-# and that lives in each platform's home-manager.nix shim.
+# and that lives in each platform aggregator.
 #
 # Which entry point this host's user gets is per-host via homeEntryPoint,
 # set in hosts/ — the dev box and the lite boxes share this bridge but not
