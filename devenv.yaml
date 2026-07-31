@@ -1,0 +1,5 @@
+# Same channel the flake's Linux side rides; devenv.lock pins it
+# independently of flake.lock (bump with `devenv update`).
+inputs:
+  nixpkgs:
+    url: github:NixOS/nixpkgs/nixos-unstable

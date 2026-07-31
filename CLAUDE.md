@@ -46,7 +46,7 @@ Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywh
 
 Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; Linux-only build tools → `modules/nixos/packages.nix` (note: everything in `modules/nixos/` lands on *both* WSL hosts); mac GUI app → cask in `modules/darwin/homebrew.nix`; new concern → new file + aggregator entry in `common/` (both platforms) or the platform dir; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; platform-only user config → file in `home/marcus/wsl/` or `home/marcus/mac/`, imported from the relevant entry point. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
-**Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs.
+**Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. The one devenv.nix that DOES live here is this repo being its own project: operational scripts only (`edit-secrets`, `age-place`, `check` — the full local gate), no toolchains; the tools they wrap come from the system config, so everything still works without the shell loaded.
 
 ## File map
 
@@ -54,6 +54,8 @@ Every `.nix` file here opens with a header comment explaining itself, so this ma
 
 ```
 flake.nix                  inputs + all three host wirings
+devenv.nix                 repo-operations scripts (edit-secrets, age-place,
+                           check), on PATH via direnv when cd'd in
 .sops.yaml                 age recipients          secrets/secrets.yaml  ciphertext
 
 hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only

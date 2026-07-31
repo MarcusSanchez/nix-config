@@ -231,11 +231,15 @@ recipient list and never re-encrypts anything.
 
 ### Editing a credential
 
-From anywhere inside the repo:
+Inside the repo (`direnv allow` once per machine, then the repo's devenv
+scripts are on PATH whenever you're cd'd in):
 
 ```sh
-sops ~/nix-config/secrets/secrets.yaml
+edit-secrets
 ```
+
+Which is just `sops ~/nix-config/secrets/secrets.yaml`, if the shell isn't
+loaded.
 
 It opens the decrypted file in `$EDITOR` and re-encrypts when you save. Commit
 and push as normal.
@@ -243,7 +247,15 @@ and push as normal.
 ### Placing the key
 
 This is the whole of onboarding a machine — nothing to paste into
-`.sops.yaml`, no `updatekeys`, no second machine involved.
+`.sops.yaml`, no `updatekeys`, no second machine involved. As one command
+(after `rbw login` and `direnv allow ~/nix-config`):
+
+```sh
+age-place    # fetches from Bitwarden, places both copies, verifies
+             # against .sops.yaml, tells you the next step
+```
+
+Or by hand:
 
 ```sh
 rbw login                                   # your Bitwarden master password
