@@ -67,18 +67,17 @@ rebuilds actually carry new packages; `-u` is for bumping by hand.
 
 ## Bootstrapping a WSL machine
 
-Both boxes install identically. Pick the name first — you'll type it as the
-`--name` and as the `#attr`, and the config sets the hostname to match. Those
-are three separate identifiers we keep equal by convention: `--name` is only
-Windows' handle for the distro (`wsl -d`, `wsl -t`, `\\wsl$\<name>`), and it
-does **not** set the hostname. The hostname comes from `networking.hostName`
-via `/etc/wsl.conf`, which is why the `#attr` on the first rebuild is what
-actually decides what this box becomes.
+Every box installs identically, and the distro keeps its default Windows-side
+name, `NixOS` — that name is only Windows' handle (`wsl -d`, `wsl -t`,
+`\\wsl$\NixOS`) and NixOS never sees it. What decides what the box *becomes*
+is the flake attribute on the first rebuild: the config sets the hostname
+from it via `/etc/wsl.conf`. (Pass `--name` only if a PC ever hosts a second
+distro — WSL refuses duplicates.)
 
-| name | what you get |
+| flake attribute | what you get |
 |---|---|
 | `bedroom-wsl` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
-| `nixos-lite`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any name listed in `flake.nix` works — add a line there first |
+| `nixos-lite`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any attribute in `flake.nix` works — add a line there first |
 
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
 `marcus`, which is why there's a restart in the middle.
@@ -95,23 +94,17 @@ A fresh instance boots as the stock `nixos` user and the first rebuild creates
 > before placing the key. Same cause, nothing new.
 
 **On Windows** — download the latest `nixos.wsl` from
-[NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases), then
-run one of these (WSL refuses a `--name` that already exists on this PC):
+[NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases):
 
 ```powershell
-# the dev machine
-wsl --install --from-file nixos.wsl --name bedroom-wsl
-wsl -d bedroom-wsl
-
-# ...or the headless one
-wsl --install --from-file nixos.wsl --name nixos-lite
-wsl -d nixos-lite
+wsl --install --from-file nixos.wsl
+wsl -d NixOS
 ```
 
 **Inside, as the default `nixos` user:**
 
 ```sh
-HOSTNAME=<host-name>   # any attribute in flake.nix, matching the --name above
+HOSTNAME=<host-name>   # any attribute in flake.nix
 
 # The stock image has flakes disabled, so these two pass the feature flags
 # explicitly (an env var would be stripped by sudo). After the first switch
@@ -134,20 +127,15 @@ exit
 ```
 
 **On Windows again.** This restart is mandatory, and it's what applies both
-`wsl.defaultUser` *and* the hostname — WSL reads `/etc/wsl.conf` only at distro
-startup, so until now this box still calls itself `nixos` (the stock image's
-name) no matter what you
-passed to `--name`. Don't run a bare `nh os switch` before it: with the old
+`wsl.defaultUser` *and* the hostname — WSL reads `/etc/wsl.conf` only at
+distro startup, so until now this box still calls itself `nixos` (the stock
+image's hostname). Don't run a bare `nh os switch` before it: with the old
 hostname it would resolve `nixosConfigurations.nixos`, which does not exist,
 or worse a config meant for another box.
 
 ```powershell
-wsl -t bedroom-wsl
-wsl -d bedroom-wsl        # lands as marcus
-
-# ...or the headless one
-wsl -t nixos-lite
-wsl -d nixos-lite
+wsl -t NixOS
+wsl -d NixOS        # lands as marcus
 ```
 
 **First login as marcus.** Check `hostname` before anything else — it must
