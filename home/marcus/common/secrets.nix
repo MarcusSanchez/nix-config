@@ -18,14 +18,15 @@
   # --help but ignores it and opens a browser (tested 2026-07-29).
   #
   # Guarded so a machine whose secrets aren't decrypted yet starts without
-  # the variable rather than erroring.
+  # the variable rather than erroring. Bare token since 2026-07-31 — the
+  # old fly_config held a whole config.yml and needed sed.
   # croc takes its code phrase from CROC_SECRET, so with the same value
   # exported everywhere, bare `croc send <file>` and bare `croc` pair up
   # across machines with no code to read out. $(cat) drops the trailing
   # newline, which would otherwise make the phrases not match.
   home.sessionVariablesExtra = ''
-    if [ -r /run/secrets/fly_config ]; then
-      export FLY_API_TOKEN="$(sed -n 's/^access_token: //p' /run/secrets/fly_config)"
+    if [ -r /run/secrets/fly_token ]; then
+      export FLY_API_TOKEN="$(cat /run/secrets/fly_token)"
     fi
     if [ -r /run/secrets/croc_secret ]; then
       export CROC_SECRET="$(cat /run/secrets/croc_secret)"

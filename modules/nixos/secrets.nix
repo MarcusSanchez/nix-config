@@ -20,13 +20,33 @@
 # Secrets are decrypted to /run/secrets (tmpfs) owned by marcus; the home
 # layer wires each one to its tool. To change a credential:
 # `sops secrets/secrets.yaml` opens the plaintext in $EDITOR.
-{ inputs, ... }:
+{ config, inputs, ... }:
 
 {
   imports = [ inputs.sops-nix.nixosModules.sops ];
 
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml;
+
+    # gh's state file, rendered at activation with only the token coming
+    # from ciphertext — the structure is reviewable here. Still not
+    # programs.gh.hosts, which would bake the token into a world-readable
+    # /nix/store path. gh needs the token twice; that duplication is gh's
+    # format, not an accident.
+    templates."gh-hosts.yml" = {
+      content = ''
+        github.com:
+            users:
+                MarcusSanchez:
+                    oauth_token: ${config.sops.placeholder.gh_token}
+            git_protocol: https
+            user: MarcusSanchez
+            oauth_token: ${config.sops.placeholder.gh_token}
+      '';
+      path = "/home/marcus/.config/gh/hosts.yml";
+      owner = "marcus";
+      mode = "0600";
+    };
 
     age.keyFile = "/var/lib/sops-nix/key.txt";
     # No SSH host key as a second identity: it isn't a recipient, so it would
@@ -40,20 +60,18 @@
     gnupg.sshKeyPaths = [ ];
 
     secrets = {
-      # gh reads this directly; it's the file `gh auth login` would write.
-      # Deliberately not programs.gh.hosts, which would put the token in a
-      # world-readable /nix/store path.
-      gh_hosts = {
+      # Bare tokens, not config files: the file structures live in git as
+      # templates below, so a diff of secrets.yaml means "a credential
+      # changed" and rotation is pasting one value.
+      gh_token = {
         owner = "marcus";
-        mode = "0600";
-        path = "/home/marcus/.config/gh/hosts.yml";
+        mode = "0400";
       };
-
-      # Read by the shell export in home/marcus/common/secrets.nix. Holds
-      # a fly ORG token (`fly tokens create org`) — static, unlike the
+      # A fly ORG token (`fly tokens create org`) — static, unlike the
       # session macaroon `fly auth login` leaves behind, which carries a
-      # 10-minute discharge and dies with the session.
-      fly_config = {
+      # 10-minute discharge and dies with the session. Exported as
+      # FLY_API_TOKEN by home/marcus/common/secrets.nix.
+      fly_token = {
         owner = "marcus";
         mode = "0400";
       };

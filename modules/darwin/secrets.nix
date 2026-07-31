@@ -3,7 +3,7 @@
 #
 # Same single identity as the WSL boxes: the personal age key from Bitwarden,
 # at /var/lib/sops-nix/key.txt. Place it with the commands in that file.
-{ inputs, ... }:
+{ config, inputs, ... }:
 
 {
   imports = [ inputs.sops-nix.darwinModules.sops ];
@@ -15,13 +15,27 @@
     # Age only — the default hunts for an RSA host key and fails activation.
     gnupg.sshKeyPaths = [ ];
 
+    templates."gh-hosts.yml" = {
+      content = ''
+        github.com:
+            users:
+                MarcusSanchez:
+                    oauth_token: ${config.sops.placeholder.gh_token}
+            git_protocol: https
+            user: MarcusSanchez
+            oauth_token: ${config.sops.placeholder.gh_token}
+      '';
+      path = "/Users/marcussanchez/.config/gh/hosts.yml";
+      owner = "marcussanchez";
+      mode = "0600";
+    };
+
     secrets = {
-      gh_hosts = {
+      gh_token = {
         owner = "marcussanchez";
-        mode = "0600";
-        path = "/Users/marcussanchez/.config/gh/hosts.yml";
+        mode = "0400";
       };
-      fly_config = {
+      fly_token = {
         owner = "marcussanchez";
         mode = "0400";
       };
