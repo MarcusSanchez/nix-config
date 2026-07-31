@@ -20,9 +20,19 @@
       cleanup = "zap";
     };
 
+    taps = [
+      # pinentry-touchid lives in the author's tap, not homebrew-core
+      "jorgelbg/tap"
+    ];
+
     brews = [
       # real gcc (not clang-pretending); nixpkgs gcc on darwin is awkward
       "gcc"
+
+      # Touch ID for rbw unlocks — driven through the protocol shim in
+      # home/marcus/common/bitwarden.nix, which injects the gpg-agent
+      # options it gates on (rbw doesn't send them; see the shim comment)
+      "pinentry-touchid"
 
       # file-watching daemon; nixpkgs watchman has a rocky history on darwin
       "watchman"

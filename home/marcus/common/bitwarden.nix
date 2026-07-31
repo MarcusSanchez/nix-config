@@ -28,15 +28,59 @@
     enable = true;
     settings = {
       email = "marcussanchez031@gmail.com";
-      # Per platform, because rbw-agent is reached differently on each.
-      # WSL is headless, so a graphical prompt just fails to draw — curses
-      # there, invoked from the terminal the agent can still reach. On the
-      # mac the agent is a detached daemon with no controlling terminal, so
-      # pinentry-curses has no TTY it owns: it spins at 100% CPU forever
-      # retrying a read that returns EIO (and `--timeout 0` means it never
-      # gives up), one stuck process per terminal that triggered an unlock.
-      # A native Cocoa dialog needs no TTY.
-      pinentry = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
+      # Per platform. WSL: curses, drawn on the client's tty (rbw forwards
+      # it). The mac got curses too originally; a Ctrl-C mid-prompt orphans
+      # the pinentry, which then spins at 100% CPU retrying an EIO read
+      # (2026-07-29 — survivable in normal flows, marcus was right, but the
+      # landmine plus macOS tty semantics made a GUI prompt the safe call).
+      #
+      # On the mac that GUI is now Touch ID: pinentry-touchid (brew, see
+      # homebrew.nix) behind a protocol shim. Stock pinentry-touchid gates
+      # its Touch ID path on two things only gpg-agent sends — a nonempty
+      # SETKEYINFO and OPTION allow-external-password-cache (main.go; its
+      # issue #17) — so with rbw it would fall back to a pinentry-mac
+      # dialog every time. The shim speaks those two lines on rbw's behalf,
+      # then bridges the rest verbatim. First unlock: keychain miss, one
+      # pinentry-mac dialog, touchid stores the password under the injected
+      # key id. Every unlock after: the Touch ID sheet.
+      #
+      # If the brew formula isn't installed yet (fresh mac, pre-switch
+      # ordering), the shim execs pinentry-mac directly — degraded to the
+      # old dialog, never broken.
+      pinentry =
+        if pkgs.stdenv.isDarwin then
+          pkgs.writeShellScriptBin "pinentry-rbw-touchid" ''
+            TOUCHID=/opt/homebrew/bin/pinentry-touchid
+            # touchid's own first-run fallback spawns pinentry-mac from PATH
+            export PATH=${pkgs.pinentry_mac}/bin:/opt/homebrew/bin:$PATH
+            [ -x "$TOUCHID" ] || exec ${pkgs.pinentry_mac}/bin/pinentry-mac "$@"
+            coproc TP {
+              exec "$TOUCHID"
+            }
+            # coproc fds are invisible to subshells: dup onto plain fds, then close the
+            # originals via eval — the {var}<&- form can't take array subscripts, so
+            # without eval the parent silently keeps a handle on touchid's stdin and
+            # nothing ever sees EOF
+            exec 5<&"''${TP[0]}" 6>&"''${TP[1]}"
+            eval "exec ''${TP[0]}<&- ''${TP[1]}>&-"
+            IFS= read -r greeting <&5
+            printf '%s\n' "$greeting"
+            printf 'OPTION allow-external-password-cache\n' >&6
+            IFS= read -r _ <&5
+            printf 'SETKEYINFO n/rbw-master\n' >&6
+            IFS= read -r _ <&5
+            # touchid->client in the background (fd6 closed there — an inherited copy
+            # would keep touchid's stdin alive); client->touchid holds the foreground
+            # so a client hangup closes fd6 and takes touchid down — no orphaned
+            # pinentry after a Ctrl-C
+            cat <&5 6>&- &
+            BG=$!
+            cat >&6 5<&-
+            exec 6>&-
+            wait "$BG"
+          ''
+        else
+          pkgs.pinentry-curses;
       lock_timeout = 3600;
     };
   };
