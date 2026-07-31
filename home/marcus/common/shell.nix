@@ -112,13 +112,13 @@
         # Catppuccin Mocha by hex rather than $fg[...]. The ANSI names
         # resolve against whatever palette the terminal carries — close, but
         # not the same colours, and not identical across machines.
-        # %F{#rrggbb} is exact. Same hues as upstream robbyrussell; only
-        # user@host is new, in peach.
+        # %F{#rrggbb} is exact. Same hues as upstream robbyrussell; the
+        # identity segment is new — peach user, red @, mauve host.
         #
-        #   green a6e3a1   red f38ba8   peach  fab387
-        #   teal  94e2d5   blue 89b4fa  yellow f9e2af
+        #   green a6e3a1   red f38ba8    peach  fab387
+        #   teal  94e2d5   blue 89b4fa   yellow f9e2af   mauve cba6f7
         PROMPT="%(?:%B%F{#a6e3a1}%1{➜%}%f%b :%B%F{#f38ba8}%1{➜%}%f%b )"
-        PROMPT+=' %B%F{#fab387}%n@%m%f%b %F{#94e2d5}%c%f $(git_prompt_info)'
+        PROMPT+=' %B%F{#fab387}%n%F{#f38ba8}@%F{#cba6f7}%m%f%b %F{#94e2d5}%c%f $(git_prompt_info)'
 
         ZSH_THEME_GIT_PROMPT_PREFIX="%B%F{#89b4fa}git:(%b%F{#f38ba8}"
         ZSH_THEME_GIT_PROMPT_SUFFIX="%f "
