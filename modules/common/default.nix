@@ -5,6 +5,7 @@
 {
   imports = [
     ./packages.nix
+    ./secrets.nix
     ./claude-code.nix
   ];
 }

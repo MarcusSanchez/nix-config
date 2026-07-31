@@ -26,7 +26,7 @@
     atuin = {
       enable = true;
       settings = {
-        # E2E key comes from sops (modules/nixos/secrets.nix), not from
+        # E2E key comes from sops (modules/common/secrets.nix), not from
         # whatever `atuin login` last wrote. NOTE: no trailing newline in
         # the secret or atuin fails with "failed to parse header value".
         key_path = "/run/secrets/atuin_key";

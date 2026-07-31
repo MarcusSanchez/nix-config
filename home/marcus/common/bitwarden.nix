@@ -1,9 +1,9 @@
 # rbw: Bitwarden from the terminal, without the web vault.
 #
-# Holds the personal age key, which is the identity for *editing*
-# secrets/secrets.yaml — machines decrypt with their own SSH host keys and
-# never need it (see modules/nixos/secrets.nix). Lose it and you can re-key
-# from any machine that still decrypts; it is not a path to lockout.
+# Holds the personal age key — the ONE identity: machines decrypt with a
+# root-owned copy at /var/lib/sops-nix/key.txt, and the same key at
+# ~/.config/sops/age/keys.txt is what edits secrets/secrets.yaml (see
+# modules/common/secrets.nix). This vault entry is the master backup.
 # Day to day this is just a password lookup that doesn't need a browser.
 #
 # Unlike the credentials in secrets.nix, this one deliberately isn't

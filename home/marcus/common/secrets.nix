@@ -1,4 +1,4 @@
-# User-side wiring for the credentials that modules/nixos/secrets.nix
+# User-side wiring for the credentials that modules/common/secrets.nix
 # decrypts. The sops module itself is the SYSTEM one, not the home-manager
 # one — that choice matters:
 #

@@ -1,7 +1,7 @@
 # Who can decrypt secrets/.
 #
 # One key for everything: the personal age key, backed up in Bitwarden. Every
-# machine gets a copy at /var/lib/sops-nix/key.txt (see modules/nixos/secrets.nix
+# machine gets a copy at /var/lib/sops-nix/key.txt (see modules/common/secrets.nix
 # for the two commands that place it), and the same key at
 # ~/.config/sops/age/keys.txt is what lets `sops secrets/secrets.yaml` edit.
 #
