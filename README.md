@@ -1,6 +1,6 @@
 # nix-config
 
-One flake, three machines. Each NixOS box resolves its own config **by
+One flake, every machine. Each NixOS box resolves its own config **by
 hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 `nixosConfigurations.<hostname>`, so the flake attribute and
 `networking.hostName` have to stay equal.
@@ -17,12 +17,14 @@ The repo lives at `~/nix-config` everywhere; the symlink is what bare
 ## Layout
 
 ```
-flake.nix                inputs + all three host wirings
+flake.nix                inputs + all host wirings
+devenv.nix               repo scripts: secrets:edit, age:place, config:check
+                         (on PATH inside the repo after `direnv allow`)
 .sops.yaml               which age keys can decrypt
 secrets/secrets.yaml     credentials, age-encrypted (safe to push)
 hosts/                   per-host values only — wsl/, wsl-lite/, mac/
 modules/common/          shared system layer
-modules/nixos/           WSL system layer — both WSL hosts, unchanged
+modules/nixos/           WSL system layer — every WSL host, unchanged
 modules/darwin/          mac system layer
 home/marcus/             Home Manager: common/ + wsl/ + mac/, with
                          wsl.nix / wsl-lite.nix / mac.nix as entry points
@@ -117,7 +119,7 @@ sudo nix --extra-experimental-features 'nix-command flakes' run nixpkgs#git -- c
 sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --flake /tmp/nixos-config#$HOSTNAME
 
 # Move the repo home and replace /etc/nixos with a symlink to it (not managed
-# by the config; bare `nixos-rebuild` and NH_FLAKE both depend on it).
+# by the config; bare `nixos-rebuild` depends on it).
 # The rm matters: /etc/nixos is a real directory on a fresh image, and
 # `ln -s` into an existing directory silently creates the link *inside* it
 # (/etc/nixos/nix-config) instead of replacing it. All it holds is the stock
