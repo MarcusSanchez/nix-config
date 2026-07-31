@@ -235,7 +235,7 @@ Inside the repo (`direnv allow` once per machine, then the repo's devenv
 scripts are on PATH whenever you're cd'd in):
 
 ```sh
-edit-secrets
+edit:secrets
 ```
 
 Which is just `sops ~/nix-config/secrets/secrets.yaml`, if the shell isn't
@@ -251,7 +251,7 @@ This is the whole of onboarding a machine — nothing to paste into
 (after `rbw login` and `direnv allow ~/nix-config`):
 
 ```sh
-age-place    # fetches from Bitwarden, places both copies, verifies
+age:place    # fetches from Bitwarden, places both copies, verifies
              # against .sops.yaml, tells you the next step
 ```
 
