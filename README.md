@@ -18,7 +18,8 @@ The repo lives at `~/nix-config` everywhere; the symlink is what bare
 
 ```
 flake.nix                inputs + all host wirings
-devenv.nix               repo scripts: secrets:edit, age:place, config:check
+devenv.nix               repo scripts: secrets:edit, secrets:status,
+                         age:place, config:check
                          (on PATH inside the repo after `direnv allow`)
 .sops.yaml               which age keys can decrypt
 secrets/secrets.yaml     credentials, age-encrypted (safe to push)
@@ -287,10 +288,8 @@ To confirm it worked, check the tools rather than the directory — atuin logs
 itself in during activation, so nothing is typed:
 
 ```sh
-gh auth status
-atuin status | grep Username
-zsh -lc 'fly auth whoami'    # -l matters: FLY_API_TOKEN is set by a login
-                             # shell, so your current one won't have it yet
+secrets:status    # gh auth status + atuin status + fly auth whoami,
+                  # with the fly token read straight from /run/secrets
 ```
 
 `ls /run/secrets/` is *denied by design* (mode `751`, so nothing can enumerate
