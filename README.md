@@ -57,8 +57,10 @@ nix flake check               # validate before switching
 nix flake update              # bump inputs
 ```
 
-Both WSL boxes rebuild weekly from pushed main, so one push deploys to two
-machines. The mac doesn't — update it by hand with `-u`.
+Every WSL box rebuilds weekly from pushed main, so one push deploys to all
+of them. The mac doesn't — update it with a pull + switch. CI bumps
+`flake.lock` Sundays (only if the full eval gate passes), so those weekly
+rebuilds actually carry new packages; `-u` is for bumping by hand.
 
 ## Bootstrapping a WSL machine
 

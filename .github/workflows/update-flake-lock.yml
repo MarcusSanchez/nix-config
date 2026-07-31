@@ -1,0 +1,55 @@
+# Weekly flake.lock bump, so the fleet actually tracks nixpkgs.
+#
+# system.autoUpgrade rebuilds pushed main weekly — but it never runs
+# `nix flake update`, so without this the Saturday-night rebuilds are
+# no-ops against the same pinned inputs. This bumps the lock, runs the
+# SAME gate as check.yml (full eval of every host on both platforms),
+# and pushes only if it passes. A failed bump pushes nothing and leaves
+# a red run to read.
+#
+# Sundays 06:00 UTC: systemd's "weekly" is Monday 00:00, so the bump
+# lands before the boxes' autoUpgrade window opens (their timers are
+# Persistent, so they catch up whenever the box is next on).
+#
+# Note: pushes made with GITHUB_TOKEN deliberately don't trigger other
+# workflows, so check.yml will NOT run on the bump commit — that's why
+# the full gate runs inline here instead. Coverage is identical.
+name: update-flake-lock
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - name: bump inputs
+        run: nix flake update
+      - name: gate — evaluate every host, both platforms
+        run: |
+          nix flake check
+          nix eval --raw '.#darwinConfigurations' --apply \
+            'cfgs: builtins.concatStringsSep "\n" (map (n: "${n}: ${cfgs.${n}.system.drvPath}") (builtins.attrNames cfgs))'
+      - name: push if green
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          if git diff --cached --quiet; then
+            echo "inputs already current — nothing to push"
+            exit 0
+          fi
+          git commit -m "flake: weekly input bump (automated)
+
+Bumped by update-flake-lock.yml after the full eval gate passed:
+nix flake check across all nixosConfigurations plus the enumerated
+darwin evals. The autoUpgrade timers deliver this to the WSL boxes;
+the mac picks it up at the next pull + switch."
+          git push

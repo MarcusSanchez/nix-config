@@ -30,7 +30,8 @@ nix eval --raw '/etc/nix-darwin#nixosConfigurations.nixos-lite.config.system.bui
 # Both
 nix flake check                                # validate before switching — always do this after edits
 nix fmt                                        # format all nix files (nixfmt-tree)
-nix flake update                               # bump all inputs (autoUpgrade never does this)
+nix flake update                               # bump inputs by hand (CI does it Sundays via
+                                               # update-flake-lock.yml, gated on the full eval)
 ```
 
 There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry, all four WSL hosts included) + the darwin eval + a successful switch is the verification story.
