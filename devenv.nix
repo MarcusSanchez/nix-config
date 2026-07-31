@@ -8,12 +8,12 @@
 # system config, not from this shell — the scripts are ergonomics, not a
 # toolchain, so a box that hasn't run direnv still does everything the
 # README way.
-{ ... }:
+{ pkgs, ... }:
 
 {
   scripts = {
     # `sops` on the one file it ever means here.
-    "edit:secrets".exec = ''
+    "secrets:edit".exec = ''
       exec sops "$DEVENV_ROOT/secrets/secrets.yaml"
     '';
 
@@ -46,12 +46,31 @@
     '';
 
     # The same gate CI runs, locally: format, lint, evaluate every host.
-    check.exec = ''
+    "config:check".exec = ''
       cd "$DEVENV_ROOT"
       nix fmt
       statix check .
       deadnix --fail .
       nix flake check
+    '';
+
+    # One switch command on every machine — the platform branch is resolved
+    # at eval, and arguments pass through, so `config:switch -u` bumps
+    # inputs the way `nh ... switch -u` does.
+    "config:switch".exec = ''
+      exec ${if pkgs.stdenv.isDarwin then "nh darwin switch" else "nh os switch"} "$@"
+    '';
+
+    # What did the last switch change: nvd, with the per-platform
+    # incantation nobody remembers (the mac has no /run/booted-system —
+    # nix-darwin doesn't own the boot, so diff the last two generations).
+    "config:diff".exec = ''
+      ${
+        if pkgs.stdenv.isDarwin then
+          "nvd diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2)"
+        else
+          "nvd diff /run/booted-system /run/current-system"
+      }
     '';
   };
 }

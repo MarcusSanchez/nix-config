@@ -235,7 +235,7 @@ Inside the repo (`direnv allow` once per machine, then the repo's devenv
 scripts are on PATH whenever you're cd'd in):
 
 ```sh
-edit:secrets
+secrets:edit
 ```
 
 Which is just `sops ~/nix-config/secrets/secrets.yaml`, if the shell isn't
