@@ -269,7 +269,8 @@ The inverse of `age:place`, for handing off or de-privileging a box:
 secrets:drop    # removes both key copies, /run/secrets (which also holds
                 # sops-nix's own key copy + the rendered gh file), and the
                 # sessions that would outlive them: atuin (+ its synced
-                # history db), rbw's local vault, ~/.fly
+                # history db) and ~/.fly. rbw is only locked, not logged
+                # out — the vault stays, gated by your master password
 ```
 
 Close any shells that were already open (they still hold `FLY_API_TOKEN` /
