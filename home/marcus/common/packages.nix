@@ -14,5 +14,8 @@
   home.packages = with pkgs; [
     croc
     flyctl
+    # sends WoL magic packets; the target PC's BIOS/NIC must have
+    # wake-on-LAN enabled or the packet is silently ignored
+    wakeonlan
   ];
 }
