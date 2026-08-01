@@ -57,8 +57,11 @@ Every `.nix` file here opens with a header comment explaining itself, so this ma
 ```
 flake.nix                  inputs + all three host wirings
 bin/                       repo-operations scripts (secrets:edit,
-                           secrets:status, age:place, config:check) —
-                           plain executables, PATH_add'd by .envrc
+                           secrets:status, age:place, secrets:drop,
+                           config:check) — plain executables, PATH_add'd
+                           by .envrc; secrets:drop is age:place's inverse
+                           and must remove more than the two key files
+                           (its header lists the full inventory)
 .sops.yaml                 age recipients          secrets/secrets.yaml  ciphertext
 
 hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only

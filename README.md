@@ -29,7 +29,7 @@ secrets/
   secrets.yaml           credentials, age-encrypted (safe to push)
 .sops.yaml               which age keys can decrypt
 bin/                     repo scripts: secrets:edit, secrets:status,
-                         age:place, config:check — plain executables, on
+                         age:place, secrets:drop, config:check — on
                          PATH inside the repo after `direnv allow`
 flake.nix                inputs + all host wirings
 ```
@@ -260,6 +260,23 @@ secrets:status    # gh auth status + atuin status + fly auth whoami,
 
 `ls /run/secrets/` is *denied by design* (mode `751`, so nothing can enumerate
 what secrets exist) and looks like a failure when it isn't.
+
+### Dropping the key
+
+The inverse of `age:place`, for handing off or de-privileging a box:
+
+```sh
+secrets:drop    # removes both key copies, /run/secrets (which also holds
+                # sops-nix's own key copy + the rendered gh file), and the
+                # sessions that would outlive them: atuin (+ its synced
+                # history db), rbw's local vault, ~/.fly
+```
+
+Close any shells that were already open (they still hold `FLY_API_TOKEN` /
+`CROC_SECRET` in their environment), and remember the box is still on the
+tailnet — `sudo tailscale logout` if it should lose that too. Switches keep
+working; they just report the harmless `setupSecrets` failure until
+`age:place` re-arms the machine.
 
 > **The key must exist before the switch that installs secrets.** sops-nix
 > treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
