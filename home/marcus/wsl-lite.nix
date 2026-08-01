@@ -6,7 +6,7 @@
 # of /mnt/c, and worse, if it ever ran on the same PC as the dev box both
 # would see the same /mnt/c/Users/marcus while win-sync's direction stamp
 # stays per-box, producing spurious pulls and two clones racing to push.
-# ./wsl/windows.nix — only dotfiles.nix consumes it.
+# (windows.username lives inside that file too, so nothing else to skip.)
 #
 { ... }:
 
