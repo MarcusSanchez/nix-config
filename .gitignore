@@ -7,7 +7,5 @@ result-*
 # root-run nix crashes (root-owned, so it also makes git status noisy)
 .cache/
 
-# devenv/direnv state (per-machine, regenerated)
-.devenv/
-.devenv.flake.nix
+# direnv state (per-machine, regenerated)
 .direnv/

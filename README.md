@@ -28,9 +28,9 @@ modules/
 secrets/
   secrets.yaml           credentials, age-encrypted (safe to push)
 .sops.yaml               which age keys can decrypt
-devenv.nix               repo scripts: secrets:edit, secrets:status,
-                         age:place, config:check — on PATH inside the
-                         repo after `direnv allow`
+bin/                     repo scripts: secrets:edit, secrets:status,
+                         age:place, config:check — plain executables, on
+                         PATH inside the repo after `direnv allow`
 flake.nix                inputs + all host wirings
 ```
 
@@ -224,8 +224,8 @@ recipient list and never re-encrypts anything.
 
 ### Editing a credential
 
-Inside the repo (`direnv allow` once per machine, then the repo's devenv
-scripts are on PATH whenever you're cd'd in):
+Inside the repo (`direnv allow` once per machine puts `bin/` on PATH
+whenever you're cd'd in; `./bin/<name>` works without it):
 
 ```sh
 secrets:edit
@@ -248,8 +248,7 @@ age:place    # logs into Bitwarden if needed (your master password),
 ```
 
 If `age:place` can't find the vault item, its name has drifted —
-`rbw list | grep -i sops` gives the current one. The verbose steps it wraps
-live in `devenv.nix`.
+`rbw list | grep -i sops` gives the current one.
 
 To confirm it worked, check the tools rather than the directory — atuin logs
 itself in during activation, so nothing is typed:
