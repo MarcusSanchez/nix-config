@@ -8,8 +8,6 @@
     ./mac/ghostty.nix
     ./mac/nix.nix
     ./mac/dotfiles.nix
-    ./mac/manual.nix
-    ./mac/auto-commit.nix
   ];
 
   home.username = "marcussanchez";

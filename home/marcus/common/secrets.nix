@@ -8,7 +8,12 @@
 #     exist. The system module decrypts before any user activation.
 #
 # So this file holds only the parts that are genuinely user-scoped.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # flyctl reads FLY_API_TOKEN ahead of its config file, which leaves
@@ -59,4 +64,41 @@
         || echo "atuin: login failed (offline, or the stored password is stale)" >&2
     fi
   '';
+
+  # ── rbw: Bitwarden from the terminal ─────────────────────────────────
+  # Holds the personal age key — the ONE identity: machines decrypt with a
+  # root-owned copy at /var/lib/sops-nix/key.txt, and the same key at
+  # ~/.config/sops/age/keys.txt is what edits secrets/secrets.yaml (see
+  # modules/common/secrets.nix). This vault entry is the master backup.
+  # Day to day this is just a password lookup that doesn't need a browser.
+  #
+  # Unlike the credentials above, this one deliberately isn't automated:
+  # it's unlocked by the master password marcus actually remembers, which
+  # is what makes it the root of the whole chain. It's also what lets a
+  # new machine enroll itself alone: the first switch installs rbw already
+  # configured even though secrets don't decrypt yet (the harmless
+  # setupSecrets failure), so `age:place` closes the loop on the one
+  # machine in front of you.
+  #
+  #   rbw login    # once per machine (age:place runs it for you)
+  #   rbw unlock   # once per agent lifetime (lock_timeout below)
+  #   rbw get <name>
+  programs.rbw = {
+    enable = true;
+    settings = {
+      email = "marcussanchez031@gmail.com";
+      # pinentry-curses on BOTH platforms — one prompt, drawn on the tty of
+      # whatever terminal ran the rbw command (rbw forwards it to the
+      # agent-spawned pinentry). marcus's call, 2026-07-31.
+      #
+      # The one mac landmine: Ctrl-C mid-prompt orphans the pinentry, which
+      # then spins at 100% CPU retrying an EIO read (2026-07-29). Abort with
+      # Ctrl-D instead; recovery is `pkill pinentry-curses`. (A Touch ID
+      # route via pinentry-touchid was explored and works only behind a
+      # protocol shim — it gates on gpg-agent-only commands, see its issue
+      # #17 — dropped as not worth the machinery.)
+      pinentry = pkgs.pinentry-curses;
+      lock_timeout = 3600;
+    };
+  };
 }

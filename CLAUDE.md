@@ -98,27 +98,34 @@ home/marcus/
   wsl.nix wsl-lite.nix mac.nix   entry points — the HM bridges import these,
                            never common/ directly
   common/                  aggregated by its default.nix
-    secrets.nix            user side of /run/secrets: FLY_API_TOKEN export +
-                           atuin's one-time login
+    secrets.nix            user side of /run/secrets (FLY_API_TOKEN export +
+                           atuin's one-time login) + rbw, the root of the
+                           whole credential chain
+    shell.nix              zsh + the prompt + catppuccin theming (autoEnable —
+                           nvim opts out, and a revived starship must too;
+                           see Constraints)
+    packages.nix           user CLIs + comma with its prebuilt nix-index db
     dotfiles/              flat: zed.settings.json, zed.keymap.json (which
                            carries both cmd- and ctrl- variants), .ideavimrc
     toolchains.nix         rustup repair/bootstrap (isDarwin branch) + the
                            JetBrains GOROOT symlink — see Constraints
-    neovim.nix bitwarden.nix                see Constraints
-    packages.nix shell.nix git.nix catppuccin.nix comma.nix
+    neovim.nix             see Constraints
+    git.nix
   wsl/
     win-sync.nix           two-way sync engine: UI-side edits pull into the
                            repo and auto-commit (chore(<name>):) + push, repo-side
                            edits push out to Windows, and both-changed warns
                            and writes nothing
-    dotfiles.nix           common/dotfiles/ ↔ Windows, via win-sync
-    windows.nix            windows.username, set per host
+    dotfiles.nix           common/dotfiles/ ↔ Windows via win-sync; also
+                           declares windows.username (its only consumer;
+                           the value is set in wsl.nix)
   mac/
     dotfiles.nix           per-file symlinks into common/dotfiles/ (where the
-                           WSL side copies instead)
-    auto-commit.nix        commits + pushes common/dotfiles drift on activation
-    manual.nix             HM's own manpages off — they warn on every eval
-    ghostty.nix nix.nix
+                           WSL side copies instead) + commits & pushes the
+                           drift at activation
+    nix.nix                user GC launchd agent + HM manpages off (they
+                           warn on every eval under Determinate Nix)
+    ghostty.nix
 ```
 
 ## Constraints that are easy to violate

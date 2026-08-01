@@ -1,12 +1,32 @@
-# Interactive shell: zsh + oh-my-zsh, plus the CLI helpers hooked into it.
+# Interactive shell + theming: zsh + oh-my-zsh, the CLI helpers hooked
+# into it, and the catppuccin palette that the prompt's hex colours come
+# from.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }:
 
 {
+  imports = [ inputs.catppuccin.homeModules.default ];
+
+  # Catppuccin across CLI tools. nvim is themed by LazyVim itself — that
+  # opt-out is load-bearing (the neovim constraint in CLAUDE.md). So is
+  # starship's, if that ever returns: its port breaks cross-platform eval
+  # (Constraints).
+  catppuccin = {
+    enable = true;
+    # Explicit to match the upcoming default; today `enable = true` already
+    # auto-enrolls every port (hence the nvim opt-out below).
+    autoEnable = true;
+    flavor = "mocha";
+    accent = "blue";
+
+    nvim.enable = false;
+  };
+
   home.sessionVariables = {
     # NixOS ships nano as the default $EDITOR; make git/rebase/etc. open nvim
     EDITOR = "nvim";

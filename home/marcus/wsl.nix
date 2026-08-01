@@ -5,7 +5,6 @@
 {
   imports = [
     ./common
-    ./wsl/windows.nix
     ./wsl/dotfiles.nix
   ];
 

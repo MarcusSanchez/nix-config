@@ -9,11 +9,8 @@
     ./shell.nix
     ./neovim.nix
     ./git.nix
-    ./catppuccin.nix
-    ./comma.nix
     ./toolchains.nix
     ./secrets.nix
-    ./bitwarden.nix
   ];
 
   # Do not change after initial install.
