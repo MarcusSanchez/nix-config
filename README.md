@@ -255,8 +255,9 @@ command (after `direnv allow ~/nix-config`):
 ```sh
 age:place    # logs into Bitwarden if needed (your master password),
              # fetches the key, places the machine copy AND the editing
-             # copy, verifies against .sops.yaml, and tells you the next
-             # step (a switch)
+             # copy, re-locks the vault (it holds the super recovery key —
+             # an armed lite box must not be a bridge across the tiers),
+             # verifies against .sops.yaml, and tells you the next step
 ```
 
 If `age:place` can't find the vault item, its name has drifted —
