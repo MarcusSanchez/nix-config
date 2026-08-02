@@ -92,17 +92,9 @@
       # Silence the per-cd chatter; only log lines matching "error"
       # survive, so a broken .envrc still shows up loud. (The old
       # DIRENV_LOG_FORMAT="" trick no longer silences direnv 2.37+.)
+      # devenv is deliberately NOT quieted the same way: its step lines
+      # are the only sign a slow shell build is working, not idling.
       config.global.log_filter = "error";
-      # Same idea for devenv projects: its direnv shim honors DEVENV_BIN,
-      # so route only direnv-driven runs through a wrapper that drops the
-      # TUI and its plain-log fallback (--tui false alone still prints
-      # the •/✓ step lines). Failures still print (red ×, exit 1);
-      # manual `devenv` invocations keep the TUI.
-      stdlib = ''
-        export DEVENV_BIN=${pkgs.writeShellScript "devenv-quiet" ''
-          exec ${lib.getExe pkgs.devenv} --tui false --quiet "$@"
-        ''}
-      '';
     };
 
     zsh = {
