@@ -73,6 +73,12 @@
           "(TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|APIKEY|API_KEY)=[^ ]"
           "AGE-SECRET-KEY-"
           "^\\s*(sops|age|age-keygen|atuin (login|register))\\b"
+          # leading-space privacy, HISTCONTROL-style: a command typed with
+          # one leading space is never recorded — the escape hatch for
+          # pasting a bare secret no pattern could recognize. Retroactive
+          # cleanup: add a pattern here, `atuin history prune`, and the
+          # deletions sync to every machine.
+          "^ "
         ];
       };
     };
