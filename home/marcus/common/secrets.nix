@@ -89,6 +89,12 @@
   # modules/common/secrets.nix repeats the attempt after "Setting up
   # secrets..." so the login still lands in one switch; its logic mirrors
   # this hook's — keep them in sync.
+  #
+  # NixOS wrinkle: HM activation is a systemd oneshot that re-runs only
+  # when the generation CHANGES, so a switch that changes nothing (e.g.
+  # re-arming after secrets:drop with no config edits) never fires this
+  # hook — secrets return but atuin stays logged out. By hand, then:
+  #   systemctl restart home-manager-marcus.service
   home.activation.atuinLogin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     atuin=${config.programs.atuin.package}/bin/atuin
     if [ ! -r /run/secrets/atuin_password ]; then

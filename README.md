@@ -279,6 +279,17 @@ tailnet — `sudo tailscale logout` if it should lose that too. Switches keep
 working; they just report the harmless `setupSecrets` failure until
 `age:place` re-arms the machine.
 
+Re-arming is `age:place` + a switch. One wrinkle on WSL: if that switch
+changes nothing else, systemd skips the unchanged Home Manager unit and
+atuin stays logged out (gh/fly recover regardless — sops always runs).
+Fire the login by hand:
+
+```sh
+systemctl restart home-manager-marcus.service
+```
+
+New shells pick `FLY_API_TOKEN` / `CROC_SECRET` back up on their own.
+
 > **The key must exist before the switch that installs secrets.** sops-nix
 > treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
 > back, so secret installation aborts with `cannot read keyfile`. That's the

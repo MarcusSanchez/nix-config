@@ -119,7 +119,7 @@ in
       system.activationScripts.postActivation.text = lib.mkOrder 1600 (
         let
           atuin = config.home-manager.users.${user}.programs.atuin.package;
-          coreutils = pkgs.coreutils;
+          inherit (pkgs) coreutils;
           loginScript = pkgs.writeShellScript "atuin-post-secrets-login" ''
             atuin=${atuin}/bin/atuin
             timeout=${coreutils}/bin/timeout
