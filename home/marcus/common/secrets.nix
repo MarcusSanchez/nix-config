@@ -8,7 +8,7 @@
 #     exist. The system module decrypts before any user activation.
 #
 # So this file holds only the parts that are genuinely user-scoped.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   # ── rbw: Bitwarden from the terminal ─────────────────────────────────
@@ -61,6 +61,13 @@
   # exported everywhere, bare `croc send <file>` and bare `croc` pair up
   # across machines with no code to read out. $(cat) drops the trailing
   # newline, which would otherwise make the phrases not match.
+  # Where `sops` finds the editing identity. Without this, sops uses the
+  # platform-native config dir — ~/Library/Application Support/sops/age on
+  # darwin — while age:place and the README put the key in ~/.config/sops/
+  # age on every platform. Pinning the path makes editing work identically
+  # everywhere (discovered when mac edits were DENIED with a valid key).
+  home.sessionVariables.SOPS_AGE_KEY_FILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+
   home.sessionVariablesExtra = ''
     if [ -r /run/secrets/fly_token ]; then
       export FLY_API_TOKEN="$(cat /run/secrets/fly_token)"
