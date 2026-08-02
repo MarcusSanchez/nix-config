@@ -8,12 +8,7 @@
 #     exist. The system module decrypts before any user activation.
 #
 # So this file holds only the parts that are genuinely user-scoped.
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 
 {
   # ── rbw: Bitwarden from the terminal ─────────────────────────────────
@@ -75,42 +70,10 @@
     fi
   '';
 
-  # atuin keeps its session as a hub_session row in meta.db rather than a
-  # file, so unlike the key there's nothing to point it at — session_path
-  # was removed in 18.x, leaving only a one-time legacy-file migration. So
-  # the session still needs one login per machine. The key itself comes
-  # from key_path (see shell.nix), so -k isn't needed here.
-  #
-  # entryAfter "writeBoundary" is enough on NixOS: the system module
-  # decrypts during system activation, before the HM service runs. Darwin
-  # inverts that — sops-nix pins its postActivation text at mkAfter, after
-  # HM's default-order text — so on a mac's first switch this hook fires
-  # before /run/secrets exists and skips. The darwin branch of
-  # modules/common/secrets.nix repeats the attempt after "Setting up
-  # secrets..." so the login still lands in one switch; its logic mirrors
-  # this hook's — keep them in sync.
-  #
-  # NixOS wrinkle: HM activation is a systemd oneshot that re-runs only
-  # when the generation CHANGES, so a switch that changes nothing (e.g.
-  # re-arming after secrets:drop with no config edits) never fires this
-  # hook — secrets return but atuin stays logged out. By hand, then:
-  #   systemctl restart home-manager-marcus.service
-  home.activation.atuinLogin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    atuin=${config.programs.atuin.package}/bin/atuin
-    if [ ! -r /run/secrets/atuin_password ]; then
-      echo "atuin: secrets not decrypted — skipping login" >&2
-    elif ! timeout 10 "$atuin" status 2>/dev/null | grep -q '^Username:'; then
-      echo "atuin: not logged in on this machine — logging in" >&2
-      # </dev/null is load-bearing: even with -u and -p, `atuin login`
-      # still prompts "enter encryption key [blank to use existing key
-      # file]". With no stdin it hangs until the timeout kills it, which
-      # is why this silently did nothing on the mac. Feeding it EOF takes
-      # the blank default — i.e. the key from key_path, which is the sops
-      # secret.
-      timeout 30 "$atuin" login \
-        -u "$(cat /run/secrets/atuin_username)" \
-        -p "$(cat /run/secrets/atuin_password)" </dev/null >/dev/null 2>&1 \
-        || echo "atuin: login failed (offline, or the stored password is stale)" >&2
-    fi
-  '';
+  # atuin's per-machine login is deliberately NOT here: HM activation
+  # can't do it reliably on either platform (darwin runs HM's text before
+  # sops decrypts; NixOS skips the unchanged HM oneshot on a no-change
+  # switch, i.e. every re-arm after secrets:drop). It lives in
+  # modules/common/secrets.nix as system-activation text instead, which
+  # both platforms re-run on every switch.
 }

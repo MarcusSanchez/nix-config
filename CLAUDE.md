@@ -101,9 +101,13 @@ home/marcus/
   wsl.nix wsl-lite.nix mac.nix   entry points — the HM bridges import these,
                            never common/ directly
   common/                  aggregated by its default.nix
-    secrets.nix            user side of /run/secrets (FLY_API_TOKEN export +
-                           atuin's one-time login) + rbw, the root of the
-                           whole credential chain
+    secrets.nix            user side of /run/secrets (FLY_API_TOKEN/
+                           CROC_SECRET exports) + rbw, the root of the
+                           whole credential chain. atuin's login is NOT
+                           here — it's system-activation text in
+                           modules/common/secrets.nix, because HM
+                           activation misses a case on each platform
+                           (both files say which)
     shell.nix              zsh + the prompt + catppuccin theming (autoEnable —
                            nvim opts out, and a revived starship must too;
                            see Constraints)
