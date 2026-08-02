@@ -36,37 +36,6 @@
 let
   user = if pkgs.stdenv.isDarwin then "marcussanchez" else "marcus";
   home = if pkgs.stdenv.isDarwin then "/Users/marcussanchez" else "/home/marcus";
-
-  # atuin keeps its session as a hub_session row in meta.db rather than a
-  # file (session_path was removed in 18.x), so each machine needs one real
-  # `atuin login`. It happens HERE, as system-activation text both platforms
-  # re-run on every switch, because Home Manager's activation misses a case
-  # on each platform: darwin runs HM's text (order 1000) before sops-nix
-  # decrypts (mkAfter = 1500), and NixOS wraps HM in a systemd oneshot that
-  # never re-runs when the generation is unchanged — which is exactly what
-  # a secrets:drop → age:place → switch cycle produces. Steady state this
-  # finds the session in meta.db and no-ops silently.
-  atuinLogin =
-    let
-      atuin = config.home-manager.users.${user}.programs.atuin.package;
-      inherit (pkgs) coreutils;
-    in
-    pkgs.writeShellScript "atuin-post-secrets-login" ''
-      atuin=${atuin}/bin/atuin
-      timeout=${coreutils}/bin/timeout
-      [ -r /run/secrets/atuin_password ] || exit 0
-      if ! "$timeout" 10 "$atuin" status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^Username:'; then
-        echo "atuin: not logged in on this machine — logging in" >&2
-        # </dev/null is load-bearing: even with -u and -p, `atuin login`
-        # prompts "enter encryption key [blank to use existing key file]"
-        # and with no stdin hangs until the timeout kills it. EOF takes
-        # the blank default — the key from key_path, the sops secret.
-        "$timeout" 30 "$atuin" login \
-          -u "$(${coreutils}/bin/cat /run/secrets/atuin_username)" \
-          -p "$(${coreutils}/bin/cat /run/secrets/atuin_password)" </dev/null >/dev/null 2>&1 \
-          || echo "atuin: login failed (offline, or the stored password is stale)" >&2
-      fi
-    '';
 in
 {
   config = lib.mkMerge [
@@ -135,22 +104,57 @@ in
       };
     }
 
-    # Order 1600: after sops-nix's mkAfter (1500) "Setting up secrets...",
-    # as the user, who owns the secrets.
-    (lib.mkIf pkgs.stdenv.isDarwin {
-      system.activationScripts.postActivation.text = lib.mkOrder 1600 ''
-        sudo -u ${user} --set-home ${atuinLogin}
-      '';
-    })
+    # atuin keeps its session as a hub_session row in meta.db rather than a
+    # file (session_path was removed in 18.x), so each machine needs one
+    # real `atuin login`. It happens HERE, as system-activation text both
+    # platforms re-run on every switch, because Home Manager's activation
+    # misses a case on each platform: darwin runs HM's text (order 1000)
+    # before sops-nix decrypts (mkAfter = 1500), and NixOS wraps HM in a
+    # systemd oneshot that never re-runs when the generation is unchanged —
+    # which is exactly what a secrets:drop → age:place → switch cycle
+    # produces. Steady state this finds the session in meta.db and no-ops
+    # silently.
+    (
+      let
+        atuin = config.home-manager.users.${user}.programs.atuin.package;
+        inherit (pkgs) coreutils;
+        atuinLogin = pkgs.writeShellScript "atuin-post-secrets-login" ''
+          atuin=${atuin}/bin/atuin
+          timeout=${coreutils}/bin/timeout
+          [ -r /run/secrets/atuin_password ] || exit 0
+          if ! "$timeout" 10 "$atuin" status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^Username:'; then
+            echo "atuin: not logged in on this machine — logging in" >&2
+            # </dev/null is load-bearing: even with -u and -p, `atuin login`
+            # prompts "enter encryption key [blank to use existing key file]"
+            # and with no stdin hangs until the timeout kills it. EOF takes
+            # the blank default — the key from key_path, the sops secret.
+            "$timeout" 30 "$atuin" login \
+              -u "$(${coreutils}/bin/cat /run/secrets/atuin_username)" \
+              -p "$(${coreutils}/bin/cat /run/secrets/atuin_password)" </dev/null >/dev/null 2>&1 \
+              || echo "atuin: login failed (offline, or the stored password is stale)" >&2
+          fi
+        '';
+      in
+      lib.mkMerge [
+        # Order 1600: after sops-nix's mkAfter (1500) "Setting up
+        # secrets...", as the user, who owns the secrets.
+        (lib.mkIf pkgs.stdenv.isDarwin {
+          system.activationScripts.postActivation.text = lib.mkOrder 1600 ''
+            sudo -u ${user} --set-home ${atuinLogin}
+          '';
+        })
 
-    # setpriv, not sudo/su: activation runs as root, and setpriv drops to
-    # the user by plain syscalls — no PAM session, no setuid wrapper needed
-    # (--reset-env also sets the user's HOME, which atuin's data dir hangs
-    # off). stringAfter orders it behind the decryption it consumes.
-    (lib.mkIf pkgs.stdenv.isLinux {
-      system.activationScripts.atuinLogin = lib.stringAfter [ "setupSecrets" ] ''
-        ${pkgs.util-linux}/bin/setpriv --reuid ${user} --regid users --init-groups --reset-env ${atuinLogin}
-      '';
-    })
+        # setpriv, not sudo/su: activation runs as root, and setpriv drops
+        # to the user by plain syscalls — no PAM session, no setuid wrapper
+        # needed (--reset-env also sets the user's HOME, which atuin's data
+        # dir hangs off). stringAfter orders it behind the decryption it
+        # consumes.
+        (lib.mkIf pkgs.stdenv.isLinux {
+          system.activationScripts.atuinLogin = lib.stringAfter [ "setupSecrets" ] ''
+            ${pkgs.util-linux}/bin/setpriv --reuid ${user} --regid users --init-groups --reset-env ${atuinLogin}
+          '';
+        })
+      ]
+    )
   ];
 }
