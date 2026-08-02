@@ -38,66 +38,108 @@ let
   home = if pkgs.stdenv.isDarwin then "/Users/marcussanchez" else "/home/marcus";
 in
 {
-  sops = {
-    defaultSopsFile = ../../secrets/secrets.yaml;
+  config = lib.mkMerge [
+    {
+      sops = {
+        defaultSopsFile = ../../secrets/secrets.yaml;
 
-    age.keyFile = "/var/lib/sops-nix/key.txt";
-    # No SSH host key as a second identity: it isn't a recipient, so it would
-    # decrypt nothing, and leaving it set implies a fallback that doesn't
-    # exist.
-    age.sshKeyPaths = [ ];
-    # Age only. Left at its default this hunts for an RSA host key that isn't
-    # generated, and activation dies with "Cannot read ssh key
-    # '/etc/ssh/ssh_host_rsa_key'" — the most common sops-nix first-boot
-    # failure.
-    gnupg.sshKeyPaths = [ ];
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        # No SSH host key as a second identity: it isn't a recipient, so it would
+        # decrypt nothing, and leaving it set implies a fallback that doesn't
+        # exist.
+        age.sshKeyPaths = [ ];
+        # Age only. Left at its default this hunts for an RSA host key that isn't
+        # generated, and activation dies with "Cannot read ssh key
+        # '/etc/ssh/ssh_host_rsa_key'" — the most common sops-nix first-boot
+        # failure.
+        gnupg.sshKeyPaths = [ ];
 
-    # gh's state file, rendered at activation with only the token coming
-    # from ciphertext — the structure is reviewable here. Still not
-    # programs.gh.hosts, which would bake the token into a world-readable
-    # /nix/store path. gh needs the token twice; that duplication is gh's
-    # format, not an accident.
-    templates."gh-hosts.yml" = {
-      content = ''
-        github.com:
-            users:
-                MarcusSanchez:
-                    oauth_token: ${config.sops.placeholder.gh_token}
-            git_protocol: https
-            user: MarcusSanchez
-            oauth_token: ${config.sops.placeholder.gh_token}
-      '';
-      path = "${home}/.config/gh/hosts.yml";
-      owner = user;
-      mode = "0600";
-    };
-
-    # Bare values, all owner-read-only. What each one is:
-    #   gh_token        rendered into gh-hosts.yml above
-    #   fly_token       a fly ORG token (`fly tokens create org`) — static,
-    #                   unlike the session macaroon `fly auth login` leaves
-    #                   behind; exported as FLY_API_TOKEN by
-    #                   home/marcus/common/secrets.nix
-    #   croc_secret     croc's code phrase, exported as CROC_SECRET — same
-    #                   value everywhere means bare `croc send`/`croc` pair
-    #   atuin_key       E2E history key (programs.atuin key_path) — the one
-    #                   credential that can't be reissued; losing every copy
-    #                   leaves the server side unreadable
-    #   atuin_username  with atuin_password, the activation-hook login
-    #   atuin_password
-    secrets =
-      lib.genAttrs
-        [
-          "gh_token"
-          "fly_token"
-          "croc_secret"
-          "atuin_key"
-          "atuin_username"
-          "atuin_password"
-        ]
-        (_: {
+        # gh's state file, rendered at activation with only the token coming
+        # from ciphertext — the structure is reviewable here. Still not
+        # programs.gh.hosts, which would bake the token into a world-readable
+        # /nix/store path. gh needs the token twice; that duplication is gh's
+        # format, not an accident.
+        templates."gh-hosts.yml" = {
+          content = ''
+            github.com:
+                users:
+                    MarcusSanchez:
+                        oauth_token: ${config.sops.placeholder.gh_token}
+                git_protocol: https
+                user: MarcusSanchez
+                oauth_token: ${config.sops.placeholder.gh_token}
+          '';
+          path = "${home}/.config/gh/hosts.yml";
           owner = user;
-          mode = "0400";
-        });
-  };
+          mode = "0600";
+        };
+
+        # Bare values, all owner-read-only. What each one is:
+        #   gh_token        rendered into gh-hosts.yml above
+        #   fly_token       a fly ORG token (`fly tokens create org`) — static,
+        #                   unlike the session macaroon `fly auth login` leaves
+        #                   behind; exported as FLY_API_TOKEN by
+        #                   home/marcus/common/secrets.nix
+        #   croc_secret     croc's code phrase, exported as CROC_SECRET — same
+        #                   value everywhere means bare `croc send`/`croc` pair
+        #   atuin_key       E2E history key (programs.atuin key_path) — the one
+        #                   credential that can't be reissued; losing every copy
+        #                   leaves the server side unreadable
+        #   atuin_username  with atuin_password, the activation-hook login
+        #   atuin_password
+        secrets =
+          lib.genAttrs
+            [
+              "gh_token"
+              "fly_token"
+              "croc_secret"
+              "atuin_key"
+              "atuin_username"
+              "atuin_password"
+            ]
+            (_: {
+              owner = user;
+              mode = "0400";
+            });
+      };
+    }
+
+    # Darwin's second chance at the atuin login. sops-nix pins its "Setting
+    # up secrets..." at mkAfter (order 1500) on postActivation.text while
+    # home-manager's text runs at the default 1000 — import order can't
+    # flip an explicit priority — so on a mac's first switch the HM
+    # atuinLogin hook (home/marcus/common/secrets.nix) fires before
+    # /run/secrets exists and skips; without this, a fresh mac needed a
+    # second switch to log in. Order 1600 runs after sops, as the user,
+    # who owns the secrets. Steady state both hooks find the session in
+    # atuin's meta.db and no-op. Mirrors the HM hook's logic — keep them
+    # in sync. (NixOS needs none of this: the system decrypts before the
+    # HM service runs.)
+    (lib.mkIf pkgs.stdenv.isDarwin {
+      system.activationScripts.postActivation.text = lib.mkOrder 1600 (
+        let
+          atuin = config.home-manager.users.${user}.programs.atuin.package;
+          coreutils = pkgs.coreutils;
+          loginScript = pkgs.writeShellScript "atuin-post-secrets-login" ''
+            atuin=${atuin}/bin/atuin
+            timeout=${coreutils}/bin/timeout
+            [ -r /run/secrets/atuin_password ] || exit 0
+            if ! "$timeout" 10 "$atuin" status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^Username:'; then
+              echo "atuin: not logged in on this machine — logging in" >&2
+              # </dev/null is load-bearing — see the HM hook for why (the
+              # blank "encryption key" prompt would otherwise hang until
+              # the timeout).
+              "$timeout" 30 "$atuin" login \
+                -u "$(${coreutils}/bin/cat /run/secrets/atuin_username)" \
+                -p "$(${coreutils}/bin/cat /run/secrets/atuin_password)" </dev/null >/dev/null 2>&1 \
+                || echo "atuin: login failed (offline, or the stored password is stale)" >&2
+            fi
+          '';
+        in
+        ''
+          sudo -u ${user} --set-home ${loginScript}
+        ''
+      );
+    })
+  ];
 }

@@ -81,8 +81,14 @@
   # the session still needs one login per machine. The key itself comes
   # from key_path (see shell.nix), so -k isn't needed here.
   #
-  # entryAfter "writeBoundary" is enough now: the system module decrypts
-  # during system activation, well before home-manager runs.
+  # entryAfter "writeBoundary" is enough on NixOS: the system module
+  # decrypts during system activation, before the HM service runs. Darwin
+  # inverts that — sops-nix pins its postActivation text at mkAfter, after
+  # HM's default-order text — so on a mac's first switch this hook fires
+  # before /run/secrets exists and skips. The darwin branch of
+  # modules/common/secrets.nix repeats the attempt after "Setting up
+  # secrets..." so the login still lands in one switch; its logic mirrors
+  # this hook's — keep them in sync.
   home.activation.atuinLogin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     atuin=${config.programs.atuin.package}/bin/atuin
     if [ ! -r /run/secrets/atuin_password ]; then
