@@ -25,8 +25,8 @@
   # History worth knowing: this was a `cp -RL` dereferenced copy until
   # 2026-07-28, because JetBrains browsing WSL over \\wsl$ used to surface
   # Linux symlinks as reparse points its file picker couldn't traverse
-  # (commit 46643f1 switched links -> copies for exactly that). Marcus
-  # confirmed a link works now. If GoLand ever can't open the SDK from
+  # (commit 46643f1 switched links -> copies for exactly that); a link
+  # verifiably works again as of 2026-07-28. If GoLand can't open the SDK from
   # Windows again, that's the reason, and the copy is in git history.
   home.file.".toolchains/go".source = "${pkgs.go}/share/go";
 

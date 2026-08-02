@@ -11,7 +11,7 @@
 #
 # The tradeoff, taken deliberately: that key decrypts every version of every
 # secret ever committed, and a per-machine key would have bounded that. It buys
-# nothing here because marcus owns every machine, and revoking a recipient
+# nothing here because every machine shares one owner, and revoking a recipient
 # never un-exposes what it already read — rotating the credential at the
 # provider is the only real remediation.
 #

@@ -1,5 +1,5 @@
 # Neovim (stable, from nixpkgs) + the external tools LazyVim expects on PATH.
-# The editor config itself is marcus's own LazyVim fork, bootstrapped below —
+# The editor config itself is a personal LazyVim fork, bootstrapped below —
 # deliberately NOT programs.neovim, which generates its own init.lua and
 # symlinks it over the checkout.
 { pkgs, lib, ... }:

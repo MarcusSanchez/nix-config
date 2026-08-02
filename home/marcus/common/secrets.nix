@@ -19,7 +19,7 @@
   # Day to day this is just a password lookup that doesn't need a browser.
   #
   # Unlike the credentials below, this one deliberately isn't automated:
-  # it's unlocked by the master password marcus actually remembers, which
+  # it's unlocked by the memorized master password, which
   # is what makes it the root of the whole chain. It's also what lets a
   # new machine enroll itself alone: the first switch installs rbw already
   # configured even though secrets don't decrypt yet (the harmless
@@ -35,7 +35,7 @@
       email = "marcussanchez031@gmail.com";
       # pinentry-curses on BOTH platforms — one prompt, drawn on the tty of
       # whatever terminal ran the rbw command (rbw forwards it to the
-      # agent-spawned pinentry). marcus's call, 2026-07-31.
+      # agent-spawned pinentry). Settled, 2026-07-31.
       #
       # The one mac landmine: Ctrl-C mid-prompt orphans the pinentry, which
       # then spins at 100% CPU retrying an EIO read (2026-07-29). Abort with
