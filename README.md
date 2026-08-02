@@ -247,7 +247,9 @@ and push as normal.
 ### Placing the key (lite boxes)
 
 This is the whole of onboarding a lite/temporary machine — nothing to paste
-into `.sops.yaml`, no `updatekeys`, no second machine involved. As one
+into `.sops.yaml`, no `updatekeys`, no second machine involved. On a
+trusted machine it refuses (same capability probe as `secrets:drop` —
+placing the master would overwrite the unbacked-up machine key). As one
 command (after `direnv allow ~/nix-config`):
 
 ```sh

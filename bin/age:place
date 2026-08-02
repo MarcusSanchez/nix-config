@@ -9,6 +9,19 @@
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 
+# Trusted-machine guard, same capability probe as secrets:drop: if this
+# box's key decrypts super.yaml, it is the unbacked-up machine key, and
+# the tee below would OVERWRITE it with the master — a silent
+# decommissioning that even the verify step wouldn't catch (the master
+# matches .sops.yaml's first recipient, so it would print success).
+if sudo env SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt "$(command -v sops)" -d "$root/secrets/super.yaml" >/dev/null 2>&1; then
+  echo "REFUSING: this machine's key decrypts secrets/super.yaml — placing the" >&2
+  echo "roaming master here would overwrite the machine key, which has no" >&2
+  echo "backup. Trusted machines never use age:place; see README \"Enrolling" >&2
+  echo "a trusted machine\"." >&2
+  exit 1
+fi
+
 # no-op when already logged in (verified: silent exit 0); on a fresh box it
 # prompts for the master password via pinentry, right here in the terminal
 rbw login
