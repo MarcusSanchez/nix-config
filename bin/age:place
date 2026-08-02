@@ -24,6 +24,13 @@ got=$(age-keygen -y "$HOME/.config/sops/age/keys.txt")
 if [ "$got" = "$want" ]; then
   echo "key placed and verified: $got"
   echo "next: nh os switch   (or: nh darwin switch)"
+  # HM's activation is a systemd oneshot on NixOS — a switch that changes
+  # nothing skips it, and the atuin login hook with it (gh/fly recover
+  # regardless; sops always runs)
+  if [ "$(uname)" = "Linux" ]; then
+    echo "      if the switch reports no changes, atuin also needs:"
+    echo "      sudo systemctl restart home-manager-marcus.service"
+  fi
 else
   echo "MISMATCH: placed key is $got but .sops.yaml expects $want" >&2
   echo "wrong Bitwarden item? nothing will decrypt until this matches" >&2
