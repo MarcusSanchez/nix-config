@@ -24,6 +24,11 @@
 
   homeEntryPoint = ../../home/marcus/wsl-lite.nix;
 
+  # No fly_token here, and no ability to get it: super.yaml's recipients
+  # are the trusted machines' keys, which lite boxes never hold — see
+  # modules/common/secrets.nix.
+  secretsTier = "lite";
+
   # Do not change after initial install.
   system.stateVersion = "25.05";
 }

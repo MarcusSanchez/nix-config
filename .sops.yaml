@@ -1,27 +1,41 @@
-# Who can decrypt secrets/.
+# Who can decrypt secrets/ — this recipient matrix IS the tier system.
 #
-# One key for everything: the personal age key, backed up in Bitwarden. Every
-# machine gets a copy at /var/lib/sops-nix/key.txt (see modules/common/secrets.nix
-# for the two commands that place it), and the same key at
-# ~/.config/sops/age/keys.txt is what lets `sops secrets/secrets.yaml` edit.
+#   master        Bitwarden ("sops age key - nix-config (all machines)");
+#                 placed on lite/temporary boxes by age:place. Lower tier
+#                 only — a lite box can never open super.yaml. Stays FIRST
+#                 under keys:, age:place verifies against the first age1
+#                 string in this file.
+#   bedroom-wsl   each trusted machine's own key, generated on-box and
+#   macbook-air   backed up nowhere (so a vault compromise cannot open
+#                 super.yaml). Recipients of BOTH files. Enrolling or
+#                 replacing one: README "Enrolling a trusted machine".
+#   super         recovery if both trusted machines die at once: Bitwarden
+#                 ("sops age key - super recovery (nix-config)") plus a
+#                 paper printout. Never placed on any machine.
 #
-# So adding a machine touches nothing here — no ssh-to-age, no new recipient,
-# no `sops updatekeys`. However many boxes there are, the recipient list is
-# this one key.
+# creation_rules are first-match — super.yaml's rule stays above the
+# catch-all or it would get the lower-tier recipient set.
 #
-# The tradeoff, taken deliberately: that key decrypts every version of every
-# secret ever committed, and a per-machine key would have bounded that. It buys
-# nothing here because every machine shares one owner, and revoking a recipient
-# never un-exposes what it already read — rotating the credential at the
-# provider is the only real remediation.
-#
-# NOTE: no `-` before `age:` in key_groups. With one, sops treats the groups
-# as Shamir shares and requires several keys to decrypt — nothing works.
+# NOTE: no `-` before `age:` in key_groups. With one, sops treats the
+# groups as Shamir shares and requires several keys to decrypt — nothing
+# works.
 keys:
-  - &marcus age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
+  - &master age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
+  - &bedroom-wsl age10uy4rx9wnaq4gp7p8v8p7ztx6m4kuaqunkjsfhd87pt5p70p4d8qyk8drl
+  - &macbook-air age17z3w72l4nvnwjra5e2rk0s6gyga0a7xq04dp08pw45kdfdre8v6qag5ppt
+  - &super age1vkv5elnhd64gjy2sn66zwppaltcpmmxpfydz5w432uj63ywr456stsa7n7
 
 creation_rules:
+  - path_regex: secrets/super\.yaml$
+    key_groups:
+      - age:
+          - *bedroom-wsl
+          - *macbook-air
+          - *super
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
       - age:
-          - *marcus
+          - *master
+          - *bedroom-wsl
+          - *macbook-air
+          - *super

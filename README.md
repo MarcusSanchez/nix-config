@@ -211,16 +211,25 @@ every boot into `/run/secrets/`, and each tool is pointed at its file — so no
 machine ever runs `gh auth login`. Only the *values* are encrypted; the keys
 stay readable, so a diff shows *that* a credential changed without showing it.
 
-**Every machine decrypts with the same key** — your personal age key, backed up
-in Bitwarden. There is one recipient, so adding a machine never edits the
-recipient list and never re-encrypts anything.
+**Two tiers, four keys.** Lite boxes share the roaming master key from
+Bitwarden; the trusted machines each have their own, and only those open
+`super.yaml`:
 
-| file | what it is |
-|---|---|
-| `~/nix-config/.sops.yaml` | the one key allowed to decrypt |
-| `~/nix-config/secrets/secrets.yaml` | the encrypted credentials |
-| `/var/lib/sops-nix/key.txt` | that key, on each machine (root, 0400) |
-| `~/.config/sops/age/keys.txt` | the same key, for editing as your user |
+| file | holds | who can decrypt |
+|---|---|---|
+| `secrets/secrets.yaml` | gh token (low-scope), croc, atuin | every machine |
+| `secrets/super.yaml` | fly token + future hot ones | bedroom-wsl, macbook-air |
+
+| key | lives | opens |
+|---|---|---|
+| master | Bitwarden + each lite box (`age:place`) | `secrets.yaml` |
+| bedroom-wsl, macbook-air | only that machine (no backup, on purpose) | both files |
+| buried | paper in a drawer, never on a machine | both files (emergencies) |
+
+On every machine the active identity sits at `/var/lib/sops-nix/key.txt`
+(root, 0400) with an editing copy at `~/.config/sops/age/keys.txt`;
+`.sops.yaml` says which key opens what (master first, by convention —
+`age:place` verifies against it).
 
 ### Editing a credential
 
@@ -228,17 +237,18 @@ Inside the repo (`direnv allow` once per machine puts `bin/` on PATH
 whenever you're cd'd in; `./bin/<name>` works without it):
 
 ```sh
-secrets:edit
+secrets:edit          # the lower tier (secrets.yaml)
+secrets:edit super    # super.yaml — only works on a trusted machine
 ```
 
 It opens the decrypted file in `$EDITOR` and re-encrypts when you save. Commit
 and push as normal.
 
-### Placing the key
+### Placing the key (lite boxes)
 
-This is the whole of onboarding a machine — nothing to paste into
-`.sops.yaml`, no `updatekeys`, no second machine involved. As one command
-(after `direnv allow ~/nix-config`):
+This is the whole of onboarding a lite/temporary machine — nothing to paste
+into `.sops.yaml`, no `updatekeys`, no second machine involved. As one
+command (after `direnv allow ~/nix-config`):
 
 ```sh
 age:place    # logs into Bitwarden if needed (your master password),
@@ -279,9 +289,12 @@ tailnet — `sudo tailscale logout` if it should lose that too. Switches keep
 working; they just report the harmless `setupSecrets` failure until
 `age:place` re-arms the machine.
 
-Re-arming is `age:place` + a switch — gh, fly, and atuin all come back
-during activation on both platforms, and new shells pick `FLY_API_TOKEN` /
-`CROC_SECRET` back up on their own.
+Re-arming a **lite box** is `age:place` + a switch — everything it's
+entitled to comes back during activation, and new shells pick the exports
+back up on their own. On a **trusted machine** a drop destroys the machine
+key, which is backed up nowhere on purpose — re-arming means the full
+enrollment below, so treat `secrets:drop` there as a deliberate act, not a
+routine one.
 
 > **The key must exist before the switch that installs secrets.** sops-nix
 > treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
@@ -289,21 +302,47 @@ during activation on both platforms, and new shells pick `FLY_API_TOKEN` /
 > harmless error both bootstrap sections mention — on a fresh box, the switch
 > that fails is the one that installs `rbw` so you can fetch the key at all.
 
-### The key itself
+### Enrolling a trusted machine
 
-One age key does everything: machines decrypt with it, and you edit with it.
-Bitwarden holds the master copy —
-`rbw get -f notes "sops age key - nix-config (all machines)"`.
+Trusted machines don't use `age:place` — each generates its own key and
+becomes a named recipient. On the new machine:
 
-Losing every copy is the one unrecoverable case, so Bitwarden is the backup
-that matters. Every machine also holds a copy, which makes that unlikely.
+```sh
+age-keygen -o /tmp/machine.txt      # note the "Public key: age1..." line
+sudo sh -c 'cat /tmp/machine.txt >> /var/lib/sops-nix/key.txt && chmod 0400 /var/lib/sops-nix/key.txt'
+cat /tmp/machine.txt >> ~/.config/sops/age/keys.txt && rm /tmp/machine.txt
+```
 
-**Leaking it is the real risk** — git history is permanent, so anyone with this
-key can decrypt every version ever committed, including credentials you've
-since rotated. Per-machine keys would have bounded that, and were dropped on
-purpose: revoking a recipient never un-exposes what it already read, so the
-only remediation that works is rotating the credential at GitHub/fly/atuin.
-Re-encrypting achieves nothing.
+Then add the public key under `keys:` in `.sops.yaml` and to both creation
+rules, and re-encrypt:
+
+```sh
+sops updatekeys secrets/secrets.yaml
+sops updatekeys secrets/super.yaml   # must run where an EXISTING recipient
+                                     # lives (the other trusted box, or the
+                                     # buried key) — the new key can't open
+                                     # the file it isn't yet a recipient of
+```
+
+Commit, push, switch.
+
+### The keys themselves
+
+- **master** — Bitwarden:
+  `rbw get -f notes "sops age key - nix-config (all machines)"`. Opens the
+  lower tier only; a lite box (or its thief) can never read the fly token.
+- **machine keys** — exist only on their machine, unbacked-up on purpose:
+  compromising the Bitwarden vault does not open `super.yaml`.
+- **buried** — the paper printout is the disaster path: if both trusted
+  machines die at once, it re-keys `super.yaml`. Nothing unreissuable may
+  ever live in `super.yaml` (atuin's E2E key stays in the lower tier,
+  reachable via Bitwarden, for exactly this reason).
+
+**Leaking a key is the real risk** — git history is permanent, so a leaked
+key decrypts every version ever committed of the files it's a recipient of,
+including credentials since rotated. Revoking a recipient never un-exposes
+what it already read; the only remediation that works is rotating the
+credential at the provider. Re-encrypting achieves nothing.
 
 ## Tailscale on a new PC
 

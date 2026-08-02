@@ -3,22 +3,21 @@
 # platform aggregator (which is what makes the sops.* options exist here
 # at all).
 #
-# Every machine decrypts with the SAME identity — the personal age key from
-# Bitwarden, at /var/lib/sops-nix/key.txt. .sops.yaml therefore has exactly
-# one recipient, so adding a machine never edits the recipient list and
-# never needs `sops updatekeys`: place the key, switch, done.
+# Identity lives at /var/lib/sops-nix/key.txt on every machine, but WHICH
+# identity is tiered (.sops.yaml is the authority):
+#   * lite/temporary boxes hold the roaming master key from Bitwarden
+#     (placed by age:place) — it decrypts secrets/secrets.yaml only, so
+#     adding or losing such a box never edits .sops.yaml.
+#   * bedroom-wsl and the mac each hold their OWN machine key (generated
+#     on-box, backed up nowhere), a named recipient of both secrets.yaml
+#     and super.yaml. Enrolling or replacing one of these means editing
+#     .sops.yaml + `sops updatekeys` — see README "Enrolling a trusted
+#     machine".
 #
-# The file has to be there before a switch that installs secrets —
+# The keyfile has to be there before a switch that installs secrets —
 # sops-install-secrets treats a missing keyFile as fatal, not as a
-# fallback, so it aborts the whole step. On a fresh box the first switch
-# fails it harmlessly, then:
-#   sudo install -d -m 0700 /var/lib/sops-nix
-#   rbw get -f notes "sops age key - nix-config (all machines)" \
-#     | sudo tee /var/lib/sops-nix/key.txt >/dev/null
-#   sudo chmod 0400 /var/lib/sops-nix/key.txt
-# (tee, not `install /dev/stdin`: BSD install rejects a non-regular source,
-# so that form works on Linux and fails on the mac. The 0700 parent is what
-# keeps the file private between tee and chmod.)
+# fallback, so it aborts the whole step. On a fresh lite box the first
+# switch fails it harmlessly, then age:place closes the loop.
 #
 # Secrets are decrypted to /run/secrets (tmpfs) owned by the user; the home
 # layer wires each one to its tool. To change a credential:
@@ -38,6 +37,20 @@ let
   home = if pkgs.stdenv.isDarwin then "/Users/marcussanchez" else "/home/marcus";
 in
 {
+  # Which credential tier a host declares. "full" (bedroom-wsl, the mac)
+  # additionally decrypts secrets/super.yaml — the file whose recipients
+  # are the trusted machines' own keys, never the roaming master — so a
+  # "lite" box (hosts/wsl-lite) not only doesn't RECEIVE fly_token, its
+  # placed key cannot decrypt the file that holds it.
+  options.secretsTier = lib.mkOption {
+    type = lib.types.enum [
+      "full"
+      "lite"
+    ];
+    default = "full";
+    description = "Which credential tier this host declares.";
+  };
+
   config = lib.mkMerge [
     {
       sops = {
@@ -75,23 +88,23 @@ in
         };
 
         # Bare values, all owner-read-only. What each one is:
-        #   gh_token        rendered into gh-hosts.yml above
-        #   fly_token       a fly ORG token (`fly tokens create org`) — static,
-        #                   unlike the session macaroon `fly auth login` leaves
-        #                   behind; exported as FLY_API_TOKEN by
-        #                   home/marcus/common/secrets.nix
+        #   gh_token        rendered into gh-hosts.yml above; deliberately a
+        #                   LOW-scope token (repo + workflow) so it is safe
+        #                   on every tier — admin scopes were retired with
+        #                   the tier split, not tiered
         #   croc_secret     croc's code phrase, exported as CROC_SECRET — same
         #                   value everywhere means bare `croc send`/`croc` pair
         #   atuin_key       E2E history key (programs.atuin key_path) — the one
         #                   credential that can't be reissued; losing every copy
-        #                   leaves the server side unreadable
+        #                   leaves the server side unreadable, which is why it
+        #                   must stay in THIS file (Bitwarden-recoverable),
+        #                   never in super.yaml
         #   atuin_username  with atuin_password, the activation-hook login
         #   atuin_password
         secrets =
           lib.genAttrs
             [
               "gh_token"
-              "fly_token"
               "croc_secret"
               "atuin_key"
               "atuin_username"
@@ -100,7 +113,19 @@ in
             (_: {
               owner = user;
               mode = "0400";
-            });
+            })
+          # fly_token: full tier only, from super.yaml — a fly ORG token
+          # (`fly tokens create org`), static unlike the session macaroon
+          # `fly auth login` leaves behind; exported as FLY_API_TOKEN by
+          # home/marcus/common/secrets.nix, whose read-guard makes lite
+          # boxes skip the export without any home-layer branching.
+          // lib.optionalAttrs (config.secretsTier == "full") {
+            fly_token = {
+              sopsFile = ../../secrets/super.yaml;
+              owner = user;
+              mode = "0400";
+            };
+          };
       };
     }
 
