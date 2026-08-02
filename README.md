@@ -291,10 +291,12 @@ working; they just report the harmless `setupSecrets` failure until
 
 Re-arming a **lite box** is `age:place` + a switch — everything it's
 entitled to comes back during activation, and new shells pick the exports
-back up on their own. On a **trusted machine** a drop destroys the machine
-key, which is backed up nowhere on purpose — re-arming means the full
-enrollment below, so treat `secrets:drop` there as a deliberate act, not a
-routine one.
+back up on their own. On a **trusted machine** `secrets:drop` refuses to
+run (it probes whether the box's key opens `super.yaml` — no hostname
+list to drift): the machine key it would destroy has no backup, so a drop
+there is decommissioning. Doing that for real is manual: delete both key
+files, remove the machine's recipient from `.sops.yaml`, and `updatekeys`
+both secrets files from a surviving recipient.
 
 > **The key must exist before the switch that installs secrets.** sops-nix
 > treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
