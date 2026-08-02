@@ -3,7 +3,7 @@
 # Only the module's base libraries here (setting `libraries` would
 # *replace* that default set, not add to it) — anything a specific
 # project needs goes in that project's devenv.nix, not the global
-# config (e.g. noted/mobile carries the Electron/GTK stack).
+# config (an Electron project carries its own Electron/GTK stack).
 { ... }:
 
 {
