@@ -304,10 +304,15 @@ sudo sbctl verify            # everything on the ESP must show ✓ signed
 # commit + push the uncomment
 ```
 
-Reboot into the firmware and put Secure Boot into **Setup Mode** (ASUS
-boards: erase the Platform Key; some need OS Type = "Windows UEFI
-Mode"). Do NOT choose any "clear/erase ALL Secure Boot keys" option —
-it drops the revocation database (dbx). Boot back into NixOS:
+Reboot into the firmware and put Secure Boot into **Setup Mode**. This
+board is MSI: `Del` to enter, `F7` for Advanced, then Settings →
+Advanced → Windows OS Configuration → Secure Boot; set **Secure Boot
+Mode = Custom**, enter **Key Management**, and delete *only* the **PK
+(Platform Key)**. Do NOT use "Delete all Secure Boot variables" or
+"Restore Factory Keys" — the first drops the revocation database (dbx),
+the second re-enrols the vendor keys and takes you back out of Setup
+Mode. Boot back into NixOS and confirm with `bootctl status`, which
+should read `Secure Boot: disabled (setup)`:
 
 ```sh
 sudo sbctl enroll-keys --microsoft

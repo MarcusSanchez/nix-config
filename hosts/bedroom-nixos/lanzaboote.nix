@@ -11,8 +11,12 @@
 #   sudo sbctl create-keys          # writes /var/lib/sbctl
 #   (uncomment the import, nh os switch — generations get signed)
 #   sudo sbctl verify               # everything on the ESP shows signed
-#   reboot into firmware, put Secure Boot into Setup Mode (ASUS boards:
-#   erase the Platform Key; maybe set OS Type = "Windows UEFI Mode")
+#   reboot into firmware, put Secure Boot into Setup Mode. MSI board:
+#   F7 for Advanced, Settings -> Advanced -> Windows OS Configuration ->
+#   Secure Boot, Mode = Custom, Key Management, delete the PK only.
+#   NOT "delete all Secure Boot variables" (drops dbx) and NOT "restore
+#   factory keys" (undoes Setup Mode). bootctl status should then read
+#   "Secure Boot: disabled (setup)".
 #   sudo sbctl enroll-keys --microsoft
 #   # --microsoft is LOAD-BEARING: it keeps Microsoft's certificates
 #   # enrolled, which is what lets Windows AND the GPU's option ROM keep
