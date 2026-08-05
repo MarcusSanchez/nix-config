@@ -7,7 +7,7 @@
 #                 string in this file.
 #   bedroom-wsl   each trusted machine's own key, generated on-box and
 #   macbook-air   backed up nowhere (so a vault compromise cannot open
-#                 super.yaml). Recipients of BOTH files. Enrolling or
+#   tuf-nixos     super.yaml). Recipients of BOTH files. Enrolling or
 #                 replacing one: README "Enrolling a trusted machine".
 #   super         recovery if both trusted machines die at once: Bitwarden
 #                 ("sops age key - super recovery (nix-config)") plus a
@@ -23,6 +23,7 @@ keys:
   - &master age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
   - &bedroom-wsl age10uy4rx9wnaq4gp7p8v8p7ztx6m4kuaqunkjsfhd87pt5p70p4d8qyk8drl
   - &macbook-air age17z3w72l4nvnwjra5e2rk0s6gyga0a7xq04dp08pw45kdfdre8v6qag5ppt
+  - &tuf-nixos age1rwzmr2nv7grwnk3zk54k8e9l0wl3pawraxpf05ej006xhayvzguqtgh0d7
   - &super age1vkv5elnhd64gjy2sn66zwppaltcpmmxpfydz5w432uj63ywr456stsa7n7
 
 creation_rules:
@@ -31,6 +32,7 @@ creation_rules:
       - age:
           - *bedroom-wsl
           - *macbook-air
+          - *tuf-nixos
           - *super
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
@@ -38,4 +40,5 @@ creation_rules:
           - *master
           - *bedroom-wsl
           - *macbook-air
+          - *tuf-nixos
           - *super
