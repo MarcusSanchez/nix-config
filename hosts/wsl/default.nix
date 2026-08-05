@@ -5,9 +5,10 @@
 {
   imports = [
     ../../modules/nixos
+    ../../modules/wsl
     # Host-level, not in the aggregator: only ONE WSL distro per Windows PC
     # can be a tailnet node — they share a network namespace. See the file.
-    ../../modules/nixos/tailscale.nix
+    ../../modules/wsl/tailscale.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

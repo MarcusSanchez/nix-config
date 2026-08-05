@@ -1,7 +1,8 @@
-# Aggregator for all system-level modules. Every WSL host imports this —
-# they differ only in hostname and which home entry point they point
-# homeEntryPoint at, since what makes the dev box a dev box lives in the
-# home layer (the Windows dotfile syncing), not here.
+# Aggregator for the SHARED NixOS system core — every NixOS host imports
+# this, whatever its flavor. What differs by kind of machine lives in the
+# flavor layers: modules/wsl (Windows integration, weekly autoUpgrade,
+# keyring for headless secretspec) and modules/desktop (the whole
+# bare-metal GUI stack). A file here does nothing until listed.
 #
 # The two sops-nix/home-manager imports are the platform halves of
 # modules/common/secrets.nix and modules/common/home-manager.nix: they are
@@ -16,8 +17,6 @@
     ./nix.nix
     ./packages.nix
     ./nix-ld.nix
-    ./keyring.nix
     ./users.nix
-    ./wsl.nix
   ];
 }

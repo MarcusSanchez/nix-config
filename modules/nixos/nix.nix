@@ -1,4 +1,6 @@
-# Nix daemon settings, garbage collection, and automatic upgrades.
+# Nix daemon settings and garbage collection, every NixOS host. The weekly
+# autoUpgrade is deliberately NOT here — it's WSL policy (modules/wsl/
+# autoupgrade.nix); the laptop updates by hand, when its owner means to.
 { ... }:
 
 {
@@ -8,6 +10,14 @@
       "flakes"
     ];
     auto-optimise-store = true;
+
+    # Single-user machines: wheel is already root-equivalent (passwordless
+    # sudo), so let it talk to the daemon fully — extra substituters and
+    # devenv's caches work without per-flag trust prompts.
+    trusted-users = [
+      "root"
+      "@wheel"
+    ];
 
     # Pull claude-code and devenv-built artifacts from their cachix caches
     # instead of rebuilding locally. Purely build-vs-download: versions
@@ -32,18 +42,4 @@
     dates = "daily";
     options = "--delete-older-than 10d";
   };
-
-  # Automatic updating: rebuilds weekly from pushed main, honouring the
-  # pushed flake.lock. Run `nix flake update` to actually bump inputs.
-  # Deliberately NOT /etc/nixos: that's the live working tree, and the
-  # timer would silently activate uncommitted work-in-progress.
-  system.autoUpgrade = {
-    enable = true;
-    dates = "weekly";
-    flake = "github:MarcusSanchez/nix-config";
-  };
-  # WSL only runs timers while the VM is up; catch up missed windows on
-  # the next boot instead of silently skipping the week. (nix.gc's timer
-  # is already persistent by default.)
-  systemd.timers.nixos-upgrade.timerConfig.Persistent = true;
 }
