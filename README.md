@@ -229,10 +229,15 @@ same machine, two flake hosts, only ever one running.
 
 1. **Windows**: Disk Management → shrink `C:` by 1 TB (1,048,576 MB).
    Leave the freed space unallocated.
-2. Boot the latest NixOS ISO from USB (firmware boot menu). Partition
-   **only the freed space**: a 1 GiB FAT32 partition flagged `esp` —
-   NixOS's own ESP, sized for early-KMS initrds; *never touch Windows'
-   ~100 MB one* — and the rest ext4.
+2. **Disable Secure Boot in the firmware first** — the NixOS ISO is
+   unsigned and won't boot under it. (It gets re-enabled at the end, via
+   lanzaboote — see "Enable Secure Boot" below. BitLocker is off on this
+   machine today; if that ever changes, suspend it before any firmware
+   Secure Boot change or Windows demands the recovery key.) Then boot
+   the ISO from USB (firmware boot menu). Partition **only the freed
+   space**: a 1 GiB FAT32 partition flagged `esp` — NixOS's own ESP,
+   sized for early-KMS initrds; *never touch Windows' ~100 MB one* —
+   and the rest ext4.
 3. Mount root at `/mnt`, the new ESP at `/mnt/boot`, then:
 
 ```sh
@@ -284,6 +289,36 @@ git commit -m "bedroom-nixos: real hardware-configuration from install"
 - **Group memberships (input/uinput for xremap) need a relogin** after
   the first proper switch — log out and back in once before judging
   broken keybinds.
+
+### Enable Secure Boot (after everything above works)
+
+Windows wants Secure Boot back on; lanzaboote signs the NixOS boot chain
+so both live under it. The host file is prepared but **deliberately not
+imported** — enabled without keys, the bootloader install fails. In order:
+
+```sh
+sudo sbctl create-keys       # keys land in /var/lib/sbctl, root-only
+# uncomment ./lanzaboote.nix in hosts/bedroom-nixos/default.nix, then:
+nh os switch                 # generations get signed as they're installed
+sudo sbctl verify            # everything on the ESP must show ✓ signed
+# commit + push the uncomment
+```
+
+Reboot into the firmware and put Secure Boot into **Setup Mode** (ASUS
+boards: erase the Platform Key; some need OS Type = "Windows UEFI
+Mode"). Do NOT choose any "clear/erase ALL Secure Boot keys" option —
+it drops the revocation database (dbx). Boot back into NixOS:
+
+```sh
+sudo sbctl enroll-keys --microsoft
+```
+
+`--microsoft` is **load-bearing**: it keeps Microsoft's certificates
+enrolled, which is what lets Windows *and* the GPU's option ROM keep
+booting. Never enroll without it on this machine. Then reboot, switch
+Secure Boot to enabled/enforcing, and verify from both sides:
+`bootctl status` says `Secure Boot: enabled (user)`, and Windows still
+boots from the firmware menu.
 
 ## Secrets
 

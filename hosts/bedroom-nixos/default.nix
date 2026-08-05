@@ -13,6 +13,11 @@
     ../../modules/desktop
     ./nvidia.nix
     ./hardware-configuration.nix
+    # Uncomment AFTER `sudo sbctl create-keys` on the installed machine —
+    # enabled without keys on disk, the bootloader install (and therefore
+    # nixos-install) fails. Full ceremony: lanzaboote.nix header + README
+    # "Enable Secure Boot".
+    # ./lanzaboote.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -30,10 +35,11 @@
 
   # Windows lives on its own ESP (the factory ~100 MB one); NixOS gets a
   # dedicated 1 GB ESP, so systemd-boot can't auto-detect Windows across
-  # partitions. The firmware boot menu works day one; for a menu entry
-  # inside systemd-boot instead, uncomment and fill in the device handle
-  # (type `map` in an EFI shell — it's the FsN handle of the Windows ESP):
-  # boot.loader.systemd-boot.windows."11".efiDeviceHandle = "HD0b";
+  # partitions. Pick the OS in the firmware boot menu — that's the plan of
+  # record, and once Secure Boot is on it's effectively the only option:
+  # the cross-ESP chainload trick (boot.loader.systemd-boot.windows) boots
+  # through an unsigned EDK2 UEFI shell, which enforcing Secure Boot
+  # rejects — and lanzaboote replaces the systemd-boot module anyway.
 
   # Set at install time to the ISO's release — verify before first switch.
   system.stateVersion = "26.05";

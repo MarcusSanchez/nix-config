@@ -77,6 +77,14 @@ hosts/bedroom-nixos/       tuf's pattern for the desktop PC (dual-boot,
                            regenerates it; pre-excluded from statix +
                            deadnix) + its own RTX 5080 nvidia.nix (open
                            modules are MANDATORY on Blackwell)
+  lanzaboote.nix           Secure Boot (Windows dual-boot needs it) —
+                           import COMMENTED OUT until `sbctl create-keys`
+                           has run on the machine, or nixos-install
+                           itself fails; enroll-keys must use --microsoft
+                           (Windows + GPU option ROM stay bootable) —
+                           ceremony in the file header + README. The
+                           lanzaboote flake input pins a release tag;
+                           bump deliberately, not via flake update
 hosts/tuf/                 the laptop: per-host values + its hardware truth
   hardware-configuration.nix  generated (nixos-generate-config) — excluded
                            from statix (statix.toml) and deadnix
