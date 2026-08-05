@@ -23,17 +23,17 @@
     libsecret
 
     # AWT / windowing
-    xorg.libX11
-    xorg.libXext
-    xorg.libXi
-    xorg.libXrender
-    xorg.libXtst
-    xorg.libXrandr
-    xorg.libXcursor
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXfixes
-    xorg.libxcb
+    libx11
+    libxext
+    libxi
+    libxrender
+    libxtst
+    libxrandr
+    libxcursor
+    libxcomposite
+    libxdamage
+    libxfixes
+    libxcb
     libxkbcommon
     wayland
 
