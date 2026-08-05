@@ -30,3 +30,12 @@ keymap:
     remap:
       alt-h: left
       alt-l: right
+
+# Right Alt sends Super, so niri combos (Mod+…) are reachable with the
+# right thumb instead of stretching the left one across the keyboard.
+# modmap (not keymap) remaps at the key level, so it holds for every
+# combination, not just bindings xremap knows about.
+modmap:
+  - name: right-alt-as-super
+    remap:
+      Alt_R: Super_R
