@@ -262,6 +262,29 @@ git commit -m "bedroom-nixos: real hardware-configuration from install"
    `secrets:status`, `sudo tailscale up --ssh`. Push needs gh, which needs
    secrets — so the commit rides until enrollment lands; that's fine.
 
+### First login (what to expect)
+
+- **Boot noise before enrollment is normal**: every activation reports the
+  harmless `setupSecrets` failure until the machine key is enrolled and a
+  switch runs — same story as every fresh box.
+- **Monitors auto-place in connector order**, probably not your desk
+  order: `niri msg outputs` for the names, then add an
+  `output "DP-N" { position …; scale …; }` block per monitor in
+  `niri.config.kdl` (the convention is commented right above the laptop's
+  `eDP-1` block). Edits hot-reload — arrange interactively, and the
+  drift auto-commits on the next switch.
+- `direnv allow ~/nix-config` once, so `bin/` is on PATH.
+- Open `nvim` once (plugins install on first run).
+- **Deliberately imperative, minutes of hand work** (same list as the
+  laptop): JetBrains IDEs via Toolbox, DMS wallpaper/avatar from the
+  control center, `sudo tailscale up --ssh`.
+- atuin needs no ceremony here — a fresh store syncs the account history
+  straight down on the hook's first login (the laptop's key-mismatch
+  dance was a migration artifact, not part of the pattern).
+- **Group memberships (input/uinput for xremap) need a relogin** after
+  the first proper switch — log out and back in once before judging
+  broken keybinds.
+
 ## Secrets
 
 Credentials live age-encrypted in `secrets/secrets.yaml` (in this repo), which
