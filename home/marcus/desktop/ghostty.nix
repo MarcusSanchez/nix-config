@@ -17,7 +17,7 @@
 
       font-family = "JetBrainsMono Nerd Font Mono";
       window-title-font-family = "JetBrainsMono Nerd Font Mono";
-      font-size = 14;
+      font-size = 12;
       # disable ligatures
       font-feature = [
         "-calt"
