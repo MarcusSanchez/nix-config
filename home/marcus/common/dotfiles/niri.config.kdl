@@ -410,7 +410,6 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
-    Mod+D hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     // macOS spotlight muscle memory
     Alt+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     Mod+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
@@ -511,14 +510,14 @@ binds {
 
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
-    // U = Up, I = down — swapped from upstream to stay directionally
-    // consistent with the swapped J/K on the row below
+    // U = Up, D = Down — mnemonic beats upstream's U/I pair. Mod+D
+    // was the spotlight launcher; Alt+Space and Mod+Space still are.
     Mod+U              { focus-workspace-up; }
-    Mod+I              { focus-workspace-down; }
+    Mod+D              { focus-workspace-down; }
     Mod+Shift+Page_Down { move-column-to-workspace-down; }
     Mod+Shift+Page_Up   { move-column-to-workspace-up; }
     Mod+Shift+U         { move-column-to-workspace-up; }
-    Mod+Shift+I         { move-column-to-workspace-down; }
+    Mod+Shift+D         { move-column-to-workspace-down; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }
@@ -527,7 +526,7 @@ binds {
     Mod+Ctrl+Page_Down { move-workspace-down; }
     Mod+Ctrl+Page_Up   { move-workspace-up; }
     Mod+Ctrl+U         { move-workspace-up; }
-    Mod+Ctrl+I         { move-workspace-down; }
+    Mod+Ctrl+D         { move-workspace-down; }
 
     // You can bind mouse wheel scroll ticks using the following syntax.
     // These binds will change direction based on the natural-scroll setting.
