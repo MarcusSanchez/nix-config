@@ -7,6 +7,7 @@
     ./common
     ./desktop/ghostty.nix
     ./desktop/niri.nix
+    ./desktop/appearance.nix
     ./desktop/dotfiles.nix
     ./desktop/apps.nix
   ];
