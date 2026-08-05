@@ -772,11 +772,11 @@ output "DP-2" {
 output "DP-3" {
     mode "3840x2160@240.000"
     scale 1.5
-    position x=1080 y=96
+    position x=1080 y=240
 }
 
 output "DP-1" {
     mode "2560x1440@320.001"
-    scale 1
-    position x=4152 y=240
+    scale 1.25
+    position x=3640 y=384
 }
