@@ -753,5 +753,5 @@ cursor {
 // arbitrary fractional scales, and wayland-native apps stay crisp via
 // the fractional-scale protocol (xwayland apps may soften slightly)
 output "eDP-1" {
-    scale 1.1
+    scale 1.25
 }
