@@ -25,6 +25,13 @@
     accent = "blue";
 
     nvim.enable = false;
+    # Same cross-platform eval trap as starship's port: this theme reads
+    # its palette from a derivation built at EVALUATION time, and that
+    # derivation is the target's platform. With the desktop's
+    # programs.swaylock on, evaluating tuf-nixos from the mac then dies
+    # with "platform mismatch: required x86_64-linux" — so the mac loses
+    # its only way to check laptop changes. No-op on WSL/mac.
+    swaylock.enable = false;
     # autoEnable's GTK port would force Papirus icons over the Adwaita
     # set that home/marcus/desktop/niri.nix pins for reliable
     # symbolic-icon coverage (ghostty's tab bar broke without them).
