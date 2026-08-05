@@ -31,6 +31,9 @@
     casks = [
       "ghostty"
       "google-chrome"
+      # per-application key remapping; its config and the launchd agent
+      # that keeps it running live in home/marcus/mac/hammerspoon.nix
+      "hammerspoon"
       # IDE manager only — the JetBrains IDEs themselves are installed and
       # updated inside Toolbox (declaring them as casks would just drift
       # against their self-updater)

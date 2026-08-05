@@ -18,6 +18,12 @@
 -- Needs Accessibility (System Settings > Privacy & Security >
 -- Accessibility). Without it the tap silently receives nothing.
 
+-- Opens Hammerspoon's message port so the bundled CLI can talk to it:
+--   /Applications/Hammerspoon.app/Contents/Frameworks/hs/hs -c "expr"
+-- Worth having because the failure mode here is silent — a tap that
+-- never started looks exactly like a key that does nothing.
+require("hs.ipc")
+
 local home = os.getenv("HOME")
 local DOTFILES = home .. "/nix-config/home/marcus/common/dotfiles/"
 
@@ -75,9 +81,17 @@ local RULES = {
   { mods = { "alt" },          key = "k", send = "down",  always = true },
   { mods = { "alt" },          key = "h", send = "left",  always = false },
   { mods = { "alt" },          key = "l", send = "right", always = false },
-  { mods = { "alt", "shift" }, key = "l", send = "home",  always = true },
-  { mods = { "alt", "shift" }, key = "k", send = "end",   always = true },
+  -- h/l stay the horizontal pair when shifted: h to the start of the
+  -- line, l to the end. Unconditional, unlike the unshifted h/l above —
+  -- vim-speaking apps get these too. containExactly is what keeps the
+  -- two apart, so alt+shift+l is End and never Right.
+  { mods = { "alt", "shift" }, key = "h", send = "home",  always = true },
+  { mods = { "alt", "shift" }, key = "l", send = "end",   always = true },
 }
+
+-- Exposed as a global for `hs -c "hs.inspect(remapRules)"`, so what is
+-- actually loaded can be read back rather than inferred from the file.
+remapRules = RULES
 
 -- Replace the keystroke: swallow the original and post the substitute
 -- with no modifiers held, so the receiving app sees a bare arrow/Home/End

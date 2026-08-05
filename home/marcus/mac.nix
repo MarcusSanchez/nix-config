@@ -8,6 +8,7 @@
     ./mac/ghostty.nix
     ./mac/nix.nix
     ./mac/dotfiles.nix
+    ./mac/hammerspoon.nix
   ];
 
   home = {
