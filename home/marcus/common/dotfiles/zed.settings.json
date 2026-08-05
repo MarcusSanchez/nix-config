@@ -141,7 +141,7 @@
   // "ui_font_family": ".SystemUIFont",
   "buffer_font_family": "JetBrainsMono Nerd Font Mono",
   "ui_font_size": 16,
-  "buffer_font_size": 18.0,
+  "buffer_font_size": 14.0,
   "theme": {
     "mode": "system",
     "light": "Catppuccin Mocha",
