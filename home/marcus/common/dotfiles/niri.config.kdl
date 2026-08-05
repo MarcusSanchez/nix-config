@@ -742,6 +742,14 @@ cursor {
     xcursor-size 24
 }
 
+// Multi-machine convention: outputs are keyed by connector name, and a
+// block for a connector the machine doesn't have is inert — this ONE
+// file serves every host; add blocks, never fork it. eDP-1 exists only
+// on the laptop. When bedroom-nixos first boots its three monitors,
+// run `niri msg outputs` for their names and add a block per monitor
+// here (position/mode/scale — the commented template further up shows
+// the fields); until then they auto-place in connector order.
+//
 // 1.0 slightly small, DMS's next preset 1.25 way too big — niri takes
 // arbitrary fractional scales, and wayland-native apps stay crisp via
 // the fractional-scale protocol (xwayland apps may soften slightly)
