@@ -4,5 +4,7 @@ set -e
 cd "$(git rev-parse --show-toplevel)"
 nix fmt
 statix check .
-deadnix --fail .
+# hardware-configuration.nix is generated (nixos-generate-config) and not
+# held to repo style — statix.toml ignores it for the same reason
+deadnix --fail --exclude hosts/tuf/hardware-configuration.nix -- .
 nix flake check

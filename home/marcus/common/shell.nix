@@ -25,6 +25,11 @@
     accent = "blue";
 
     nvim.enable = false;
+    # autoEnable's GTK port would force Papirus icons over the Adwaita
+    # set that home/marcus/desktop/niri.nix pins for reliable
+    # symbolic-icon coverage (ghostty's tab bar broke without them).
+    # No-op on WSL/mac, load-bearing on the desktop.
+    gtk.icon.enable = false;
   };
 
   home.sessionVariables = {

@@ -8,7 +8,11 @@
     ./wsl/dotfiles.nix
   ];
 
-  home.username = "marcus";
-  home.homeDirectory = "/home/marcus";
+  home = {
+    username = "marcus";
+    homeDirectory = "/home/marcus";
+    # Do not change after initial install.
+    stateVersion = "25.05";
+  };
   windows.username = "marcus";
 }

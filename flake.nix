@@ -1,5 +1,5 @@
 {
-  description = "Marcus's Nix configuration (NixOS-WSL + macOS)";
+  description = "Marcus's Nix configuration (NixOS-WSL + macOS + bare-metal NixOS)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -32,6 +32,17 @@
     # authenticated — see home/marcus/common/secrets.nix
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # ONLY for nixosModules.greeter (the dms-greeter greetd module nixpkgs
+    # lacks) — the shell itself is nixpkgs' dms-shell so it rides the
+    # binary cache. Don't collapse the split.
+    dank-material-shell = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -68,6 +79,7 @@
             nixos-lite = ./hosts/wsl-lite;
             office-lite-wsl-1 = ./hosts/wsl-lite;
             office-lite-wsl-2 = ./hosts/wsl-lite;
+            tuf-nixos = ./hosts/tuf;
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as

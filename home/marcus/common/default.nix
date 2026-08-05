@@ -1,6 +1,8 @@
 # Shared Home Manager config for every machine. Per-host entry points
-# (../wsl.nix, ../mac.nix, ../wsl-lite.nix) set identity and the
-# platform-only imports from ../wsl/ and ../mac/.
+# (../wsl.nix, ../mac.nix, ../wsl-lite.nix, ../desktop.nix) set identity,
+# home.stateVersion (a per-machine birth certificate — it can't live in a
+# shared file since machines were installed under different releases),
+# and the platform-only imports.
 { ... }:
 
 {
@@ -12,7 +14,4 @@
     ./toolchains.nix
     ./secrets.nix
   ];
-
-  # Do not change after initial install.
-  home.stateVersion = "25.05";
 }

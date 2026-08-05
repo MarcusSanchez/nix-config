@@ -26,7 +26,7 @@ jobs:
       - name: lint (statix + deadnix)
         run: |
           nix run --inputs-from . nixpkgs#statix -- check .
-          nix run --inputs-from . nixpkgs#deadnix -- --fail .
+          nix run --inputs-from . nixpkgs#deadnix -- --fail --exclude hosts/tuf/hardware-configuration.nix -- .
       # evaluates every nixosConfigurations entry
       - name: nix flake check
         run: nix flake check

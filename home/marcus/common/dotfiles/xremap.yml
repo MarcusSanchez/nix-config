@@ -1,0 +1,32 @@
+# xremap: per-application key remapping (the AutoHotkey niche).
+# Live-editable — xremap runs with --watch=config and reloads on save.
+keymap:
+  # Ctrl+Alt+F12 switches to an empty VT that displays a stale
+  # framebuffer frame (retain-splash side effect) — swallow just that
+  # chord by rewriting it to the unused F24. Ctrl+Alt+F1..F11 stay.
+  - name: swallow-vt12
+    remap:
+      ctrl-alt-f12: f24
+
+  # Alt+J/K are up/down arrows EVERYWHERE — vim apps included.
+  # J=up / K=down follows the same swapped convention as the niri binds.
+  - name: vertical-arrows-always
+    remap:
+      alt-j: up
+      alt-k: down
+
+  # Alt+H/L become left/right only outside apps that already speak vim:
+  # Zed, JetBrains IDEs, and terminals whose title says nvim is running
+  # (ghostty's shell integration titles the window after the foreground
+  # command; plain shells keep the remap).
+  - name: horizontal-arrows-dynamic
+    application:
+      not:
+        - dev.zed.Zed
+        - /^jetbrains-/
+    window:
+      not:
+        - /^nvim\b/
+    remap:
+      alt-h: left
+      alt-l: right

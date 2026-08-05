@@ -10,6 +10,10 @@
     ./mac/dotfiles.nix
   ];
 
-  home.username = "marcussanchez";
-  home.homeDirectory = "/Users/marcussanchez";
+  home = {
+    username = "marcussanchez";
+    homeDirectory = "/Users/marcussanchez";
+    # Do not change after initial install.
+    stateVersion = "25.05";
+  };
 }
