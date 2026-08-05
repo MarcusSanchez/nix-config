@@ -19,5 +19,9 @@
     ./macos.nix
     ./fonts.nix
     inputs.home-manager.darwinModules.home-manager
+    # Last on purpose: appending leaves every position above unmoved, and
+    # the ordering note at the top of this file makes that matter. Settings
+    # for it live with the rest of the brew config, in ./homebrew.nix.
+    inputs.nix-homebrew.darwinModules.nix-homebrew
   ];
 }

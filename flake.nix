@@ -11,6 +11,11 @@
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+    # Installs and owns the Homebrew prefix itself. nix-darwin's homebrew.*
+    # options only drive `brew bundle` and assume brew is already there, so
+    # this is the piece that makes a fresh mac reproducible. No follows:
+    # its only input is the brew source it pins, and it has no nixpkgs.
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
