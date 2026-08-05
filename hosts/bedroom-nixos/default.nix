@@ -17,7 +17,7 @@
     # enabled without keys on disk, the bootloader install (and therefore
     # nixos-install) fails. Full ceremony: lanzaboote.nix header + README
     # "Enable Secure Boot".
-    # ./lanzaboote.nix
+    ./lanzaboote.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
