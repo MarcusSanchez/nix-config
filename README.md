@@ -9,6 +9,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 |---|---|---|---|
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
 | `nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
+| `tuf-nixos` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
@@ -18,13 +19,17 @@ The repo lives at `~/nix-config` everywhere; the symlink is what bare
 
 ```
 home/
-  marcus/                Home Manager — common/ + wsl/ + mac/, with
-                         wsl.nix / wsl-lite.nix / mac.nix as entry points
-hosts/                   per-host values only — mac/, wsl/, wsl-lite/
+  marcus/                Home Manager — common/ + wsl/ + mac/ + desktop/,
+                         with wsl.nix / wsl-lite.nix / mac.nix / desktop.nix
+                         as entry points
+hosts/                   per-host values only — mac/, wsl/, wsl-lite/, tuf/
+                         (tuf also carries its hardware + nvidia facts)
 modules/
-  common/                shared system layer
+  common/                shared system layer (all platforms)
   darwin/                mac system layer
-  nixos/                 WSL system layer — every WSL host, unchanged
+  nixos/                 shared Linux core — every NixOS host
+  wsl/                   WSL flavor (Windows integration, autoUpgrade)
+  desktop/               bare-metal flavor (boot/niri/DMS session)
 secrets/
   secrets.yaml           credentials, age-encrypted (safe to push)
 .sops.yaml               which age keys can decrypt
@@ -45,6 +50,17 @@ One concern per file, and a file does nothing until it's in its directory's
 nh os switch                  # apply
 nh os switch -u               # apply + update inputs
 nvd diff /run/booted-system /run/current-system
+```
+
+**TUF laptop**
+
+```sh
+nh os switch                  # same as WSL — but NO autoUpgrade here:
+nh os switch -u               # a desktop updates when you mean it to
+sudo nixos-rebuild boot --flake /etc/nixos
+                              # for greeter/display-manager changes:
+                              # stage for next boot instead of yanking
+                              # the live session out from under you
 ```
 
 **Mac**
