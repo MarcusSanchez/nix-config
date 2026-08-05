@@ -320,7 +320,28 @@ sudo sbctl enroll-keys --microsoft
 
 `--microsoft` is **load-bearing**: it keeps Microsoft's certificates
 enrolled, which is what lets Windows *and* the GPU's option ROM keep
-booting. Never enroll without it on this machine. Then reboot, switch
+booting. Never enroll without it on this machine.
+
+**This board refuses runtime writes.** On the MSI board, `enroll-keys`
+fails with `permission denied` writing `db`, even with `SetupMode=1`,
+PK deleted, no lockdown LSM, immutable flags cleared and
+`--disable-landlock` — the firmware itself rejects it, not Linux. Export
+the key files to the ESP and enrol them from the firmware instead:
+
+```sh
+sudo mkdir -p /boot/sbctl-keys && cd /boot/sbctl-keys
+sudo sbctl enroll-keys --microsoft --export esl   # also: --export auth
+```
+
+Then in Key Management enrol **db → KEK → PK, in that order** (PK last:
+enrolling it is what leaves Setup Mode). The exported `db.esl` already
+contains Microsoft's certificates because of `--microsoft`.
+
+**Also set Image Execution Policy → Deny Execute** (Fixed and Removable
+Media) while in that menu. `sbctl status` reports this board as
+`FQ0001: Defaults to executing on Secure Boot policy violation
+(CRITICAL)` — MSI's default is to run binaries that fail verification,
+which makes Secure Boot report as on while enforcing nothing. Then reboot, switch
 Secure Boot to enabled/enforcing, and verify from both sides:
 `bootctl status` says `Secure Boot: enabled (user)`, and Windows still
 boots from the firmware menu.
