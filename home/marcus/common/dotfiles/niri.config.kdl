@@ -756,3 +756,26 @@ cursor {
 output "eDP-1" {
     scale 1.1
 }
+
+// bedroom-nixos: three monitors, left to right — DP-1 vertical, the 4K
+// in the middle, DP-2 on the right. Connector-keyed, so these blocks are
+// inert on the laptop (which has only eDP-1). Modes are each panel's
+// maximum; y positions centre the shorter panels against DP-1's height.
+output "DP-1" {
+    mode "2560x1440@320.001"
+    transform "90"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-3" {
+    mode "3840x2160@240.000"
+    scale 1.25
+    position x=1440 y=416
+}
+
+output "DP-2" {
+    mode "1920x1080@179.998"
+    scale 1
+    position x=4512 y=740
+}
