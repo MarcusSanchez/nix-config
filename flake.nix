@@ -80,6 +80,7 @@
             office-lite-wsl-1 = ./hosts/wsl-lite;
             office-lite-wsl-2 = ./hosts/wsl-lite;
             tuf-nixos = ./hosts/tuf;
+            bedroom-nixos = ./hosts/bedroom-nixos;
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as

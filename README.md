@@ -10,6 +10,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
 | `nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `tuf-nixos` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
+| `bedroom-nixos` | bare-metal desktop, dual-boot with the PC hosting `bedroom-wsl` — prepared, not yet installed | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
@@ -218,6 +219,48 @@ Same expected `cannot read keyfile` error as on WSL, and the same fix: run
 [Placing the key](#placing-the-key) to place the age key, then
 `nh darwin switch` again. After that the only thing left is opening `nvim`
 once — `gh`, `flyctl` and `atuin` all come up authenticated.
+
+## Dual-boot install (bedroom PC → bedroom-nixos)
+
+The host is prepared: `hosts/bedroom-nixos/` exists with the RTX 5080
+nvidia config and a **placeholder** `hardware-configuration.nix` the
+install replaces. Windows and `bedroom-wsl` are untouched throughout —
+same machine, two flake hosts, only ever one running.
+
+1. **Windows**: Disk Management → shrink `C:` by 1 TB (1,048,576 MB).
+   Leave the freed space unallocated.
+2. Boot the latest NixOS ISO from USB (firmware boot menu). Partition
+   **only the freed space**: a 1 GiB FAT32 partition flagged `esp` —
+   NixOS's own ESP, sized for early-KMS initrds; *never touch Windows'
+   ~100 MB one* — and the rest ext4.
+3. Mount root at `/mnt`, the new ESP at `/mnt/boot`, then:
+
+```sh
+sudo nixos-generate-config --root /mnt
+git clone https://github.com/MarcusSanchez/nix-config /mnt/home/marcus/nix-config
+cp /mnt/etc/nixos/hardware-configuration.nix \
+   /mnt/home/marcus/nix-config/hosts/bedroom-nixos/hardware-configuration.nix
+# if the ISO's release isn't 26.05, set system.stateVersion in
+# hosts/bedroom-nixos/default.nix to match it — then:
+sudo nixos-install --flake /mnt/home/marcus/nix-config#bedroom-nixos
+# marcus has no password yet and the greeter needs one:
+sudo nixos-enter --root /mnt -- passwd marcus
+```
+
+4. Reboot into the greeter (pick NixOS's disk in the firmware boot menu;
+   Windows stays on its own entry). First login, in a terminal:
+
+```sh
+sudo chown -R marcus:users ~/nix-config
+sudo ln -sfn /home/marcus/nix-config /etc/nixos
+cd ~/nix-config && git add hosts/bedroom-nixos/hardware-configuration.nix
+git commit -m "bedroom-nixos: real hardware-configuration from install"
+```
+
+5. Enroll the machine key ([Enrolling a trusted machine](#enrolling-a-trusted-machine)
+   — push the commit above together with the `.sops.yaml` change), switch,
+   `secrets:status`, `sudo tailscale up --ssh`. Push needs gh, which needs
+   secrets — so the commit rides until enrollment lands; that's fine.
 
 ## Secrets
 
