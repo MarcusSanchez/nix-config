@@ -23,5 +23,6 @@
     ./desktop.nix
     ./fonts.nix
     ./nix-ld.nix
+    ./envfs.nix
   ];
 }
