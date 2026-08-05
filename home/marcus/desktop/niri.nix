@@ -1,5 +1,5 @@
 # User-side pieces of the niri session (the compositor itself and its
-# portals come from programs.niri in modules/nixos/desktop.nix).
+# portals come from programs.niri in modules/desktop/desktop.nix).
 # The shell is DankMaterialShell (quickshell-based): bar, launcher,
 # notifications, control center, lock screen and wallpaper-driven
 # Material theming in one — spawned and bound in niri.config.kdl
@@ -61,7 +61,7 @@
     (pkgs.xremap.override { withVariant = "niri"; })
 
     # TPM-backed virtual FIDO2 key (system plumbing in
-    # modules/nixos/tpm.nix, spawned in niri.config.kdl). It shells out
+    # modules/desktop/tpm.nix, spawned in niri.config.kdl). It shells out
     # to a bare `pinentry` for the touch-confirmation prompt — the
     # alias points it at the gnome3 flavor, which prompts via gcr.
     pkgs.tpm-fido
@@ -98,7 +98,7 @@
   xdg.configFile."DankMaterialShell/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/dms.settings.json";
 
-  # fallback lock (PAM entry in modules/nixos/desktop.nix) in case the
+  # fallback lock (PAM entry in modules/desktop/desktop.nix) in case the
   # DMS lock ever misbehaves — run `swaylock` from a terminal
   programs.swaylock.enable = true;
 }

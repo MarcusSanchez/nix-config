@@ -59,7 +59,9 @@ Every `.nix` file here opens with a header comment explaining itself, so this ma
 flake.nix                  inputs + all host wirings. dank-material-shell
                            input supplies ONLY the dms-greeter module (the
                            shell is nixpkgs' dms-shell — cache reasons;
-                           don't collapse the split)
+                           don't collapse the split). nix-homebrew takes no
+                           follows — it has no nixpkgs input, only the brew
+                           source it pins
 bin/                       repo-operations scripts (secrets:edit,
                            secrets:status, age:place, secrets:drop,
                            config:check) — plain executables, PATH_add'd
@@ -121,6 +123,10 @@ modules/desktop/           the bare-metal flavor — currently just the laptop
   tpm.nix                  tpm-fido udev rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
+  envfs.nix                /bin + /usr/bin as a FUSE mount resolving
+                           shebangs against PATH, so Toolbox's generated
+                           #!/bin/bash launchers run. Desktop only — not
+                           handed to the unattended WSL boxes
   zram.nix locale.nix fonts.nix tailscale.nix
 modules/darwin/
   default.nix              aggregator
@@ -131,7 +137,8 @@ modules/darwin/
                            tailscale-app cask while this is on — one
                            tailscaled per mac. nix-darwin#1688 recovery
                            command is in the file header
-  homebrew.nix             cleanup = "zap" (Constraints)
+  homebrew.nix             cleanup = "zap" + nix-homebrew, which owns the
+                           prefix and pins brew's version (Constraints)
   macos.nix                Touch ID sudo + Remote Login (the password-auth
                            fallback for when tailscaled is down — no
                            authorized_keys exist anywhere any more)
@@ -163,7 +170,10 @@ home/marcus/
                            monitors are inert, so one kdl serves many
                            machines — add output blocks, don't fork; also
                            hardcodes the absolute xremap.yml path),
-                           dms.settings.json, xremap.yml
+                           dms.settings.json, xremap.yml,
+                           hammerspoon.init.lua (the mac's xremap; watches
+                           this directory and reloads itself on save, so
+                           edits need no rebuild)
     toolchains.nix         rustup repair/bootstrap (isDarwin branch) + the
                            JetBrains GOROOT symlink — see Constraints
     neovim.nix             see Constraints
@@ -182,6 +192,12 @@ home/marcus/
                            drift at activation
     nix.nix                user GC launchd agent + HM manpages off (they
                            warn on every eval under Determinate Nix)
+    hammerspoon.nix        the mac's xremap — per-app remaps matched on
+                           bundle id AND window title, which is why it is
+                           not Karabiner (bundle ids only, and its DriverKit
+                           driver is broken on macOS 26). Accessibility must
+                           be granted BY HAND; until it is, the event tap
+                           never starts and the keys silently do nothing
     ghostty.nix
   desktop/
     niri.nix               user side of the session: DMS helper packages
@@ -192,6 +208,11 @@ home/marcus/
                            leftovers), out-of-store links for niri.kdl +
                            dms.settings.json
     dotfiles.nix           mac-style symlinks + configAutoCommit for drift
+    appearance.nix         wallpaper + avatar from ./assets, linked to
+                           stable paths under ~ — DMS records an ABSOLUTE
+                           path in its session state, so a store path would
+                           rot at the next GC. Avatar goes to ~/.face, the
+                           convention AccountsService falls back to
     apps.nix ghostty.nix   ghostty here and mac/ghostty.nix share most
                            settings by copy — a common/ghostty.nix refactor
                            is a known follow-up, not yet done
@@ -209,7 +230,9 @@ home/marcus/
 - **On the mac, `nix.enable = false` is load-bearing** — Determinate Nix owns the daemon and nix-darwin refuses to build otherwise. Never set system-side `nix.settings`/`nix.gc`/`nix.optimise` in `modules/darwin/`; user-level GC lives in `home/marcus/mac/nix.nix` instead. Daemon-level settings (extra substituters and their keys) are therefore imperative on the mac, in `/etc/nix/nix.custom.conf` — Determinate's file, applied with `sudo launchctl kickstart -k system/systems.determinate.nix-daemon`. The WSL boxes get the same settings declaratively from `modules/nixos/nix.nix`.
 - **If `programs.starship` is ever enabled again, set `catppuccin.starship.enable = false` with it.** `autoEnable` otherwise pulls in catppuccin's starship port, which reads its palette from a derivation built at *evaluation* time. That derivation is the target platform's, so evaluating the mac config from Linux — CI's ubuntu runner, or a WSL box — fails outright rather than degrading. It broke CI for three commits on 2026-07-30 and looked like a hostname problem. `nix flake check` never catches it, because that command doesn't touch `darwinConfigurations`.
 
-- **`homebrew.nix` has `cleanup = "zap"`**: any formula/cask/tap not declared there is uninstalled on the next mac rebuild. When marcus mentions installing a mac app, it must be declared or it will vanish. **Homebrew 6 refuses third-party taps that aren't trusted on the machine** — a declared tap the mac hasn't trusted kills activation at the brew-bundle step ("Refusing to load formula ... from untrusted tap") *before Home Manager or secrets run*, which presents as a totally broken switch (2026-08-01, the pinentry-touchid leftover). No taps are declared today; adding one means a per-mac trust step, so prefer formulae from core.
+- **`homebrew.nix` has `cleanup = "zap"`**: any formula/cask/tap not declared there is uninstalled on the next mac rebuild. When marcus mentions installing a mac app, it must be declared or it will vanish. **Homebrew 6 refuses third-party taps that aren't trusted on the machine** — a declared tap the mac hasn't trusted kills activation at the brew-bundle step ("Refusing to load formula ... from untrusted tap") *before Home Manager or secrets run*, which presents as a totally broken switch (2026-08-01, the pinentry-touchid leftover). No taps are declared today. Since nix-homebrew arrived (below), a tap's trust entry can be declared with it — `nix-homebrew.trust.{taps,casks,formulae,commands}` — so a tap no longer needs a hand-run `brew trust` on each mac; removing an entry does NOT revoke it, that still needs `brew untrust`. Core formulae remain the simpler path.
+
+- **Homebrew itself is nix-managed** (`nix-homebrew` in `modules/darwin/homebrew.nix`): it owns `/opt/homebrew` and pins brew's version through the flake, so `brew --version` moves on `nix flake update` and never on self-update. Consequences: `brew doctor` permanently warns "Missing git origin remote" right before its own "managed by Nix" line — expected, not a fault; `brew update` still exits 0 against the read-only store path, so `onActivation.autoUpdate` is unaffected. Taps stay mutable deliberately — pinning them means carrying homebrew-core and homebrew-cask as flake inputs (~1.6 GB, pushed to daily), and pinning a cask's definition still doesn't pin what it downloads.
 - **The usernames differ per machine** — `marcus` on WSL, `marcussanchez` on the mac. The HM bridges and `users.nix` files encode this; don't "unify" them.
 - **stateVersions must never change — they are not "the version we're on".** Per machine: `system.stateVersion` "25.05" (WSL), "26.05" (tuf), `6` (darwin); `home.stateVersion` lives in each entry point ("25.05" everywhere except desktop.nix's "26.05") and can never move back into `home/marcus/common/` — the machines were installed under different releases.
 

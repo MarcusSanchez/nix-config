@@ -368,7 +368,7 @@ credential at the provider. Re-encrypting achieves nothing.
 ## Tailscale on a new PC
 
 Only relevant if that box will be a tailnet node. Both `hosts/wsl` and
-`hosts/wsl-lite` import `modules/nixos/tailscale.nix`, so every WSL host is
+`hosts/wsl-lite` import `modules/wsl/tailscale.nix`, so every WSL host is
 one unless you drop the import.
 
 **Windows needs mirrored networking.** This is a Windows-side file the repo

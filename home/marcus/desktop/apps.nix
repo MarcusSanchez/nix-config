@@ -10,7 +10,7 @@
     # IDE manager only; the JetBrains IDEs themselves are installed and
     # updated inside Toolbox (into ~/.local — nix-ld makes them run)
     jetbrains-toolbox
-    # firewall port 53317 is opened in modules/nixos/desktop.nix
+    # firewall port 53317 is opened in modules/desktop/desktop.nix
     localsend
     # native Wayland instead of xwayland-satellite, where its CEF drew
     # an ugly fallback frame — and no decoration feature flag: CEF's
