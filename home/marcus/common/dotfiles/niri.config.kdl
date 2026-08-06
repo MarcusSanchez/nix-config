@@ -687,6 +687,12 @@ binds {
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
+    // the snipping tool (same chord as Windows'): slurp selects the
+    // region, satty opens it for arrows/text/blur, copy lands on the
+    // clipboard, save lands next to niri's own screenshots. Esc in the
+    // region picker cancels the whole pipeline. Tools installed by
+    // home/marcus/desktop/niri.nix.
+    Mod+Shift+S hotkey-overlay-title="Snip + annotate" { spawn "sh" "-c" "mkdir -p ~/Pictures/Screenshots && grim -g \"$(slurp)\" - | satty --filename - --fullscreen --early-exit --copy-command wl-copy --output-filename ~/Pictures/Screenshots/'Snip from %Y-%m-%d %H-%M-%S.png'"; }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
