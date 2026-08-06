@@ -130,11 +130,41 @@ in
   # untransformed at scale 1: sideways on a vertical monitor, tiny on
   # the 4K (bedroom-nixos's first greeter did exactly that). The DMS
   # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
-  # generated config when that file exists; hand it the same
-  # connector-keyed output layout the session includes. Store copy —
-  # updates on rebuild, not on save like the session's symlink.
+  # generated config when that file exists; hand it the session's
+  # connector-keyed output layout, with one greeter-only change: the
+  # bedroom side monitors are switched OFF. Quickshell renders a full
+  # sign-in stack on every screen it sees and no DMS setting hides it
+  # (verified against GreetdSettings in the packaged source) — with the
+  # sides off, the login UI exists only on the middle monitor and the
+  # session wakes the sides on login. Built by filtering those blocks
+  # out of the shared file and appending explicit `off` blocks, because
+  # niri's merge behavior for duplicate output sections is undocumented.
+  # Store copy — updates on rebuild, not on save like the session's
+  # symlink. Inert on the laptop (no such connectors).
   environment.etc."greetd/niri_overrides.kdl".source =
-    ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+    pkgs.runCommand "greeter-niri-overrides.kdl"
+      {
+        base = ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+        extra = pkgs.writeText "greeter-side-monitors-off.kdl" ''
+
+          // greeter-only: sides dark, sign-in lives on the 4K alone
+          output "DP-2" {
+              off
+          }
+
+          output "DP-1" {
+              off
+          }
+        '';
+      }
+      ''
+        awk '
+          /^output "(DP-1|DP-2)" \{/ { skip = 1; next }
+          skip && /^\}/ { skip = 0; next }
+          !skip
+        ' "$base" > $out
+        cat "$extra" >> $out
+      '';
 
   # The greeter's avatar probe checks, in order: its own cache,
   # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
