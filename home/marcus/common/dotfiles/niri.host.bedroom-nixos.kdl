@@ -1,0 +1,32 @@
+// Host-specific niri config for bedroom-nixos. niri.config.kdl
+// includes the stable name "niri.host.kdl", and desktop/niri.nix
+// links that name at ~/.config/niri to THIS file when the hostname
+// matches — one shared config, per-host tails. Live-editable like
+// the rest: niri hot-reloads on save.
+//
+// Per-app default column widths for the desk's wide monitors; the
+// laptop keeps the global 2/3 for everything (its host file is
+// comment-only). Sizes apply at open — resizing after is unaffected.
+// Find an app's id with `niri msg windows` while it's running.
+
+window-rule {
+    match app-id="spotify"
+    default-column-width { proportion 1.0; }
+}
+
+// the editors take (nearly) the whole working strip, same as Mod+F
+window-rule {
+    match app-id="dev.zed.Zed"
+    match app-id="^jetbrains-"
+    default-column-width { proportion 0.95; }
+}
+
+window-rule {
+    match app-id="com.mitchellh.ghostty"
+    default-column-width { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="^zen"
+    default-column-width { proportion 0.95; }
+}

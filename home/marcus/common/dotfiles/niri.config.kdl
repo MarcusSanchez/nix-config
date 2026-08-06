@@ -756,6 +756,13 @@ cursor {
 // both files side by side.
 include "niri.outputs.kdl"
 
+// Host-specific tail: desktop/niri.nix links this stable name at the
+// niri.host.<hostname>.kdl matching the machine (per-app default
+// widths on the bedroom desk, nothing on the laptop). A new desktop
+// host needs its niri.host.<hostname>.kdl committed or HM breaks the
+// link at first switch.
+include "niri.host.kdl"
+
 // Static-content apps land on their own screen instead of the working
 // strip. Inert where those connectors don't exist, so the laptop is
 // unaffected. open-on-output takes a connector name; add rules here as
