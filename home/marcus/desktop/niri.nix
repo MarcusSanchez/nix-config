@@ -78,6 +78,9 @@ in
     pkgs.slurp
     pkgs.satty
     pkgs.wl-clipboard
+    # notify-send, for the screenshot binds' best-effort toast (DMS is
+    # the notification daemon that renders it)
+    pkgs.libnotify
 
     # synthetic keystrokes via the virtual-keyboard protocol; Mod+W in
     # niri.config.kdl forwards Ctrl+W to the focused app (close tab)

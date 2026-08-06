@@ -691,7 +691,15 @@ binds {
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
 
-    Print { screenshot; }
+    // Region screenshot, the community-standard grim+slurp flow: the
+    // capture lands on the CLIPBOARD and on disk the instant the drag
+    // ends — no overlay, nothing to confirm. Esc during selection
+    // cancels. The notification is best-effort (needs libnotify; DMS
+    // renders it with a preview). niri's own freeze-frame picker
+    // stays on Shift+Print for when a frozen screen helps (tooltips,
+    // menus).
+    Print hotkey-overlay-title="Screenshot region → clipboard" { spawn "sh" "-c" "f=\"$HOME/Pictures/Screenshots/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png\"; mkdir -p \"$HOME/Pictures/Screenshots\" && grim -g \"$(slurp)\" \"$f\" && wl-copy < \"$f\" && notify-send -i \"$f\" Screenshot 'Copied to clipboard + saved' || true"; }
+    Shift+Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
     // the snipping tool (same chord as Windows'): slurp selects the
