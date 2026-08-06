@@ -116,44 +116,43 @@
   "privacyShowScreenShareIcon": false,
   "controlCenterWidgets": [
     {
-      "enabled": true,
       "id": "volumeSlider",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "brightnessSlider",
-      "width": 50,
-      "deviceName": "backlight:nvidia_0"
+      "enabled": true,
+      "width": 50
     },
     {
-      "enabled": true,
       "id": "wifi",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "bluetooth",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "audioOutput",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "audioInput",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "nightMode",
+      "enabled": true,
       "width": 50
     },
     {
-      "enabled": true,
       "id": "darkMode",
+      "enabled": true,
       "width": 50
     }
   ],
@@ -538,8 +537,8 @@
   "osdAlwaysShowValue": false,
   "osdPosition": 5,
   "osdVolumeEnabled": true,
-  "osdMediaVolumeEnabled": true,
-  "osdMediaPlaybackEnabled": false,
+  "osdMediaVolumeEnabled": false,
+  "osdMediaPlaybackEnabled": true,
   "osdBrightnessEnabled": true,
   "osdIdleInhibitorEnabled": true,
   "osdMicMuteEnabled": true,
