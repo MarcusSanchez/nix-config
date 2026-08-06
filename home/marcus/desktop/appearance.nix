@@ -40,6 +40,14 @@ in
       if [ -f "$state" ]; then
         run ${pkgs.jq}/bin/jq --arg p "${wallpaper}" '.wallpaperPath = $p' "$state" > "$state.tmp" \
           && run mv "$state.tmp" "$state"
+      else
+        # a truly fresh machine has no session state yet — the exact case
+        # this hook exists for. Seed a minimal one; DMS merges its
+        # defaults into an existing file on startup. (Learned on
+        # bedroom-nixos's first boot, where the old skip-if-absent logic
+        # left the wallpaper empty.)
+        run mkdir -p "$(dirname "$state")"
+        run sh -c 'printf %s "{\"wallpaperPath\": \"${wallpaper}\"}" > "$1"' _ "$state"
       fi
       ${pkgs.dms-shell}/bin/dms ipc call wallpaper set "${wallpaper}" >/dev/null 2>&1 || true
     fi
