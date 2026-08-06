@@ -8,6 +8,7 @@
 {
   imports = [
     ./packages.nix
+    ./cli-tools.nix
     ./shell.nix
     ./neovim.nix
     ./git.nix

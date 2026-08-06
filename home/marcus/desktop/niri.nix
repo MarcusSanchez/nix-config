@@ -82,6 +82,18 @@ in
     # the notification daemon that renders it)
     pkgs.libnotify
 
+    # clipboard history: wl-paste watchers (spawned in niri.config.kdl)
+    # store every copy; DMS's clipboard view (Mod+V) reads it back via
+    # `cliphist list`
+    pkgs.cliphist
+
+    # MPRIS media control — the XF86AudioPlay/Prev/Next binds in
+    # niri.config.kdl call this; without it media keys are wired to
+    # nothing (how the Wooting's skip keys were dead until 2026-08-06)
+    pkgs.playerctl
+    # same story for the laptop's XF86MonBrightness keys
+    pkgs.brightnessctl
+
     # synthetic keystrokes via the virtual-keyboard protocol; Mod+W in
     # niri.config.kdl forwards Ctrl+W to the focused app (close tab)
     pkgs.wtype

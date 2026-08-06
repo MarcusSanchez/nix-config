@@ -305,6 +305,12 @@ layout {
 // The path comes from DMS's session state so the two can't disagree.
 spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
 spawn-at-startup "dms" "run"
+
+// clipboard-history store side: every copy (text and images) lands in
+// cliphist's db; Mod+V opens DMS's picker over it. Watchers, not a
+// daemon — wl-paste re-runs cliphist per copy event.
+spawn-at-startup "sh" "-c" "wl-paste --type text --watch cliphist store"
+spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
 // per-app key remapping (see dotfiles/xremap.yml); --watch=config
 // hot-reloads edits, --watch picks up hotplugged keyboards
 spawn-at-startup "xremap" "--watch=config,device" "/home/marcus/nix-config/home/marcus/common/dotfiles/xremap.yml"
@@ -671,8 +677,12 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    Mod+V       { toggle-window-floating; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    // Mod+V is clipboard HISTORY (Windows Win+V muscle memory) — the
+    // DMS picker over what the cliphist watchers stored. Float toggle
+    // moved to Mod+Shift+V for it; layer-hop demoted to Mod+Ctrl+V.
+    Mod+V hotkey-overlay-title="Clipboard history" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
+    Mod+Shift+V { toggle-window-floating; }
+    Mod+Ctrl+V  { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
     // Windows in this column will appear as vertical tabs,
@@ -736,7 +746,7 @@ overview {
 
 // Browser OAuth popups used to be floated by a title heuristic here;
 // retired 2026-08-06 — tiling them felt better. Real dialogs (file
-// pickers) declare a parent and float regardless; Mod+V floats
+// pickers) declare a parent and float regardless; Mod+Shift+V floats
 // anything by hand. Zed's settings UI keeps its float rule: tiled, it
 // opens as a plain toplevel and inherits the 95% default-column-width
 // from niri.host.bedroom-nixos.kdl — a giant settings pane (tried

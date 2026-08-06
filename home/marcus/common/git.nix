@@ -8,6 +8,9 @@
       name = "Marcus Sanchez";
       email = "marcussanchez031@gmail.com";
     };
+    # syntax-highlighted, word-level diffs for diff/log/show — delta
+    # reads git's colors, so catppuccin theming carries through
+    delta.enable = true;
   };
 
   programs.gh = {
