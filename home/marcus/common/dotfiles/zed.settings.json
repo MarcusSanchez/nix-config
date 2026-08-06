@@ -108,7 +108,11 @@
     "dock": "left",
   },
   "colorize_brackets": true,
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": {
+    "mode": "light",
+    "light": "Catppuccin Mocha",
+    "dark": "Catppuccin Mocha"
+  },
   "diagnostics": {
     "button": true,
     "include_warnings": true,
@@ -144,7 +148,7 @@
   "ui_font_size": 16,
   "buffer_font_size": 14.0,
   "theme": {
-    "mode": "system",
+    "mode": "light",
     "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha",
   },
