@@ -56,6 +56,16 @@
     # with the path read from DMS's session state)
     pkgs.swaybg
 
+    # the snipping tool (Mod+Shift+S in niri.config.kdl): slurp picks a
+    # region, grim captures it, satty annotates (arrows/text/blur) and
+    # copies via wl-clipboard. niri's built-in Print overlay stays for
+    # quick unannotated shots; flameshot was researched and skipped —
+    # it fights niri's portal situation.
+    pkgs.grim
+    pkgs.slurp
+    pkgs.satty
+    pkgs.wl-clipboard
+
     # synthetic keystrokes via the virtual-keyboard protocol; Mod+W in
     # niri.config.kdl forwards Ctrl+W to the focused app (close tab)
     pkgs.wtype
