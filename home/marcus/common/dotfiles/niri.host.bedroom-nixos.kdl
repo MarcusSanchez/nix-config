@@ -28,5 +28,5 @@ window-rule {
 
 window-rule {
     match app-id="^zen"
-    default-column-width { proportion 0.95; }
+    default-column-width { proportion 1.0; }
 }
