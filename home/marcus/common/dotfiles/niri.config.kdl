@@ -493,8 +493,8 @@ binds {
     // one-handed monitor switch: Ctrl+Super sit adjacent on the
     // bedroom keyboard and are hard to chord (Mod+[/] alone is
     // consume/expel, further down)
-    Mod+Shift+BracketLeft  { focus-monitor-left; }
-    Mod+Shift+BracketRight { focus-monitor-right; }
+    Alt+Shift+BracketLeft  { focus-monitor-left; }
+    Alt+Shift+BracketRight { focus-monitor-right; }
 
     Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
     Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
