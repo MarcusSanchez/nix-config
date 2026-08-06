@@ -74,6 +74,12 @@ in
     # only sets session memory and the avatar vanishes on reboot.
     accounts-daemon.enable = true;
 
+    # firmware updates (LVFS), and specifically the UEFI dbx revocation
+    # database: MSI's true-Setup-Mode reset (the only path to custom
+    # Secure Boot keys on that board) wipes dbx, and fwupd is what
+    # restores it — `fwupdmgr update` offers "UEFI dbx" as a device
+    fwupd.enable = true;
+
     # DMS reads battery state through UPower — without it the bar's
     # battery widget silently hides — and drives the control center's
     # performance/balanced/saver switch through power-profiles-daemon.
