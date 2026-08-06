@@ -138,8 +138,15 @@ in
 
   networking = {
     networkmanager.enable = true;
-    # localsend discovers and transfers on this port
-    firewall.allowedTCPPorts = [ 53317 ];
+    firewall.allowedTCPPorts = [
+      # localsend discovers and transfers here
+      53317
+      # Metro (Expo/React Native dev server) — phone-on-LAN loads the
+      # app from here. WSL never needed this: its traffic enters
+      # through Windows' network stack, not the NixOS firewall.
+      8081
+    ];
+    # localsend's discovery side
     firewall.allowedUDPPorts = [ 53317 ];
   };
 
