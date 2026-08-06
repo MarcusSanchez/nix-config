@@ -11,11 +11,22 @@
 # design. (noctalia was trialed in the same slot; DMS won.)
 {
   config,
+  lib,
   pkgs,
   osConfig,
   ...
 }:
 
+let
+  # Live experiment on the desktop PC: the ghostty tab-bar icon
+  # breakage under Papirus was diagnosed on the laptop, whose Plasma
+  # history muddied the picture. bedroom-nixos (clean install, no DE
+  # leftovers) runs the catppuccin/Papirus icons natively to see
+  # whether it reproduces; the laptop keeps the Adwaita pin. Verdict
+  # decides whether the pin is load-bearing everywhere or was a
+  # laptop-only artifact.
+  papirusIconTest = osConfig.networking.hostName == "bedroom-nixos";
+in
 {
   # GTK icon/cursor theme NAMES, owned declaratively: Plasma wrote
   # breeze-dark/breeze_cursors into settings.ini and dconf for
@@ -25,14 +36,18 @@
   # (Plasma's old files land in .hm-backup on first switch.)
   gtk = {
     enable = true;
-    iconTheme = {
+    # on the test host, catppuccin's GTK port supplies iconTheme
+    # (Papirus-Dark) instead
+    iconTheme = lib.mkIf (!papirusIconTest) {
       name = "Adwaita";
       package = pkgs.adwaita-icon-theme;
     };
   };
-  # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini
+  catppuccin.gtk.icon.enable = papirusIconTest;
+  # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini —
+  # icon-theme follows whichever theme won gtk.iconTheme above
   dconf.settings."org/gnome/desktop/interface" = {
-    icon-theme = "Adwaita";
+    icon-theme = config.gtk.iconTheme.name;
     cursor-theme = "Adwaita";
     cursor-size = 24;
   };

@@ -34,9 +34,12 @@
     swaylock.enable = false;
     # autoEnable's GTK port would force Papirus icons over the Adwaita
     # set that home/marcus/desktop/niri.nix pins for reliable
-    # symbolic-icon coverage (ghostty's tab bar broke without them).
-    # No-op on WSL/mac, load-bearing on the desktop.
-    gtk.icon.enable = false;
+    # symbolic-icon coverage (ghostty's tab bar broke without them on
+    # the laptop). No-op on WSL/mac, load-bearing on the desktop.
+    # mkDefault so niri.nix can flip it per-host: bedroom-nixos runs
+    # the Papirus icons as a live experiment — does the tab-bar
+    # breakage reproduce on a machine with no Plasma history?
+    gtk.icon.enable = lib.mkDefault false;
   };
 
   home.sessionVariables = {
