@@ -704,31 +704,18 @@ overview {
     backdrop-color "#11111b"
 }
 
+// Auxiliary windows (Zed's settings UI, browser OAuth popups) used to
+// be floated by title-heuristic rules here; retired 2026-08-06 — tiling
+// them as ordinary columns felt better. Real dialogs (file pickers)
+// declare a parent and float regardless. Mod+V floats anything by
+// hand; to float a popup by rule again, `niri msg windows` with it
+// open gives the app-id/title to match.
+
 // Frosted-glass terminal: niri 26.04 grew blur support, so ghostty's
 // 0.75 background-opacity (set in ghostty.nix) gets real blur behind
 // it instead of the tinted-glass look that made us go opaque. xray
 // blurs the wallpaper only — the stable variant; non-xray blur of
 // other windows is still experimental (vanishes during animations).
-// Browser OAuth/login popups (window.open) are plain toplevels with
-// page-dependent titles — no structural marker to match, so this is a
-// heuristic on auth vocabulary in the title at open time. A popup that
-// opens on a generic title before redirecting won't float: Mod+V
-// floats it by hand.
-window-rule {
-    match app-id="^zen" title="(?i)(sign.?in|log.?in|oauth|authoriz|authenticat)"
-    open-floating true
-}
-
-// Zed opens auxiliary windows (the settings UI) as plain toplevels
-// that niri would tile into a column; float them instead. Real
-// dialogs (file pickers etc.) declare a parent and float by default
-// already. To float another app's popup: `niri msg windows` with the
-// popup open gives its app-id/title for a rule like this one.
-window-rule {
-    match app-id="dev.zed.Zed" title="^Zed — "
-    open-floating true
-}
-
 window-rule {
     match app-id="com.mitchellh.ghostty"
     // the focus ring defaults to a solid rect BEHIND the window, which
