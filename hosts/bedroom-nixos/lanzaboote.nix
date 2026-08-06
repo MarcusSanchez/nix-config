@@ -4,24 +4,26 @@
 # the disk needs (anti-cheat, attestation). HOST-level on purpose: the
 # laptop runs with Secure Boot off and must never import this.
 #
-# NOT imported until the keys exist (see the commented import in
-# ./default.nix): with lanzaboote enabled and /var/lib/sbctl absent, the
-# bootloader-install step fails — which would break nixos-install itself.
-# The README's "Enable Secure Boot" section is the ceremony:
+# Live since the 2026-08-06 install: Secure Boot reads "enabled (user)"
+# under this machine's own PK. On a REINSTALL, comment this import out
+# until `sudo sbctl create-keys` has run — with lanzaboote enabled and
+# /var/lib/sbctl absent, the bootloader-install step fails, which would
+# break nixos-install itself. The README's "Secure Boot" section is the
+# full ceremony; the shape that actually works on this MSI board:
 #   sudo sbctl create-keys          # writes /var/lib/sbctl
-#   (uncomment the import, nh os switch — generations get signed)
+#   (import this file, switch — generations get signed)
 #   sudo sbctl verify               # everything on the ESP shows signed
-#   reboot into firmware, put Secure Boot into Setup Mode. MSI board:
-#   F7 for Advanced, Settings -> Advanced -> Windows OS Configuration ->
-#   Secure Boot, Mode = Custom, Key Management, delete the PK only.
-#   NOT "delete all Secure Boot variables" (drops dbx) and NOT "restore
-#   factory keys" (undoes Setup Mode). bootctl status should then read
-#   "Secure Boot: disabled (setup)".
-#   sudo sbctl enroll-keys --microsoft
+#   firmware: Secure Boot -> Mode = Custom -> Key Management ->
+#   "Delete all Secure Boot variables". That is the ONLY route to true
+#   Setup Mode here: deleting just the PK leaves db/KEK Microsoft-owned
+#   and runtime enrolment gets EPERM despite SetupMode=1. Deleting all
+#   DOES drop the dbx revocation database — deliberate, restored later.
+#   sudo sbctl enroll-keys --microsoft   # succeeds at runtime now
 #   # --microsoft is LOAD-BEARING: it keeps Microsoft's certificates
 #   # enrolled, which is what lets Windows AND the GPU's option ROM keep
 #   # booting. Never enroll without it on this machine.
 #   reboot, enable Secure Boot; `bootctl status` = "enabled (user)"
+#   fwupdmgr update                 # restores the dbx (fwupd.nix)
 {
   inputs,
   lib,

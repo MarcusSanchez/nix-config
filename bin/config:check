@@ -11,3 +11,8 @@ deadnix --fail \
             hosts/bedroom-nixos/hardware-configuration.nix \
   -- .
 nix flake check
+# flake check never touches darwinConfigurations — evaluate them the
+# same enumerated way CI does (a hostname rename broke a named eval once)
+nix eval --raw '.#darwinConfigurations' --apply \
+  'cfgs: builtins.concatStringsSep "\n" (map (n: "${n}: ${cfgs.${n}.system.drvPath}") (builtins.attrNames cfgs))'
+echo

@@ -23,8 +23,10 @@ home/
   marcus/                Home Manager — common/ + wsl/ + mac/ + desktop/,
                          with wsl.nix / wsl-lite.nix / mac.nix / desktop.nix
                          as entry points
-hosts/                   per-host values only — mac/, wsl/, wsl-lite/, tuf/
-                         (tuf also carries its hardware + nvidia facts)
+hosts/                   per-host values only — mac/, wsl/, wsl-lite/,
+                         tuf/, bedroom-nixos/ (the bare-metal two also
+                         carry their hardware + nvidia facts;
+                         bedroom-nixos adds lanzaboote/Secure Boot)
 modules/
   common/                shared system layer (all platforms)
   darwin/                mac system layer
@@ -32,7 +34,8 @@ modules/
   wsl/                   WSL flavor (Windows integration, autoUpgrade)
   desktop/               bare-metal flavor (boot/niri/DMS session)
 secrets/
-  secrets.yaml           credentials, age-encrypted (safe to push)
+  secrets.yaml           lower-tier credentials, age-encrypted (safe to push)
+  super.yaml             trusted-machines-only tier (see Secrets)
 .sops.yaml               which age keys can decrypt
 bin/                     repo scripts: secrets:edit, secrets:status,
                          age:place, secrets:drop, config:check — on
@@ -53,7 +56,7 @@ nh os switch -u               # apply + update inputs
 nvd diff /run/booted-system /run/current-system
 ```
 
-**TUF laptop**
+**Bare metal (tuf-nixos, bedroom-nixos)**
 
 ```sh
 nh os switch                  # same as WSL — but NO autoUpgrade here:
@@ -223,8 +226,12 @@ once — `gh`, `flyctl` and `atuin` all come up authenticated.
 ## Dual-boot install (bedroom PC -> bedroom-nixos)
 
 Same physical machine as `bedroom-wsl`, two flake hosts, only ever one
-running. `hosts/bedroom-nixos/` is prepared; the install regenerates its
-placeholder `hardware-configuration.nix`.
+running. **This install happened 2026-08-06**; the section stays as the
+reinstall runbook. A reinstall regenerates the committed
+`hardware-configuration.nix` (and means new disk UUIDs — commit the
+regenerated file, step 6), and `hosts/bedroom-nixos/lanzaboote.nix`
+must be commented out of the host's imports until its keys exist again
+(its header explains).
 
 > **The mistake this runbook exists to prevent.** The first attempt let
 > the installer choose `/boot`, and it picked **Windows' ~200 MiB ESP** —
@@ -329,29 +336,36 @@ git push
 ```
 
 Expect on first boot: monitors auto-place in connector order (`niri msg
-outputs`, then add `output` blocks to `niri.config.kdl` — they hot-reload,
-so arrange interactively), and **group changes (input/uinput for xremap)
-need one relogin**.
+outputs`, then add `output` blocks to `niri.outputs.kdl` — they
+hot-reload, so arrange interactively), and **group changes (input/uinput
+for xremap) need one relogin**. A brand-new hostname also needs its
+`home/marcus/common/dotfiles/niri.host.<hostname>.kdl` committed BEFORE
+the first switch, or Home Manager links the niri config against a file
+that doesn't exist.
 
 ### Secure Boot
 
-**The chosen arrangement: Secure Boot stays OFF, and gets toggled back on
-in the firmware for the sessions that need it.** Anti-cheat games
-(Fortnite, Valorant) require it on the Windows side; NixOS boots fine
-without it. Flipping the setting takes a minute in the BIOS and costs
-nothing structural, so it beats the alternative below.
+**The shipped arrangement, live since 2026-08-06: both OSes run under
+Secure Boot at once.** lanzaboote signs systemd-boot and every NixOS
+generation with keys generated on the machine; the firmware enforces
+under this machine's own PK with Microsoft's certificates retained, so
+Windows and the GPU's option ROM keep booting, anti-cheat (Fortnite,
+Valorant) sees Secure Boot on, and **nothing ever gets toggled in the
+BIOS** — the F11 boot menu picks the OS, that's the whole dual-boot
+ceremony. `bootctl status` reads `Secure Boot: enabled (user)`, and an
+unsigned USB stick is refused at the firmware level (verified by hand —
+the FQ0001 quirk below is cosmetic once Deny Execute is set).
 
-The one running cost: **every toggle re-breaks the Windows Hello PIN**,
-because it's TPM-sealed against Secure Boot state (PCR 7). Sign in with
-the account password and re-create the PIN — Settings -> Accounts ->
-Sign-in options. If BitLocker is ever enabled, suspend it *before* the
-toggle or Windows demands the recovery key instead.
+One-time Windows-side cost, already paid: changing Secure Boot state
+re-breaks the Windows Hello PIN (TPM-sealed against PCR 7) — sign in
+with the account password and re-create it under Settings -> Accounts ->
+Sign-in options. If BitLocker is ever enabled, suspend it *before* any
+future Secure Boot change or Windows demands the recovery key.
 
-The rest of this section is the alternative — signing NixOS's boot chain
-so both OSes run under Secure Boot at once. It is documented because the
-groundwork exists, not because it is the current plan. `lanzaboote.nix`
-stays **commented out** until keys exist on the machine — enabled without
-them, the bootloader install fails and takes `nixos-install` with it.
+The ceremony below is the reinstall runbook. `lanzaboote.nix` must stay
+**commented out** of the host imports until keys exist on the machine —
+enabled without them, the bootloader install fails and takes
+`nixos-install` with it.
 
 ```sh
 sudo nix-shell -p sbctl --run "sbctl create-keys"   # sbctl ships WITH lanzaboote,
@@ -364,42 +378,65 @@ sudo sbctl verify        # generations + systemd-boot signed. The KERNEL showing
                          # embedding it — verified by reading the PE sections
 ```
 
-**This MSI board refuses runtime key enrolment.** `sbctl enroll-keys`
-fails with `permission denied` writing `db` even with `SetupMode=1`, PK
-deleted, no lockdown LSM, immutable flags cleared and `--disable-landlock`
-— the firmware rejects it, not Linux. Export and enrol from the BIOS:
+**Getting the keys enrolled — the MSI finding that took two nights.**
+Deleting only the PK does NOT give real Setup Mode on this board: the
+firmware reports `SetupMode=1` but keeps `db`/`KEK` Microsoft-owned and
+immutable, so `sbctl enroll-keys` fails with `permission denied` no
+matter what Linux-side knob is turned (lockdown, immutable flags,
+landlock — all red herrings). The route that works:
+
+1. Firmware (`Del`, `F7` for Advanced, Settings -> Advanced -> Windows
+   OS Configuration -> Secure Boot): **Mode = Custom**, Key Management,
+   **"Delete all Secure Boot variables"** — accepting that this **drops
+   the dbx revocation database** (deliberate; restored in step 5). This
+   is true Setup Mode: no key variables at all.
+2. Boot NixOS and enrol at runtime — it just works from real Setup Mode:
+   ```sh
+   sudo sbctl enroll-keys --microsoft
+   ```
+   `--microsoft` is **load-bearing**: it keeps Microsoft's certificates
+   enrolled, which is what lets Windows and the GPU's option ROM keep
+   booting. Never enroll without it on this machine.
+3. **Image Execution Policy -> Deny Execute** (Fixed *and* Removable
+   Media) where the firmware offers it. `sbctl status` reports this
+   board as `FQ0001: defaults to executing on Secure Boot policy
+   violation (CRITICAL)` — MSI's default runs binaries that fail
+   verification. On firmware revisions without the setting, verify
+   enforcement empirically: an unsigned installer USB must be refused.
+4. **Secure Boot = Enabled**, save. Verify in NixOS: `bootctl status`
+   -> `Secure Boot: enabled (user)`. Verify Windows still boots (its
+   certs are enrolled), and re-create the Hello PIN once.
+5. Restore the dbx: `fwupdmgr update` and pick the "UEFI dbx" device
+   (`services.fwupd` in the desktop flavor exists for this), or apply
+   Microsoft's signed `dbxupdate_x64.bin` via `fwupdtool install-blob`
+   if LVFS refuses to match an empty dbx.
+
+Leave the TPM alone through all of this; clearing it destroys Windows
+Hello and any TPM-sealed BitLocker protector.
+
+<details>
+<summary>Fallback: enrolling from the firmware's file browser</summary>
+
+If runtime enrolment ever regresses, keys can be exported and enrolled
+from the BIOS instead:
 
 ```sh
 sudo mkdir -p /boot/sbctl-keys && cd /boot/sbctl-keys
 sudo sbctl enroll-keys --microsoft --export esl    # also: --export auth
 ```
 
-Then in the firmware (`Del`, `F7` for Advanced, Settings -> Advanced ->
-Windows OS Configuration -> Secure Boot):
+In Key Management, enrol **db -> KEK -> PK, in that order** (PK last:
+enrolling it exits Setup Mode). Browse to the NixOS ESP ->
+`sbctl-keys/` -> `db.esl` etc. Several volumes look identical in that
+browser; the NixOS one contains `sbctl-keys`, Windows' has
+`EFI/Microsoft`.
 
-1. **Secure Boot Mode = Custom**, then **Key Management**
-2. Enrol **db -> KEK -> PK, in that order** (PK last: enrolling it exits
-   Setup Mode). Browse to the NixOS ESP -> `sbctl-keys/` -> `db.esl` etc.
-   Several volumes look identical in that browser; the NixOS one is the
-   one containing `sbctl-keys`, Windows' is the one with `EFI/Microsoft`.
-3. **Image Execution Policy -> Deny Execute** (Fixed *and* Removable
-   Media). `sbctl status` reports this board as `FQ0001: defaults to
-   executing on Secure Boot policy violation (CRITICAL)` — MSI's default
-   runs binaries that fail verification, so Secure Boot would report as on
-   while enforcing nothing.
-4. **Secure Boot = Enabled**, `F10`, and answer **yes** when it asks to
-   save. Verify back in NixOS: `bootctl status` -> `Secure Boot: enabled
-   (user)`.
+</details>
 
-Never pick "Delete all Secure Boot variables" (drops the `dbx` revocation
-database) or "Restore Factory Keys" (undoes Setup Mode) — and leave the
-TPM alone entirely; clearing it destroys Windows Hello and any
-TPM-sealed BitLocker protector.
-
-**If you abandon Secure Boot partway**, put the board back the way Windows
-expects: Key Management -> **Restore Factory Keys**, then Secure Boot ->
-Enabled. NixOS then won't boot until you disable it again — that's a
-firmware toggle, nothing is damaged.
+**If you abandon Secure Boot partway**, put the board back the way
+Windows expects: Key Management -> **Restore Factory Keys**, then
+Secure Boot -> Enabled. NixOS then won't boot until you disable it
+again — that's a firmware toggle, nothing is damaged.
 
 ## Secrets
 
@@ -409,19 +446,19 @@ every boot into `/run/secrets/`, and each tool is pointed at its file — so no
 machine ever runs `gh auth login`. Only the *values* are encrypted; the keys
 stay readable, so a diff shows *that* a credential changed without showing it.
 
-**Two tiers, four keys.** Lite boxes share the roaming master key from
-Bitwarden; the trusted machines each have their own, and only those open
-`super.yaml`:
+**Two tiers, six keys.** Lite boxes share the roaming master key from
+Bitwarden; the four trusted machines each have their own, and only those
+open `super.yaml`:
 
 | file | holds | who can decrypt |
 |---|---|---|
 | `secrets/secrets.yaml` | gh token (low-scope), croc, atuin | every machine |
-| `secrets/super.yaml` | fly token + future hot ones | bedroom-wsl, macbook-air |
+| `secrets/super.yaml` | fly token + future hot ones | bedroom-wsl, macbook-air, tuf-nixos, bedroom-nixos |
 
 | key | lives | opens |
 |---|---|---|
 | master | Bitwarden + each lite box (`age:place`) | `secrets.yaml` |
-| bedroom-wsl, macbook-air | only that machine (no backup, on purpose) | both files |
+| bedroom-wsl, macbook-air, tuf-nixos, bedroom-nixos | only that machine (no backup, on purpose) | both files |
 | buried | paper in a drawer, never on a machine | both files (emergencies) |
 
 On every machine the active identity sits at `/var/lib/sops-nix/key.txt`
@@ -536,8 +573,8 @@ Commit, push, switch.
   lower tier only; a lite box (or its thief) can never read the fly token.
 - **machine keys** — exist only on their machine, unbacked-up on purpose:
   compromising the Bitwarden vault does not open `super.yaml`.
-- **buried** — the paper printout is the disaster path: if both trusted
-  machines die at once, it re-keys `super.yaml`. Nothing unreissuable may
+- **buried** — the paper printout is the disaster path: if all four
+  trusted machines die at once, it re-keys `super.yaml`. Nothing unreissuable may
   ever live in `super.yaml` (atuin's E2E key stays in the lower tier,
   reachable via Bitwarden, for exactly this reason).
 
@@ -551,7 +588,10 @@ credential at the provider. Re-encrypting achieves nothing.
 
 Only relevant if that box will be a tailnet node. Both `hosts/wsl` and
 `hosts/wsl-lite` import `modules/wsl/tailscale.nix`, so every WSL host is
-one unless you drop the import.
+one unless you drop the import. (The bare-metal hosts need none of this
+section: `modules/desktop/tailscale.nix` rides the flavor aggregator —
+bare metal is always its own node — and everything below about Windows
+is WSL-specific. Enrolment is the same `sudo tailscale up` everywhere.)
 
 **Windows needs mirrored networking.** This is a Windows-side file the repo
 can't manage, and it's per-PC rather than per-distro:

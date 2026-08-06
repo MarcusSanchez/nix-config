@@ -17,7 +17,7 @@
     };
 
     # Splash on boot/shutdown instead of console text: bgrt draws a
-    # spinner under the firmware's ASUS logo, Windows-style. Esc during
+    # spinner under the firmware's vendor logo, Windows-style. Esc during
     # boot shows the log.
     plymouth.enable = true;
 

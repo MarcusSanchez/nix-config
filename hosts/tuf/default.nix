@@ -1,8 +1,9 @@
 # Host definition: the TUF laptop (ASUS TUF Dash F15 FX517ZR — i7-12650H,
-# RTX 3070 Mobile, MUX in discrete mode). The only bare-metal NixOS host:
-# shared Linux core + the desktop flavor (niri/DMS session), plus its own
-# GPU facts in ./nvidia.nix. Everything host-specific lives here;
-# everything reusable lives in modules/.
+# RTX 3070 Mobile, MUX in discrete mode). One of two bare-metal NixOS
+# hosts (the other is hosts/bedroom-nixos): shared Linux core + the
+# desktop flavor (niri/DMS session), plus its own GPU facts in
+# ./nvidia.nix. Everything host-specific lives here; everything reusable
+# lives in modules/.
 { hostName, ... }:
 
 {

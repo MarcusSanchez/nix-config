@@ -8,7 +8,8 @@ name: check
 on:
   push:
     branches: [main]
-    # win-sync (WSL) and auto-commit.nix (mac) auto-push chore commits
+    # win-sync (WSL) and the dotfiles auto-commit hook (mac + desktop,
+    # home/marcus/common/dotfiles-links.nix) auto-push chore commits
     # touching only these mirrored config files; nix copies them without
     # parsing, so they can't affect the build — skip the run
     paths-ignore:

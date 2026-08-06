@@ -2,9 +2,9 @@
 # RTX 5080), dual-booted next to the Windows that hosts bedroom-wsl —
 # same physical machine, two hosts in this flake, only ever one running.
 # Same desktop flavor as the TUF laptop; its own GPU facts in
-# ./nvidia.nix. PREPARED AHEAD OF INSTALL: hardware-configuration.nix is
-# a placeholder until the installer regenerates it (see its header), and
-# the README's dual-boot runbook is the install path.
+# ./nvidia.nix. Installed 2026-08-06 via the README's dual-boot
+# runbook; hardware-configuration.nix is the generated truth from that
+# install (regenerate, don't edit).
 { hostName, ... }:
 
 {
@@ -13,10 +13,10 @@
     ../../modules/desktop
     ./nvidia.nix
     ./hardware-configuration.nix
-    # Uncomment AFTER `sudo sbctl create-keys` on the installed machine —
-    # enabled without keys on disk, the bootloader install (and therefore
-    # nixos-install) fails. Full ceremony: lanzaboote.nix header + README
-    # "Enable Secure Boot".
+    # Secure Boot, live since install day. On a REINSTALL, comment this
+    # out until `sudo sbctl create-keys` has run — enabled without keys
+    # on disk, the bootloader install (and therefore nixos-install)
+    # fails. Full ceremony: lanzaboote.nix header + README "Secure Boot".
     ./lanzaboote.nix
   ];
 
@@ -29,8 +29,8 @@
 
   homeEntryPoint = ../../home/marcus/desktop.nix;
 
-  # Trusted machine: own age key, recipient of both secrets files —
-  # enrolled at install day (README "Enrolling a trusted machine").
+  # Trusted machine: own age key (generated on-box at install, enrolled
+  # in .sops.yaml), recipient of both secrets files.
   secretsTier = "full";
 
   # Windows lives on its own ESP (the factory ~100 MB one); NixOS gets a
@@ -50,6 +50,6 @@
   # session alike. Host-level because it names this desk's connector.
   boot.kernelParams = [ "video=DP-2:panel_orientation=left_side_up" ];
 
-  # Set at install time to the ISO's release — verify before first switch.
+  # The release this machine was installed under — never changes.
   system.stateVersion = "26.05";
 }
