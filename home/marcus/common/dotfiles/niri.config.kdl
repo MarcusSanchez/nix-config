@@ -140,19 +140,16 @@ layout {
     // - "on-overflow", focusing a column will center it if it doesn't fit
     //   together with the previously focused column.
     //
-    // "always" is deliberate: under "never", closing the edge column
-    // leaves the view parked on dead space until a manual Mod+H/L
-    // (niri#1642) — with the focused column always centered, closing an
-    // edge column recenters on the neighbor immediately. Columns here
-    // are mostly 95-100% wide, so centering looks the same as "never"
-    // outside that fix; narrower columns (ghostty at 50%) sit centered
-    // rather than edge-hugged.
-    center-focused-column "always"
+    // Known wart of "never": closing the rightmost column leaves the
+    // view glued where it was — the survivor hugs the left border with
+    // a gap on the right until a manual Mod+H/Mod+L. The wanted
+    // fill-the-gap-on-close behavior is NOT a niri option as of 26.04
+    // (niri#1642); "always" was tried as a stand-in on 2026-08-06 and
+    // rejected — constant centering is worse than the wart.
+    center-focused-column "never"
 
     // a lone window sits centered instead of hugging the left edge;
     // as soon as a second column appears, normal strip behavior resumes
-    // (moot while center-focused-column is "always"; kept for if that
-    // ever reverts)
     always-center-single-column
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
