@@ -23,10 +23,12 @@ home/
   marcus/                Home Manager — common/ + wsl/ + mac/ + desktop/,
                          with wsl.nix / wsl-lite.nix / mac.nix / desktop.nix
                          as entry points
-hosts/                   per-host values only — mac/, wsl/, wsl-lite/,
-                         tuf/, bedroom-nixos/ (the bare-metal two also
-                         carry their hardware + nvidia facts;
-                         bedroom-nixos adds lanzaboote/Secure Boot)
+hosts/                   per-host values only. Naming rule: hardware
+                         truth => dir named by exact hostname
+                         (tuf-nixos/, bedroom-nixos/ — hardware config,
+                         nvidia facts, lanzaboote); no hardware truth =>
+                         shareable kind (wsl/, wsl-lite/, mac/ — several
+                         flake attrs may point at one dir)
 modules/
   common/                shared system layer (all platforms)
   darwin/                mac system layer

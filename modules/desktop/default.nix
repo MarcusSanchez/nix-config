@@ -4,7 +4,7 @@
 # dank-material-shell flake input — the ONLY thing that input supplies
 # (the shell itself is nixpkgs' dms-shell; see flake.nix). NVIDIA is NOT
 # here: modules encode per-machine GPU facts (MUX mode, open modules),
-# so each host carries its own — see hosts/tuf/nvidia.nix and
+# so each host carries its own — see hosts/tuf-nixos/nvidia.nix and
 # hosts/bedroom-nixos/nvidia.nix.
 #
 # tailscale.nix lives in this aggregator, unlike the WSL flavor's: a
