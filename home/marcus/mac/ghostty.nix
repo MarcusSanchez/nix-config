@@ -1,53 +1,25 @@
-# Ghostty terminal. The app itself is a brew cask (homebrew.nix); with
-# package = null HM only manages the config file (~/.config/ghostty/config).
-# The catppuccin module themes it automatically (autoEnable), replacing the
-# hand-downloaded theme files of the pre-nix setup. Shaders stay an
-# imperative folder in ~/Library/Application Support/com.mitchellh.ghostty.
+# Ghostty on the mac: shared settings from common/ghostty.nix, plus
+# the macOS chrome. The app itself is a brew cask (homebrew.nix); with
+# package = null HM only manages the config file
+# (~/.config/ghostty/config). Shaders stay an imperative folder in
+# ~/Library/Application Support/com.mitchellh.ghostty.
 { ... }:
 
 {
+  imports = [ ../common/ghostty.nix ];
+
   programs.ghostty = {
-    enable = true;
     package = null; # installed as a brew cask
 
     settings = {
-      # Ghostty sets TERM=xterm-ghostty, which remote hosts generally don't
-      # have — the line editor then redraws wrong and typing comes out
-      # duplicated. ssh-terminfo makes Ghostty install its terminfo on the
-      # remote on first connect (cached; `ghostty +ssh-cache` inspects it);
-      # ssh-env falls back to a sane TERM where it can't.
-      # modules/nixos/packages.nix ships ghostty.terminfo, fixing this from
-      # the other side for the fleet's machines; this covers everything else.
-      shell-integration-features = "ssh-env,ssh-terminfo";
-
-      font-family = "JetBrainsMono Nerd Font Mono";
-      window-title-font-family = "JetBrainsMono Nerd Font Mono";
       font-size = 17;
-      # disable ligatures
-      font-feature = [
-        "-calt"
-        "-liga"
-      ];
 
       macos-titlebar-style = "tabs";
-      window-padding-balance = true;
-      window-save-state = "always";
-      confirm-close-surface = false;
       # effectively "open maximized"
       window-height = 20000;
       window-width = 20000;
 
-      background-opacity = 0.75;
       background-blur = 20;
-
-      split-divider-color = "#f5c2e7";
-      cursor-color = "#F5E0DC";
-
-      quick-terminal-position = "bottom";
-      keybind = [
-        "global:super+escape=toggle_quick_terminal"
-        "shift+enter=text:\\n"
-      ];
 
       # custom-shader = "…/ghostty-shaders/starfield.glsl";
     };
