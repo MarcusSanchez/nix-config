@@ -615,11 +615,13 @@ binds {
     // near-maximize: 95% width so a neighbor still peeks at the edge —
     // real maximize stays on Mod+Ctrl+F, true fullscreen on Mod+Shift+F
     Mod+F { set-column-width "95%"; }
-    // non-exclusive: the window fills the screen and the app renders its
-    // fullscreen UI, but it stays in the layout so the bar stays visible —
-    // the "double-tap the title bar" feel. True exclusive fullscreen (for
-    // games, video handoff) moved to Mod+Ctrl+Shift+F.
-    Mod+Shift+F { toggle-windowed-fullscreen; }
+    // the "double-tap the title bar" feel: the column takes the full
+    // width of the output (bar and gaps still there), and toggles back.
+    // NOT toggle-windowed-fullscreen — that only tells the CLIENT it is
+    // fullscreen and never resizes the tile, so on a terminal it looks
+    // like nothing happened. True exclusive fullscreen (games, video
+    // handoff) is Mod+Ctrl+Shift+F.
+    Mod+Shift+F { maximize-column; }
     Mod+Ctrl+Shift+F { fullscreen-window; }
 
     // While maximize-column leaves gaps and borders around the window,
