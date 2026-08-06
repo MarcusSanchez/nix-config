@@ -1,15 +1,21 @@
 # Aggregator for the bare-metal desktop flavor: boot/splash, the niri +
-# DankMaterialShell session, and laptop hardware services. Imports the
-# dms-greeter module from the dank-material-shell flake input — the ONLY
-# thing that input supplies (the shell itself is nixpkgs' dms-shell; see
-# flake.nix). NVIDIA is NOT here: modules encode per-machine GPU facts
-# (MUX mode, open modules), so each host carries its own — see
-# hosts/tuf/nvidia.nix.
+# DankMaterialShell session, and the hardware services a machine someone
+# sits in front of needs. Imports the dms-greeter module from the
+# dank-material-shell flake input — the ONLY thing that input supplies
+# (the shell itself is nixpkgs' dms-shell; see flake.nix). NVIDIA is NOT
+# here: modules encode per-machine GPU facts (MUX mode, open modules),
+# so each host carries its own — see hosts/tuf/nvidia.nix and
+# hosts/bedroom-nixos/nvidia.nix.
 #
 # tailscale.nix lives in this aggregator, unlike the WSL flavor's: a
 # bare-metal machine is always its own tailnet node, so the
 # one-node-per-Windows-PC constraint that forces host-level imports on
 # WSL does not exist here.
+#
+# The niri.nix..packages.nix run keeps the concern order of the
+# desktop.nix monolith it was split from: merged-list options
+# (systemPackages, udev.packages) order their entries by module
+# position, so reordering imports is not cosmetic.
 { inputs, ... }:
 
 {
@@ -18,9 +24,19 @@
     ./boot.nix
     ./zram.nix
     ./locale.nix
-    ./tpm.nix
+    ./security-keys.nix
     ./tailscale.nix
-    ./desktop.nix
+    ./niri.nix
+    ./greeter.nix
+    ./fwupd.nix
+    ./power.nix
+    ./audio.nix
+    ./printing.nix
+    ./swaylock.nix
+    ./networking.nix
+    ./bluetooth.nix
+    ./users.nix
+    ./packages.nix
     ./fonts.nix
     ./nix-ld.nix
     ./envfs.nix
