@@ -123,7 +123,8 @@
     {
       "enabled": true,
       "id": "brightnessSlider",
-      "width": 50
+      "width": 50,
+      "deviceName": "backlight:nvidia_0"
     },
     {
       "enabled": true,

@@ -615,13 +615,13 @@ binds {
     // near-maximize: 95% width so a neighbor still peeks at the edge —
     // real maximize stays on Mod+Ctrl+F, true fullscreen on Mod+Shift+F
     Mod+F { set-column-width "95%"; }
-    // the "double-tap the title bar" feel: the column takes the full
-    // width of the output (bar and gaps still there), and toggles back.
-    // NOT toggle-windowed-fullscreen — that only tells the CLIENT it is
-    // fullscreen and never resizes the tile, so on a terminal it looks
-    // like nothing happened. True exclusive fullscreen (games, video
-    // handoff) is Mod+Ctrl+Shift+F.
-    Mod+Shift+F { maximize-column; }
+    // the "double-tap the title bar" feel, measured on a 1745x981 output:
+    //   maximize-window-to-edges  1745x942  edge to edge, bar still there
+    //   maximize-column           1712x905  full width but gaps all round
+    //   fullscreen-window         1745x982  covers the bar too (Mod+Ctrl+Shift+F)
+    //   toggle-windowed-fullscreen          no size change AT ALL — it only
+    //                                       tells the client it is fullscreen
+    Mod+Shift+F { maximize-window-to-edges; }
     Mod+Ctrl+Shift+F { fullscreen-window; }
 
     // While maximize-column leaves gaps and borders around the window,
