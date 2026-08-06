@@ -46,6 +46,13 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Secure Boot signing for the dual-boot desktop (bedroom-nixos only —
+    # Windows on the same machine effectively requires SB). Pinned to a
+    # release tag on purpose; bump deliberately, not via flake update.
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -85,6 +92,7 @@
             office-lite-wsl-1 = ./hosts/wsl-lite;
             office-lite-wsl-2 = ./hosts/wsl-lite;
             tuf-nixos = ./hosts/tuf;
+            bedroom-nixos = ./hosts/bedroom-nixos;
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as

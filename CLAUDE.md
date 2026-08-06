@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a WSL NixOS dev box (host `bedroom-wsl`, user `marcus`), a family of headless WSL instances sharing one config (`nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` — same user — same toolchains, no Windows integration; meant for pulling a repo down on some other PC and working from a terminal), a bare-metal NixOS laptop (host `tuf-nixos`, user `marcus` — ASUS TUF Dash F15, niri + DankMaterialShell desktop, absorbed from the archived `marcussanchez/tuf-nix-config` repo whose git history holds the rejected Plasma/GNOME/SDDM experiments), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and the laptop have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a WSL NixOS dev box (host `bedroom-wsl`, user `marcus`), a family of headless WSL instances sharing one config (`nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` — same user — same toolchains, no Windows integration; meant for pulling a repo down on some other PC and working from a terminal), a bare-metal NixOS laptop (host `tuf-nixos`, user `marcus` — ASUS TUF Dash F15, niri + DankMaterialShell desktop, absorbed from the archived `marcussanchez/tuf-nix-config` repo whose git history holds the rejected Plasma/GNOME/SDDM experiments), a bare-metal desktop (host `bedroom-nixos` — the dual-boot side of the PC that also hosts bedroom-wsl; same desktop flavor as the laptop, its own RTX 5080 facts), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and the laptop have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -73,6 +73,17 @@ bin/                       repo-operations scripts (secrets:edit,
 secrets/secrets.yaml       lower-tier ciphertext   secrets/super.yaml  trusted-only
 
 hosts/{wsl,wsl-lite,mac}/  layer 1 — per-host values only
+hosts/bedroom-nixos/       the desktop PC, dual-booted beside Windows.
+                           hardware-configuration.nix is a PLACEHOLDER
+                           until install day regenerates it (warns on
+                           every eval; excluded from statix). Its own
+                           RTX 5080 nvidia.nix
+  lanzaboote.nix           Secure Boot — import COMMENTED OUT until
+                           `sbctl create-keys` has run on the machine, or
+                           the bootloader install (and nixos-install with
+                           it) fails. This MSI board REFUSES runtime key
+                           enrolment: export the keys to the ESP and
+                           enrol them from the firmware — README
 hosts/tuf/                 the laptop: per-host values + its hardware truth
   hardware-configuration.nix  generated (nixos-generate-config) — excluded
                            from statix (statix.toml) and deadnix
@@ -104,7 +115,8 @@ modules/wsl/               the WSL flavor — both WSL host kinds
   tailscale.nix            NOT in the aggregator — host-level, and it carries
                            the systemd-resolved config MagicDNS needs on WSL
                            (Constraints)
-modules/desktop/           the bare-metal flavor — currently just the laptop
+modules/desktop/           the bare-metal flavor — the laptop and the
+                           bedroom-nixos desktop
   default.nix              aggregator; imports the dms-greeter flake module;
                            carries tailscale.nix (aggregator placement is
                            CORRECT here, unlike WSL — bare metal is always

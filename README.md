@@ -10,6 +10,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
 | `nixos-lite`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `tuf-nixos` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
+| `bedroom-nixos` | bare-metal desktop, dual-boot beside the PC that hosts `bedroom-wsl` | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
@@ -218,6 +219,174 @@ Same expected `cannot read keyfile` error as on WSL, and the same fix: run
 [Placing the key](#placing-the-key) to place the age key, then
 `nh darwin switch` again. After that the only thing left is opening `nvim`
 once — `gh`, `flyctl` and `atuin` all come up authenticated.
+
+## Dual-boot install (bedroom PC -> bedroom-nixos)
+
+Same physical machine as `bedroom-wsl`, two flake hosts, only ever one
+running. `hosts/bedroom-nixos/` is prepared; the install regenerates its
+placeholder `hardware-configuration.nix`.
+
+> **The mistake this runbook exists to prevent.** The first attempt let
+> the installer choose `/boot`, and it picked **Windows' ~200 MiB ESP** —
+> so NixOS wrote its bootloader inside Windows' boot partition, which then
+> could not hold even two generations (each is ~130 MB with the early-KMS
+> nvidia initrd). Symptom: "the ESP is too small". The cure is to create a
+> **dedicated 1 GiB ESP** and to *verify what is mounted at `/mnt/boot`
+> before installing*. Never let the graphical installer partition: it
+> auto-selects the existing ESP and writes its own `configuration.nix`
+> instead of using this flake.
+
+**1. Windows side.** Shrink `C:` by 1 TB (1,048,576 MB); leave the freed
+space unallocated. **Turn Secure Boot off** in the firmware — the ISO is
+unsigned and won't boot under it. (BitLocker must be *off or suspended*
+before any firmware Secure Boot change, or Windows demands its recovery
+key on the next boot. Windows Hello PINs are TPM-sealed against Secure
+Boot state too, and *will* need re-creating afterwards — sign in with the
+account password, then Settings -> Accounts -> Sign-in options.)
+
+**2. Boot the ISO** (firmware boot menu) and partition by hand. Do not
+open the graphical installer.
+
+```sh
+lsblk -f                                   # identify the disk and the free space
+sudo parted /dev/nvme0n1 unit MiB print free
+```
+
+Create **both** partitions in the freed region — a 1 GiB ESP and ext4 for
+the rest. Substitute the real MiB offsets from `print free`:
+
+```sh
+sudo parted -s -a optimal /dev/nvme0n1 mkpart NIXBOOT fat32 <FREE_START>MiB <FREE_START+1024>MiB
+sudo parted -s /dev/nvme0n1 set <N> esp on
+sudo parted -s -a optimal /dev/nvme0n1 mkpart nixos ext4 <FREE_START+1024>MiB <FREE_END>MiB
+sudo partprobe /dev/nvme0n1
+sudo parted /dev/nvme0n1 unit MiB print free    # confirm: 1024MiB partition, esp flag
+```
+
+Fractional-scale arithmetic bites here too: if a partition ends on a
+fractional boundary, round the next start *up* a MiB, or parted silently
+places it somewhere else.
+
+**3. Format and mount — then check before installing.**
+
+```sh
+sudo mkfs.vfat -F 32 -n NIXBOOT /dev/nvme0n1p<ESP>
+sudo mkfs.ext4 -F -L nixos /dev/nvme0n1p<ROOT>
+sudo mount /dev/nvme0n1p<ROOT> /mnt
+sudo mkdir -p /mnt/boot && sudo mount /dev/nvme0n1p<ESP> /mnt/boot
+
+findmnt -no SOURCE,SIZE /mnt/boot     # MUST be the ~1G partition, NOT the 200M one
+ls /mnt/boot                          # MUST be empty — if it holds EFI/Microsoft,
+                                      # you mounted Windows' ESP. Unmount and fix.
+```
+
+**4. Install.** `--no-root-passwd` matters: without it `nixos-install`
+stops at an interactive prompt, which hangs an unattended/ssh run.
+
+```sh
+sudo nixos-generate-config --root /mnt
+git clone https://github.com/MarcusSanchez/nix-config /mnt/home/marcus/nix-config
+cp /mnt/etc/nixos/hardware-configuration.nix \
+   /mnt/home/marcus/nix-config/hosts/bedroom-nixos/hardware-configuration.nix
+grep -A3 'fileSystems."/boot"' \
+   /mnt/home/marcus/nix-config/hosts/bedroom-nixos/hardware-configuration.nix
+                                      # sanity: that UUID is the NEW ESP
+sudo nixos-install --no-root-passwd --flake /mnt/home/marcus/nix-config#bedroom-nixos
+sudo nixos-enter --root /mnt -- bash -c 'echo marcus:<password> | chpasswd'
+```
+
+**5. Enrol the machine key before first boot** — saves a round trip, and
+means secrets work on the very first switch. Generate on the box (never
+copy a key between machines), then add `&bedroom-nixos` to `.sops.yaml`
+and `sops updatekeys` **from a machine that is already a recipient**
+(tuf-nixos, bedroom-wsl or the mac), and push:
+
+```sh
+sudo nix-shell -p age --run "age-keygen -o /tmp/machine.txt"   # note the public key
+sudo install -d -m 0700 /mnt/var/lib/sops-nix
+sudo sh -c 'cat /tmp/machine.txt >> /mnt/var/lib/sops-nix/key.txt'
+sudo chmod 0400 /mnt/var/lib/sops-nix/key.txt
+sudo install -d -m 0700 /mnt/home/marcus/.config/sops/age
+sudo sh -c 'cat /tmp/machine.txt >> /mnt/home/marcus/.config/sops/age/keys.txt'
+sudo chmod 0600 /mnt/home/marcus/.config/sops/age/keys.txt
+sudo chown -R 1000:100 /mnt/home/marcus          # uid 1000 is marcus on the target
+sudo rm -f /tmp/machine.txt
+```
+
+**6. First boot.** `/etc/nixos` is a real directory on a fresh install, so
+`ln -s` into it silently creates the link *inside* it — remove it first:
+
+```sh
+sudo rm -rf /etc/nixos && sudo ln -s /home/marcus/nix-config /etc/nixos
+ls -ld /etc/nixos                     # must print a symlink
+cd ~/nix-config && git add hosts/bedroom-nixos/hardware-configuration.nix
+git commit -m "bedroom-nixos: real hardware-configuration from install"
+git pull --rebase                     # picks up the .sops.yaml enrolment
+sudo nixos-rebuild switch --flake /etc/nixos
+secrets:status                        # gh / atuin / fly all green
+sudo tailscale up --ssh
+git push
+```
+
+Expect on first boot: monitors auto-place in connector order (`niri msg
+outputs`, then add `output` blocks to `niri.config.kdl` — they hot-reload,
+so arrange interactively), and **group changes (input/uinput for xremap)
+need one relogin**.
+
+### Secure Boot (optional, and this board fights it)
+
+Windows wants Secure Boot on for anti-cheat; NixOS then needs a signed
+boot chain, which is what `./lanzaboote.nix` provides. It stays
+**commented out** until keys exist on the machine — enabled without them,
+the bootloader install fails and takes `nixos-install` with it.
+
+```sh
+sudo nix-shell -p sbctl --run "sbctl create-keys"   # sbctl ships WITH lanzaboote,
+                                                    # hence nix-shell for this first step
+# uncomment ./lanzaboote.nix in hosts/bedroom-nixos/default.nix
+sudo nixos-rebuild switch --flake /etc/nixos
+sudo sbctl verify        # generations + systemd-boot signed. The KERNEL showing
+                         # "not signed" is EXPECTED: lanzaboote's signed stub
+                         # carries its SHA-256 (.linuxh/.initrdh) instead of
+                         # embedding it — verified by reading the PE sections
+```
+
+**This MSI board refuses runtime key enrolment.** `sbctl enroll-keys`
+fails with `permission denied` writing `db` even with `SetupMode=1`, PK
+deleted, no lockdown LSM, immutable flags cleared and `--disable-landlock`
+— the firmware rejects it, not Linux. Export and enrol from the BIOS:
+
+```sh
+sudo mkdir -p /boot/sbctl-keys && cd /boot/sbctl-keys
+sudo sbctl enroll-keys --microsoft --export esl    # also: --export auth
+```
+
+Then in the firmware (`Del`, `F7` for Advanced, Settings -> Advanced ->
+Windows OS Configuration -> Secure Boot):
+
+1. **Secure Boot Mode = Custom**, then **Key Management**
+2. Enrol **db -> KEK -> PK, in that order** (PK last: enrolling it exits
+   Setup Mode). Browse to the NixOS ESP -> `sbctl-keys/` -> `db.esl` etc.
+   Several volumes look identical in that browser; the NixOS one is the
+   one containing `sbctl-keys`, Windows' is the one with `EFI/Microsoft`.
+3. **Image Execution Policy -> Deny Execute** (Fixed *and* Removable
+   Media). `sbctl status` reports this board as `FQ0001: defaults to
+   executing on Secure Boot policy violation (CRITICAL)` — MSI's default
+   runs binaries that fail verification, so Secure Boot would report as on
+   while enforcing nothing.
+4. **Secure Boot = Enabled**, `F10`, and answer **yes** when it asks to
+   save. Verify back in NixOS: `bootctl status` -> `Secure Boot: enabled
+   (user)`.
+
+Never pick "Delete all Secure Boot variables" (drops the `dbx` revocation
+database) or "Restore Factory Keys" (undoes Setup Mode) — and leave the
+TPM alone entirely; clearing it destroys Windows Hello and any
+TPM-sealed BitLocker protector.
+
+**If you abandon Secure Boot partway**, put the board back the way Windows
+expects: Key Management -> **Restore Factory Keys**, then Secure Boot ->
+Enabled. NixOS then won't boot until you disable it again — that's a
+firmware toggle, nothing is damaged.
 
 ## Secrets
 
