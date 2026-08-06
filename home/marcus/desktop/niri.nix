@@ -9,7 +9,12 @@
 # UI land as git drift). Session *state* — wallpaper path, avatar,
 # per-app usage — stays outside in ~/.local/state, machine-local by
 # design. (noctalia was trialed in the same slot; DMS won.)
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  osConfig,
+  ...
+}:
 
 {
   # GTK icon/cursor theme NAMES, owned declaratively: Plasma wrote
@@ -105,6 +110,10 @@
     {
       "niri/config.kdl".source = link "niri.config.kdl";
       "niri/niri.outputs.kdl".source = link "niri.outputs.kdl";
+      # the per-host tail config.kdl includes: hostname picks the
+      # target, so each desktop machine reads its own rules from the
+      # one shared repo (a new host must commit its file first)
+      "niri/niri.host.kdl".source = link "niri.host.${osConfig.networking.hostName}.kdl";
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
     };
 
