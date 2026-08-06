@@ -333,12 +333,25 @@ outputs`, then add `output` blocks to `niri.config.kdl` — they hot-reload,
 so arrange interactively), and **group changes (input/uinput for xremap)
 need one relogin**.
 
-### Secure Boot (optional, and this board fights it)
+### Secure Boot
 
-Windows wants Secure Boot on for anti-cheat; NixOS then needs a signed
-boot chain, which is what `./lanzaboote.nix` provides. It stays
-**commented out** until keys exist on the machine — enabled without them,
-the bootloader install fails and takes `nixos-install` with it.
+**The chosen arrangement: Secure Boot stays OFF, and gets toggled back on
+in the firmware for the sessions that need it.** Anti-cheat games
+(Fortnite, Valorant) require it on the Windows side; NixOS boots fine
+without it. Flipping the setting takes a minute in the BIOS and costs
+nothing structural, so it beats the alternative below.
+
+The one running cost: **every toggle re-breaks the Windows Hello PIN**,
+because it's TPM-sealed against Secure Boot state (PCR 7). Sign in with
+the account password and re-create the PIN — Settings -> Accounts ->
+Sign-in options. If BitLocker is ever enabled, suspend it *before* the
+toggle or Windows demands the recovery key instead.
+
+The rest of this section is the alternative — signing NixOS's boot chain
+so both OSes run under Secure Boot at once. It is documented because the
+groundwork exists, not because it is the current plan. `lanzaboote.nix`
+stays **commented out** until keys exist on the machine — enabled without
+them, the bootloader install fails and takes `nixos-install` with it.
 
 ```sh
 sudo nix-shell -p sbctl --run "sbctl create-keys"   # sbctl ships WITH lanzaboote,

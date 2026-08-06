@@ -755,3 +755,45 @@ cursor {
 output "eDP-1" {
     scale 1.25
 }
+
+// bedroom-nixos: three monitors, left to right — DP-2 vertical, the 4K
+// in the middle, DP-1 on the right. Connector-keyed, so these blocks are
+// inert on the laptop (which has only eDP-1). Modes are each panel's
+// maximum; y positions centre the shorter panels against the vertical
+// one's 1920 logical height, so the cursor crosses at a steady height.
+//
+// The desk works as: side monitors hold static things (video, music),
+// the 4K in the middle is the scrollable workspace. Verify the connector
+// names with `niri msg outputs` after any cable change — the layout
+// follows the PORT, not the panel.
+output "DP-2" {
+    mode "1920x1080@179.998"
+    transform "90"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-3" {
+    mode "3840x2160@240.000"
+    scale 1.75
+    position x=1080 y=343
+}
+
+// x=3275, not 3274: at scale 1.75 the 4K's logical width is
+// 3840/1.75 = 2194.29, so it really ends at 3274.29 — asking for 3274
+// overlaps by a fraction and niri silently falls back to automatic
+// placement (which is how the y offset gets lost).
+output "DP-1" {
+    mode "2560x1440@320.001"
+    scale 1.25
+    position x=3275 y=384
+}
+
+// Static-content apps land on their own screen instead of the working
+// strip. Inert where those connectors don't exist, so the laptop is
+// unaffected. open-on-output takes a connector name; add rules here as
+// the desk settles.
+window-rule {
+    match app-id="spotify"
+    open-on-output "DP-2"
+}
