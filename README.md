@@ -8,7 +8,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
 | `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
-| `framework-lite-wsl`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
+| `framework-wsl`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `tuf-nixos` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
 | `bedroom-nixos` | bare-metal desktop, dual-boot beside the PC that hosts `bedroom-wsl` | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
@@ -101,7 +101,7 @@ distro — WSL refuses duplicates.)
 | flake attribute | what you get |
 |---|---|
 | `bedroom-wsl` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
-| `framework-lite-wsl`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any attribute in `flake.nix` works — add a line there first |
+| `framework-wsl`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any attribute in `flake.nix` works — add a line there first |
 
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
 `marcus`, which is why there's a restart in the middle.
