@@ -615,7 +615,12 @@ binds {
     // near-maximize: 95% width so a neighbor still peeks at the edge —
     // real maximize stays on Mod+Ctrl+F, true fullscreen on Mod+Shift+F
     Mod+F { set-column-width "95%"; }
-    Mod+Shift+F { fullscreen-window; }
+    // non-exclusive: the window fills the screen and the app renders its
+    // fullscreen UI, but it stays in the layout so the bar stays visible —
+    // the "double-tap the title bar" feel. True exclusive fullscreen (for
+    // games, video handoff) moved to Mod+Ctrl+Shift+F.
+    Mod+Shift+F { toggle-windowed-fullscreen; }
+    Mod+Ctrl+Shift+F { fullscreen-window; }
 
     // While maximize-column leaves gaps and borders around the window,
     // maximize-window-to-edges doesn't: the window expands to the edges of the screen.
@@ -753,7 +758,7 @@ cursor {
 // arbitrary fractional scales, and wayland-native apps stay crisp via
 // the fractional-scale protocol (xwayland apps may soften slightly)
 output "eDP-1" {
-    scale 1.25
+    scale 1.1
 }
 
 // bedroom-nixos: three monitors, left to right — DP-2 vertical, the 4K
