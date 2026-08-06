@@ -17,7 +17,7 @@
       # remote on first connect (cached; `ghostty +ssh-cache` inspects it);
       # ssh-env falls back to a sane TERM where it can't.
       # modules/nixos/packages.nix ships ghostty.terminfo, fixing this from
-      # the other side for our own machines; this covers everything else.
+      # the other side for the fleet's machines; this covers everything else.
       shell-integration-features = "ssh-env,ssh-terminfo";
 
       font-family = "JetBrainsMono Nerd Font Mono";

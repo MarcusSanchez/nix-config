@@ -20,7 +20,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # claude-code deliberately does NOT follow our nixpkgs: its binary cache
+    # claude-code deliberately does NOT follow the flake's nixpkgs: its binary cache
     # is built against its own pin, and a follows would force local rebuilds
     claude-code.url = "github:sadjow/claude-code-nix";
     catppuccin = {

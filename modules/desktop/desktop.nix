@@ -47,7 +47,7 @@ in
     displayManager = {
       # DMS's greetd-based greeter — the login screen wears the same
       # Material theme as the session shell. configHome points it at
-      # marcus's DMS settings so wallpaper/colors stay in sync; package
+      # the user's DMS settings so wallpaper/colors stay in sync; package
       # pinned to the same nixpkgs dms-shell the session uses so
       # greeter and shell can't drift apart.
       dms-greeter = {
@@ -105,8 +105,8 @@ in
     udev.packages = [ pkgs.libfido2 ];
   };
 
-  # The greeter runs niri with its OWN generated config — marcus's
-  # niri.config.kdl is session-only — so unaided it drives every monitor
+  # The greeter runs niri with its OWN generated config — the session's
+  # niri.config.kdl reaches only the session — so unaided it drives every monitor
   # untransformed at scale 1: sideways on a vertical monitor, tiny on
   # the 4K (bedroom-nixos's first greeter did exactly that). The DMS
   # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its

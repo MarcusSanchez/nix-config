@@ -13,7 +13,7 @@
 # Also do NOT install Tailscale on Windows while this is enabled: traffic
 # would be encapsulated twice and Tailscale packets don't fit inside
 # Tailscale packets. Tailscale's own docs actually recommend the Windows
-# host over WSL; we're going the other way because it makes this distro a
+# host over WSL; this config goes the other way because it makes this distro a
 # real node with its own MagicDNS name and inbound `tailscale ssh`, which
 # the Windows-side setup can't do without port-dispatching into wsl.exe.
 # If it misbehaves, that's the pivot.
@@ -29,7 +29,7 @@
 #
 # (An authKeyFile from sops would allow unattended enrolment, but auth keys
 # expire after 90 days max, so it'd be a recurring rotation for two
-# machines we sit in front of. Note extraUpFlags only applies when
+# interactively-used machines. Note extraUpFlags only applies when
 # authKeyFile is set — hence passing --ssh by hand above.)
 { ... }:
 
