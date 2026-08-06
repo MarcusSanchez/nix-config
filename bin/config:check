@@ -8,5 +8,6 @@ statix check .
 # and not held to repo style — statix.toml ignores them for the same reason
 deadnix --fail \
   --exclude hosts/tuf/hardware-configuration.nix \
+            hosts/bedroom-nixos/hardware-configuration.nix \
   -- .
 nix flake check
