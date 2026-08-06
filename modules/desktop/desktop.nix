@@ -95,11 +95,12 @@ in
       alsa.support32Bit = true;
       pulse.enable = true;
       # Follow the content's sample rate instead of resampling all to
-      # 48k: with a menu of allowed rates, PipeWire re-clocks the DAC
-      # (Fosi K7: 24-bit/192k capable) to match the playing stream —
-      # 44.1k sources play at 44.1k, hi-res at 96k/192k. Bit depth
-      # needs no config: mixing is float32 internally and the DAC
-      # negotiates its best format (S24) on its own.
+      # 48k. The list is a MENU, not a demand: PipeWire intersects it
+      # with each device's own capabilities, so this is safe flavor-wide
+      # — a laptop codec that only does 44.1/48 picks between those,
+      # while a hi-res DAC (the desk's Fosi K7 does 24-bit/192k) gets
+      # the full range. Bit depth needs no config: mixing is float32
+      # internally and each device negotiates its best format itself.
       extraConfig.pipewire."10-clock-rates" = {
         "context.properties" = {
           "default.clock.rate" = 48000;
