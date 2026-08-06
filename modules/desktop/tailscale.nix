@@ -20,4 +20,11 @@
     enable = true;
     extraSetFlags = [ "--ssh" ];
   };
+
+  # Anything arriving over the tailnet is one of marcus's own devices,
+  # so skip the firewall for it entirely: every dev server, on any
+  # port, is reachable from the phone/laptop via this box's tailnet
+  # name — from anywhere, with zero LAN exposure. The LAN port list in
+  # desktop.nix stays tight because this is the catch-all.
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
 }
