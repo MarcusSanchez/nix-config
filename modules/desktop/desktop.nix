@@ -105,6 +105,30 @@ in
     udev.packages = [ pkgs.libfido2 ];
   };
 
+  # The greeter runs niri with its OWN generated config — marcus's
+  # niri.config.kdl is session-only — so unaided it drives every monitor
+  # untransformed at scale 1: sideways on a vertical monitor, tiny on
+  # the 4K (bedroom-nixos's first greeter did exactly that). The DMS
+  # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
+  # generated config when that file exists; hand it the same
+  # connector-keyed output layout the session includes. Store copy —
+  # updates on rebuild, not on save like the session's symlink.
+  environment.etc."greetd/niri_overrides.kdl".source =
+    ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+
+  # The greeter's avatar probe checks, in order: its own cache,
+  # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
+  # dms-greeter user cannot read ~/.face through the 0700 home dir, and
+  # AccountsService only gets an icons/ copy when the avatar is set
+  # imperatively through the UI. Seed that copy declaratively from the
+  # same asset home/marcus/desktop/appearance.nix links to ~/.face, so
+  # a fresh machine's login screen has the face too. C+ overwrites, so
+  # an asset change propagates at the next boot/activation instead of
+  # being blocked by the existing copy.
+  systemd.tmpfiles.rules = [
+    "C+ /var/lib/AccountsService/icons/marcus 0644 root root - ${../../home/marcus/desktop/assets/avatar-spaceman.png}"
+  ];
+
   security = {
     # swaylock is the fallback locker (DMS's is primary); it
     # authenticates via PAM, and without this entry unlocking fails

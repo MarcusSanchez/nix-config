@@ -87,16 +87,26 @@
     x11.enable = true;
   };
 
-  # niri hot-reloads this on save; linked out-of-store so edits apply
-  # without a rebuild and land in the repo as ordinary git drift
-  xdg.configFile."niri/config.kdl".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/niri.config.kdl";
-
-  # Same caveat as the zed links: DMS may atomically replace the link
-  # with a plain file on save; HM re-links and hm-backups it on the
-  # next switch.
-  xdg.configFile."DankMaterialShell/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/dms.settings.json";
+  # niri hot-reloads its files on save; linked out-of-store so edits
+  # apply without a rebuild and land in the repo as ordinary git drift.
+  # niri.outputs.kdl must sit BESIDE config.kdl: its include is resolved
+  # relative to the symlink's directory, not the target's (verified on
+  # niri 26.04) — the same file also feeds the greeter's compositor via
+  # /etc/greetd/niri_overrides.kdl (modules/desktop/desktop.nix).
+  #
+  # DMS caveat, same as the zed links: it may atomically replace
+  # settings.json's link with a plain file on save; HM re-links and
+  # hm-backups it on the next switch.
+  xdg.configFile =
+    let
+      dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
+      link = f: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${f}";
+    in
+    {
+      "niri/config.kdl".source = link "niri.config.kdl";
+      "niri/niri.outputs.kdl".source = link "niri.outputs.kdl";
+      "DankMaterialShell/settings.json".source = link "dms.settings.json";
+    };
 
   # fallback lock (PAM entry in modules/desktop/desktop.nix) in case the
   # DMS lock ever misbehaves — run `swaylock` from a terminal

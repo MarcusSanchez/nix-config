@@ -6,9 +6,12 @@
 #
 # The avatar goes to ~/.face, the freedesktop convention AccountsService
 # falls back to when no icon has been set explicitly — which is what the
-# DMS greeter, lock screen and control center read. (Setting it through
-# `dms ipc call profile setImage` instead writes a root-owned copy under
-# /var/lib/AccountsService; that path stays valid but isn't declarative.)
+# in-session readers (lock screen, control center) resolve. The GREETER
+# runs as its own user and cannot read ~/.face through the 0700 home
+# dir; modules/desktop/desktop.nix seeds /var/lib/AccountsService/icons/
+# from the same asset for it. (Setting it through `dms ipc call profile
+# setImage` instead writes a root-owned copy under /var/lib/
+# AccountsService; that path stays valid but isn't declarative.)
 {
   config,
   pkgs,
