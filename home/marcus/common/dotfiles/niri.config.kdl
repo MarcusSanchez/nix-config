@@ -704,12 +704,17 @@ overview {
     backdrop-color "#11111b"
 }
 
-// Auxiliary windows (Zed's settings UI, browser OAuth popups) used to
-// be floated by title-heuristic rules here; retired 2026-08-06 — tiling
-// them as ordinary columns felt better. Real dialogs (file pickers)
-// declare a parent and float regardless. Mod+V floats anything by
-// hand; to float a popup by rule again, `niri msg windows` with it
-// open gives the app-id/title to match.
+// Browser OAuth popups used to be floated by a title heuristic here;
+// retired 2026-08-06 — tiling them felt better. Real dialogs (file
+// pickers) declare a parent and float regardless; Mod+V floats
+// anything by hand. Zed's settings UI keeps its float rule: tiled, it
+// opens as a plain toplevel and inherits the 95% default-column-width
+// from niri.host.bedroom-nixos.kdl — a giant settings pane (tried
+// tiling it the same day, reverted the same hour).
+window-rule {
+    match app-id="dev.zed.Zed" title="^Zed — "
+    open-floating true
+}
 
 // Frosted-glass terminal: niri 26.04 grew blur support, so ghostty's
 // 0.75 background-opacity (set in ghostty.nix) gets real blur behind
