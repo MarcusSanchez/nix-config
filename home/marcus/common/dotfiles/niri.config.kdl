@@ -139,10 +139,20 @@ layout {
     // - "always", the focused column will always be centered.
     // - "on-overflow", focusing a column will center it if it doesn't fit
     //   together with the previously focused column.
-    center-focused-column "never"
+    //
+    // "always" is deliberate: under "never", closing the edge column
+    // leaves the view parked on dead space until a manual Mod+H/L
+    // (niri#1642) — with the focused column always centered, closing an
+    // edge column recenters on the neighbor immediately. Columns here
+    // are mostly 95-100% wide, so centering looks the same as "never"
+    // outside that fix; narrower columns (ghostty at 50%) sit centered
+    // rather than edge-hugged.
+    center-focused-column "always"
 
     // a lone window sits centered instead of hugging the left edge;
     // as soon as a second column appears, normal strip behavior resumes
+    // (moot while center-focused-column is "always"; kept for if that
+    // ever reverts)
     always-center-single-column
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.

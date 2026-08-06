@@ -18,14 +18,12 @@
 }:
 
 let
-  # Live experiment on the desktop PC: the ghostty tab-bar icon
-  # breakage under Papirus was diagnosed on the laptop, whose Plasma
-  # history muddied the picture. bedroom-nixos (clean install, no DE
-  # leftovers) runs the catppuccin/Papirus icons natively to see
-  # whether it reproduces; the laptop keeps the Adwaita pin. Verdict
-  # decides whether the pin is load-bearing everywhere or was a
-  # laptop-only artifact.
-  papirusIconTest = osConfig.networking.hostName == "bedroom-nixos";
+  # VERDICT (2026-08-06): ghostty's tab bar renders fine under Papirus
+  # on bedroom-nixos — the laptop-era breakage was an artifact of that
+  # machine's Plasma leftovers, not a Papirus deficiency. The desktop
+  # keeps the catppuccin/Papirus icons; the laptop keeps its Adwaita
+  # pin, which remains load-bearing THERE until someone re-tests on it.
+  papirusIcons = osConfig.networking.hostName == "bedroom-nixos";
 in
 {
   # GTK icon/cursor theme NAMES, owned declaratively: Plasma wrote
@@ -36,14 +34,14 @@ in
   # (Plasma's old files land in .hm-backup on first switch.)
   gtk = {
     enable = true;
-    # on the test host, catppuccin's GTK port supplies iconTheme
+    # on the desktop PC, catppuccin's GTK port supplies iconTheme
     # (Papirus-Dark) instead
-    iconTheme = lib.mkIf (!papirusIconTest) {
+    iconTheme = lib.mkIf (!papirusIcons) {
       name = "Adwaita";
       package = pkgs.adwaita-icon-theme;
     };
   };
-  catppuccin.gtk.icon.enable = papirusIconTest;
+  catppuccin.gtk.icon.enable = papirusIcons;
   # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini —
   # icon-theme follows whichever theme won gtk.iconTheme above
   dconf.settings."org/gnome/desktop/interface" = {

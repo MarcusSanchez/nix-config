@@ -33,12 +33,12 @@
     # its only way to check laptop changes. No-op on WSL/mac.
     swaylock.enable = false;
     # autoEnable's GTK port would force Papirus icons over the Adwaita
-    # set that home/marcus/desktop/niri.nix pins for reliable
-    # symbolic-icon coverage (ghostty's tab bar broke without them on
-    # the laptop). No-op on WSL/mac, load-bearing on the desktop.
-    # mkDefault so niri.nix can flip it per-host: bedroom-nixos runs
-    # the Papirus icons as a live experiment — does the tab-bar
-    # breakage reproduce on a machine with no Plasma history?
+    # set home/marcus/desktop/niri.nix pins on the laptop, where
+    # ghostty's tab bar once broke without Adwaita's symbolics.
+    # mkDefault so niri.nix decides per-host: bedroom-nixos runs
+    # Papirus (verified fine there 2026-08-06 — the laptop breakage was
+    # a Plasma-leftover artifact); the laptop keeps the pin. No-op on
+    # WSL/mac.
     gtk.icon.enable = lib.mkDefault false;
   };
 
