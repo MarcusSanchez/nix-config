@@ -265,10 +265,9 @@ home/marcus/
     niri.nix               user side of the session: DMS helper packages
                            (quickshell/dgop/matugen — dms-shell does NOT
                            bundle them; matugen missing = theme generation
-                           silently no-ops), GTK/dconf theme names —
-                           Adwaita on the laptop, catppuccin Papirus on
-                           bedroom-nixos (the papirusIcons hostname
-                           branch; see Constraints), the snipping tool
+                           silently no-ops), GTK/dconf theme names
+                           (Adwaita everywhere; see Constraints for why
+                           not Papirus), the snipping tool
                            (grim/slurp/satty, Mod+Shift+S), and FOUR
                            out-of-store links: niri/config.kdl,
                            niri/niri.outputs.kdl, niri/niri.host.kdl
@@ -307,7 +306,7 @@ home/marcus/
   - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `pkill quickshell`, then `niri msg action spawn -- dms run` (the supervisor may be long dead, so respawn explicitly). Verify pixels with `grim -o <output>` over SSH, not by asking state again.
   - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/desktop/boot.nix` + `desktop.nix` headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
   - **Group membership changes (input/uinput) need a relogin** — the session that ran the switch doesn't have them yet.
-  - **The icon-theme story is host-conditional.** `home/marcus/common/shell.nix` sets `catppuccin.gtk.icon.enable = lib.mkDefault false` and `desktop/niri.nix` flips it on for bedroom-nixos only (the `papirusIcons` branch): Papirus was verified fine there 2026-08-06 — ghostty's tab bar renders — proving the old breakage was Plasma-leftover fallout on the laptop, not a Papirus deficiency. The Adwaita pin stays load-bearing ON THE LAPTOP until re-tested there; don't flatten the branch in either direction without testing ghostty's tab bar on the affected machine.
+  - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `desktop/niri.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus was trialed on bedroom-nixos 2026-08-06 and proved technically fine — ghostty's tab bar renders; the old laptop breakage was Plasma-leftover fallout, not a Papirus deficiency — but its restyled app icons were rejected on looks. Re-enabling it is safe on clean installs; it is a taste decision, not a stability one.
   - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a DMS restart to be indexed.
   - When a GUI app misbehaves, run it from a terminal and read its output before theorizing about the launcher.
 - The zsh `initContent` in `home/marcus/common/shell.nix` is wrapped in `lib.mkOrder 1200` on purpose, so marcus's keybindings land after zoxide/atuin's shell hooks. Don't drop the ordering when editing it.

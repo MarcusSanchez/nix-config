@@ -11,20 +11,11 @@
 # design. (noctalia was trialed in the same slot; DMS won.)
 {
   config,
-  lib,
   pkgs,
   osConfig,
   ...
 }:
 
-let
-  # VERDICT (2026-08-06): ghostty's tab bar renders fine under Papirus
-  # on bedroom-nixos — the laptop-era breakage was an artifact of that
-  # machine's Plasma leftovers, not a Papirus deficiency. The desktop
-  # keeps the catppuccin/Papirus icons; the laptop keeps its Adwaita
-  # pin, which remains load-bearing THERE until someone re-tests on it.
-  papirusIcons = osConfig.networking.hostName == "bedroom-nixos";
-in
 {
   # GTK icon/cursor theme NAMES, owned declaratively: Plasma wrote
   # breeze-dark/breeze_cursors into settings.ini and dconf for
@@ -32,16 +23,21 @@ in
   # only scans the theme it's named, so every named icon rendered as a
   # broken-image placeholder and the cursor stayed a themeless default.
   # (Plasma's old files land in .hm-backup on first switch.)
+  #
+  # Adwaita, not Papirus, by PREFERENCE: with Adwaita named, apps fall
+  # through to their own hicolor icons (native look, like macOS);
+  # Papirus replaces them with its restyled set. A 2026-08-06 trial on
+  # bedroom-nixos proved Papirus technically fine (ghostty's tab bar
+  # renders — the old laptop breakage was Plasma-leftover fallout) but
+  # the restyled app icons were rejected. Flip
+  # catppuccin.gtk.icon.enable in common/shell.nix to re-try it.
   gtk = {
     enable = true;
-    # on the desktop PC, catppuccin's GTK port supplies iconTheme
-    # (Papirus-Dark) instead
-    iconTheme = lib.mkIf (!papirusIcons) {
+    iconTheme = {
       name = "Adwaita";
       package = pkgs.adwaita-icon-theme;
     };
   };
-  catppuccin.gtk.icon.enable = papirusIcons;
   # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini —
   # icon-theme follows whichever theme won gtk.iconTheme above
   dconf.settings."org/gnome/desktop/interface" = {
