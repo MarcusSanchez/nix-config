@@ -10,16 +10,12 @@
   programs.ghostty.settings = {
     font-size = 12;
 
-    # One bar, macOS-style: tabs merged into the titlebar next to the
-    # window controls instead of a separate tab bar below it. Caveat
-    # from the docs: tab titles aren't drag areas — drag the window by
-    # the bar's empty space or super+drag.
-    gtk-titlebar-style = "tabs";
-    # client-side decorations always: "auto" lets the compositor
-    # stack a server-side bar on top of the tabs titlebar
-    window-decoration = "client";
-    # chrome colored from the terminal palette rather than GTK gray
-    window-theme = "ghostty";
+    # No titlebar at all: under niri, tabs/splits go unused (the
+    # compositor tiles instead), so the header is pure chrome. The old
+    # tabs-in-titlebar setup (gtk-titlebar-style "tabs" +
+    # window-decoration "client" + window-theme "ghostty") is in git
+    # history if terminal tabs ever come back into fashion.
+    window-decoration = "none";
 
     # blur comes from niri's window-rule background-effect, not from
     # here: ghostty's own background-blur option speaks the KDE/macOS
