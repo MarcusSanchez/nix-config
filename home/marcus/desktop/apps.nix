@@ -30,5 +30,11 @@
     })
     # zen isn't in nixpkgs; the flake input repackages official binaries
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+
+    # Wooting keyboard configurator (device access comes from
+    # modules/desktop/wooting.nix's udev rules). If this packaged
+    # version ever lags a new keyboard, the web Wootility needs a
+    # chromium-based browser — zen is firefox-based and has no WebHID.
+    pkgs.wootility
   ];
 }

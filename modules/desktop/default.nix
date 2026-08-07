@@ -37,6 +37,7 @@
     ./bluetooth.nix
     ./users.nix
     ./packages.nix
+    ./wooting.nix
     ./fonts.nix
     ./nix-ld.nix
     ./envfs.nix
