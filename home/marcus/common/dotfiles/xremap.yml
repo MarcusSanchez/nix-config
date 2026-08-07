@@ -15,6 +15,14 @@ keymap:
       alt-j: up
       alt-k: down
 
+  # Shift+Alt+H/L are Home/End EVERYWHERE — no app carve-outs, unlike
+  # the plain Alt+H/L below (exact modifier matching keeps the two
+  # rules from colliding).
+  - name: home-end-always
+    remap:
+      shift-alt-h: home
+      shift-alt-l: end
+
   # Alt+H/L become left/right only outside apps that already speak vim:
   # Zed, JetBrains IDEs, and terminals whose title says nvim is running
   # (ghostty's shell integration titles the window after the foreground
