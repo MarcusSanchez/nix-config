@@ -1,9 +1,11 @@
-# Wooting keyboard access for Wootility: the option ships Wooting's
-# maintained udev rules (hidraw access via uaccess for the active seat
-# user), replacing the /etc/udev/rules.d hand-install their setup page
-# prescribes for other distros. Inert without the hardware plugged in.
-{ ... }:
+# Wooting keyboard access: the maintained udev rules (hidraw via
+# uaccess for the active seat user), which is what lets the web
+# Wootility configure the keyboard over WebHID from a chromium browser.
+# Deliberately NOT hardware.wooting.enable — that option also installs
+# the wootility desktop app, which the web version replaces here.
+# Inert without the hardware plugged in.
+{ pkgs, ... }:
 
 {
-  hardware.wooting.enable = true;
+  services.udev.packages = [ pkgs.wooting-udev-rules ];
 }
