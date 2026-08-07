@@ -637,17 +637,19 @@ binds {
     Mod+Ctrl+Shift+R { switch-preset-window-height; }
     Mod+Ctrl+R { reset-window-height; }
 
-    // near-maximize: 95% width so a neighbor still peeks at the edge —
-    // real maximize stays on Mod+Ctrl+F, true fullscreen on Mod+Shift+F
+    // near-maximize: 95% width so a neighbor still peeks at the edge
     Mod+F { set-column-width "95%"; }
-    // the "double-tap the title bar" feel, measured on a 1745x981 output:
+    // the F ladder: 95% -> 100% -> edge-to-edge. No exclusive
+    // fullscreen bind — videos and games request it themselves, and
+    // fullscreen-window (covers the bar) earned no manual use.
+    // Reference, measured on a 1745x981 output:
     //   maximize-window-to-edges  1745x942  edge to edge, bar still there
     //   maximize-column           1712x905  full width but gaps all round
-    //   fullscreen-window         1745x982  covers the bar too (Mod+Ctrl+Shift+F)
+    //   fullscreen-window         1745x982  covers the bar too
     //   toggle-windowed-fullscreen          no size change AT ALL — it only
     //                                       tells the client it is fullscreen
-    Mod+Shift+F { maximize-window-to-edges; }
-    Mod+Ctrl+Shift+F { fullscreen-window; }
+    Mod+Shift+F { set-column-width "100%"; }
+    Mod+Ctrl+Shift+F { maximize-window-to-edges; }
 
     // While maximize-column leaves gaps and borders around the window,
     // maximize-window-to-edges doesn't: the window expands to the edges of the screen.

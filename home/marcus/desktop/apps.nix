@@ -36,6 +36,11 @@
     # version ever lags a new keyboard, the web Wootility needs a
     # chromium-based browser — zen is firefox-based and has no WebHID.
     pkgs.wootility
+
+    # media center (torrent-streaming frontend). stremio-linux-shell is
+    # the current packaging — plain `stremio` was removed from nixpkgs
+    # over its outdated qt5 webengine.
+    pkgs.stremio-linux-shell
   ];
 
   # Launcher hygiene: terminal apps and system plumbing ship .desktop
