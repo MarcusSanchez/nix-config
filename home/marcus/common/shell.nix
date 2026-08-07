@@ -137,7 +137,14 @@
       # keybindings below always win, regardless of module import order.
       initContent = lib.mkOrder 1200 ''
         alias cls='clear'
-        precmd() { echo }
+        # Blank line between command outputs — but not as the FIRST
+        # line of a fresh screen (new terminal, clear/cls), where it
+        # just pushed the prompt down. The flag arms after each prompt
+        # and disarms on clear. Ctrl+L needs nothing: zle's
+        # clear-screen redraws the prompt without running precmd.
+        _blank_before_prompt=""
+        precmd() { print -rn -- "$_blank_before_prompt"; _blank_before_prompt=$'\n' }
+        clear() { command clear; _blank_before_prompt="" }
 
         # Two lines: an identity banner, then robbyrussell exactly as
         # upstream — so the status arrow sits next to what you type.
