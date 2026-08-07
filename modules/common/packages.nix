@@ -12,6 +12,18 @@
     file
     htop
 
+    # the no-config modern-unix staples (the ones with shell hooks or
+    # theming — fzf/bat/eza/yazi/lazygit/btop — live in
+    # home/marcus/common/cli-tools.nix instead)
+    dust # du, readable
+    duf # df, readable
+    tealdeer # `tldr <cmd>`: example-first man pages
+    hyperfine # statistical CLI benchmarking
+    entr # watch files, rerun a command
+    xh # HTTP client with humane syntax
+    trippy # traceroute+ping TUI
+    doggo # dig, readable
+
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>
     nvd
     nh

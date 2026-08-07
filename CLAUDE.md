@@ -200,6 +200,12 @@ home/marcus/
                            nvim opts out, and a revived starship must too;
                            see Constraints)
     packages.nix           user CLIs + comma with its prebuilt nix-index db
+    cli-tools.nix          the modern-unix staples that carry shell hooks,
+                           aliases or theming (fzf/bat/eza/yazi/lazygit/
+                           btop as programs.* — catppuccin themes them via
+                           the HM modules; ls->eza, cat->bat aliases,
+                           interactive-only). The no-config siblings live
+                           in modules/common/packages.nix
     dotfiles-links.nix     the UI-managed-config links + drift auto-commit
                            shared by mac/ and desktop/ (message names the
                            host via osConfig) — NOT in common/default.nix
