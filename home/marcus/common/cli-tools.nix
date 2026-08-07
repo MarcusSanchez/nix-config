@@ -27,8 +27,13 @@
 
     # terminal file manager (async, image previews in ghostty). The zsh
     # integration adds `y`: like yazi, but the shell cd's to wherever
-    # navigation ended when it quits
-    yazi.enable = true;
+    # navigation ended when it quits. Wrapper name pinned: the default
+    # varies by home.stateVersion (`yy` before 26.05), and the fleet
+    # spans both sides of that line
+    yazi = {
+      enable = true;
+      shellWrapperName = "y";
+    };
 
     # the most-loved git TUI: hunk staging, interactive rebase, branch
     # surgery — visual and keyboard-driven
