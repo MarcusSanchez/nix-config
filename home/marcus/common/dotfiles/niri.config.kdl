@@ -708,7 +708,12 @@ binds {
     // renders it with a preview). niri's own freeze-frame picker
     // stays on Shift+Print for when a frozen screen helps (tooltips,
     // menus).
-    Print hotkey-overlay-title="Screenshot region → clipboard" { spawn "sh" "-c" "f=\"$HOME/Pictures/Screenshots/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png\"; mkdir -p \"$HOME/Pictures/Screenshots\" && grim -g \"$(slurp)\" \"$f\" && wl-copy < \"$f\" && notify-send -i \"$f\" Screenshot 'Copied to clipboard + saved' || true"; }
+    // wl-copy must OUTLIVE the bind to serve the clipboard (niri kills
+    // the spawn's whole scope when its main process exits — a forked
+    // wl-copy dies with it and the clipboard offer vanishes), hence
+    // exec + --foreground: the bind process BECOMES the clipboard
+    // server and exits when the next copy replaces it.
+    Print hotkey-overlay-title="Screenshot region → clipboard" { spawn "sh" "-c" "f=\"$HOME/Pictures/Screenshots/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png\"; mkdir -p \"$HOME/Pictures/Screenshots\" && grim -g \"$(slurp)\" \"$f\" || exit 0; notify-send -i \"$f\" Screenshot 'Copied to clipboard + saved' 2>/dev/null; exec wl-copy --foreground < \"$f\""; }
     Shift+Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
