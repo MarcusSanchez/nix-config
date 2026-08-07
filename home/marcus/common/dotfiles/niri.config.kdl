@@ -694,7 +694,9 @@ binds {
     // closes the CURRENT TAB inside it, not the window (Mod+Q / Alt+F4
     // do that). The column tabbed-display toggle moved to Mod+Shift+W.
     Mod+W { spawn "wtype" "-M" "ctrl" "-k" "w" "-m" "ctrl"; }
-    Mod+Shift+W { toggle-column-tabbed-display; }
+    // tabbed-column toggle lives on T, not Shift+W: one slipped Shift
+    // next to the close-tab bind above cost real sessions
+    Mod+Shift+T { toggle-column-tabbed-display; }
 
     // Actions to switch layouts.
     // Note: if you uncomment these, make sure you do NOT have
