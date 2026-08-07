@@ -18,6 +18,7 @@
     # on disk, the bootloader install (and therefore nixos-install)
     # fails. Full ceremony: lanzaboote.nix header + README "Secure Boot".
     ./lanzaboote.nix
+    ./reboot-windows.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
