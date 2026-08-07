@@ -15,7 +15,7 @@
 #
 # Consequences:
 #  - nix.settings / nix.gc / nix.optimise are unavailable here; user-level
-#    GC lives in home/marcus/mac/nix.nix instead.
+#    GC lives in home/marcus/darwin/nix.nix instead.
 #  - No system.autoUpgrade on darwin anyway — bump inputs with
 #    `nix flake update` and rebuild.
 { ... }:

@@ -5,10 +5,10 @@
 {
   imports = [
     ./common
-    ./mac/ghostty.nix
-    ./mac/nix.nix
-    ./mac/dotfiles.nix
-    ./mac/hammerspoon.nix
+    ./darwin/ghostty.nix
+    ./darwin/nix.nix
+    ./darwin/dotfiles.nix
+    ./darwin/hammerspoon.nix
   ];
 
   home = {

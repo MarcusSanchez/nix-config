@@ -105,6 +105,6 @@
           specialArgs = { inherit inputs hostName; };
           modules = [ hostModule ];
         }
-      ) { "macbook-air" = ./hosts/mac; };
+      ) { "macbook-air" = ./hosts/darwin; };
     };
 }

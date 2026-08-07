@@ -20,14 +20,14 @@ The repo lives at `~/nix-config` everywhere; the symlink is what bare
 
 ```
 home/
-  marcus/                Home Manager — common/ + wsl/ + mac/ + desktop/,
-                         with wsl.nix / wsl-lite.nix / mac.nix / desktop.nix
+  marcus/                Home Manager — common/ + wsl/ + darwin/ + desktop/,
+                         with wsl.nix / wsl-lite.nix / darwin.nix / desktop.nix
                          as entry points
 hosts/                   per-host values only. Naming rule: hardware
                          truth => dir named by exact hostname
                          (tuf-nixos/, bedroom-nixos/ — hardware config,
                          nvidia facts, lanzaboote); no hardware truth =>
-                         shareable kind (wsl/, wsl-lite/, mac/ — several
+                         shareable kind (wsl/, wsl-lite/, darwin/ — several
                          flake attrs may point at one dir)
 modules/
   common/                shared system layer (all platforms)
@@ -46,7 +46,10 @@ flake.nix                inputs + all host wirings
 ```
 
 One concern per file, and a file does nothing until it's in its directory's
-`default.nix`. Every file opens with a comment explaining itself.
+`default.nix`. Every file opens with a comment explaining itself. Naming
+across layers: `common` = all platforms; OS names for OS cores (`nixos`,
+`darwin`); flavor names for flavors (`wsl`, `desktop`); machines by exact
+hostname.
 
 ## Common operations
 

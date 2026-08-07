@@ -7,7 +7,7 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  homeEntryPoint = ../../home/marcus/mac.nix;
+  homeEntryPoint = ../../home/marcus/darwin.nix;
 
   # From flake.nix — see hosts/wsl/default.nix.
   networking.hostName = hostName;

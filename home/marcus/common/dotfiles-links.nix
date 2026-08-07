@@ -8,7 +8,7 @@
 # both set from the flake's hostName specialArg.
 #
 # Imported EXPLICITLY by home/marcus/desktop/dotfiles.nix and
-# home/marcus/mac/dotfiles.nix, and deliberately NOT aggregated by
+# home/marcus/darwin/dotfiles.nix, and deliberately NOT aggregated by
 # common/default.nix: the WSL boxes reach these same files through
 # win-sync (wsl/dotfiles.nix) — Windows can't traverse Linux symlinks
 # at all, and a second writer would fight the sync engine.

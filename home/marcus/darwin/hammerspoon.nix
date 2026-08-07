@@ -17,7 +17,7 @@
   # Out of the store, so edits apply on save without a rebuild — the
   # config's own path watcher reloads Hammerspoon. Same live-editing loop
   # as xremap's --watch=config, and the drift is committed by the hook in
-  # mac/dotfiles.nix, whose pathspec already covers this directory.
+  # darwin/dotfiles.nix, whose pathspec already covers this directory.
   # (Hammerspoon reads ~/.hammerspoon/init.lua; it is not XDG-aware.)
   home.file.".hammerspoon/init.lua".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/hammerspoon.init.lua";

@@ -1,4 +1,4 @@
-// Zed keymap — macOS port of the WSL copy (home/marcus/wsl/zed/keymap.json,
+// Zed keymap — macOS port of the WSL copy (home/marcus/common/dotfiles/zed.keymap.json,
 // the tuned source of truth; itself descended from this machine's pre-nix
 // keymap). Keep them in sync by diffing against it.
 //

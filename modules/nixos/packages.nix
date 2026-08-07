@@ -16,7 +16,7 @@
     # Ghostty needs that entry here or the line editor redraws wrong and
     # typing comes out duplicated. terminfo-only output — a few KB, not
     # the emulator. (The other half of this is
-    # shell-integration-features = ssh-terminfo in home/marcus/mac/ghostty.nix.)
+    # shell-integration-features = ssh-terminfo in home/marcus/darwin/ghostty.nix.)
     ghostty.terminfo
   ];
 }

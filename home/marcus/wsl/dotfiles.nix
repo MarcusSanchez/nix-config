@@ -3,7 +3,7 @@
 # contract). Zed reads %APPDATA%\Zed, IdeaVim reads %USERPROFILE% — same
 # engine, one instance each because the state dir, chore scope and
 # Windows directory differ per app. The mac reaches these same repo files
-# through symlinks instead (mac/dotfiles.nix). windows.username — the
+# through symlinks instead (darwin/dotfiles.nix). windows.username — the
 # Windows account owning /mnt/c/Users/<name> — is declared here because
 # this is its only consumer; the value is set per host in wsl.nix.
 {
