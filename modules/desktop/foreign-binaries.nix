@@ -31,7 +31,6 @@
 # looking at. Promote envfs to modules/nixos if the WSL side ever wants it.
 { pkgs, ... }:
 
-
 {
   services.envfs.enable = true;
 

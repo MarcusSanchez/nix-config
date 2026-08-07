@@ -157,7 +157,8 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            networkmanager) — one list, order feeds merges
   boot.nix                 Plymouth + retain-splash handoff to the greeter —
                            several cooperating tricks, see its header and
-                           Constraints before touching ANY of it
+                           Constraints before touching ANY of it (also
+                           carries zramSwap, independent of that web)
   foreign-binaries.nix     the two shims for non-nix binaries, both for
                            the JetBrains/Toolbox story: the nix-ld
                            X11/GTK/NSS/JCEF list (empirically derived, do
@@ -170,7 +171,7 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
-  packages.nix zram.nix locale.nix fonts.nix tailscale.nix
+  packages.nix locale.nix fonts.nix tailscale.nix
                            (swaylock's PAM entry lives in niri.nix with
                            the session it unlocks)
 modules/darwin/

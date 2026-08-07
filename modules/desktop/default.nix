@@ -22,7 +22,6 @@
   imports = [
     inputs.dank-material-shell.nixosModules.greeter
     ./boot.nix
-    ./zram.nix
     ./locale.nix
     ./security-keys.nix
     ./tailscale.nix

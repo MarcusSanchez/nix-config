@@ -50,4 +50,11 @@
   # dank-greeter doesn't manage plymouth — it would hang the boot.)
   systemd.services.plymouth-quit.serviceConfig.ExecStart =
     lib.mkForce "-${pkgs.plymouth}/bin/plymouth quit --retain-splash";
+
+  # Independent of the splash machinery above. Compressed swap in RAM:
+  # no disk swap exists on these machines, and RAM at this size makes
+  # zram effectively free headroom that keeps the OOM killer away from
+  # a browser+IDE workload. Default memoryPercent (50) is fine. No disk
+  # swap also means hibernation stays impossible — accepted.
+  zramSwap.enable = true;
 }
