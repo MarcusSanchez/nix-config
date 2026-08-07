@@ -31,11 +31,9 @@
     # zen isn't in nixpkgs; the flake input repackages official binaries
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-    # Wooting keyboard configurator (device access comes from
-    # modules/desktop/wooting.nix's udev rules). If this packaged
-    # version ever lags a new keyboard, the web Wootility needs a
-    # chromium-based browser — zen is firefox-based and has no WebHID.
-    pkgs.wootility
+    # (No Wootility app: the web Wootility in Chrome covers it — WebHID
+    # plus the udev rules from modules/desktop/wooting.nix. zen can't;
+    # firefox-based, no WebHID.)
 
     # media center (torrent-streaming frontend). stremio-linux-shell is
     # the current packaging — plain `stremio` was removed from nixpkgs
