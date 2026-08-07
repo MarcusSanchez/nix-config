@@ -170,6 +170,16 @@ vmap g/ <Action>(FindInPath)
 nmap gS <Action>(GotoSymbol)
 nmap gO <Action>(FileStructurePopup)
 
+" Multicursor occurrences — the IDE's builtin pair lives on Alt+J,
+" which xremap owns as Up everywhere (that's why it 'stopped
+" working'). Alt+Shift+H/L pass through to JetBrains untouched
+" (xremap's vim-app carve-out): L adds a caret at the next
+" occurrence, H releases the last one when you overshoot.
+nmap <A-S-l> <Action>(SelectNextOccurrence)
+vmap <A-S-l> <Action>(SelectNextOccurrence)
+nmap <A-S-h> <Action>(UnselectPreviousOccurrence)
+vmap <A-S-h> <Action>(UnselectPreviousOccurrence)
+
 " Jump between errors (ge shows the description once you're there)
 nmap ]e <Action>(GotoNextError)
 nmap [e <Action>(GotoPreviousError)
