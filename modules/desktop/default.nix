@@ -34,7 +34,6 @@
     ./users.nix
     ./packages.nix
     ./fonts.nix
-    ./nix-ld.nix
-    ./envfs.nix
+    ./foreign-binaries.nix
   ];
 }

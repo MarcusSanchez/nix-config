@@ -108,9 +108,9 @@ modules/nixos/             the shared Linux CORE — every NixOS host
   packages.nix             Linux-only build tools + ghostty.terminfo, which
                            fixes TERM for sessions ssh-ing *into* this box
   nix-ld.nix               enable only — the desktop's GUI library list
-                           lives in modules/desktop/nix-ld.nix (libraries
-                           CONCATENATE across modules; proven by eval:
-                           WSL = base 14, laptop = 47)
+                           lives in modules/desktop/foreign-binaries.nix
+                           (libraries CONCATENATE across modules; proven
+                           by eval: WSL = base 14, laptop = 47)
   nix.nix users.nix        (no ssh.nix — it existed only to make the host key
                            that sops used before the single-key move)
 modules/wsl/               the WSL flavor — both WSL host kinds
@@ -158,16 +158,18 @@ modules/desktop/           the bare-metal flavor — the laptop and the
   boot.nix                 Plymouth + retain-splash handoff to the greeter —
                            several cooperating tricks, see its header and
                            Constraints before touching ANY of it
-  nix-ld.nix               the JetBrains X11/GTK/NSS/JCEF list — empirically
-                           derived, do not trim (header has the ldd recipe)
+  foreign-binaries.nix     the two shims for non-nix binaries, both for
+                           the JetBrains/Toolbox story: the nix-ld
+                           X11/GTK/NSS/JCEF list (empirically derived, do
+                           not trim — header has the ldd recipe) and
+                           envfs (/bin + /usr/bin as a FUSE mount
+                           resolving shebangs against PATH, so Toolbox's
+                           generated #!/bin/bash launchers run; desktop
+                           only — not handed to the unattended WSL boxes)
   security-keys.nix        (was tpm.nix) tpm-fido + libfido2 udev rules;
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
-  envfs.nix                /bin + /usr/bin as a FUSE mount resolving
-                           shebangs against PATH, so Toolbox's generated
-                           #!/bin/bash launchers run. Desktop only — not
-                           handed to the unattended WSL boxes
   packages.nix zram.nix locale.nix fonts.nix tailscale.nix
                            (swaylock's PAM entry lives in niri.nix with
                            the session it unlocks)
