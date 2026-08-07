@@ -9,7 +9,9 @@ let mapleader = " "
 " General settings
 " ----------------------------------------------------------------
 set visualbell              " Disable bell sound
-set clipboard=unnamed       " Use system clipboard
+set clipboard=unnamed,ideaput  " System clipboard; paste via IDEA (ideaput
+                               " is a clipboard FLAG, not its own option —
+                               " a bare `set ideaput` is E518 on IdeaVim 2.x)
 set whichwrap+=<,>,[,],h,l  " Move to the next line with these keys
 set scrolloff=5             " Show a few lines of context around the cursor
 set incsearch               " Incremental search
@@ -24,7 +26,6 @@ set ideajoin                " Use IDEA to intelligently join lines
 set ideastatusicon=enabled  " Always show the IdeaVim icon
 set ideavimsupport=dialog   " Use IdeaVim in dialogs
 set idearefactormode=keep   " Keep mode when starting a refactor
-set ideaput                 " Use IDEA to paste
 set ideamarks               " Use IDEA to set marks
 
 " ----------------------------------------------------------------
