@@ -12,10 +12,10 @@
 # one-node-per-Windows-PC constraint that forces host-level imports on
 # WSL does not exist here.
 #
-# The niri.nix..packages.nix run keeps the concern order of the
-# desktop.nix monolith it was split from: merged-list options
-# (systemPackages, udev.packages) order their entries by module
-# position, so reordering imports is not cosmetic.
+# The niri.nix..packages.nix run descends from the old desktop.nix
+# monolith: merged-list options (systemPackages, udev.packages) order
+# their entries by module position, so reordering imports is not
+# cosmetic.
 { inputs, ... }:
 
 {
@@ -28,16 +28,11 @@
     ./tailscale.nix
     ./niri.nix
     ./greeter.nix
-    ./fwupd.nix
-    ./power.nix
+    ./peripherals.nix
     ./audio.nix
-    ./printing.nix
-    ./swaylock.nix
     ./networking.nix
-    ./bluetooth.nix
     ./users.nix
     ./packages.nix
-    ./wooting.nix
     ./fonts.nix
     ./nix-ld.nix
     ./envfs.nix

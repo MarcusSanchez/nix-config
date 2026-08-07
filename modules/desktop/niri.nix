@@ -40,4 +40,9 @@ in
   # backs HM's dconf.settings and gsettings for GTK apps (arrived with
   # GNOME before, left with it)
   programs.dconf.enable = true;
+
+  # swaylock is the session's fallback locker (DMS's is primary); it
+  # authenticates via PAM, and without this entry unlocking fails.
+  # Pairs with programs.swaylock in home/marcus/desktop/niri.nix.
+  security.pam.services.swaylock = { };
 }

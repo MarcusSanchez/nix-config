@@ -45,8 +45,9 @@ bin/                     repo scripts: secrets:edit, secrets:status,
 flake.nix                inputs + all host wirings
 ```
 
-One concern per file, and a file does nothing until it's in its directory's
-`default.nix`. Every file opens with a comment explaining itself. Naming
+One purpose per file (a purpose may span several related options — see
+modules/desktop/peripherals.nix — but never becomes a grab-bag), and a
+file does nothing until it's in its directory's `default.nix`. Every file opens with a comment explaining itself. Naming
 across layers: `common` = all platforms; OS names for OS cores (`nixos`,
 `darwin`); flavor names for flavors (`wsl`, `desktop`); machines by exact
 hostname.
