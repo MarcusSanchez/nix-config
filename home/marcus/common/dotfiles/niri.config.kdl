@@ -535,6 +535,9 @@ binds {
     Mod+U              { focus-workspace-up; }
     Mod+D              { focus-workspace-down; }
     Mod+I              { focus-workspace-down; }
+    // the same pair on Alt, for the hand that's already there
+    Alt+U              { focus-workspace-up; }
+    Alt+I              { focus-workspace-down; }
     Mod+Shift+Page_Down { move-column-to-workspace-down; }
     Mod+Shift+Page_Up   { move-column-to-workspace-up; }
     Mod+Shift+U         { move-column-to-workspace-up; }
