@@ -160,11 +160,11 @@ nmap gr <Action>(ShowUsages)
 nmap gy <Action>(GotoTypeDeclaration)
 nmap gs <Action>(GotoSuperMethod)
 
-" Zed-style g-mappings. g<Space> is the star: grep across every file
-" in the project (FindInPath); in visual mode the selection arrives
-" prefilled as the query.
-nmap g<Space> <Action>(FindInPath)
-vmap g<Space> <Action>(FindInPath)
+" Zed-style g-mappings. g/ is the star: grep across every file in the
+" project (FindInPath); in visual mode the selection arrives prefilled
+" as the query.
+nmap g/ <Action>(FindInPath)
+vmap g/ <Action>(FindInPath)
 " project-wide symbol search / current-file outline, Zed's other two
 nmap gS <Action>(GotoSymbol)
 nmap gO <Action>(FileStructurePopup)
