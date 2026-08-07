@@ -37,4 +37,27 @@
     # chromium-based browser — zen is firefox-based and has no WebHID.
     pkgs.wootility
   ];
+
+  # Launcher hygiene: terminal apps and system plumbing ship .desktop
+  # entries that clutter the DMS spotlight. A user-level entry with the
+  # SAME id and NoDisplay shadows the package's copy (XDG precedence) —
+  # the binaries stay on PATH, only the launcher rows disappear. Delete
+  # a line to bring one back; DMS reindexes on shell restart.
+  xdg.desktopEntries =
+    let
+      hide = name: {
+        inherit name;
+        noDisplay = true;
+      };
+    in
+    {
+      btop = hide "btop";
+      htop = hide "htop";
+      yazi = hide "Yazi";
+      nvim = hide "Neovim wrapper";
+      satty = hide "Satty";
+      cups = hide "Manage Printing";
+      nixos-manual = hide "NixOS Manual";
+      "org.quickshell" = hide "Quickshell";
+    };
 }
