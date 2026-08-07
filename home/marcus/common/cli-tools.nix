@@ -14,8 +14,14 @@
 
 {
   programs = {
-    # fuzzy-anything: Ctrl+T files, Alt+C directories, **<Tab> completion
-    fzf.enable = true;
+    # fuzzy-anything: Ctrl+T files, Alt+C directories, **<Tab> completion.
+    # No history widget: atuin owns Ctrl-R (shell.nix), and leaving
+    # fzf's competing binding declared made every eval warn about the
+    # collision — this is the warning's own prescribed fix.
+    fzf = {
+      enable = true;
+      historyWidget.command = "";
+    };
 
     # cat with syntax highlighting + git gutters; degrades to plain
     # output when piped, which is what makes the alias safe
