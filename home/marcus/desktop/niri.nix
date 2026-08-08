@@ -65,6 +65,10 @@
     # with the path read from DMS's session state)
     pkgs.swaybg
 
+    # video wallpapers (the live spaceman on the 4K): mpv on the
+    # background layer, spawned per-output
+    pkgs.mpvpaper
+
     # the snipping tool (Mod+Shift+S in niri.config.kdl): slurp picks a
     # region, grim captures it, satty annotates (arrows/text/blur) and
     # copies via wl-clipboard. niri's built-in Print overlay stays for
