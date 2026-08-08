@@ -63,4 +63,7 @@
       nixos-manual = hide "NixOS Manual";
       "org.quickshell" = hide "Quickshell";
     };
+
+  # the zed-editor package names its CLI `zeditor`; muscle memory says zed
+  home.shellAliases.zed = "zeditor";
 }

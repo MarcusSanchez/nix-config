@@ -610,10 +610,9 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
+        "notificationButton",
         "cpuUsage",
         "memUsage",
-        "notificationButton",
-        "battery",
         "controlCenterButton"
       ],
       "screenPreferences": [
