@@ -610,8 +610,7 @@
       "innerPadding": 4,
       "leftWidgets": [
         "launcherButton",
-        "workspaceSwitcher",
-        "focusedWindow"
+        "workspaceSwitcher"
       ],
       "name": "Main Bar",
       "noBackground": false,
