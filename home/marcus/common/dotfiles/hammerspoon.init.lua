@@ -82,11 +82,12 @@ local RULES = {
   { mods = { "alt" },          key = "h", send = "left",  always = false },
   { mods = { "alt" },          key = "l", send = "right", always = false },
   -- h/l stay the horizontal pair when shifted: h to the start of the
-  -- line, l to the end. Unconditional, unlike the unshifted h/l above —
-  -- vim-speaking apps get these too. containExactly is what keeps the
-  -- two apart, so alt+shift+l is End and never Right.
-  { mods = { "alt", "shift" }, key = "h", send = "home",  always = true },
-  { mods = { "alt", "shift" }, key = "l", send = "end",   always = true },
+  -- line, l to the end. Suppressed in vim-speaking apps like the
+  -- unshifted h/l above — those bind alt+shift+h/l themselves.
+  -- containExactly is what keeps the two apart, so alt+shift+l is End
+  -- and never Right.
+  { mods = { "alt", "shift" }, key = "h", send = "home",  always = false },
+  { mods = { "alt", "shift" }, key = "l", send = "end",   always = false },
 }
 
 -- Exposed as a global for `hs -c "hs.inspect(remapRules)"`, so what is
