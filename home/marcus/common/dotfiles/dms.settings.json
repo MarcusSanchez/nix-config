@@ -121,6 +121,11 @@
       "width": 50
     },
     {
+      "id": "inputVolumeSlider",
+      "enabled": true,
+      "width": 50
+    },
+    {
       "id": "wifi",
       "enabled": true,
       "width": 50
