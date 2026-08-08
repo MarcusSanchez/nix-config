@@ -30,3 +30,8 @@ window-rule {
     match app-id="^zen"
     default-column-width { proportion 1.0; }
 }
+
+// the live spaceman on the 4K: mpv on the background layer, ABOVE
+// DMS's wallpaper — the static astronaut stays underneath as the
+// crash/fallback frame. NVDEC decodes; ~6% of one core, 8% GPU.
+spawn-at-startup "mpvpaper" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"

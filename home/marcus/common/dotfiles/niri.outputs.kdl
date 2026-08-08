@@ -34,15 +34,16 @@ output "eDP-1" {
 // the 4K in the middle is the scrollable workspace. Verify the connector
 // names with `niri msg outputs` after any cable change — the layout
 // follows the PORT, not the panel.
-// NO transform here, deliberately: DP-2's rotation comes from the
-// bedroom host's `video=DP-2:panel_orientation=left_side_up` kernel
-// param (hosts/bedroom-nixos/default.nix), the DRM property plymouth
-// also honors — one source of truth for splash, greeter and session.
-// niri COMPOSES a config transform on top of the panel orientation
-// (verified live: property + transform "90" = 180°, sideways-flipped),
-// so adding one back double-rotates.
+// transform "90" is back to being the rotation source: the
+// panel_orientation kernel param it once deferred to was retired when
+// the side connectors became boot-disabled (video=DP-2:d in
+// hosts/bedroom-nixos/default.nix) — plymouth never draws there now,
+// so the param's only job disappeared. Do NOT reintroduce the param
+// while this transform exists: niri COMPOSES the two (verified live:
+// property + transform "90" = 180°, sideways-flipped).
 output "DP-2" {
     mode "1920x1080@179.998"
+    transform "90"
     scale 1
     position x=0 y=0
 }

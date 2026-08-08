@@ -43,14 +43,17 @@
   # through an unsigned EDK2 UEFI shell, which enforcing Secure Boot
   # rejects — and lanzaboote replaces the systemd-boot module anyway.
 
-  # Tell the kernel the DP-2 monitor is physically mounted rotated
-  # (left edge up), as a DRM panel-orientation property. Plymouth
-  # honors it (upright boot/shutdown splash) and so does niri — which
-  # COMPOSES it with any config transform rather than preferring one,
-  # so niri.outputs.kdl's DP-2 block carries NO transform: this
-  # property is the single source of rotation for splash, greeter and
-  # session alike. Host-level because it names this desk's connector.
-  boot.kernelParams = [ "video=DP-2:panel_orientation=left_side_up" ];
+  # Boot with only the main monitor lit: plymouth paints every active
+  # connector and has no per-monitor config, so the side connectors
+  # are kernel-disabled until a compositor turns them on (the greeter's
+  # niri does, per niri.outputs.kdl — where DP-2's rotation now lives
+  # as transform "90" again; the old panel_orientation param's only
+  # consumer was plymouth-on-DP-2, which no longer exists).
+  # Host-level because it names this desk's connectors.
+  boot.kernelParams = [
+    "video=DP-1:d"
+    "video=DP-2:d"
+  ];
 
   # The release this machine was installed under — never changes.
   system.stateVersion = "26.05";
