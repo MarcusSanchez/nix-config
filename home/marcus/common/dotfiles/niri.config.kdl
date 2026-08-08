@@ -785,6 +785,20 @@ window-rule {
     }
 }
 
+// Same frosted treatment for zen, armed but dormant: the compositor
+// only blurs through alpha the APP provides, and zen ships opaque
+// until browser.tabs.allow_transparent_browser is flipped in
+// about:config (chrome/sidebar areas only — web pages paint their own
+// opaque backgrounds regardless).
+window-rule {
+    match app-id="^zen"
+    draw-border-with-background false
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
 // compositor cursor + XCURSOR_* env for spawned apps; the theme package
 // and GTK-side settings live in home/marcus/desktop/niri.nix
 cursor {
