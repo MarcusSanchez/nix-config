@@ -10,28 +10,34 @@ let
   # The stock greeter puts a full sign-in UI on EVERY monitor
   # (GreeterSurface.qml hardcodes `model: Quickshell.screens`; unlike
   # the lock screen there is no screenPreferences filter). This derived
-  # copy of the same dms-shell makes the surface list honor
-  # DMS_GREETER_SCREENS (comma-separated connector names, set on the
-  # greetd unit below): listed screens get the UI, the rest get NO
-  # surface — and a surface-less output shows the greeter compositor's
-  # black background, monitors on. That is the same clean blank the
-  # lock screen produces, instead of the old cut-the-signal approach
-  # (output off), which dropped the side monitors into no-signal
-  # standby. Safety: empty/unset var, single-screen machines, and a
-  # filter that matches nothing all fall back to every screen — no
+  # copy of the same dms-shell filters that list to greeterScreens:
+  # listed connectors get the UI, the rest get NO surface — and a
+  # surface-less output shows the greeter compositor's black
+  # background, monitors on. Same clean blank as the lock screen,
+  # instead of the old cut-the-signal approach (output off), which
+  # dropped the side monitors into no-signal standby. The list is
+  # BAKED into the QML at build time — an env var was tried first
+  # (2026-08-08) and did not survive the greetd -> script -> niri ->
+  # quickshell inheritance chain. Safety: single-screen machines and a
+  # filter that matches nothing both fall back to every screen — no
   # config state can produce a greeter with nowhere to type. The
   # substitution uses --replace-fail on purpose: a DMS update that
   # moves the line breaks the BUILD, never the login screen.
+  greeterScreens = [
+    "DP-3"
+    "eDP-1"
+  ];
   greeterShell =
     pkgs.runCommand "dms-shell-greeter-screens"
       {
         base = pkgs.dms-shell;
+        wantList = builtins.toJSON greeterScreens;
       }
       ''
         cp -r --no-preserve=mode "$base" $out
         substituteInPlace $out/share/quickshell/dms/Modules/Greetd/GreeterSurface.qml \
           --replace-fail 'model: Quickshell.screens' \
-          'model: (function () { var raw = Quickshell.env("DMS_GREETER_SCREENS") || ""; var want = raw.split(",").filter(function (x) { return x.length > 0; }); if (want.length === 0 || Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()'
+          "model: (function () { var want = $wantList; if (Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()"
       '';
 in
 {
@@ -74,19 +80,29 @@ in
   # the 4K (bedroom-nixos's first greeter did exactly that). The DMS
   # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
   # generated config when that file exists; hand it the session's
-  # connector-keyed output layout unmodified — which screens carry the
-  # sign-in UI is greeterShell's DMS_GREETER_SCREENS filter above, and
-  # the unlisted ones render the compositor's black background with
-  # the monitors still powered. Store copy — updates on rebuild, not
-  # on save like the session's symlink.
+  # connector-keyed output layout unmodified (which screens carry the
+  # sign-in UI is greeterShell's baked list above), plus one
+  # greeter-only extra: idle management. None exists at the greeter
+  # otherwise (the session's belongs to DMS, which only runs after
+  # login), so a remote wake-on-lan used to leave every monitor burning
+  # at the sign-in screen all night — swayidle powers the panels off
+  # after five idle minutes and any input wakes them (niri behavior).
+  # Store copy — updates on rebuild, not on save like the session's
+  # symlink.
   environment.etc."greetd/niri_overrides.kdl".source =
-    ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+    pkgs.runCommand "greeter-niri-overrides.kdl"
+      {
+        base = ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+        extra = pkgs.writeText "greeter-idle.kdl" ''
 
-  # Which connectors the greeter UI appears on (see greeterShell):
-  # bedroom's 4K and the laptop panel. Absent names are ignored and an
-  # unmatchable list falls back to all screens, so this is inert
-  # everywhere it doesn't apply.
-  systemd.services.greetd.environment.DMS_GREETER_SCREENS = "DP-3,eDP-1";
+          // greeter-only: dark screens after 5 idle minutes (any input
+          // wakes them) — the sign-in screen otherwise never sleeps
+          spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
+        '';
+      }
+      ''
+        cat "$base" "$extra" > $out
+      '';
 
   # The greeter's avatar probe checks, in order: its own cache,
   # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
