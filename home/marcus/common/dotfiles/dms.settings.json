@@ -610,13 +610,10 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
-        "clipboard",
         "cpuUsage",
         "memUsage",
-        "diskUsage",
         "notificationButton",
         "battery",
-        "idleInhibitor",
         "controlCenterButton"
       ],
       "screenPreferences": [
