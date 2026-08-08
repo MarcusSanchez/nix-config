@@ -13,6 +13,7 @@
     ../../modules/desktop
     ./nvidia.nix
     ./hardware-configuration.nix
+    ./wake-on-lan.nix
     # Secure Boot, live since install day. On a REINSTALL, comment this
     # out until `sudo sbctl create-keys` has run — enabled without keys
     # on disk, the bootloader install (and therefore nixos-install)
