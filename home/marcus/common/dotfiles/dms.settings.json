@@ -612,7 +612,6 @@
         "systemTray",
         "cpuUsage",
         "memUsage",
-        "separator",
         "notificationButton",
         "controlCenterButton"
       ],
