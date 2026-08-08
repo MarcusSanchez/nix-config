@@ -1,0 +1,20 @@
+{
+  "name": "Catppuccin Mocha Mauve",
+  "primary": "#cba6f7",
+  "primaryText": "#11111b",
+  "primaryContainer": "#574a80",
+  "secondary": "#b4befe",
+  "surface": "#1e1e2e",
+  "surfaceText": "#cdd6f4",
+  "surfaceVariant": "#313244",
+  "surfaceVariantText": "#bac2de",
+  "surfaceTint": "#cba6f7",
+  "background": "#1e1e2e",
+  "backgroundText": "#cdd6f4",
+  "outline": "#7f849c",
+  "surfaceContainerLowest": "#11111b",
+  "surfaceContainerLow": "#181825",
+  "surfaceContainer": "#1e1e2e",
+  "surfaceContainerHigh": "#313244",
+  "surfaceContainerHighest": "#45475a"
+}

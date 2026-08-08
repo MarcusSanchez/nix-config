@@ -1,7 +1,7 @@
 {
-  "currentThemeName": "dynamic",
+  "currentThemeName": "custom",
   "currentThemeCategory": "generic",
-  "customThemeFile": "",
+  "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.mauve.json",
   "registryThemeVariants": {},
   "matugenScheme": "scheme-tonal-spot",
   "matugenContrast": 0,
