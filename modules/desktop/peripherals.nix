@@ -13,6 +13,10 @@
     # CUPS
     printing.enable = true;
 
+    # virtual filesystems for the file manager: trash, USB drives,
+    # MTP phones, network shares (nautilus in home/marcus/desktop/apps.nix)
+    gvfs.enable = true;
+
     # firmware updates (LVFS), and specifically the UEFI dbx revocation
     # database: MSI's true-Setup-Mode reset (the only path to custom
     # Secure Boot keys on that board) wipes dbx, and fwupd is what

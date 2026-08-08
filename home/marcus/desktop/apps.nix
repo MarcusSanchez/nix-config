@@ -35,6 +35,11 @@
     # plus the udev rules from modules/desktop/wooting.nix. zen can't;
     # firefox-based, no WebHID.)
 
+    # GNOME Files — the GUI file explorer (yazi remains the terminal
+    # one); gvfs in modules/desktop/peripherals.nix backs its trash,
+    # USB and phone mounting
+    nautilus
+
     # media center (torrent-streaming frontend). stremio-linux-shell is
     # the current packaging — plain `stremio` was removed from nixpkgs
     # over its outdated qt5 webengine.
