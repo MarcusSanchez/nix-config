@@ -88,9 +88,11 @@
           )
           {
             bedroom-wsl = ./hosts/wsl;
+
             framework-wsl = ./hosts/wsl-lite;
             office-lite-wsl-1 = ./hosts/wsl-lite;
             office-lite-wsl-2 = ./hosts/wsl-lite;
+
             tuf-nixos = ./hosts/tuf-nixos;
             bedroom-nixos = ./hosts/bedroom-nixos;
           };
