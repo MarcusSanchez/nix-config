@@ -56,30 +56,6 @@
     nixd
     nixfmt
 
-    # The editor toolchain Mason used to install imperatively inside
-    # nvim (removed 2026-08-08) — every LSP/formatter/linter the
-    # LazyVim setup shells out to now arrives declaratively, on every
-    # machine nvim runs on.
-    lua-language-server
-    stylua
-    vtsls # TypeScript/TSX
-    prettier
-    shfmt
-    hadolint
-    markdownlint-cli2
-    golangci-lint
-    gofumpt
-    gotools # goimports lives here
-    taplo # TOML LSP
-    marksman # markdown LSP
-    # json-lsp AND eslint-lsp in one package (also css/html servers)
-    vscode-langservers-extracted
-    dockerfile-language-server-nodejs
-    tailwindcss-language-server
-    # plain rust_analyzer replaces rustaceanvim's tooling; the analyzer
-    # binary is toolchain-independent, so nixpkgs' is fine beside rustup
-    rust-analyzer
-
     # nix linters, also enforced by CI: statix (antipatterns, config in
     # statix.toml) and deadnix (unused bindings)
     statix
