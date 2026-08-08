@@ -121,11 +121,6 @@
       "width": 50
     },
     {
-      "id": "brightnessSlider",
-      "enabled": true,
-      "width": 50
-    },
-    {
       "id": "wifi",
       "enabled": true,
       "width": 50
@@ -142,16 +137,6 @@
     },
     {
       "id": "audioInput",
-      "enabled": true,
-      "width": 50
-    },
-    {
-      "id": "nightMode",
-      "enabled": true,
-      "width": 50
-    },
-    {
-      "id": "darkMode",
       "enabled": true,
       "width": 50
     }
@@ -666,7 +651,9 @@
       "popupGapsAuto": true,
       "popupGapsManual": 4,
       "position": 0,
-      "rightWidgets": [],
+      "rightWidgets": [
+        "controlCenterButton"
+      ],
       "screenPreferences": [
         "DP-1",
         "DP-2"
