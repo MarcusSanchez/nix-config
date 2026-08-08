@@ -44,16 +44,37 @@
   # rejects — and lanzaboote replaces the systemd-boot module anyway.
 
   # Boot with only the main monitor lit: plymouth paints every active
-  # connector and has no per-monitor config, so the side connectors
-  # are kernel-disabled until a compositor turns them on (the greeter's
-  # niri does, per niri.outputs.kdl — where DP-2's rotation now lives
-  # as transform "90" again; the old panel_orientation param's only
-  # consumer was plymouth-on-DP-2, which no longer exists).
-  # Host-level because it names this desk's connectors.
+  # connector and has no per-monitor config, so the side connectors are
+  # kernel-disabled through the splash. The `d` force is HARDER than
+  # first assumed — compositors do NOT resurrect a forced-off connector
+  # (learned live: the session came up single-monitor) — so the
+  # wake-side-monitors oneshot below un-forces them via sysfs right
+  # before greetd, and the greeter lights them (blank-filtered, per
+  # modules/desktop/greeter.nix). DP-2's rotation lives in
+  # niri.outputs.kdl as transform "90" again; the retired
+  # panel_orientation param's only consumer was plymouth-on-DP-2,
+  # which no longer draws. Known cosmetic cost: the brief SHUTDOWN
+  # splash still paints all three (the session re-enabled them), and
+  # sideways on DP-2. Host-level: this desk's connectors by name.
   boot.kernelParams = [
     "video=DP-1:d"
     "video=DP-2:d"
   ];
+
+  systemd.services.wake-side-monitors = {
+    description = "Un-force the boot-disabled side monitor connectors before the greeter";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "greetd.service" ];
+    after = [ "plymouth-quit.service" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      for conn in DP-1 DP-2; do
+        for f in /sys/class/drm/card*-"$conn"/status; do
+          [ -e "$f" ] && echo detect > "$f" || true
+        done
+      done
+    '';
+  };
 
   # The release this machine was installed under — never changes.
   system.stateVersion = "26.05";
