@@ -121,7 +121,7 @@
       "width": 50
     },
     {
-      "id": "inputVolumeSlider",
+      "id": "brightnessSlider",
       "enabled": true,
       "width": 50
     },
@@ -613,8 +613,10 @@
         "clipboard",
         "cpuUsage",
         "memUsage",
+        "diskUsage",
         "notificationButton",
         "battery",
+        "idleInhibitor",
         "controlCenterButton"
       ],
       "screenPreferences": [
