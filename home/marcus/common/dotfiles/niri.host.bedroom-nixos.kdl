@@ -31,7 +31,11 @@ window-rule {
     default-column-width { proportion 1.0; }
 }
 
-// the live spaceman on the 4K: mpv on the background layer, ABOVE
-// DMS's wallpaper — the static astronaut stays underneath as the
-// crash/fallback frame. NVDEC decodes; ~6% of one core, 8% GPU.
-spawn-at-startup "mpvpaper" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
+// the live spaceman on the 4K. Layer "bottom", not "background":
+// DMS's wallpaper surface maps seconds after session start and lands
+// on top of anything in the background layer (the boot race that made
+// the video invisible) — bottom sits above every background surface
+// and below all windows, deterministically. The static astronaut
+// stays underneath as the crash/fallback frame. NVDEC decodes; ~6% of
+// one core, 8% GPU.
+spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
