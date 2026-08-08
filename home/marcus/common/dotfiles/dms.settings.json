@@ -628,9 +628,50 @@
         "controlCenterButton"
       ],
       "screenPreferences": [
-        "all"
+        "DP-3",
+        "eDP-1"
       ],
       "showOnLastDisplay": true,
+      "spacing": 4,
+      "squareCorners": false,
+      "transparency": 1,
+      "visible": true,
+      "widgetTransparency": 1
+    },
+    {
+      "autoHide": false,
+      "autoHideDelay": 250,
+      "borderColor": "surfaceText",
+      "borderEnabled": false,
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "bottomGap": 0,
+      "centerWidgets": [
+        "clock"
+      ],
+      "enabled": true,
+      "fontScale": 1,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "gothCornersEnabled": false,
+      "id": "side",
+      "innerPadding": 4,
+      "leftWidgets": [
+        "launcherButton",
+        "workspaceSwitcher"
+      ],
+      "name": "Side Bar",
+      "noBackground": false,
+      "openOnOverview": false,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "position": 0,
+      "rightWidgets": [],
+      "screenPreferences": [
+        "DP-1",
+        "DP-2"
+      ],
+      "showOnLastDisplay": false,
       "spacing": 4,
       "squareCorners": false,
       "transparency": 1,
