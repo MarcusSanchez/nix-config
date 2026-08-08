@@ -572,7 +572,12 @@
   "updaterAllowAUR": true,
   "updaterIgnoredPackages": [],
   "displayNameMode": "system",
-  "screenPreferences": {},
+  "screenPreferences": {
+    "lockScreen": [
+      "DP-3",
+      "eDP-1"
+    ]
+  },
   "showOnLastDisplay": {},
   "niriOutputSettings": {},
   "hyprlandOutputSettings": {},
