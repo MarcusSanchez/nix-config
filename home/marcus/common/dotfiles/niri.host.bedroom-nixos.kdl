@@ -39,11 +39,10 @@ window-rule {
 // stays underneath as the crash/fallback frame. NVDEC decodes; ~6% of
 // one core, 8% GPU.
 spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
-// the sides run spaceman-free derivations of the same loop, mosaicked
-// from measured-clean star fields (the animation sweeps wider than the
-// still: warm jellyfish pixels reach x=1024..2720 in the source, so
-// the fields are 0-1010 and 2740-3840, density-matched per panel).
-// Generated locally by ffmpeg (too big for the repo); the static
-// starfield jpgs remain the DMS-layer fallback beneath.
-spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-2" "/home/marcus/Pictures/Wallpapers/live/spaceman-1080x1920.mp4"
-spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-1" "/home/marcus/Pictures/Wallpapers/live/spaceman-2560x1440.mp4"
+// only the middle monitor animates. The sides wear static comet
+// stills captured from the same loop (home/marcus/desktop/assets/
+// space-stars-*.jpg, rendered by DMS's ordinary wallpaper layer) —
+// derived side VIDEOS were run here until 2026-08-08 and retired:
+// mosaic seams wide enough to hide moving comets ate too much frame,
+// and three 4K-class decoders for two accent panels bought little
+// over stills from the identical star field.
