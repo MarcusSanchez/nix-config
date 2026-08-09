@@ -610,7 +610,8 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
-        "cpuUsage",
+        "cpuCombo",
+        "gpuCombo",
         "memUsage",
         "notificationButton",
         "controlCenterButton"
