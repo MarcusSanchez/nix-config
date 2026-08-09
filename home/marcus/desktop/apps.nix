@@ -44,6 +44,17 @@
     # the current packaging — plain `stremio` was removed from nixpkgs
     # over its outdated qt5 webengine.
     pkgs.stremio-linux-shell
+
+    # remote desktop (TeamViewer-style, self-hostable) — used OUTBOUND,
+    # to control other machines; nothing here runs at startup, so this
+    # box is only controllable while the app is deliberately open.
+    # Should receiving ever matter: capture goes through the GNOME
+    # portal + PipeWire (already in place for screen sharing), input
+    # through /dev/uinput (group membership already exists for xremap).
+    # `rustdesk`, not `rustdesk-flutter`: same upstream app, newer
+    # release (the unfree mark is upstream's relicense, and unfree is
+    # allowed here anyway).
+    rustdesk
   ];
 
   # Launcher hygiene: terminal apps and system plumbing ship .desktop
