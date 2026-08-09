@@ -23,8 +23,12 @@
 # Imported by hosts/wsl-lite only — the lite PCs are the ones controlled
 # remotely. Windows-side hand-work, once per PC: RustDesk -> Security ->
 # unlock -> "Enable direct IP access" + set a permanent password.
-# Connect from any tailnet machine with <hostname>:21118 (or bare
-# <hostname>; the port is the client's default).
+# Connect from any tailnet machine with the box's TAILNET IP —
+# <100.x.y.z>:21118 — not its hostname: RustDesk only enters direct
+# mode when the input parses as an IP; a hostname is treated as an ID
+# and sent to the public rendezvous, which reports the device offline
+# (verified in the client log). Tailnet IPs are stable per node, so a
+# saved session keeps working.
 #
 # On a machine not yet enrolled (`tailscale up` never run) the unit
 # fails after its retries — expected until first enrolment; it heals on
