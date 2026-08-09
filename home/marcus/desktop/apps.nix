@@ -54,7 +54,24 @@
     # `rustdesk`, not `rustdesk-flutter`: same upstream app, newer
     # release (the unfree mark is upstream's relicense, and unfree is
     # allowed here anyway).
-    rustdesk
+    #
+    # Forced through xwayland: keyboard forwarding to the remote fails
+    # under native Wayland — legacy mode's rdev grab has no backend
+    # ("Failed to send grab command, no sender" in the client log) and
+    # map mode drops keys too (verified live against the office box).
+    # The Flutter shell is GTK-based, so GDK_BACKEND=x11 is honored.
+    # The .desktop Exec resolves `rustdesk` via PATH — wrapping bin/
+    # covers both launch paths, same as the spotify wrapper above.
+    (symlinkJoin {
+      name = "rustdesk-x11";
+      paths = [ rustdesk ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        rm $out/bin/rustdesk
+        makeWrapper ${rustdesk}/bin/rustdesk $out/bin/rustdesk \
+          --set GDK_BACKEND x11
+      '';
+    })
   ];
 
   # Launcher hygiene: terminal apps and system plumbing ship .desktop
