@@ -3,14 +3,21 @@
 // shell's DgopService (plugins share the QML engine, so qs.Services
 // imports work); addRef keeps the cpu module polled while the pill
 // lives. Color thresholds mirror the stock widgets'.
+//
+// PluginComponent, not raw BasePill: the shell injects popoutService
+// into it and pillClickAction receives the pill's computed trigger
+// geometry — which is what anchors the process-list popout to the
+// pill, floating, exactly like the stock RAM widget's click.
 import QtQuick
 import qs.Common
 import qs.Modules.Plugins
 import qs.Services
 import qs.Widgets
 
-BasePill {
+PluginComponent {
     id: root
+
+    property var popoutService: null
 
     readonly property real usage: DgopService.cpuUsage || 0
     readonly property real temp: DgopService.cpuTemperature || 0
@@ -18,49 +25,44 @@ BasePill {
     Component.onCompleted: DgopService.addRef(["cpu"])
     Component.onDestruction: DgopService.removeRef(["cpu"])
 
-    content: Component {
-        Item {
-            implicitWidth: comboRow.implicitWidth
-            implicitHeight: comboRow.implicitHeight
+    pillClickAction: (x, y, width, section, screen) => popoutService?.toggleProcessList(x, y, width, section, screen)
 
-            Row {
-                id: comboRow
-                anchors.centerIn: parent
-                spacing: Theme.spacingXS
+    horizontalBarPill: Component {
+        Row {
+            spacing: Theme.spacingXS
 
-                DankIcon {
-                    name: "memory"
-                    size: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)
-                    color: {
-                        if (root.usage > 80 || root.temp > 85)
-                            return Theme.tempDanger;
-                        if (root.usage > 60 || root.temp > 69)
-                            return Theme.tempWarning;
-                        return Theme.widgetIconColor;
-                    }
-                    anchors.verticalCenter: parent.verticalCenter
+            DankIcon {
+                name: "memory"
+                size: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)
+                color: {
+                    if (root.usage > 80 || root.temp > 85)
+                        return Theme.tempDanger;
+                    if (root.usage > 60 || root.temp > 69)
+                        return Theme.tempWarning;
+                    return Theme.widgetIconColor;
                 }
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: (root.usage > 0 ? root.usage.toFixed(0) : "--") + "%"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.widgetTextColor
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: (root.usage > 0 ? root.usage.toFixed(0) : "--") + "%"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: "|"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.outline
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: "|"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.outline
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: (root.temp > 0 ? Math.round(root.temp).toString() : "--") + "°"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.widgetTextColor
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: (root.temp > 0 ? Math.round(root.temp).toString() : "--") + "°"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }

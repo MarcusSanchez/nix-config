@@ -4,6 +4,14 @@
 // picked dynamically, so each machine finds its own card). Utilization
 // has no dgop metric, so nvidia-smi is polled on a 3s timer; on a
 // machine where that binary is missing the usage side just reads "--".
+//
+// PluginComponent, not raw BasePill — see cpuCombo: injected
+// popoutService + pillClickAction geometry give the click the same
+// pill-anchored floating process list as the stock widgets. (A
+// GPU-specific per-process popout fed by `nvidia-smi pmon` was
+// prototyped — the shell has no such view — but its plugin-owned
+// popout never mapped on click; parked until the positioning story
+// is figured out.)
 import QtQuick
 import Quickshell.Io
 import qs.Common
@@ -11,8 +19,10 @@ import qs.Modules.Plugins
 import qs.Services
 import qs.Widgets
 
-BasePill {
+PluginComponent {
     id: root
+
+    property var popoutService: null
 
     readonly property var gpu: (DgopService.availableGpus && DgopService.availableGpus.length > 0) ? DgopService.availableGpus[0] : null
     readonly property real temp: gpu ? (gpu.temperature || 0) : 0
@@ -35,6 +45,8 @@ BasePill {
             DgopService.removeGpuPciId(registeredPciId);
     }
 
+    pillClickAction: (x, y, width, section, screen) => popoutService?.toggleProcessList(x, y, width, section, screen)
+
     Process {
         id: usageProbe
         command: ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"]
@@ -54,49 +66,42 @@ BasePill {
         onTriggered: usageProbe.running = true
     }
 
-    content: Component {
-        Item {
-            implicitWidth: comboRow.implicitWidth
-            implicitHeight: comboRow.implicitHeight
+    horizontalBarPill: Component {
+        Row {
+            spacing: Theme.spacingXS
 
-            Row {
-                id: comboRow
-                anchors.centerIn: parent
-                spacing: Theme.spacingXS
-
-                DankIcon {
-                    name: "auto_awesome_mosaic"
-                    size: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)
-                    color: {
-                        if (root.usage > 80 || root.temp > 80)
-                            return Theme.tempDanger;
-                        if (root.usage > 60 || root.temp > 65)
-                            return Theme.tempWarning;
-                        return Theme.widgetIconColor;
-                    }
-                    anchors.verticalCenter: parent.verticalCenter
+            DankIcon {
+                name: "auto_awesome_mosaic"
+                size: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)
+                color: {
+                    if (root.usage > 80 || root.temp > 80)
+                        return Theme.tempDanger;
+                    if (root.usage > 60 || root.temp > 65)
+                        return Theme.tempWarning;
+                    return Theme.widgetIconColor;
                 }
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: (root.usage >= 0 ? root.usage : "--") + "%"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.widgetTextColor
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: (root.usage >= 0 ? root.usage : "--") + "%"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: "|"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.outline
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: "|"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.outline
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                StyledText {
-                    text: (root.temp > 0 ? Math.round(root.temp).toString() : "--") + "°"
-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
-                    color: Theme.widgetTextColor
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            StyledText {
+                text: (root.temp > 0 ? Math.round(root.temp).toString() : "--") + "°"
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }
