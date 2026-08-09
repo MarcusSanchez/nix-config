@@ -39,6 +39,11 @@ window-rule {
 // stays underneath as the crash/fallback frame. NVDEC decodes; ~6% of
 // one core, 8% GPU.
 spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
+// remote-desktop receiver: rustdesk only accepts connections while an
+// instance is running, and Wayland rules out a root service — so the
+// session carries it. Tray icon lands in the DMS bar's system tray.
+spawn-at-startup "rustdesk" "--tray"
+
 // only the middle monitor animates. The sides wear static comet
 // stills captured from the same loop (home/marcus/desktop/assets/
 // space-stars-*.jpg, rendered by DMS's ordinary wallpaper layer) —
