@@ -199,7 +199,7 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        active-color "#cba6f7"
+        active-color "#89b4fa"
 
         // Color of the ring on inactive monitors.
         //
@@ -776,7 +776,8 @@ window-rule {
 window-rule {
     match app-id="com.mitchellh.ghostty"
     // the focus ring defaults to a solid rect BEHIND the window, which
-    // shines mauve through a translucent terminal — draw it as a border
+    // shines the accent through a translucent terminal — draw it as a
+    // border
     // around instead
     draw-border-with-background false
     background-effect {
