@@ -1,0 +1,8 @@
+{
+  "id": "gpuCombo",
+  "name": "GPU Usage + Temp",
+  "version": "1.0.0",
+  "description": "One bar pill for the GPU: utilization (polled from nvidia-smi — dgop has no usage metric) and temperature (dgop hwmon) with a divider.",
+  "components": { "widget": "./GpuCombo.qml" },
+  "permissions": []
+}

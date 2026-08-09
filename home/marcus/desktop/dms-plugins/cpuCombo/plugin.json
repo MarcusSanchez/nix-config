@@ -1,0 +1,8 @@
+{
+  "id": "cpuCombo",
+  "name": "CPU Usage + Temp",
+  "version": "1.0.0",
+  "description": "One bar pill for the CPU: utilization and temperature with a divider, fed by the shell's own dgop service.",
+  "components": { "widget": "./CpuCombo.qml" },
+  "permissions": []
+}

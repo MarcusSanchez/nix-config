@@ -144,6 +144,14 @@
     let
       dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
       link = f: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${f}";
+      # custom DMS bar widgets (one dir per plugin id), linked out-of-store
+      # like the rest of the rice so QML edits hot-reload without a rebuild.
+      # A plugin only LOADS where plugin_settings.json (machine-local DMS
+      # state, not managed here) has it enabled — a bar entry for a plugin
+      # the machine hasn't enabled simply doesn't render, so the shared
+      # dms.settings.json stays safe across hosts.
+      plugins = "${config.home.homeDirectory}/nix-config/home/marcus/desktop/dms-plugins";
+      pluginLink = p: config.lib.file.mkOutOfStoreSymlink "${plugins}/${p}";
     in
     {
       "niri/config.kdl".source = link "niri.config.kdl";
@@ -153,6 +161,8 @@
       # one shared repo (a new host must commit its file first)
       "niri/niri.host.kdl".source = link "niri.host.${osConfig.networking.hostName}.kdl";
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
+      "DankMaterialShell/plugins/cpuCombo".source = pluginLink "cpuCombo";
+      "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
     };
 
   # fallback lock (PAM entry in modules/desktop/desktop.nix) in case the
