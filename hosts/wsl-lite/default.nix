@@ -16,6 +16,10 @@
     # can be a tailnet node — they share a network namespace. Fine here
     # because every lite instance lives on a PC of its own. See the file.
     ../../modules/wsl/tailscale.nix
+    # Lite-kind only: tailnet -> Windows-RustDesk doorway, so these PCs
+    # are remote-controllable without RustDesk's public rendezvous (which
+    # now demands an account). See the file for the Windows-side checkbox.
+    ../../modules/wsl/rustdesk-bridge.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

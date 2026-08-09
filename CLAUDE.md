@@ -121,6 +121,12 @@ modules/wsl/               the WSL flavor — both WSL host kinds
   tailscale.nix            NOT in the aggregator — host-level, and it carries
                            the systemd-resolved config MagicDNS needs on WSL
                            (Constraints)
+  rustdesk-bridge.nix      NOT in the aggregator — imported by hosts/wsl-lite
+                           only: tailscale-serve doorway to the Windows side's
+                           RustDesk direct-access port (21118), because the
+                           tailnet node lives in WSL while RustDesk runs on
+                           Windows. Needs a one-time Windows-side checkbox —
+                           its header has the ceremony
 modules/desktop/           the bare-metal flavor — the laptop and the
                            bedroom-nixos desktop
   default.nix              aggregator; imports the dms-greeter flake module;
