@@ -69,7 +69,8 @@
       postBuild = ''
         rm $out/bin/rustdesk
         makeWrapper ${rustdesk}/bin/rustdesk $out/bin/rustdesk \
-          --set GDK_BACKEND x11
+          --set GDK_BACKEND x11 \
+          --set GDK_SCALE 2
       '';
     })
   ];
