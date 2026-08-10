@@ -12,12 +12,11 @@
   imports = [
     ../common
     ./nix.nix
-    ./tailscale.nix
+    ./networking.nix
     inputs.sops-nix.darwinModules.sops
     ./homebrew.nix
     ./users.nix
-    ./macos.nix
-    ./fonts.nix
+    ./system.nix
     inputs.home-manager.darwinModules.home-manager
     # Last on purpose: appending leaves every position above unmoved, and
     # the ordering note at the top of this file makes that matter. Settings

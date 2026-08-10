@@ -23,7 +23,7 @@
 # can kill its own session when tailscaled restarts. On a laptop rebuilt
 # locally that degrades to "run one command":
 #   sudo launchctl kickstart -k system/com.tailscale.tailscaled
-# Remote Login (macos.nix) stays on as the password-auth fallback path.
+# Remote Login (system.nix) stays on as the password-auth fallback path.
 #
 # Enrolment is interactive, once: sudo tailscale up --ssh
 # After that, the activation hook below re-asserts prefs on every switch.

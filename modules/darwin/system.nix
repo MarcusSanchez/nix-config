@@ -1,8 +1,18 @@
-# macOS system behavior. Mostly a landing zone: as imperative tweaks get
-# rediscovered, declare them here instead of clicking through System Settings.
-{ config, lib, ... }:
+# Machine-level system settings and services for the mac: fonts, Touch
+# ID, Remote Login, and the imperative tweaks rediscovered over time —
+# declare them here instead of clicking through System Settings.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
+  # Fonts, installed to /Library/Fonts/Nix Fonts. Replaces the manually
+  # downloaded copies in ~/Library/Fonts.
+  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+
   # Touch ID for sudo (works in tmux/iTerm too via pam_reattach behavior
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
