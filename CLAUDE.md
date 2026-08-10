@@ -80,6 +80,11 @@ hosts/bedroom-nixos/       the desktop PC, dual-booted beside Windows
                            excluded from statix + deadnix like tuf's,
                            regenerate don't edit. RTX 5080 — the shared
                            modules/desktop/nvidia.nix fits it as-is
+  wake-on-lan.nix          arms WoL on the NIC declaratively
+                           (systemd.network link file keyed by MAC)
+  reboot-windows.nix       one-shot BootNext into the Windows entry by
+                           label lookup — the dual-boot switch without
+                           touching firmware menus
   monitors.nix             boot-splash-on-one-monitor: the side
                            connectors kernel-forced off through plymouth
                            (`video=<conn>:d`) + the wake-side-monitors

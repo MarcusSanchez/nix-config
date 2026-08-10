@@ -10,6 +10,16 @@ deadnix --fail \
   --exclude hosts/tuf-nixos/hardware-configuration.nix \
             hosts/bedroom-nixos/hardware-configuration.nix \
   -- .
+# CLAUDE.md carries a hand-maintained file map; a tracked .nix file it
+# never mentions means the map lagged a rename or a new file — fail
+# instead of drifting (basenames only: coarse, but catches every case
+# that has actually happened)
+fail=0
+for f in $(git ls-files '*.nix'); do
+  grep -qF "$(basename "$f" .nix)" CLAUDE.md \
+    || { echo "CLAUDE.md file map does not mention: $f" >&2; fail=1; }
+done
+[ "$fail" = 0 ]
 nix flake check
 # flake check never touches darwinConfigurations — evaluate them the
 # same enumerated way CI does (a hostname rename broke a named eval once)
