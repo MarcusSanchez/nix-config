@@ -14,84 +14,9 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
-`nixos-rebuild` / `darwin-rebuild` look for.
-
-## Layout
-
-```
-home/
-  marcus/                Home Manager — common/ + wsl/ + darwin/ + desktop/,
-                         with wsl.nix / wsl-lite.nix / darwin.nix / desktop.nix
-                         as entry points
-hosts/                   per-host values only. Naming rule: hardware
-                         truth => dir named by exact hostname
-                         (tuf-nixos/, bedroom-nixos/ — hardware config,
-                         nvidia facts, lanzaboote); no hardware truth =>
-                         shareable kind (wsl/, wsl-lite/, darwin/ — several
-                         flake attrs may point at one dir)
-modules/
-  common/                shared system layer (all platforms)
-  darwin/                mac system layer
-  nixos/                 shared Linux core — every NixOS host
-  wsl/                   WSL flavor (Windows integration, autoUpgrade)
-  desktop/               bare-metal flavor (boot/niri/DMS session)
-secrets/
-  secrets.yaml           lower-tier credentials, age-encrypted (safe to push)
-  super.yaml             trusted-machines-only tier (see Secrets)
-.sops.yaml               which age keys can decrypt
-bin/                     repo scripts: secrets:edit, secrets:status,
-                         age:place, secrets:drop, config:check — on
-                         PATH inside the repo after `direnv allow`
-flake.nix                inputs + all host wirings
-```
-
-One purpose per file (a purpose may span several related options — see
-modules/desktop/peripherals.nix — but never becomes a grab-bag), and a
-file does nothing until it's in its directory's `default.nix`. Every file opens with a comment explaining itself. Naming
-across layers: `common` = all platforms; OS names for OS cores (`nixos`,
-`darwin`); flavor names for flavors (`wsl`, `desktop`); machines by exact
-hostname.
-
-## Common operations
-
-**WSL**
-
-```sh
-nh os switch                  # apply
-nh os switch -u               # apply + update inputs
-nvd diff /run/booted-system /run/current-system
-```
-
-**Bare metal (tuf-nixos, bedroom-nixos)**
-
-```sh
-nh os switch                  # same as WSL — but NO autoUpgrade here:
-nh os switch -u               # a desktop updates when you mean it to
-sudo nixos-rebuild boot --flake /etc/nixos
-                              # for greeter/display-manager changes:
-                              # stage for next boot instead of yanking
-                              # the live session out from under you
-```
-
-**Mac**
-
-```sh
-nh darwin switch
-nh darwin switch -u
-nvd diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2)
-```
-
-**Both**
-
-```sh
-config:check                  # fmt + lint + evaluate every host (the CI gate)
-nix flake update              # bump inputs by hand (CI does it Sundays)
-```
-
-Every WSL box rebuilds weekly from pushed main, so one push deploys to all
-of them. The mac doesn't — update it with a pull + switch. CI bumps
-`flake.lock` Sundays (only if the full eval gate passes), so those weekly
-rebuilds actually carry new packages; `-u` is for bumping by hand.
+`nixos-rebuild` / `darwin-rebuild` look for. Everything below is
+bootstrapping — how a machine goes from nothing to a working member of
+the fleet. Day-to-day reference lives in the file headers and CLAUDE.md.
 
 ## Bootstrapping a WSL machine
 
@@ -145,7 +70,7 @@ sudo nixos-rebuild switch --option experimental-features 'nix-command flakes' --
 # The rm matters: /etc/nixos is a real directory on a fresh image, and
 # `ln -s` into an existing directory silently creates the link *inside* it
 # (/etc/nixos/nix-config) instead of replacing it. All it holds is the stock
-# configuration.nix, which is unused once we build from the flake.
+# configuration.nix, which is unused once the flake is the source of truth.
 sudo mv /tmp/nixos-config /home/marcus/nix-config
 sudo chown -R marcus:users /home/marcus/nix-config
 sudo rm -rf /etc/nixos
@@ -232,17 +157,15 @@ once — `gh`, `flyctl` and `atuin` all come up authenticated.
 ## Dual-boot install (bedroom PC -> bedroom-nixos)
 
 Same physical machine as `bedroom-wsl`, two flake hosts, only ever one
-running. **This install happened 2026-08-06**; the section stays as the
-reinstall runbook. A reinstall regenerates the committed
-`hardware-configuration.nix` (and means new disk UUIDs — commit the
-regenerated file, step 6), and `hosts/bedroom-nixos/lanzaboote.nix`
-must be commented out of the host's imports until its keys exist again
-(its header explains).
+running. This section is the (re)install runbook. A reinstall regenerates
+the committed `hardware-configuration.nix` (and means new disk UUIDs —
+commit the regenerated file, step 6), and
+`hosts/bedroom-nixos/lanzaboote.nix` must be commented out of the host's
+imports until its keys exist again (its header explains).
 
-> **The mistake this runbook exists to prevent.** The first attempt let
-> the installer choose `/boot`, and it picked **Windows' ~200 MiB ESP** —
-> so NixOS wrote its bootloader inside Windows' boot partition, which then
-> could not hold even two generations (each is ~130 MB with the early-KMS
+> **The mistake this runbook exists to prevent.** Letting the installer
+> choose `/boot` puts the bootloader on **Windows' ~200 MiB ESP**, which
+> cannot hold even two generations (each is ~130 MB with the early-KMS
 > nvidia initrd). Symptom: "the ESP is too small". The cure is to create a
 > **dedicated 1 GiB ESP** and to *verify what is mounted at `/mnt/boot`
 > before installing*. Never let the graphical installer partition: it
@@ -351,22 +274,22 @@ that doesn't exist.
 
 ### Secure Boot
 
-**The shipped arrangement, live since 2026-08-06: both OSes run under
-Secure Boot at once.** lanzaboote signs systemd-boot and every NixOS
-generation with keys generated on the machine; the firmware enforces
-under this machine's own PK with Microsoft's certificates retained, so
-Windows and the GPU's option ROM keep booting, anti-cheat (Fortnite,
-Valorant) sees Secure Boot on, and **nothing ever gets toggled in the
-BIOS** — the F11 boot menu picks the OS, that's the whole dual-boot
-ceremony. `bootctl status` reads `Secure Boot: enabled (user)`, and an
-unsigned USB stick is refused at the firmware level (verified by hand —
-the FQ0001 quirk below is cosmetic once Deny Execute is set).
+**The shipped arrangement: both OSes run under Secure Boot at once.**
+lanzaboote signs systemd-boot and every NixOS generation with keys
+generated on the machine; the firmware enforces under this machine's own
+PK with Microsoft's certificates retained, so Windows and the GPU's
+option ROM keep booting, anti-cheat (Fortnite, Valorant) sees Secure
+Boot on, and **nothing ever gets toggled in the BIOS** — the F11 boot
+menu picks the OS, that's the whole dual-boot ceremony. `bootctl status`
+reads `Secure Boot: enabled (user)`, and an unsigned USB stick is
+refused at the firmware level (the FQ0001 quirk below is cosmetic once
+Deny Execute is set).
 
-One-time Windows-side cost, already paid: changing Secure Boot state
-re-breaks the Windows Hello PIN (TPM-sealed against PCR 7) — sign in
-with the account password and re-create it under Settings -> Accounts ->
-Sign-in options. If BitLocker is ever enabled, suspend it *before* any
-future Secure Boot change or Windows demands the recovery key.
+One-time Windows-side cost: changing Secure Boot state re-breaks the
+Windows Hello PIN (TPM-sealed against PCR 7) — sign in with the account
+password and re-create it under Settings -> Accounts -> Sign-in options.
+If BitLocker is ever enabled, suspend it *before* any future Secure Boot
+change or Windows demands the recovery key.
 
 The ceremony below is the reinstall runbook. `lanzaboote.nix` must stay
 **commented out** of the host imports until keys exist on the machine —
@@ -381,15 +304,15 @@ sudo nixos-rebuild switch --flake /etc/nixos
 sudo sbctl verify        # generations + systemd-boot signed. The KERNEL showing
                          # "not signed" is EXPECTED: lanzaboote's signed stub
                          # carries its SHA-256 (.linuxh/.initrdh) instead of
-                         # embedding it — verified by reading the PE sections
+                         # embedding it
 ```
 
-**Getting the keys enrolled — the MSI finding that took two nights.**
-Deleting only the PK does NOT give real Setup Mode on this board: the
-firmware reports `SetupMode=1` but keeps `db`/`KEK` Microsoft-owned and
-immutable, so `sbctl enroll-keys` fails with `permission denied` no
-matter what Linux-side knob is turned (lockdown, immutable flags,
-landlock — all red herrings). The route that works:
+**Getting the keys enrolled — the MSI-specific route.** Deleting only
+the PK does NOT give real Setup Mode on this board: the firmware reports
+`SetupMode=1` but keeps `db`/`KEK` Microsoft-owned and immutable, so
+`sbctl enroll-keys` fails with `permission denied` no matter what
+Linux-side knob is turned (lockdown, immutable flags, landlock — all
+red herrings). The route that works:
 
 1. Firmware (`Del`, `F7` for Advanced, Settings -> Advanced -> Windows
    OS Configuration -> Secure Boot): **Mode = Custom**, Key Management,
@@ -446,52 +369,26 @@ again — that's a firmware toggle, nothing is damaged.
 
 ## Secrets
 
-Credentials live age-encrypted in `secrets/secrets.yaml` (in this repo), which
-is why the repo can be public. sops-nix decrypts them at every activation and
-every boot into `/run/secrets/`, and each tool is pointed at its file — so no
-machine ever runs `gh auth login`. Only the *values* are encrypted; the keys
-stay readable, so a diff shows *that* a credential changed without showing it.
+Only the bootstrap-facing half lives here: how a new box gets its age
+key. (Credentials are age-encrypted in `secrets/`, which is why the repo
+can be public; sops-nix decrypts them into `/run/secrets/` at every
+activation, and each tool is pointed at its file. Two tiers: every
+machine opens `secrets.yaml` via a key; only the trusted machines' own
+keys open `super.yaml`.)
 
-**Two tiers, six keys.** Lite boxes share the roaming master key from
-Bitwarden; the four trusted machines each have their own, and only those
-open `super.yaml`:
+> **The key must exist before the switch that installs secrets.** sops-nix
+> treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
+> back, so secret installation aborts with `cannot read keyfile`. That's the
+> harmless error both bootstrap sections mention — on a fresh box, the switch
+> that fails is the one that installs `rbw` so you can fetch the key at all.
 
-| file | holds | who can decrypt |
-|---|---|---|
-| `secrets/secrets.yaml` | gh token (low-scope), croc, atuin | every machine |
-| `secrets/super.yaml` | fly token + future hot ones | bedroom-wsl, macbook-air, tuf-nixos, bedroom-nixos |
-
-| key | lives | opens |
-|---|---|---|
-| master | Bitwarden + each lite box (`age:place`) | `secrets.yaml` |
-| bedroom-wsl, macbook-air, tuf-nixos, bedroom-nixos | only that machine (no backup, on purpose) | both files |
-| buried | paper in a drawer, never on a machine | both files (emergencies) |
-
-On every machine the active identity sits at `/var/lib/sops-nix/key.txt`
-(root, 0400) with an editing copy at `~/.config/sops/age/keys.txt`;
-`.sops.yaml` says which key opens what (master first, by convention —
-`age:place` verifies against it).
-
-### Editing a credential
-
-Inside the repo (`direnv allow` once per machine puts `bin/` on PATH
-whenever you're cd'd in; `./bin/<name>` works without it):
-
-```sh
-secrets:edit          # the lower tier (secrets.yaml)
-secrets:edit super    # super.yaml — only works on a trusted machine
-```
-
-It opens the decrypted file in `$EDITOR` and re-encrypts when you save. Commit
-and push as normal.
-
-### Placing the key (lite boxes)
+### Placing the key
 
 This is the whole of onboarding a lite/temporary machine — nothing to paste
 into `.sops.yaml`, no `updatekeys`, no second machine involved. On a
-trusted machine it refuses (same capability probe as `secrets:drop` —
-placing the master would overwrite the unbacked-up machine key). As one
-command (after `direnv allow ~/nix-config`):
+trusted machine it refuses (placing the master would overwrite the
+unbacked-up machine key). As one command (after `direnv allow
+~/nix-config`, which puts `bin/` on PATH):
 
 ```sh
 age:place    # logs into Bitwarden if needed (your master password),
@@ -514,39 +411,6 @@ secrets:status    # gh auth status + atuin status + fly auth whoami,
 
 `ls /run/secrets/` is *denied by design* (mode `751`, so nothing can enumerate
 what secrets exist) and looks like a failure when it isn't.
-
-### Dropping the key
-
-The inverse of `age:place`, for handing off or de-privileging a box:
-
-```sh
-secrets:drop    # removes both key copies, /run/secrets (which also holds
-                # sops-nix's own key copy + the rendered gh file), and the
-                # sessions that would outlive them: atuin (+ its synced
-                # history db) and ~/.fly. rbw is only locked, not logged
-                # out — the vault stays, gated by your master password
-```
-
-Close any shells that were already open (they still hold `FLY_API_TOKEN` /
-`CROC_SECRET` in their environment), and remember the box is still on the
-tailnet — `sudo tailscale logout` if it should lose that too. Switches keep
-working; they just report the harmless `setupSecrets` failure until
-`age:place` re-arms the machine.
-
-Re-arming a **lite box** is `age:place` + a switch — everything it's
-entitled to comes back during activation, and new shells pick the exports
-back up on their own. On a **trusted machine** `secrets:drop` refuses to
-run (it probes whether the box's key opens `super.yaml` — no hostname
-list to drift): the machine key it would destroy has no backup, so a drop
-there is decommissioning. Doing that for real is manual: delete both key
-files, remove the machine's recipient from `.sops.yaml`, and `updatekeys`
-both secrets files from a surviving recipient.
-
-> **The key must exist before the switch that installs secrets.** sops-nix
-> treats a missing `/var/lib/sops-nix/key.txt` as fatal rather than falling
-> back, so secret installation aborts with `cannot read keyfile`. That's the
-> harmless error both bootstrap sections mention — on a fresh box, the switch
-> that fails is the one that installs `rbw` so you can fetch the key at all.
 
 ### Enrolling a trusted machine
 
@@ -572,24 +436,6 @@ sops updatekeys secrets/super.yaml   # must run where an EXISTING recipient
 
 Commit, push, switch.
 
-### The keys themselves
-
-- **master** — Bitwarden:
-  `rbw get -f notes "sops age key - nix-config (all machines)"`. Opens the
-  lower tier only; a lite box (or its thief) can never read the fly token.
-- **machine keys** — exist only on their machine, unbacked-up on purpose:
-  compromising the Bitwarden vault does not open `super.yaml`.
-- **buried** — the paper printout is the disaster path: if all four
-  trusted machines die at once, it re-keys `super.yaml`. Nothing unreissuable may
-  ever live in `super.yaml` (atuin's E2E key stays in the lower tier,
-  reachable via Bitwarden, for exactly this reason).
-
-**Leaking a key is the real risk** — git history is permanent, so a leaked
-key decrypts every version ever committed of the files it's a recipient of,
-including credentials since rotated. Revoking a recipient never un-exposes
-what it already read; the only remediation that works is rotating the
-credential at the provider. Re-encrypting achieves nothing.
-
 ## Tailscale on a new PC
 
 Only relevant if that box will be a tailnet node. Both `hosts/wsl` and
@@ -599,8 +445,8 @@ section: `modules/desktop/tailscale.nix` rides the flavor aggregator —
 bare metal is always its own node — and everything below about Windows
 is WSL-specific. Enrolment is the same `sudo tailscale up` everywhere.)
 
-**Windows needs mirrored networking.** This is a Windows-side file the repo
-can't manage, and it's per-PC rather than per-distro:
+**Windows: mirrored networking is preferred.** This is a Windows-side
+file the repo can't manage, and it's per-PC rather than per-distro:
 
 ```powershell
 @"
@@ -613,12 +459,13 @@ wsl --shutdown
 Order doesn't matter — before or after installing the distro, it just needs
 the `wsl --shutdown` to take effect.
 
-Two things break without it. NAT mode's MTU is 1280, which breaks SSH and TLS
-while leaving `ping` working, so it looks like everything is fine until
-nothing you actually use works. And the MagicDNS fix in `tailscale.nix` points
-resolved at `10.255.255.254`, a resolver that only exists in mirrored mode —
-without it, DNS falls back to `1.1.1.1`/`8.8.8.8`, so the internet works and
-LAN and tailnet names quietly don't.
+The MagicDNS fix in `tailscale.nix` points resolved at `10.255.255.254`,
+a resolver that only exists in mirrored mode — without it, DNS falls
+back to `1.1.1.1`/`8.8.8.8`, so the internet works and LAN and tailnet
+names quietly don't. (Current WSL gives NAT mode a healthy 1500 MTU too,
+and NAT is what the office boxes run — but NAT changes where the
+Windows host lives on the network; see `modules/wsl/rustdesk-bridge.nix`
+for the consequence.)
 
 **Then enrol the box**, which is interactive and stores nothing in the repo:
 
