@@ -8,7 +8,7 @@
 # Adwaita, not Papirus, by PREFERENCE: with Adwaita named, apps fall
 # through to their own hicolor icons (native look, like macOS);
 # Papirus replaces them with its restyled set. Papirus itself works
-# (ghostty's tab bar renders — the old laptop breakage was
+# (ghostty's tab bar renders — the breakage once blamed on it was
 # Plasma-leftover fallout); it stays off purely on looks. Flip
 # catppuccin.gtk.icon.enable in common/shell.nix to re-try it.
 { config, pkgs, ... }:

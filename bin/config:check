@@ -33,8 +33,7 @@ done < <(grep -oP '[A-Za-z0-9._/-]+\.nix(?![\w-])' README.md | sort -u \
 # hardware-configuration.nix files are generated (nixos-generate-config)
 # and not held to repo style — statix.toml ignores them for the same reason
 deadnix --fail \
-  --exclude hosts/tuf-laptop/hardware-configuration.nix \
-            hosts/naut-dt/hardware-configuration.nix \
+  --exclude hosts/naut-dt/hardware-configuration.nix \
   -- .
 nix flake check
 # flake check never touches darwinConfigurations — evaluate them the

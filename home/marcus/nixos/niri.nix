@@ -56,7 +56,7 @@
     # niri.config.kdl call this; without it media keys are wired to
     # nothing (the Wooting's skip keys included)
     pkgs.playerctl
-    # same story for the laptop's XF86MonBrightness keys
+    # same story for XF86MonBrightness keys, where a panel has them
     pkgs.brightnessctl
 
     # synthetic keystrokes via the virtual-keyboard protocol; Mod+W in

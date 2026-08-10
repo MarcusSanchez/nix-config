@@ -1,9 +1,9 @@
-# Proprietary NVIDIA driver — the flavor's shared shape: every current
-# bare-metal host drives its panel straight off a discrete NVIDIA GPU
-# (the laptop's MUX is in discrete mode), so there is deliberately NO
-# prime offload/sync config here. A hybrid-MUX or iGPU-offload machine
-# adds its own prime block at host level; the mkDefault scalars below
-# are what let such a host override any of this cleanly.
+# Proprietary NVIDIA driver — the shared shape: every bare-metal host
+# drives its panel straight off a discrete NVIDIA GPU, so there is
+# deliberately NO prime offload/sync config here. A hybrid-MUX or
+# iGPU-offload machine adds its own prime block at host level; the
+# mkDefault scalars below are what let such a host override any of
+# this cleanly.
 #
 # The two LISTS stay at NORMAL priority on purpose:
 # hardware-configuration.nix also defines boot.initrd.kernelModules (as

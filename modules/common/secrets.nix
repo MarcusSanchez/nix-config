@@ -119,7 +119,6 @@ in
               (builtins.elem config.networking.hostName [
                 "naut-box"
                 "naut-dt"
-                "tuf-laptop"
                 "macbook-air"
               ])
               {

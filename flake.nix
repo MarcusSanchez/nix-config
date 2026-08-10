@@ -99,7 +99,6 @@
                 office-one = ./hosts/wsl;
                 office-two = ./hosts/wsl;
 
-                tuf-laptop = ./hosts/tuf-laptop;
                 naut-dt = ./hosts/naut-dt;
               };
         in
@@ -116,7 +115,6 @@
           framework-wsl = cfgs.framework-dt;
           office-lite-wsl-1 = cfgs.office-one;
           office-lite-wsl-2 = cfgs.office-two;
-          tuf-nixos = cfgs.tuf-laptop;
           bedroom-nixos = cfgs.naut-dt;
         };
 

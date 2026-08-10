@@ -6,8 +6,8 @@
 # (regenerate, don't edit).
 #
 # Imports are DECISIVE: modules/nixos is a pool with no aggregator, and
-# this list is the whole statement of what the machine runs — the same
-# desktop session as tuf-laptop, plus this box's own hardware truth.
+# this list is the whole statement of what the machine runs — the
+# desktop session, plus this box's own hardware truth.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
 { inputs, hostName, ... }:

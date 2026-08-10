@@ -8,7 +8,6 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
 | `naut-box`, `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
-| `tuf-laptop` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
 | `naut-dt` | bare-metal desktop, dual-boot beside the PC that hosts `naut-box` | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 

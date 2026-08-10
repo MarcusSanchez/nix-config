@@ -1,8 +1,8 @@
 # Secure Boot for the dual-boot desktop: lanzaboote signs systemd-boot and
 # every generation with keys generated ON THIS MACHINE (sbctl), so NixOS
 # boots with Secure Boot enforcing — which Windows on the other half of
-# the disk needs (anti-cheat, attestation). HOST-level on purpose: the
-# laptop runs with Secure Boot off and must never import this.
+# the disk needs (anti-cheat, attestation). HOST-level on purpose:
+# only this machine's firmware enrolls these keys.
 #
 # Live: Secure Boot reads "enabled (user)"
 # under this machine's own PK. On a REINSTALL, comment this import out

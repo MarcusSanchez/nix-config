@@ -4,9 +4,9 @@
 // matches — one shared config, per-host tails. Live-editable like
 // the rest: niri hot-reloads on save.
 //
-// Per-app default column widths for the desk's wide monitors; the
-// laptop keeps the global 2/3 for everything (its host file is
-// comment-only). Sizes apply at open — resizing after is unaffected.
+// Per-app default column widths for the desk's wide monitors; a host
+// without a tail of its own keeps the global 2/3 for everything.
+// Sizes apply at open — resizing after is unaffected.
 // Find an app's id with `niri msg windows` while it's running.
 
 window-rule {

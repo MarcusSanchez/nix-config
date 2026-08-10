@@ -1,5 +1,5 @@
 # Hammerspoon — the mac's per-application key remapper, standing in for
-# xremap on the laptop. The rules themselves live in
+# xremap on the NixOS desktop. The rules themselves live in
 # common/dotfiles/hammerspoon.init.lua; this file only installs the
 # config and keeps the app running.
 #

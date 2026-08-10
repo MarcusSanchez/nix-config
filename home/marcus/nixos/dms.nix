@@ -90,8 +90,8 @@ in
       # niri.host.naut-dt.kdl); these are the sides' whole
       # wallpaper now, not just the fallback. Assigned per-monitor via
       # `dms ipc call wallpaper setFor <connector> <path>` — recorded in
-      # machine-local session state, so the laptop (which also gets these
-      # files) is unaffected.
+      # machine-local session state, so another desktop host (which would
+      # also get these files) is unaffected.
       "Pictures/Wallpapers/space-stars-2560x1440.jpg".source = ./assets/space-stars-2560x1440.jpg;
       "Pictures/Wallpapers/space-stars-1080x1920.jpg".source = ./assets/space-stars-1080x1920.jpg;
       "Pictures/avatar-spaceman.png".source = ./assets/avatar-spaceman.png;

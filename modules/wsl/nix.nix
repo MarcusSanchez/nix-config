@@ -48,9 +48,9 @@
   # main, honouring the pushed flake.lock. Run `nix flake update` to
   # actually bump inputs (CI does it Sundays). Deliberately NOT
   # /etc/nixos: that's the live working tree, and the timer would
-  # silently activate uncommitted work-in-progress. The laptop
-  # deliberately has no autoUpgrade — a desktop mid-session should
-  # never swap its compositor under the user; it updates via
+  # silently activate uncommitted work-in-progress. The bare-metal
+  # desktop deliberately has no autoUpgrade — a machine mid-session
+  # should never swap its compositor under the user; it updates via
   # `nh os switch -u`, on purpose.
   system.autoUpgrade = {
     enable = true;
