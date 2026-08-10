@@ -16,7 +16,7 @@
     # niri kdls (nixos/niri.nix), dms.settings.json (nixos/dms.nix)
     # and xremap.yml live under the same pathspec, so their drift rides
     # the same hook.
-    ./common/dotfiles-links.nix
+    ./common/dotfiles.nix
     ./nixos/apps.nix
   ];
 

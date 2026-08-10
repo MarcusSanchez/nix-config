@@ -17,7 +17,7 @@
 
     # the no-config modern-unix staples (the ones with shell hooks or
     # theming — fzf/bat/eza/yazi/lazygit/btop — live in
-    # home/marcus/common/cli-tools.nix instead)
+    # home/marcus/common/packages.nix instead)
     dust # du, readable
     duf # df, readable
     tealdeer # `tldr <cmd>`: example-first man pages

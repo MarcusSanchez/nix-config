@@ -247,17 +247,18 @@ home/marcus/
     shell.nix              zsh + the prompt + catppuccin theming (autoEnable —
                            nvim opts out, and a revived starship must too;
                            see Constraints)
-    packages.nix           user CLIs + comma with its prebuilt nix-index db
-    cli-tools.nix          the modern-unix staples that carry shell hooks,
+    packages.nix           user CLIs + comma with its prebuilt nix-index
+                           db + the modern-unix staples that carry shell hooks,
                            aliases or theming (fzf/bat/eza/yazi/lazygit/
                            btop as programs.* — catppuccin themes them via
                            the HM modules; ls->eza, cat->bat aliases,
                            interactive-only). The no-config siblings live
                            in modules/common/packages.nix
-    dotfiles-links.nix     the UI-managed-config links + drift auto-commit
-                           shared by the darwin and desktop entries (message names the
-                           host via osConfig) — NOT in common/default.nix
-                           on purpose: WSL manages none of those files
+    dotfiles.nix           the UI-managed-config links + drift
+                           auto-commit shared by the darwin and desktop
+                           entries (message names the host via osConfig)
+                           — NOT in common/default.nix on purpose: WSL
+                           manages none of those files
     ghostty.nix            shared ghostty settings — NOT in
                            common/default.nix on purpose: enable installs
                            the package, and WSL must not gain a GUI
@@ -289,7 +290,7 @@ home/marcus/
                            JetBrains GOROOT symlink — see Constraints
     neovim.nix             see Constraints
     git.nix
-  darwin/                  (dotfiles-links.nix is imported straight from
+  darwin/                  (dotfiles.nix is imported straight from
                            the darwin.nix entry point — per-file symlinks
                            where the WSL side copies instead)
     nix.nix                user GC launchd agent + HM manpages off (they

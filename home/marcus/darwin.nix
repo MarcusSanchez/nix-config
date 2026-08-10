@@ -9,7 +9,7 @@
     ./darwin/nix.nix
     # UI-managed-config links + drift auto-commit (the desktop entry
     # point imports the same file; WSL manages none of these)
-    ./common/dotfiles-links.nix
+    ./common/dotfiles.nix
     ./darwin/hammerspoon.nix
   ];
 
