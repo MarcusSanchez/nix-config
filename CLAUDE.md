@@ -50,7 +50,7 @@ Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywh
 
 Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + BOTH desktop hosts' import lists (order aligned); WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from BOTH desktop home entries (naut-dt.nix + tuf-laptop.nix); mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
-**Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. Its own operational commands (`secrets:edit`, `secrets:status`, `age:place`, `config:check`) are plain executables in `bin/`, on PATH via the one-line `.envrc` (`PATH_add bin`) — devenv was tried for this and retired 2026-08-01: a 67 MiB profile and a second lockfile for four scripts whose tools all come from the system config. `./bin/<name>` works with no direnv at all.
+**Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. Its own operational commands (`secrets:edit`, `secrets:status`, `age:place`, `secrets:drop`, `config:check`) are plain executables in `bin/`, on PATH fleet-wide through `modules/common/bin.nix` — thin wrappers that run the LIVE working-tree scripts, so editing bin/ needs no rebuild. `./bin/<name>` also works directly, no wrapper involved.
 
 ## File map
 
@@ -65,8 +65,9 @@ flake.nix                  inputs + all host wirings. dank-material-shell
                            source it pins
 bin/                       repo-operations scripts (secrets:edit,
                            secrets:status, age:place, secrets:drop,
-                           config:check) — plain executables, PATH_add'd
-                           by .envrc; secrets:drop is age:place's inverse
+                           config:check) — plain executables, on PATH
+                           fleet-wide via modules/common/bin.nix's live
+                           wrappers; secrets:drop is age:place's inverse
                            and must remove more than the two key files
                            (its header lists the full inventory)
 .sops.yaml                 age recipients + tier rules (super first — first
@@ -112,6 +113,12 @@ hosts/tuf-laptop/           the laptop: per-host values + its hardware truth
 
 modules/common/            default.nix packages.nix (cross-platform CLIs
                            + the claude-code overlay and package)
+  bin.nix                  the repo's bin/ scripts on PATH everywhere —
+                           wrappers exec the LIVE working tree (edits
+                           need no rebuild) and return the caller to
+                           their starting directory; also the
+                           reboot-windows command, hostname-gated to
+                           the dual-boot desktop
                            identity.nix secrets.nix home-manager.nix —
                            the identity option, the shared sops config
                            and the HM bridge (platform files are shims)

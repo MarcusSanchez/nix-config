@@ -5,6 +5,7 @@
 {
   imports = [
     ./packages.nix
+    ./bin.nix
     ./secrets.nix
     ./home-manager.nix
     ./identity.nix

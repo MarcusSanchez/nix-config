@@ -173,8 +173,8 @@ keys open `super.yaml`.)
 This is the whole of onboarding an ordinary/temporary machine — nothing to paste
 into `.sops.yaml`, no `updatekeys`, no second machine involved. On a
 trusted machine it refuses (placing the master would overwrite the
-unbacked-up machine key). As one command (after `direnv allow
-~/nix-config`, which puts `bin/` on PATH):
+unbacked-up machine key). The repo's bin/ commands are on PATH
+fleet-wide (modules/common/bin.nix), so as one command:
 
 ```sh
 age:place    # logs into Bitwarden if needed (your master password),
