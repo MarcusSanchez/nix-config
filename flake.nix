@@ -83,40 +83,22 @@
       # where each machine supplies its own VALUE is an option set in
       # hosts/ (greeterScreens).
       nixosConfigurations =
-        let
-          cfgs =
-            nixpkgs.lib.mapAttrs
-              (
-                hostName: hostModule:
-                nixpkgs.lib.nixosSystem {
-                  specialArgs = { inherit inputs hostName; };
-                  modules = [ hostModule ];
-                }
-              )
-              {
-                naut-box = ./hosts/wsl;
-                framework-dt = ./hosts/wsl;
-                office-one = ./hosts/wsl;
-                office-two = ./hosts/wsl;
+        nixpkgs.lib.mapAttrs
+          (
+            hostName: hostModule:
+            nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit inputs hostName; };
+              modules = [ hostModule ];
+            }
+          )
+          {
+            naut-box = ./hosts/wsl;
+            framework-dt = ./hosts/wsl;
+            office-one = ./hosts/wsl;
+            office-two = ./hosts/wsl;
 
-                naut-dt = ./hosts/naut-dt;
-              };
-        in
-        cfgs
-        # TRANSITION aliases: a machine resolves its config by its CURRENT
-        # hostname, so until each box has activated a new-name generation
-        # (and, on WSL, restarted the distro so wsl.conf applies it) the
-        # old attribute must keep working. Each alias IS the new-name
-        # config — activating it renames the machine, so every box
-        # self-migrates on its next switch/autoUpgrade. Delete a line once
-        # its machine reports the new hostname.
-        // {
-          bedroom-wsl = cfgs.naut-box;
-          framework-wsl = cfgs.framework-dt;
-          office-lite-wsl-1 = cfgs.office-one;
-          office-lite-wsl-2 = cfgs.office-two;
-          bedroom-nixos = cfgs.naut-dt;
-        };
+            naut-dt = ./hosts/naut-dt;
+          };
 
       # Same shape as above: the attribute IS the hostname, passed down as
       # `hostName`. Bare `sudo darwin-rebuild switch` resolves
