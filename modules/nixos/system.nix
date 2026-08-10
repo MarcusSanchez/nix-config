@@ -1,9 +1,34 @@
-# Devices you plug in or pair, their firmware, and their power state.
-# Several small concerns grouped by purpose — each would otherwise be a
-# near-one-line file.
+# Machine-level system settings and services: timezone/locale, fonts,
+# and the devices you plug in or pair — their firmware and their power
+# state. Several small concerns grouped by purpose; each would
+# otherwise be a near-one-line file.
 { pkgs, ... }:
 
 {
+  # Timezone and locale, carried over from the installer's config.
+  time.timeZone = "America/New_York";
+
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "en_US.UTF-8";
+    LC_IDENTIFICATION = "en_US.UTF-8";
+    LC_MEASUREMENT = "en_US.UTF-8";
+    LC_MONETARY = "en_US.UTF-8";
+    LC_NAME = "en_US.UTF-8";
+    LC_NUMERIC = "en_US.UTF-8";
+    LC_PAPER = "en_US.UTF-8";
+    LC_TELEPHONE = "en_US.UTF-8";
+    LC_TIME = "en_US.UTF-8";
+  };
+
+  # The zed and ghostty configs assume "JetBrainsMono Nerd Font (Mono)";
+  # noto is the fallback base + emoji.
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    noto-fonts
+    noto-fonts-color-emoji
+  ];
+
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;

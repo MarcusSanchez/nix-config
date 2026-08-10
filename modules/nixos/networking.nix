@@ -1,6 +1,6 @@
-# NetworkManager plus the LAN-facing firewall policy. The tailnet
-# catch-all (trustedInterfaces = tailscale0) lives in ./tailscale.nix
-# beside the daemon it trusts.
+# The machine's whole network story: NetworkManager, the LAN-facing
+# firewall policy, and tailscale — whose trustedInterfaces line is the
+# tailnet catch-all the tight LAN port list below leans on.
 { ... }:
 
 {
@@ -10,7 +10,7 @@
     # to — localhost traffic never touches the firewall, so a dev
     # server used purely from this machine's own browser needs nothing
     # here. Databases and other internals stay closed; for anything
-    # not listed, the tailnet path (tailscale.nix trusts tailscale0)
+    # not listed, the tailnet path (tailscale0 is trusted below)
     # reaches every port from enrolled devices with no LAN exposure.
     firewall = {
       allowedTCPPorts = [
@@ -45,4 +45,26 @@
       ];
     };
   };
+
+  # Tailscale, so this machine is reachable from any network rather than
+  # only over the LAN. Inbound SSH is Tailscale SSH: tailscaled
+  # terminates SSH itself and authorizes from tailnet identity + the
+  # policy file's "ssh" rules — no sshd, no authorized_keys, no key to
+  # distribute, and nothing listening on the LAN. Reaching this box
+  # needs a matching rule in the tailnet policy, and the action must be
+  # "accept" — "check" demands a periodic browser re-auth and presents
+  # as a connection that simply closes. Enrolment is interactive and
+  # stores nothing in the repo: `sudo tailscale up` (--ssh is already
+  # handled: extraSetFlags creates tailscaled-set.service, which runs
+  # `tailscale set --ssh` after tailscaled starts).
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [ "--ssh" ];
+  };
+
+  # Everything arriving over the tailnet comes from this tailnet's own
+  # enrolled devices, so skip the firewall for it entirely: every dev
+  # server, on any port, is reachable from the phone/laptop via this
+  # box's tailnet name — from anywhere, with zero LAN exposure.
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
 }

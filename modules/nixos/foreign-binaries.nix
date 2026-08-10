@@ -1,10 +1,10 @@
 # The two shims that make FOREIGN (non-nix) binaries run — both here
 # for the JetBrains/Toolbox story, though they serve any outside binary.
 #
-# 1) nix-ld ADDITIONS (enabled in modules/nixos/nix-ld.nix; list options
-# CONCATENATE, so these merge with the base set). Desktop-wide concerns
-# only — anything a specific project needs goes in that project's
-# devenv.nix.
+# 1) nix-ld itself (enabled below) plus its ADDITIONS (list options
+# CONCATENATE, so these merge with the module's base set). Desktop-wide
+# concerns only — anything a specific project needs goes in that
+# project's devenv.nix.
 #
 # The bulk below is what JetBrains IDEs need — do not trim it. Their
 # bundled JBR dlopens the whole X11/GTK/NSS stack, and the base set
@@ -34,6 +34,7 @@
 {
   services.envfs.enable = true;
 
+  programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     # JetBrains IDEs dlopen libsecret for the native keychain; without
     # it they fall back to "in memory password storage" with a warning

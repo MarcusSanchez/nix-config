@@ -45,7 +45,7 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
 1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`tuf-laptop/`, `naut-dt/` — hardware-configuration.nix, nvidia facts, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth rides that attr's module list in flake.nix: the rustdesk bridge on the remotely-controlled PCs, secrets-super on the trusted machines). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
-2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machines' whole world: account, nix daemon, and the boot/niri/DMS desktop stack — **no default.nix on purpose**; the desktop hosts import its files DECISIVELY, and the import order in their lists is not cosmetic, merged-list options order by module position), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (peripherals.nix carries bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and both desktop hosts), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
+2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machines' whole world: account, nix daemon, and the boot/niri/DMS desktop stack — **no default.nix on purpose**; the desktop hosts import its files DECISIVELY, and the import order in their lists is not cosmetic, merged-list options order by module position), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and both desktop hosts), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
 3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop session's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `naut-dt.nix` / `tuf-laptop.nix` / `wsl.nix` / `darwin.nix` as the per-host entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; the two desktop entries list the same nixos/ files — duplication on purpose). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
 
 Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + BOTH desktop hosts' import lists (order aligned); WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from BOTH desktop home entries (naut-dt.nix + tuf-laptop.nix); mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
@@ -127,10 +127,6 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
   packages.nix             build tools + ghostty.terminfo (fixes TERM for
                            sessions ssh-ing *into* this box) + the
                            desk-only tools (ethtool/libsecret/watchman)
-  nix-ld.nix               enable only — the GUI library list lives in
-                           ./foreign-binaries.nix (libraries CONCATENATE
-                           across modules; proven by eval: base 14,
-                           laptop 47)
   users.nix                the account, groups included (input/uinput for
                            xremap, networkmanager pairing with
                            ./networking.nix) + hardware.uinput
@@ -171,12 +167,13 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
                            purpose: reads home/marcus/common/dotfiles/ and
                            home/marcus/nixos/assets/. Ships via `nixos-rebuild
                            boot`, never switch
-  peripherals.nix          plugged-in/paired devices, their firmware and
-                           power: bluetooth, CUPS, fwupd (the dbx-restore
-                           story), upower + power-profiles-daemon (DMS
-                           widgets fail QUIETLY without them), wooting
-                           udev rules (deliberately not
-                           hardware.wooting.enable — it bundles the app)
+  system.nix               machine-level settings and services:
+                           timezone/locale, fonts, bluetooth, CUPS, fwupd
+                           (the dbx-restore story), upower +
+                           power-profiles-daemon (DMS widgets fail
+                           QUIETLY without them), wooting udev rules
+                           (deliberately not hardware.wooting.enable —
+                           it bundles the app)
   audio.nix                pipewire + rtkit; allowed-rates is a device-
                            intersected MENU (content-rate following), not
                            a forced rate
@@ -188,9 +185,11 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
                            Constraints before touching ANY of it (also
                            carries zramSwap, independent of that web)
   foreign-binaries.nix     the two shims for non-nix binaries, both for
-                           the JetBrains/Toolbox story: the nix-ld
-                           X11/GTK/NSS/JCEF list (empirically derived, do
-                           not trim — header has the ldd recipe) and
+                           the JetBrains/Toolbox story: nix-ld (enable +
+                           the X11/GTK/NSS/JCEF library list —
+                           empirically derived, do not trim; header has
+                           the ldd recipe; libraries CONCATENATE with the
+                           module's base set) and
                            envfs (/bin + /usr/bin as a FUSE mount
                            resolving shebangs against PATH, so Toolbox's
                            generated #!/bin/bash launchers run; desktop
@@ -208,11 +207,11 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
                            initrd.kernelModules = [ ] at priority 100,
                            so mkDefault there would silently drop early
                            KMS
-  locale.nix fonts.nix tailscale.nix
-                           (tailscale trusts tailscale0 wholesale — the
-                           LAN firewall list in networking.nix stays
-                           tight because of it; swaylock's PAM entry
-                           lives in niri.nix with the session it unlocks)
+                           (networking.nix carries the tailscale block —
+                           trustedInterfaces is the tailnet catch-all its
+                           tight LAN port list leans on; swaylock's PAM
+                           entry lives in niri.nix with the session it
+                           unlocks)
 modules/darwin/
   default.nix              aggregator
   nix.nix                  nix.enable = false (Constraints)
@@ -339,7 +338,7 @@ home/marcus/
 
 - **Never commit a decrypted secret, and never print one.** Credentials live age-encrypted in `secrets/` (`secrets:edit` / `secrets:edit super`; `.sops.yaml` lists recipients). The repo is public, so the ciphertext is world-readable — that's fine, but a plaintext slip is permanent in git history and means revoking at the provider. **Two files, and the flake line is the tier**: `secrets.yaml` (gh low-scope token, croc, atuin) is opened by the roaming master key from Bitwarden — what `age:place` places on ordinary boxes; `super.yaml` (fly org token + future hot secrets) is opened ONLY by the per-machine keys of the trusted machines (each generated on-box, backed up nowhere — deliberately: vault compromise cannot open super) plus a buried paper-only recovery key. There is no tier option: a trusted machine's flake entry adds `modules/common/secrets-super.nix` to its module list, and that line MUST track key reality — `sops-install-secrets` aborts the WHOLE install on the first file it cannot decrypt (`decryptSecrets` returns on first error), so declaring super.yaml on a master-key box loses every secret on it, not just the super ones. Consequences to respect: onboarding an ordinary box never touches `.sops.yaml` (place master, switch; `age:place` re-locks rbw afterward — the vault holds the super RECOVERY key, so an unlocked hour would bridge the tiers); enrolling/replacing a TRUSTED machine edits `.sops.yaml` + runs `sops updatekeys` on both files (updatekeys for `super.yaml` must run where an existing recipient lives) + adds the secrets-super line to its flake entry; `secrets:drop` AND `age:place` both REFUSE on trusted boxes (capability probe: does the box's key open super.yaml) — drop would destroy the unbacked-up machine key, place would silently overwrite it with the master; **nothing unreissuable ever goes in `super.yaml`** — atuin_key stays in the lower tier so it remains Bitwarden-recoverable; the mac factory reset will destroy `&macbook-air` (re-enrollment joins that day's checklist). **A missing `keyFile` is fatal, not a fallback** (`sops-install-secrets`: "cannot read keyfile"), so a machine without a key fails the whole `setupSecrets` step — the expected first-switch error on a fresh box. Declared-but-missing VALUES are equally fatal ("the key 'x' cannot be found"), so a value lands in its yaml before or with its wiring.
 
-- **`modules/wsl/tailscale.nix` is imported by the WSL host modules, NOT the wsl aggregator — never move it there.** Every WSL2 distro on a Windows PC shares one network namespace (same IP, ports, routing table), so two `tailscaled` instances fight over `tailscale0`, UDP 41641 and the `100.64.0.0/10` route. One tailnet node per PC — every host module imports it today only because each instance lives on a PC of its own. Two sharing a PC means the second drops the import, and that per-machine fact is exactly what the aggregator cannot express. Also **never install Tailscale on Windows while this is on** — traffic would be encapsulated twice and Tailscale packets don't fit inside Tailscale packets. Running it inside WSL is viable only because mirrored networking gives `eth1` an MTU of 1500 (NAT mode's 1280 breaks SSH and TLS while ping keeps working) and NixOS-WSL runs systemd as PID 1. The node is up only while WSL is — that's accepted, not a bug. (The mac and both bare-metal hosts are their own nodes — `modules/darwin/tailscale.nix` (OSS daemon, not the GUI app) and `modules/nixos/tailscale.nix` (in both desktop hosts' decisive lists — bare metal is always its own node — and it trusts tailscale0 wholesale; the LAN firewall list in networking.nix stays tight because of it); see the file map.)
+- **`modules/wsl/tailscale.nix` is imported by the WSL host modules, NOT the wsl aggregator — never move it there.** Every WSL2 distro on a Windows PC shares one network namespace (same IP, ports, routing table), so two `tailscaled` instances fight over `tailscale0`, UDP 41641 and the `100.64.0.0/10` route. One tailnet node per PC — every host module imports it today only because each instance lives on a PC of its own. Two sharing a PC means the second drops the import, and that per-machine fact is exactly what the aggregator cannot express. Also **never install Tailscale on Windows while this is on** — traffic would be encapsulated twice and Tailscale packets don't fit inside Tailscale packets. Running it inside WSL is viable only because mirrored networking gives `eth1` an MTU of 1500 (NAT mode's 1280 breaks SSH and TLS while ping keeps working) and NixOS-WSL runs systemd as PID 1. The node is up only while WSL is — that's accepted, not a bug. (The mac and both bare-metal hosts are their own nodes — `modules/darwin/tailscale.nix` (OSS daemon, not the GUI app) and the tailscale block in `modules/nixos/networking.nix` (bare metal is always its own node; it trusts tailscale0 wholesale, which is why the LAN firewall list beside it stays tight); see the file map.)
 
 - **Never manage `~/.config/nvim` through Nix, and never re-enable `programs.neovim`.** It is marcus's own LazyVim fork (github.com/marcussanchez/neovim-config), a normal mutable git checkout — lazy.nvim writes `lazy-lock.json` and marcus commits/pushes from there. `programs.neovim` generates its own `init.lua` and symlinks it over the checkout, silently breaking the whole editor (this happened once; the fix was deliberate). `home/marcus/common/neovim.nix` installs the stable nixpkgs binary via `home.packages`, clone-bootstraps the config if `~/.config/nvim` doesn't exist, and otherwise ff-only pulls it during activation (only when the tree is clean — never touch that safety check). (Marcus prefers stable over nightly; a nightly-overlay setup existed before commit ~2026-07 if ever needed again.)
 - **Zig and ZLS must stay on matching versions or editor tooling breaks.** Both come from nixpkgs (`pkgs.zig` / `pkgs.zls` in `modules/common/packages.nix`), which builds zls against its own zig, so they stay in lockstep automatically — don't source one of them from somewhere else. If a just-released Zig is ever needed before nixpkgs catches up, the old two-input overlay approach (mitchellh/zig-overlay + zigtools/zls pinned ref) is in git history at `modules/nixos/zig.nix` before commit ~2026-07.

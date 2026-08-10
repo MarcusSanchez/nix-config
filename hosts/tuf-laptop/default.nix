@@ -17,22 +17,18 @@
     inputs.home-manager.nixosModules.home-manager
     ../../modules/nixos/nix.nix
     ../../modules/nixos/packages.nix
-    ../../modules/nixos/nix-ld.nix
     ../../modules/nixos/users.nix
     # the desktop session, in an order that is NOT cosmetic: merged-list
     # options (systemPackages, udev.packages) order their entries by
     # module position — keep this run aligned with naut-dt's
     inputs.dank-material-shell.nixosModules.greeter
     ../../modules/nixos/boot.nix
-    ../../modules/nixos/locale.nix
     ../../modules/nixos/security-keys.nix
-    ../../modules/nixos/tailscale.nix
     ../../modules/nixos/niri.nix
     ../../modules/nixos/greeter.nix
-    ../../modules/nixos/peripherals.nix
+    ../../modules/nixos/system.nix
     ../../modules/nixos/audio.nix
     ../../modules/nixos/networking.nix
-    ../../modules/nixos/fonts.nix
     ../../modules/nixos/foreign-binaries.nix
     ../../modules/nixos/nvidia.nix
     ./hardware-configuration.nix

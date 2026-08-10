@@ -18,11 +18,11 @@
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # (No Wootility app: the web Wootility in Chrome covers it — WebHID
-    # plus the udev rules from modules/nixos/peripherals.nix. zen can't;
+    # plus the udev rules from modules/nixos/system.nix. zen can't;
     # firefox-based, no WebHID.)
 
     # GNOME Files — the GUI file explorer (yazi remains the terminal
-    # one); gvfs in modules/nixos/peripherals.nix backs its trash,
+    # one); gvfs in modules/nixos/system.nix backs its trash,
     # USB and phone mounting
     nautilus
 
