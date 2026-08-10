@@ -17,7 +17,7 @@
     ../../modules/wsl
     # Not in the wsl aggregator: only ONE WSL distro per Windows PC
     # can be a tailnet node — they share a network namespace. See the file.
-    ../../modules/wsl/tailscale.nix
+    ../../modules/wsl/networking.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

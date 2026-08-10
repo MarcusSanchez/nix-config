@@ -13,6 +13,5 @@
     ./users.nix
     ./wsl.nix
     ./keyring.nix
-    ./autoupgrade.nix
   ];
 }

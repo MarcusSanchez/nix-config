@@ -225,7 +225,7 @@ Commit, push, switch.
 ## Tailscale on a new PC
 
 Only relevant if that box will be a tailnet node. `hosts/wsl` imports
-`modules/wsl/tailscale.nix`, so every WSL host is
+`modules/wsl/networking.nix`, so every WSL host is
 one unless you drop the import. (The bare-metal hosts need none of this
 section: `modules/desktop/tailscale.nix` rides the flavor aggregator —
 bare metal is always its own node — and everything below about Windows

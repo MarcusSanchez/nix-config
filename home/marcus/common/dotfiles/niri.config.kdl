@@ -315,7 +315,7 @@ spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
 // hot-reloads edits, --watch picks up hotplugged keyboards
 spawn-at-startup "xremap" "--watch=config,device" "/home/marcus/nix-config/home/marcus/common/dotfiles/xremap.yml"
 // TPM-backed virtual FIDO2 key (Windows-Hello-ish); pinentry prompts
-// on use. Plumbing in modules/nixos/security-keys.nix.
+// on use. Plumbing in modules/nixos/security.nix.
 spawn-at-startup "tpm-fido"
 // Windows-style boot: auto-login lands on the LOCK screen, with the
 // session already warm behind it. ONLY for the boot session — greetd

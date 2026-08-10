@@ -1,6 +1,7 @@
-# Nix daemon settings and garbage collection, every NixOS host. The weekly
-# autoUpgrade is deliberately NOT here — it's WSL policy (modules/wsl/
-# autoupgrade.nix); the laptop updates by hand, when its owner means to.
+# Nix daemon settings and garbage collection for the bare-metal
+# machines. The weekly autoUpgrade is deliberately NOT here — it's WSL
+# policy (modules/wsl/nix.nix); a desktop updates by hand, when its
+# owner means to.
 { ... }:
 
 {

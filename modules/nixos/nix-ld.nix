@@ -1,4 +1,4 @@
-# The two shims that make FOREIGN (non-nix) binaries run — both here
+# nix-ld and its companion shim, which make non-nix binaries run — both
 # for the JetBrains/Toolbox story, though they serve any outside binary.
 #
 # 1) nix-ld itself (enabled below) plus its ADDITIONS (list options
