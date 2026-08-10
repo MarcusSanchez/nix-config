@@ -5,11 +5,11 @@
 #                 only — a lite box can never open super.yaml. Stays FIRST
 #                 under keys:, age:place verifies against the first age1
 #                 string in this file.
-#   bedroom-wsl   each trusted machine's own key, generated on-box and
-#   bedroom-nixos backed up nowhere (so a vault compromise cannot open
+#   naut-box      each trusted machine's own key, generated on-box and
+#   naut-dt       backed up nowhere (so a vault compromise cannot open
 #   macbook-air   super.yaml). Recipients of BOTH files. Enrolling or
-#   tuf-nixos     replacing one: README "Enrolling a trusted machine".
-#                 (bedroom-wsl and bedroom-nixos are the two OSes of one
+#   tuf-laptop    replacing one: README "Enrolling a trusted machine".
+#                 (naut-box and naut-dt are the two OSes of one
 #                 physical PC; each enrolls its own key, and a reinstall
 #                 means re-enrolment — the superseded key gets revoked.)
 #   super         recovery if both trusted machines die at once: Bitwarden
@@ -24,27 +24,27 @@
 # works.
 keys:
   - &master age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
-  - &bedroom-wsl age10uy4rx9wnaq4gp7p8v8p7ztx6m4kuaqunkjsfhd87pt5p70p4d8qyk8drl
+  - &naut-box age10uy4rx9wnaq4gp7p8v8p7ztx6m4kuaqunkjsfhd87pt5p70p4d8qyk8drl
   - &macbook-air age17z3w72l4nvnwjra5e2rk0s6gyga0a7xq04dp08pw45kdfdre8v6qag5ppt
-  - &tuf-nixos age1rwzmr2nv7grwnk3zk54k8e9l0wl3pawraxpf05ej006xhayvzguqtgh0d7
-  - &bedroom-nixos age17jj9yr8e6dqcm4pl2nmmzjnhfv0udl5nl0cvhf0gcrls8wznh5rqv7k7rz
+  - &tuf-laptop age1rwzmr2nv7grwnk3zk54k8e9l0wl3pawraxpf05ej006xhayvzguqtgh0d7
+  - &naut-dt age17jj9yr8e6dqcm4pl2nmmzjnhfv0udl5nl0cvhf0gcrls8wznh5rqv7k7rz
   - &super age1vkv5elnhd64gjy2sn66zwppaltcpmmxpfydz5w432uj63ywr456stsa7n7
 
 creation_rules:
   - path_regex: secrets/super\.yaml$
     key_groups:
       - age:
-          - *bedroom-wsl
+          - *naut-box
           - *macbook-air
-          - *tuf-nixos
-          - *bedroom-nixos
+          - *tuf-laptop
+          - *naut-dt
           - *super
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
       - age:
           - *master
-          - *bedroom-wsl
+          - *naut-box
           - *macbook-air
-          - *tuf-nixos
-          - *bedroom-nixos
+          - *tuf-laptop
+          - *naut-dt
           - *super

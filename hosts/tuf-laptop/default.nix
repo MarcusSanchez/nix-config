@@ -1,7 +1,7 @@
 # Host definition: the TUF laptop (discrete NVIDIA GPU, MUX in
 # discrete mode — the flavor's shared driver shape in
 # modules/desktop/nvidia.nix fits it as-is). One of two bare-metal
-# NixOS hosts (the other is hosts/bedroom-nixos): shared Linux core +
+# NixOS hosts (the other is hosts/naut-dt): shared Linux core +
 # the desktop flavor (niri/DMS session). Everything host-specific lives
 # here; everything reusable lives in modules/.
 { hostName, ... }:

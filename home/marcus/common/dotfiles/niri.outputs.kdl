@@ -24,7 +24,7 @@ output "eDP-1" {
     scale 1.1
 }
 
-// bedroom-nixos: three monitors, left to right — DP-2 vertical, the 4K
+// naut-dt: three monitors, left to right — DP-2 vertical, the 4K
 // in the middle, DP-1 on the right. Connector-keyed, so these blocks are
 // inert on the laptop (which has only eDP-1). Modes are each panel's
 // maximum; y positions centre the shorter panels against the vertical
@@ -38,7 +38,7 @@ output "eDP-1" {
 // panel_orientation kernel param alongside it: niri COMPOSES the two
 // (property + transform "90" = 180°, sideways-flipped). The param
 // would also serve nothing — the side connectors are boot-disabled
-// (video=DP-2:d in hosts/bedroom-nixos/default.nix), so plymouth
+// (video=DP-2:d in hosts/naut-dt/monitors.nix), so plymouth
 // never draws there, and plymouth-on-DP-2 is the only thing such a
 // param would rotate.
 output "DP-2" {

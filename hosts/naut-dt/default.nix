@@ -1,7 +1,7 @@
 # Host definition: the bedroom PC's bare-metal side (AMD CPU, NVIDIA
 # GPU — the flavor's shared driver shape in modules/desktop/nvidia.nix
 # fits it as-is), dual-booted next to the Windows that hosts
-# bedroom-wsl — same physical machine, two hosts in this flake, only
+# naut-box — same physical machine, two hosts in this flake, only
 # ever one running. Same desktop flavor as the TUF laptop.
 # hardware-configuration.nix is the generated truth from the install
 # (regenerate, don't edit).

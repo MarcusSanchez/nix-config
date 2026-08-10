@@ -34,7 +34,7 @@ in
     # for exactly that reason). The 1440p is a four-column mosaic with
     # 80px gradient-feathered seams; the portrait is a single native
     # rip. Only the middle monitor animates (mpvpaper in
-    # niri.host.bedroom-nixos.kdl); these are the sides' whole
+    # niri.host.naut-dt.kdl); these are the sides' whole
     # wallpaper now, not just the fallback. Assigned per-monitor via
     # `dms ipc call wallpaper setFor <connector> <path>` — recorded in
     # machine-local session state, so the laptop (which also gets these

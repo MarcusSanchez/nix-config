@@ -1,4 +1,4 @@
-// Host-specific niri config for bedroom-nixos. niri.config.kdl
+// Host-specific niri config for naut-dt. niri.config.kdl
 // includes the stable name "niri.host.kdl", and desktop/niri.nix
 // links that name at ~/.config/niri to THIS file when the hostname
 // matches — one shared config, per-host tails. Live-editable like

@@ -28,7 +28,7 @@
     # Same cross-platform eval trap as starship's port: this theme reads
     # its palette from a derivation built at EVALUATION time, and that
     # derivation is the target's platform. With the desktop's
-    # programs.swaylock on, evaluating tuf-nixos from the mac then dies
+    # programs.swaylock on, evaluating the laptop from the mac then dies
     # with "platform mismatch: required x86_64-linux" — so the mac loses
     # its only way to check laptop changes. No-op on WSL/mac.
     swaylock.enable = false;
@@ -149,7 +149,7 @@
         # Two lines: an identity banner, then robbyrussell exactly as
         # upstream — so the status arrow sits next to what you type.
         #
-        #   (NixOS) marcus@bedroom-wsl        (nix-darwin, in green, on the mac)
+        #   (NixOS) marcus@naut-box             (nix-darwin, in green, on the mac)
         #   ➜  nix-config git:(main) ✗
         #
         # The platform label is plain text on purpose — a third attempt at

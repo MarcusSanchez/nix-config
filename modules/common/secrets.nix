@@ -8,7 +8,7 @@
 #   * lite/temporary boxes hold the roaming master key from Bitwarden
 #     (placed by age:place) — it decrypts secrets/secrets.yaml only, so
 #     adding or losing such a box never edits .sops.yaml.
-#   * bedroom-wsl and the mac each hold their OWN machine key (generated
+#   * the trusted machines each hold their OWN machine key (generated
 #     on-box, backed up nowhere), a named recipient of both secrets.yaml
 #     and super.yaml. Enrolling or replacing one of these means editing
 #     .sops.yaml + `sops updatekeys` — see README "Enrolling a trusted

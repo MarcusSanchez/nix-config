@@ -761,7 +761,7 @@ overview {
 // pickers) declare a parent and float regardless; Mod+Shift+V floats
 // anything by hand. Zed's settings UI keeps its float rule: tiled, it
 // opens as a plain toplevel and inherits the 95% default-column-width
-// from niri.host.bedroom-nixos.kdl — a giant settings pane.
+// from niri.host.naut-dt.kdl — a giant settings pane.
 window-rule {
     match app-id="dev.zed.Zed" title="^Zed — "
     open-floating true

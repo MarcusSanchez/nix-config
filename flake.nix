@@ -46,7 +46,7 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Secure Boot signing for the dual-boot desktop (bedroom-nixos only —
+    # Secure Boot signing for the dual-boot desktop (naut-dt only —
     # Windows on the same machine effectively requires SB). Pinned to a
     # release tag on purpose; bump deliberately, not via flake update.
     lanzaboote = {
@@ -80,45 +80,64 @@
       # (the rustdesk bridge on the remotely-controlled PCs) rides the
       # entry's list instead of forking the kind.
       nixosConfigurations =
-        nixpkgs.lib.mapAttrs
-          (
-            hostName: hostModules:
-            nixpkgs.lib.nixosSystem {
-              specialArgs = { inherit inputs hostName; };
-              modules = hostModules;
-            }
-          )
-          {
-            # secrets-super on an entry = this machine holds its own age
-            # key, a recipient of secrets/super.yaml. The line must track
-            # key reality — see modules/common/secrets-super.nix.
-            bedroom-wsl = [
-              ./hosts/wsl
-              ./modules/common/secrets-super.nix
-            ];
+        let
+          cfgs =
+            nixpkgs.lib.mapAttrs
+              (
+                hostName: hostModules:
+                nixpkgs.lib.nixosSystem {
+                  specialArgs = { inherit inputs hostName; };
+                  modules = hostModules;
+                }
+              )
+              {
+                # secrets-super on an entry = this machine holds its own age
+                # key, a recipient of secrets/super.yaml. The line must track
+                # key reality — see modules/common/secrets-super.nix.
+                naut-box = [
+                  ./hosts/wsl
+                  ./modules/common/secrets-super.nix
+                ];
 
-            framework-wsl = [
-              ./hosts/wsl
-              ./modules/wsl/rustdesk-bridge.nix
-            ];
-            office-lite-wsl-1 = [
-              ./hosts/wsl
-              ./modules/wsl/rustdesk-bridge.nix
-            ];
-            office-lite-wsl-2 = [
-              ./hosts/wsl
-              ./modules/wsl/rustdesk-bridge.nix
-            ];
+                framework-dt = [
+                  ./hosts/wsl
+                  ./modules/wsl/rustdesk-bridge.nix
+                ];
+                office-one = [
+                  ./hosts/wsl
+                  ./modules/wsl/rustdesk-bridge.nix
+                ];
+                office-two = [
+                  ./hosts/wsl
+                  ./modules/wsl/rustdesk-bridge.nix
+                ];
 
-            tuf-nixos = [
-              ./hosts/tuf-nixos
-              ./modules/common/secrets-super.nix
-            ];
-            bedroom-nixos = [
-              ./hosts/bedroom-nixos
-              ./modules/common/secrets-super.nix
-            ];
-          };
+                tuf-laptop = [
+                  ./hosts/tuf-laptop
+                  ./modules/common/secrets-super.nix
+                ];
+                naut-dt = [
+                  ./hosts/naut-dt
+                  ./modules/common/secrets-super.nix
+                ];
+              };
+        in
+        cfgs
+        # TRANSITION aliases: a machine resolves its config by its CURRENT
+        # hostname, so until each box has activated a new-name generation
+        # (and, on WSL, restarted the distro so wsl.conf applies it) the
+        # old attribute must keep working. Each alias IS the new-name
+        # config — activating it renames the machine, so every box
+        # self-migrates on its next switch/autoUpgrade. Delete a line once
+        # its machine reports the new hostname.
+        // {
+          bedroom-wsl = cfgs.naut-box;
+          framework-wsl = cfgs.framework-dt;
+          office-lite-wsl-1 = cfgs.office-one;
+          office-lite-wsl-2 = cfgs.office-two;
+          tuf-nixos = cfgs.tuf-laptop;
+          bedroom-nixos = cfgs.naut-dt;
+        };
 
       # Same shape as above: the attribute IS the hostname, passed down as
       # `hostName`. Bare `sudo darwin-rebuild switch` resolves

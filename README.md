@@ -7,10 +7,9 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
-| `bedroom-wsl` | WSL, dev | `marcus` | `/etc/nixos` |
-| `framework-wsl`, `office-lite-wsl-1`, `office-lite-wsl-2` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
-| `tuf-nixos` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
-| `bedroom-nixos` | bare-metal desktop, dual-boot beside the PC that hosts `bedroom-wsl` | `marcus` | `/etc/nixos` |
+| `naut-box`, `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
+| `tuf-laptop` | bare-metal laptop — niri + DankMaterialShell | `marcus` | `/etc/nixos` |
+| `naut-dt` | bare-metal desktop, dual-boot beside the PC that hosts `naut-box` | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
