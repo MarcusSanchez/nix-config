@@ -2,7 +2,7 @@
 # hashedPassword on purpose: users.mutableUsers defaults to true, so
 # the password set at install time survives rebuilds. NetworkManager
 # membership pairs with ./networking.nix; input/uinput are evdev read +
-# uinput write for xremap (home/marcus/nixos/session-tools.nix).
+# uinput write for xremap (home/marcus/nixos/niri.nix).
 { pkgs, ... }:
 
 {

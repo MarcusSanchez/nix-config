@@ -308,15 +308,14 @@ home/marcus/
                            silently no-ops) + out-of-store links for
                            dms.settings.json and the assets/dms-plugins/
                            bar widgets
-    niri.nix               the session's config wiring: out-of-store
-                           links for niri/config.kdl, niri.outputs.kdl,
+    niri.nix               the session: out-of-store links for
+                           niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
-                           swaylock fallback + xwayland-satellite
-    session-tools.nix      what niri.config.kdl's binds and spawns
-                           expect on PATH: snipping (grim/slurp/satty,
-                           Mod+Shift+S), cliphist, playerctl,
-                           wallpapers (swaybg/mpvpaper), xremap,
-                           tpm-fido
+                           swaylock fallback + everything the binds and
+                           spawns expect on PATH — snipping
+                           (grim/slurp/satty, Mod+Shift+S), cliphist,
+                           playerctl, wallpapers (swaybg/mpvpaper),
+                           xremap, tpm-fido, xwayland-satellite
     appearance.nix         wallpaper + avatar from ./assets, linked to
                            stable paths under ~ — DMS records an ABSOLUTE
                            path in its session state, so a store path would
