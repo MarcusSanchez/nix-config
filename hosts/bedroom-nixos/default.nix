@@ -19,6 +19,7 @@
     # fails. Full ceremony: lanzaboote.nix header.
     ./lanzaboote.nix
     ./reboot-windows.nix
+    ./monitors.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -28,15 +29,9 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  homeEntryPoint = ../../home/marcus/desktop.nix;
-
   # Connectors that carry the greeter's sign-in UI on this machine — the
   # 4K in the middle; the sides stay blank at the login screen.
   greeterScreens = [ "DP-3" ];
-
-  # Trusted machine: own age key (generated on-box at install, enrolled
-  # in .sops.yaml), recipient of both secrets files.
-  secretsTier = "full";
 
   # Windows lives on its own ESP (the factory ~100 MB one); NixOS gets a
   # dedicated 1 GB ESP, so systemd-boot can't auto-detect Windows across
@@ -45,40 +40,6 @@
   # the cross-ESP chainload trick (boot.loader.systemd-boot.windows) boots
   # through an unsigned EDK2 UEFI shell, which enforcing Secure Boot
   # rejects — and lanzaboote replaces the systemd-boot module anyway.
-
-  # Boot with only the main monitor lit: plymouth paints every active
-  # connector and has no per-monitor config, so the side connectors are
-  # kernel-disabled through the splash. The `d` force outlives the
-  # splash — compositors do NOT resurrect a forced-off connector
-  # (the session would come up single-monitor) — so the
-  # wake-side-monitors oneshot below un-forces them via sysfs right
-  # before greetd, and the greeter lights them (blank-filtered, per
-  # modules/desktop/greeter.nix). DP-2's rotation lives in
-  # niri.outputs.kdl as transform "90"; a panel_orientation param
-  # would only rotate a plymouth that never draws there (and niri
-  # composing param + transform flips the image — see
-  # niri.outputs.kdl). Known cosmetic cost: the brief SHUTDOWN
-  # splash still paints all three (the session re-enabled them), and
-  # sideways on DP-2. Host-level: this desk's connectors by name.
-  boot.kernelParams = [
-    "video=DP-1:d"
-    "video=DP-2:d"
-  ];
-
-  systemd.services.wake-side-monitors = {
-    description = "Un-force the boot-disabled side monitor connectors before the greeter";
-    wantedBy = [ "multi-user.target" ];
-    before = [ "greetd.service" ];
-    after = [ "plymouth-quit.service" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      for conn in DP-1 DP-2; do
-        for f in /sys/class/drm/card*-"$conn"/status; do
-          [ -e "$f" ] && echo detect > "$f" || true
-        done
-      done
-    '';
-  };
 
   # The release this machine was installed under — never changes.
   system.stateVersion = "26.05";

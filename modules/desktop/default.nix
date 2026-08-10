@@ -16,9 +16,14 @@
 # monolith: merged-list options (systemPackages, udev.packages) order
 # their entries by module position, so reordering imports is not
 # cosmetic.
-{ inputs, ... }:
+{ inputs, lib, ... }:
 
 {
+  # Both bare-metal hosts run the same user desktop; a host wanting a
+  # different home config overrides at normal priority. (The WSL flavor
+  # can't do this — its two kinds use different entry points.)
+  homeEntryPoint = lib.mkDefault ../../home/marcus/desktop.nix;
+
   imports = [
     inputs.dank-material-shell.nixosModules.greeter
     ./boot.nix
