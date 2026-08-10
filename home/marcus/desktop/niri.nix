@@ -1,5 +1,5 @@
 # User-side pieces of the niri session (the compositor itself and its
-# portals come from programs.niri in modules/desktop/desktop.nix).
+# portals come from programs.niri in modules/desktop/niri.nix).
 # The shell is DankMaterialShell (quickshell-based): bar, launcher,
 # notifications, control center, lock screen and wallpaper-driven
 # Material theming in one — spawned and bound in niri.config.kdl
@@ -103,7 +103,7 @@
     (pkgs.xremap.override { withVariant = "niri"; })
 
     # TPM-backed virtual FIDO2 key (system plumbing in
-    # modules/desktop/tpm.nix, spawned in niri.config.kdl). It shells out
+    # modules/desktop/security-keys.nix, spawned in niri.config.kdl). It shells out
     # to a bare `pinentry` for the touch-confirmation prompt — the
     # alias points it at the gnome3 flavor, which prompts via gcr.
     pkgs.tpm-fido
@@ -134,7 +134,7 @@
   # niri.outputs.kdl must sit BESIDE config.kdl: its include is resolved
   # relative to the symlink's directory, not the target's (verified on
   # niri 26.04) — the same file also feeds the greeter's compositor via
-  # /etc/greetd/niri_overrides.kdl (modules/desktop/desktop.nix).
+  # /etc/greetd/niri_overrides.kdl (modules/desktop/greeter.nix).
   #
   # DMS caveat, same as the zed links: it may atomically replace
   # settings.json's link with a plain file on save; HM re-links and
@@ -164,7 +164,7 @@
       "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
     };
 
-  # fallback lock (PAM entry in modules/desktop/desktop.nix) in case the
+  # fallback lock (PAM entry in modules/desktop/niri.nix) in case the
   # DMS lock ever misbehaves — run `swaylock` from a terminal
   programs.swaylock.enable = true;
 }

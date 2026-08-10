@@ -3,7 +3,7 @@
 // resolves relative includes against ~/.config/niri/, where both
 // files are linked) and the DMS greeter, whose launcher appends
 // `include "/etc/greetd/niri_overrides.kdl"` to its own generated
-// config when that file exists — modules/desktop/desktop.nix points
+// config when that file exists — modules/desktop/greeter.nix points
 // it at a store copy of this one. Without that, the greeter runs
 // every monitor untransformed at scale 1: sideways on the vertical
 // monitor, tiny on the 4K. (The greeter copy updates on rebuild, not
