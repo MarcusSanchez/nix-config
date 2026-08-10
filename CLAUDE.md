@@ -84,7 +84,7 @@ hosts/bedroom-nixos/       the desktop PC, dual-booted beside Windows
                            reinstall, comment the import out until
                            `sbctl create-keys` has run, or the bootloader
                            install (and nixos-install with it) fails.
-                           The working MSI ceremony (its header + README):
+                           The working MSI ceremony (its header):
                            firmware "Delete all Secure Boot variables" =
                            TRUE Setup Mode (delete-PK-only leaves db/KEK
                            immutable), then runtime `sbctl enroll-keys

@@ -2,9 +2,8 @@
 # RTX 5080), dual-booted next to the Windows that hosts bedroom-wsl —
 # same physical machine, two hosts in this flake, only ever one running.
 # Same desktop flavor as the TUF laptop; its own GPU facts in
-# ./nvidia.nix. Installed via the README's dual-boot
-# runbook; hardware-configuration.nix is the generated truth from that
-# install (regenerate, don't edit).
+# ./nvidia.nix. hardware-configuration.nix is the generated truth from
+# the install (regenerate, don't edit).
 { hostName, ... }:
 
 {
@@ -17,7 +16,7 @@
     # Secure Boot, live since install day. On a REINSTALL, comment this
     # out until `sudo sbctl create-keys` has run — enabled without keys
     # on disk, the bootloader install (and therefore nixos-install)
-    # fails. Full ceremony: lanzaboote.nix header + README "Secure Boot".
+    # fails. Full ceremony: lanzaboote.nix header.
     ./lanzaboote.nix
     ./reboot-windows.nix
   ];

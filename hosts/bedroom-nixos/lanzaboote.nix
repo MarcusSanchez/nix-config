@@ -8,8 +8,8 @@
 # under this machine's own PK. On a REINSTALL, comment this import out
 # until `sudo sbctl create-keys` has run — with lanzaboote enabled and
 # /var/lib/sbctl absent, the bootloader-install step fails, which would
-# break nixos-install itself. The README's "Secure Boot" section is the
-# full ceremony; the shape that actually works on this MSI board:
+# break nixos-install itself. The full ceremony, in the shape that
+# actually works on this MSI board:
 #   sudo sbctl create-keys          # writes /var/lib/sbctl
 #   (import this file, switch — generations get signed)
 #   sudo sbctl verify               # everything on the ESP shows signed
