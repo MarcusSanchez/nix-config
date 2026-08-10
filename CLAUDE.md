@@ -312,7 +312,11 @@ home/marcus/
                            helpers; matugen missing = theme generation
                            silently no-ops) + out-of-store links for
                            dms.settings.json and the assets/dms-plugins/
-                           bar widgets
+                           bar widgets + wallpaper/avatar from ./assets,
+                           linked to stable paths under ~ (DMS records
+                           ABSOLUTE paths in session state — a store
+                           path would rot at GC; avatar to ~/.face, the
+                           AccountsService fallback)
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
@@ -321,11 +325,7 @@ home/marcus/
                            (grim/slurp/satty, Mod+Shift+S), cliphist,
                            playerctl, wallpapers (swaybg/mpvpaper),
                            xremap, tpm-fido, xwayland-satellite
-    appearance.nix         wallpaper + avatar from ./assets, linked to
-                           stable paths under ~ — DMS records an ABSOLUTE
-                           path in its session state, so a store path would
-                           rot at the next GC. Avatar goes to ~/.face, the
-                           convention AccountsService falls back to
+
     apps.nix ghostty.nix   ghostty.nix = shared common/ghostty.nix +
                            the GTK chrome and Windows-Terminal keybinds
 ```

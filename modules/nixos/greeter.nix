@@ -125,7 +125,7 @@ in
     # dms-greeter user cannot read ~/.face through the 0700 home dir, and
     # AccountsService only gets an icons/ copy when the avatar is set
     # imperatively through the UI. Seed that copy declaratively from the
-    # same asset home/marcus/nixos/appearance.nix links to ~/.face, so
+    # same asset home/marcus/nixos/dms.nix links to ~/.face, so
     # a fresh machine's login screen has the face too. C+ overwrites, so
     # an asset change propagates at the next boot/activation instead of
     # being blocked by the existing copy.
