@@ -91,13 +91,7 @@
                 }
               )
               {
-                # secrets-super on an entry = this machine holds its own age
-                # key, a recipient of secrets/super.yaml. The line must track
-                # key reality — see modules/common/secrets-super.nix.
-                naut-box = [
-                  ./hosts/wsl
-                  ./modules/common/secrets-super.nix
-                ];
+                naut-box = [ ./hosts/wsl ];
 
                 framework-dt = [
                   ./hosts/wsl
@@ -112,14 +106,8 @@
                   ./modules/wsl/rustdesk-bridge.nix
                 ];
 
-                tuf-laptop = [
-                  ./hosts/tuf-laptop
-                  ./modules/common/secrets-super.nix
-                ];
-                naut-dt = [
-                  ./hosts/naut-dt
-                  ./modules/common/secrets-super.nix
-                ];
+                tuf-laptop = [ ./hosts/tuf-laptop ];
+                naut-dt = [ ./hosts/naut-dt ];
               };
         in
         cfgs
@@ -143,20 +131,12 @@
       # `hostName`. Bare `sudo darwin-rebuild switch` resolves
       # darwinConfigurations.<scutil --get LocalHostName>, so the two must
       # agree — deriving it means they can't drift.
-      darwinConfigurations =
-        nixpkgs.lib.mapAttrs
-          (
-            hostName: hostModules:
-            nix-darwin.lib.darwinSystem {
-              specialArgs = { inherit inputs hostName; };
-              modules = hostModules;
-            }
-          )
-          {
-            macbook-air = [
-              ./hosts/darwin
-              ./modules/common/secrets-super.nix
-            ];
-          };
+      darwinConfigurations = nixpkgs.lib.mapAttrs (
+        hostName: hostModules:
+        nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit inputs hostName; };
+          modules = hostModules;
+        }
+      ) { macbook-air = [ ./hosts/darwin ]; };
     };
 }

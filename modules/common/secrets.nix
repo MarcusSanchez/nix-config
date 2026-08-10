@@ -8,11 +8,11 @@
 #   * lite/temporary boxes hold the roaming master key from Bitwarden
 #     (placed by age:place) — it decrypts secrets/secrets.yaml only, so
 #     adding or losing such a box never edits .sops.yaml.
-#   * the trusted machines each hold their OWN machine key (generated
-#     on-box, backed up nowhere), a named recipient of both secrets.yaml
-#     and super.yaml. Enrolling or replacing one of these means editing
-#     .sops.yaml + `sops updatekeys` — see README "Enrolling a trusted
-#     machine".
+#   * the trusted machines (the `trusted` list below) each hold their
+#     OWN machine key (generated on-box, backed up nowhere), a named
+#     recipient of both secrets.yaml and super.yaml. Enrolling or
+#     replacing one means editing .sops.yaml + `sops updatekeys` + this
+#     file's list — see README "Enrolling a trusted machine".
 #
 # The keyfile has to be there before a switch that installs secrets —
 # sops-install-secrets treats a missing keyFile as fatal, not as a
@@ -35,6 +35,17 @@
 let
   user = config.identity.username;
   home = config.identity.home;
+  # The hostnames whose own age key opens secrets/super.yaml — must
+  # track .sops.yaml's recipients and key reality on the box:
+  # sops-install-secrets aborts the WHOLE install on the first file it
+  # cannot decrypt, so listing a master-key box here would cost it
+  # every secret, not just the super ones.
+  trusted = [
+    "naut-box"
+    "naut-dt"
+    "tuf-laptop"
+    "macbook-air"
+  ];
 in
 {
   config = lib.mkMerge [
@@ -87,13 +98,6 @@ in
         #                   never in super.yaml
         #   atuin_username  with atuin_password, the activation-hook login
         #   atuin_password
-        # The super-tier declarations (fly_token from super.yaml) are NOT
-        # here — they live in ./secrets-super.nix, wired per-attr in
-        # flake.nix onto the trusted machines only. Declaring them
-        # everywhere is not an option: sops-install-secrets aborts the
-        # WHOLE install on the first file it cannot decrypt, so a
-        # master-key box declaring super.yaml would lose every secret,
-        # not just the super ones.
         secrets =
           lib.genAttrs
             [
@@ -106,7 +110,23 @@ in
             (_: {
               owner = user;
               mode = "0400";
-            });
+            })
+          # The super tier, trusted machines only (the `trusted` list in
+          # the let above). fly_token: a fly ORG token (`fly tokens
+          # create org`), static unlike the session macaroon `fly auth
+          # login` leaves behind; exported as FLY_API_TOKEN by
+          # home/marcus/common/secrets.nix, whose read-guard makes boxes
+          # without it skip the export with no home-layer branching.
+          # Nothing unreissuable ever goes in super.yaml — a lost super
+          # secret must be re-creatable at its provider (atuin_key stays
+          # above, Bitwarden-recoverable, for exactly this reason).
+          // lib.optionalAttrs (builtins.elem config.networking.hostName trusted) {
+            fly_token = {
+              sopsFile = ../../secrets/super.yaml;
+              owner = user;
+              mode = "0400";
+            };
+          };
       };
     }
 

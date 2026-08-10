@@ -1,12 +1,15 @@
 # Dev toolchains and CLI basics for every machine. Platform-only packages
 # (build essentials the mac gets from Xcode CLT) live in the platform's own
 # packages.nix.
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    # from the overlay pinned at the bottom of this file
+    claude-code
+
     tree
     jq
     file
@@ -72,4 +75,10 @@
     zig
     zls
   ];
+
+  # Claude Code, kept current via the claude-code-nix overlay. Its
+  # binary cache (claude-code.cachix.org) is wired in per-platform:
+  # nix.settings in the nixos/wsl nix.nix files, /etc/nix/
+  # nix.custom.conf on the mac.
+  nixpkgs.overlays = [ inputs.claude-code.overlays.default ];
 }
