@@ -35,10 +35,10 @@
       email = "marcussanchez031@gmail.com";
       # pinentry-curses on BOTH platforms — one prompt, drawn on the tty of
       # whatever terminal ran the rbw command (rbw forwards it to the
-      # agent-spawned pinentry). Settled, 2026-07-31.
+      # agent-spawned pinentry).
       #
       # The one mac landmine: Ctrl-C mid-prompt orphans the pinentry, which
-      # then spins at 100% CPU retrying an EIO read (2026-07-29). Abort with
+      # then spins at 100% CPU retrying an EIO read. Abort with
       # Ctrl-D instead; recovery is `pkill pinentry-curses`. (A Touch ID
       # route via pinentry-touchid was explored and works only behind a
       # protocol shim — it gates on gpg-agent-only commands, see its issue
@@ -50,13 +50,13 @@
 
   # flyctl reads FLY_API_TOKEN ahead of its config file, which leaves
   # ~/.fly/config.yml entirely to flyctl — free to persist wireguard peer
-  # state and refresh its own tokens without us clobbering them. Installing
+  # state and refresh its own tokens without interference. Installing
   # the token isn't an option: `fly auth login -t <token>` lists the flag in
-  # --help but ignores it and opens a browser (tested 2026-07-29).
+  # --help but ignores it and opens a browser.
   #
   # Guarded so a machine whose secrets aren't decrypted yet starts without
-  # the variable rather than erroring. Bare token since 2026-07-31 — the
-  # old fly_config held a whole config.yml and needed sed.
+  # the variable rather than erroring. A bare token on purpose — a
+  # whole-config.yml secret would need sed to install.
   # croc takes its code phrase from CROC_SECRET, so with the same value
   # exported everywhere, bare `croc send <file>` and bare `croc` pair up
   # across machines with no code to read out. $(cat) drops the trailing

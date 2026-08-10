@@ -2,7 +2,7 @@
 # RTX 5080), dual-booted next to the Windows that hosts bedroom-wsl —
 # same physical machine, two hosts in this flake, only ever one running.
 # Same desktop flavor as the TUF laptop; its own GPU facts in
-# ./nvidia.nix. Installed 2026-08-06 via the README's dual-boot
+# ./nvidia.nix. Installed via the README's dual-boot
 # runbook; hardware-configuration.nix is the generated truth from that
 # install (regenerate, don't edit).
 { hostName, ... }:
@@ -45,15 +45,16 @@
 
   # Boot with only the main monitor lit: plymouth paints every active
   # connector and has no per-monitor config, so the side connectors are
-  # kernel-disabled through the splash. The `d` force is HARDER than
-  # first assumed — compositors do NOT resurrect a forced-off connector
-  # (learned live: the session came up single-monitor) — so the
+  # kernel-disabled through the splash. The `d` force outlives the
+  # splash — compositors do NOT resurrect a forced-off connector
+  # (the session would come up single-monitor) — so the
   # wake-side-monitors oneshot below un-forces them via sysfs right
   # before greetd, and the greeter lights them (blank-filtered, per
   # modules/desktop/greeter.nix). DP-2's rotation lives in
-  # niri.outputs.kdl as transform "90" again; the retired
-  # panel_orientation param's only consumer was plymouth-on-DP-2,
-  # which no longer draws. Known cosmetic cost: the brief SHUTDOWN
+  # niri.outputs.kdl as transform "90"; a panel_orientation param
+  # would only rotate a plymouth that never draws there (and niri
+  # composing param + transform flips the image — see
+  # niri.outputs.kdl). Known cosmetic cost: the brief SHUTDOWN
   # splash still paints all three (the session re-enabled them), and
   # sideways on DP-2. Host-level: this desk's connectors by name.
   boot.kernelParams = [

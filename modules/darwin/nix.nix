@@ -7,7 +7,7 @@
 #
 # What actually lives out there today (unmanaged by this repo — restate it
 # by hand after a reinstall):
-#  - extra-trusted-users = marcussanchez, added 2026-07-27. devenv sets the
+#  - extra-trusted-users = marcussanchez. devenv sets the
 #    restricted `system` setting on every shell eval, which the daemon
 #    ignores for untrusted clients — the whole devenv shell then fails to
 #    build. Determinate's default is trusted-users = root only.

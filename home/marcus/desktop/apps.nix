@@ -58,7 +58,7 @@
     # Forced through xwayland: keyboard forwarding to the remote fails
     # under native Wayland — legacy mode's rdev grab has no backend
     # ("Failed to send grab command, no sender" in the client log) and
-    # map mode drops keys too (verified live against the office box).
+    # map mode drops keys too.
     # The Flutter shell is GTK-based, so GDK_BACKEND=x11 is honored.
     # The .desktop Exec resolves `rustdesk` via PATH — wrapping bin/
     # covers both launch paths, same as the spotify wrapper above.

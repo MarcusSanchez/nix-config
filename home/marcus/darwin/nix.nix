@@ -23,7 +23,7 @@
   #
   # An upstream bug, and cosmetic today — but the reference never gets
   # registered, so a GC that collects that nixpkgs source breaks the next
-  # rebuild of the manpage. Verified 2026-07-27 that this is the only trigger:
+  # rebuild of the manpage. This is the only trigger:
   # nix-darwin's documentation.man/doc.enable and Determinate's lazy-trees are
   # both innocent.
   #

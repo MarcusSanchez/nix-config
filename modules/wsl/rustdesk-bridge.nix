@@ -10,15 +10,14 @@
 # unreachable from the LAN by construction.
 #
 # The Windows host is the NAT default gateway, resolved at unit start,
-# NOT 127.0.0.1: these boxes run WSL's NAT networking (verified live on
-# office-lite-wsl-1 — eth0 172.18.x.x/20; loopback interop is a
-# mirrored-mode feature, and a localhost backend dies with connection
-# refused inside the distro's own loopback). The NAT subnet is
-# re-randomized every Windows boot, which is also why this unit
-# re-asserts the mapping each boot instead of trusting the serve state
-# tailscaled persists — a remembered gateway goes stale on reboot.
-# Windows Firewall already admits WSL-subnet traffic to rustdesk.exe
-# via the rules its installer adds (verified: gateway:21118 OPEN).
+# NOT 127.0.0.1: these boxes run WSL's NAT networking (eth0 on a
+# 172.x/20; loopback interop is a mirrored-mode feature, and a
+# localhost backend dies with connection refused inside the distro's
+# own loopback). The NAT subnet is re-randomized every Windows boot,
+# which is also why this unit re-asserts the mapping each boot instead
+# of trusting the serve state tailscaled persists — a remembered
+# gateway goes stale on reboot. Windows Firewall admits WSL-subnet
+# traffic to rustdesk.exe via the rules its installer adds.
 #
 # Imported by hosts/wsl-lite only — the lite PCs are the ones controlled
 # remotely. Windows-side hand-work, once per PC: RustDesk -> Security ->
@@ -26,9 +25,8 @@
 # Connect from any tailnet machine with the box's TAILNET IP —
 # <100.x.y.z>:21118 — not its hostname: RustDesk only enters direct
 # mode when the input parses as an IP; a hostname is treated as an ID
-# and sent to the public rendezvous, which reports the device offline
-# (verified in the client log). Tailnet IPs are stable per node, so a
-# saved session keeps working.
+# and sent to the public rendezvous, which reports the device offline.
+# Tailnet IPs are stable per node, so a saved session keeps working.
 #
 # On a machine not yet enrolled (`tailscale up` never run) the unit
 # fails after its retries — expected until first enrolment; it heals on

@@ -16,8 +16,8 @@ let
   # background, monitors on. Same clean blank as the lock screen,
   # instead of the old cut-the-signal approach (output off), which
   # dropped the side monitors into no-signal standby. The list is
-  # BAKED into the QML at build time — an env var was tried first
-  # (2026-08-08) and did not survive the greetd -> script -> niri ->
+  # BAKED into the QML at build time — an env var does not survive the
+  # greetd -> script -> niri ->
   # quickshell inheritance chain. Safety: single-screen machines and a
   # filter that matches nothing both fall back to every screen — no
   # config state can produce a greeter with nowhere to type. The
@@ -77,7 +77,7 @@ in
   # The greeter runs niri with its OWN generated config — the session's
   # niri.config.kdl reaches only the session — so unaided it drives every monitor
   # untransformed at scale 1: sideways on a vertical monitor, tiny on
-  # the 4K (bedroom-nixos's first greeter did exactly that). The DMS
+  # the 4K. The DMS
   # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
   # generated config when that file exists; hand it the session's
   # connector-keyed output layout unmodified (which screens carry the

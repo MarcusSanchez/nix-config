@@ -4,7 +4,7 @@
 # the disk needs (anti-cheat, attestation). HOST-level on purpose: the
 # laptop runs with Secure Boot off and must never import this.
 #
-# Live since the 2026-08-06 install: Secure Boot reads "enabled (user)"
+# Live: Secure Boot reads "enabled (user)"
 # under this machine's own PK. On a REINSTALL, comment this import out
 # until `sudo sbctl create-keys` has run — with lanzaboote enabled and
 # /var/lib/sbctl absent, the bootloader-install step fails, which would

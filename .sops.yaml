@@ -10,9 +10,8 @@
 #   macbook-air   super.yaml). Recipients of BOTH files. Enrolling or
 #   tuf-nixos     replacing one: README "Enrolling a trusted machine".
 #                 (bedroom-wsl and bedroom-nixos are the two OSes of one
-#                 physical PC; bedroom-nixos's key was re-generated at the
-#                 2026-08-06 reinstall — the old one was revoked with the
-#                 first attempt.)
+#                 physical PC; each enrolls its own key, and a reinstall
+#                 means re-enrolment — the superseded key gets revoked.)
 #   super         recovery if both trusted machines die at once: Bitwarden
 #                 ("sops age key - super recovery (nix-config)") plus a
 #                 paper printout. Never placed on any machine.

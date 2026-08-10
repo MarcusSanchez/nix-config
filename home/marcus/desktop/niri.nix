@@ -8,7 +8,7 @@
 # UI-managed-config pattern as zed/niri: edits made in the DMS settings
 # UI land as git drift). Session *state* — wallpaper path, avatar,
 # per-app usage — stays outside in ~/.local/state, machine-local by
-# design. (noctalia was trialed in the same slot; DMS won.)
+# design. (noctalia fits the same slot; DMS is the deliberate pick.)
 {
   config,
   pkgs,
@@ -26,10 +26,9 @@
   #
   # Adwaita, not Papirus, by PREFERENCE: with Adwaita named, apps fall
   # through to their own hicolor icons (native look, like macOS);
-  # Papirus replaces them with its restyled set. A 2026-08-06 trial on
-  # bedroom-nixos proved Papirus technically fine (ghostty's tab bar
-  # renders — the old laptop breakage was Plasma-leftover fallout) but
-  # the restyled app icons were rejected. Flip
+  # Papirus replaces them with its restyled set. Papirus itself works
+  # (ghostty's tab bar renders — the old laptop breakage was
+  # Plasma-leftover fallout); it stays off purely on looks. Flip
   # catppuccin.gtk.icon.enable in common/shell.nix to re-try it.
   gtk = {
     enable = true;
@@ -89,7 +88,7 @@
 
     # MPRIS media control — the XF86AudioPlay/Prev/Next binds in
     # niri.config.kdl call this; without it media keys are wired to
-    # nothing (how the Wooting's skip keys were dead until 2026-08-06)
+    # nothing (the Wooting's skip keys included)
     pkgs.playerctl
     # same story for the laptop's XF86MonBrightness keys
     pkgs.brightnessctl
@@ -121,8 +120,8 @@
   # default with no hover/text/resize variants.
   home.pointerCursor = {
     enable = true;
-    # plain Adwaita arrow — the catppuccin mauve set was tried and its
-    # pointer reads as an odd purple triangle
+    # plain Adwaita arrow — the catppuccin set's pointer reads as an
+    # odd purple triangle
     package = pkgs.adwaita-icon-theme;
     name = "Adwaita";
     size = 24;

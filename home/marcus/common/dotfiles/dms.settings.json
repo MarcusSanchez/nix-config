@@ -35,7 +35,7 @@
   "clockFormat": "auto",
   "showSeconds": false,
   "padHours12Hour": false,
-  "useFahrenheit": false,
+  "useFahrenheit": true,
   "windSpeedUnit": "kmh",
   "nightModeEnabled": false,
   "animationSpeed": 1,
@@ -142,6 +142,11 @@
     },
     {
       "id": "audioInput",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "idleInhibitor",
       "enabled": true,
       "width": 50
     }

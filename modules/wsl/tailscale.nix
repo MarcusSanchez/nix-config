@@ -21,8 +21,7 @@
 # Two things that make this viable here and would not be true by default:
 # an MTU of 1500 on the WSL NIC (an MTU of 1280 breaks SSH and TLS while
 # leaving ping working — tailscale#7346; mirrored networking's eth1 has
-# always had 1500, and current WSL ships it in NAT mode too, verified
-# live on office-lite-wsl-1: eth0, NAT, MTU 1500, tailscale healthy),
+# 1500, and current WSL ships it in NAT mode too),
 # and NixOS-WSL runs systemd as PID 1, without which tailscaled won't
 # start at all. Which mode a PC runs matters elsewhere though: NAT means
 # the distro's 127.0.0.1 never reaches Windows — the Windows host is the

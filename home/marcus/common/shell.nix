@@ -35,10 +35,10 @@
     # autoEnable's GTK port would force Papirus icons over the Adwaita
     # set home/marcus/desktop/niri.nix pins — and with Adwaita named,
     # apps fall through to their own hicolor icons (the native look).
-    # Papirus was trialed on bedroom-nixos 2026-08-06: technically fine
-    # (ghostty's tab bar renders; the old laptop breakage was
-    # Plasma-leftover fallout), rejected on looks — its restyled app
-    # icons replace the native ones. No-op on WSL/mac.
+    # Papirus itself works (ghostty's tab bar renders; the old laptop
+    # breakage was Plasma-leftover fallout) — it stays off purely on
+    # looks, because its restyled app icons replace the native ones.
+    # No-op on WSL/mac.
     gtk.icon.enable = false;
   };
 
@@ -160,7 +160,7 @@
         # The OS glyph is picked at eval time and is a monochrome Nerd Font
         # codepoint — U+F179 apple / U+F17C tux — NOT starship's default ❄,
         # whose emoji presentation renders in colour and reads badly against
-        # text (relearned several times on 2026-07-30).
+        # text.
         #
         # Reassigned here rather than forked into a custom theme file: omz
         # sets these when it sources the theme, and this block is ordered

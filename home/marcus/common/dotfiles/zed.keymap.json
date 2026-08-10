@@ -124,7 +124,7 @@
       "space space": "file_finder::Toggle",
       "space e": "tab_switcher::Toggle",
 
-      // ideavimrc ports (2026-07-25)
+      // ideavimrc ports
       "s": "vim::PushSneak", // flash.search stand-in: 2-char jump
       "] e": "editor::GoToDiagnostic",
       "[ e": "editor::GoToPreviousDiagnostic",
@@ -164,7 +164,7 @@
       "alt-L": "vim::SelectNext",
       "alt-H": "editor::UndoSelection",
 
-      // ideavimrc ports (2026-07-25): indent/dedent keeping the selection
+      // ideavimrc ports: indent/dedent keeping the selection
       "tab": "editor::Indent",
       "shift-tab": "editor::Outdent"
     }

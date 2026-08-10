@@ -7,11 +7,10 @@
 //
 // PluginComponent, not raw BasePill — see cpuCombo: injected
 // popoutService + pillClickAction geometry give the click the same
-// pill-anchored floating process list as the stock widgets. (A
-// GPU-specific per-process popout fed by `nvidia-smi pmon` was
-// prototyped — the shell has no such view — but its plugin-owned
-// popout never mapped on click; parked until the positioning story
-// is figured out.)
+// pill-anchored floating process list as the stock widgets. (The
+// shell has no per-process GPU view; a plugin-owned popout fed by
+// `nvidia-smi pmon` would add one, but plugin popouts do not map on
+// click — an open experiment.)
 import QtQuick
 import Quickshell.Io
 import qs.Common

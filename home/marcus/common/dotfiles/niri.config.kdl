@@ -144,8 +144,8 @@ layout {
     // view glued where it was — the survivor hugs the left border with
     // a gap on the right until a manual Mod+H/Mod+L. The wanted
     // fill-the-gap-on-close behavior is NOT a niri option as of 26.04
-    // (niri#1642); "always" was tried as a stand-in on 2026-08-06 and
-    // rejected — constant centering is worse than the wart.
+    // (niri#1642); "always" is no stand-in — constant centering is
+    // worse than the wart.
     center-focused-column "never"
 
     // a lone window sits centered instead of hugging the left edge;
@@ -756,13 +756,12 @@ overview {
     backdrop-color "#11111b"
 }
 
-// Browser OAuth popups used to be floated by a title heuristic here;
-// retired 2026-08-06 — tiling them felt better. Real dialogs (file
+// Browser OAuth popups deliberately tile — no title heuristic floats
+// them. Real dialogs (file
 // pickers) declare a parent and float regardless; Mod+Shift+V floats
 // anything by hand. Zed's settings UI keeps its float rule: tiled, it
 // opens as a plain toplevel and inherits the 95% default-column-width
-// from niri.host.bedroom-nixos.kdl — a giant settings pane (tried
-// tiling it the same day, reverted the same hour).
+// from niri.host.bedroom-nixos.kdl — a giant settings pane.
 window-rule {
     match app-id="dev.zed.Zed" title="^Zed — "
     open-floating true

@@ -42,7 +42,7 @@ spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3"
 // only the middle monitor animates. The sides wear static comet
 // stills captured from the same loop (home/marcus/desktop/assets/
 // space-stars-*.jpg, rendered by DMS's ordinary wallpaper layer) —
-// derived side VIDEOS were run here until 2026-08-08 and retired:
-// mosaic seams wide enough to hide moving comets ate too much frame,
-// and three 4K-class decoders for two accent panels bought little
-// over stills from the identical star field.
+// deliberately not derived side videos: mosaic seams wide enough to
+// hide moving comets eat too much frame, and three 4K-class decoders
+// for two accent panels buy little over stills from the identical
+// star field.
