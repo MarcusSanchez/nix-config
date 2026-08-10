@@ -7,11 +7,11 @@
 # osConfig.networking.hostName — the same value on NixOS and darwin,
 # both set from the flake's hostName specialArg.
 #
-# Imported EXPLICITLY by home/marcus/desktop/dotfiles.nix and
-# home/marcus/darwin/dotfiles.nix, and deliberately NOT aggregated by
-# common/default.nix: the WSL boxes reach these same files through
-# win-sync (wsl/dotfiles.nix) — Windows can't traverse Linux symlinks
-# at all, and a second writer would fight the sync engine.
+# Imported EXPLICITLY by the desktop.nix and darwin.nix entry points,
+# and deliberately NOT aggregated by common/default.nix: the WSL boxes
+# reach these same files through win-sync (wsl/dotfiles.nix) — Windows
+# can't traverse Linux symlinks at all, and a second writer would fight
+# the sync engine.
 #
 # Per-FILE links, never a whole-dir one: ~/.config/zed stays a real
 # directory, so the prompt-library db and themes Zed writes beside its

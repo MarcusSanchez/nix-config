@@ -281,9 +281,9 @@ home/marcus/
     dotfiles.nix           common/dotfiles/ ↔ Windows via win-sync; also
                            declares windows.username (its only consumer;
                            the value is set in wsl.nix)
-  darwin/
-    dotfiles.nix           shim -> common/dotfiles-links.nix (per-file
-                           symlinks where the WSL side copies instead)
+  darwin/                  (dotfiles-links.nix is imported straight from
+                           the darwin.nix entry point — per-file symlinks
+                           where the WSL side copies instead)
     nix.nix                user GC launchd agent + HM manpages off (they
                            warn on every eval under Determinate Nix)
     hammerspoon.nix        the mac's xremap — per-app remaps matched on
@@ -304,7 +304,6 @@ home/marcus/
                            out-of-store links: niri/config.kdl,
                            niri/niri.outputs.kdl, niri/niri.host.kdl
                            (target picked by hostname), DMS settings.json
-    dotfiles.nix           shim -> common/dotfiles-links.nix
     appearance.nix         wallpaper + avatar from ./assets, linked to
                            stable paths under ~ — DMS records an ABSOLUTE
                            path in its session state, so a store path would
