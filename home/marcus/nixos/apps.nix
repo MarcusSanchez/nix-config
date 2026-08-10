@@ -7,6 +7,10 @@
   home.packages = with pkgs; [
     google-chrome
 
+    # config rides the dotfiles links (common/dotfiles.nix); the mac's
+    # app is a brew cask, so the package here is desktop-only by nature
+    ghostty
+
     # IDE manager only; the JetBrains IDEs themselves are installed and
     # updated inside Toolbox (into ~/.local — nix-ld makes them run)
     jetbrains-toolbox

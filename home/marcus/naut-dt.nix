@@ -6,7 +6,6 @@
 {
   imports = [
     ./common
-    ./common/ghostty.nix
     ./nixos/theme.nix
     ./nixos/dms.nix
     ./nixos/niri.nix

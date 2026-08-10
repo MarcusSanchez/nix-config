@@ -33,8 +33,20 @@ let
   pathArgs = lib.concatMapStringsSep " " (p: "\"${p}\"") paths;
 in
 {
-  xdg.configFile."zed/settings.json".source = link "zed.settings.json";
-  xdg.configFile."zed/keymap.json".source = link "zed.keymap.json";
+  xdg.configFile = {
+    "zed/settings.json".source = link "zed.settings.json";
+    "zed/keymap.json".source = link "zed.keymap.json";
+
+    # ghostty: the platform entry file, with the shared base linked
+    # BESIDE it — ghostty resolves the entry's config-file include
+    # against the entry's own directory (the same trap as niri's
+    # include). The package is elsewhere: home/marcus/nixos/apps.nix on
+    # the desktops, a brew cask on the mac.
+    "ghostty/config".source = link (
+      if pkgs.stdenv.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
+    );
+    "ghostty/ghostty.config".source = link "ghostty.config";
+  };
 
   home.file.".ideavimrc".source = link ".ideavimrc";
 

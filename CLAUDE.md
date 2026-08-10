@@ -260,15 +260,12 @@ home/marcus/
                            auto-commit shared by the darwin and desktop
                            entries (message names the host via osConfig)
                            — NOT in common/default.nix on purpose: WSL
-                           manages none of those files
-    ghostty.nix            ghostty whole: package (Linux; the mac app is
-                           a cask) + out-of-store links to the dotfiles
-                           config — NOT in common/default.nix on purpose:
-                           WSL must not gain a GUI terminal. TWO links
-                           per machine: the platform entry file AND the
-                           shared base beside it (ghostty resolves the
+                           manages none of those files. ghostty gets TWO
+                           links: the platform entry file AND the shared
+                           base beside it (ghostty resolves the
                            config-file include against the entry's dir —
-                           same trap as niri's include)
+                           same trap as niri's include); its package
+                           lives in nixos/apps.nix (the mac's is a cask)
     dotfiles/              flat: zed.settings.json (ONE file for every
                            machine — font sizes and wsl_connections need
                            cross-machine consensus), zed.keymap.json (both
@@ -307,7 +304,6 @@ home/marcus/
                            driver is broken on macOS 26). Accessibility must
                            be granted BY HAND; until it is, the event tap
                            never starts and the keys silently do nothing
-    ghostty.nix
   nixos/                   the desktop session's concern files, imported
                            decisively by BOTH desktop home entries
                            (naut-dt.nix + tuf-laptop.nix — keep the two
@@ -334,7 +330,7 @@ home/marcus/
                            playerctl, wallpapers (swaybg/mpvpaper),
                            xremap, tpm-fido, xwayland-satellite
 
-    apps.nix ghostty.nix   ghostty.nix = shared common/ghostty.nix +
+    apps.nix
                            the GTK chrome and Windows-Terminal keybinds
 ```
 
