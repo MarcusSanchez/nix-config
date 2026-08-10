@@ -74,6 +74,7 @@
       "jetbrains-toolbox"
       "localsend"
       "raycast"
+      "rustdesk"
       "spotify"
       "stremio"
       "zed"
