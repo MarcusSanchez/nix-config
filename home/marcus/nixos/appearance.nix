@@ -8,7 +8,7 @@
 # falls back to when no icon has been set explicitly — which is what the
 # in-session readers (lock screen, control center) resolve. The GREETER
 # runs as its own user and cannot read ~/.face through the 0700 home
-# dir; modules/desktop/greeter.nix seeds /var/lib/AccountsService/icons/
+# dir; modules/nixos/greeter.nix seeds /var/lib/AccountsService/icons/
 # from the same asset for it. (Setting it through `dms ipc call profile
 # setImage` instead writes a root-owned copy under /var/lib/
 # AccountsService; that path stays valid but isn't declarative.)

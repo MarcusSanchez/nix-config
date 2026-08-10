@@ -40,7 +40,7 @@ window-rule {
 // one core, 8% GPU.
 spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
 // only the middle monitor animates. The sides wear static comet
-// stills captured from the same loop (home/marcus/desktop/assets/
+// stills captured from the same loop (home/marcus/nixos/assets/
 // space-stars-*.jpg, rendered by DMS's ordinary wallpaper layer) —
 // deliberately not derived side videos: mosaic seams wide enough to
 // hide moving comets eat too much frame, and three 4K-class decoders

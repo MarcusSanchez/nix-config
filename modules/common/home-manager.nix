@@ -15,7 +15,7 @@
 {
   options.homeEntryPoint = lib.mkOption {
     type = lib.types.path;
-    description = "Home Manager entry point for this host's user — set in hosts/, or defaulted by a flavor (modules/desktop does).";
+    description = "Home Manager entry point for this host's user, set in hosts/.";
   };
 
   config.home-manager = {

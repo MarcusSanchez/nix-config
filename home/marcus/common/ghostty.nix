@@ -1,5 +1,5 @@
 # Ghostty settings shared by every machine that runs it — imported
-# EXPLICITLY by home/marcus/desktop/ghostty.nix and
+# EXPLICITLY by home/marcus/nixos/ghostty.nix and
 # home/marcus/darwin/ghostty.nix, and deliberately NOT aggregated by
 # common/default.nix: enable = true installs the package, and the WSL
 # boxes must not gain a GUI terminal (their ghostty is the Windows

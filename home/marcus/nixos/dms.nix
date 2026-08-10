@@ -34,7 +34,7 @@
       # state, not managed here) has it enabled — a bar entry for a plugin
       # the machine hasn't enabled simply doesn't render, so the shared
       # dms.settings.json stays safe across hosts.
-      plugins = "${config.home.homeDirectory}/nix-config/home/marcus/desktop/dms-plugins";
+      plugins = "${config.home.homeDirectory}/nix-config/home/marcus/nixos/dms-plugins";
       pluginLink = p: config.lib.file.mkOutOfStoreSymlink "${plugins}/${p}";
     in
     {

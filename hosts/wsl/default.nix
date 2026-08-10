@@ -1,15 +1,21 @@
 # Host definition: the WSL KIND, not one machine — every WSL attribute
 # in flake.nix points here, differing only in the hostName passed in
-# (and any per-attr extra modules wired there, e.g. the rustdesk
-# bridge). Headless and portable: a terminal into the shared
+# (and any per-attr extra modules wired there: the rustdesk bridge,
+# secrets-super). Headless and portable: a terminal into the shared
 # toolchains on whatever PC hosts the distro.
-{ hostName, ... }:
+#
+# The two platform modules are the sops-nix/home-manager halves that
+# make the sops.* and home-manager.* options exist for modules/common
+# to set; everything WSL lives in modules/wsl, self-contained.
+{ inputs, hostName, ... }:
 
 {
   imports = [
-    ../../modules/nixos
+    ../../modules/common
+    inputs.sops-nix.nixosModules.sops
+    inputs.home-manager.nixosModules.home-manager
     ../../modules/wsl
-    # Host-level, not in the aggregator: only ONE WSL distro per Windows PC
+    # Not in the wsl aggregator: only ONE WSL distro per Windows PC
     # can be a tailnet node — they share a network namespace. See the file.
     ../../modules/wsl/tailscale.nix
   ];

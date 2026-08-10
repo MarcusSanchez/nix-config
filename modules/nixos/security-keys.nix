@@ -1,5 +1,5 @@
 # Security-key plumbing for WebAuthn, virtual and physical. The virtual
-# half is tpm-fido (home/marcus/desktop/session-tools.nix): a FIDO2 key whose
+# half is tpm-fido (home/marcus/nixos/session-tools.nix): a FIDO2 key whose
 # secrets are sealed in the TPM — the closest Linux gets to Windows
 # Hello. uaccess tags grant the active seat user access via logind
 # ACLs: no tss-group membership (dodges the dynamic-GID udev bug), no

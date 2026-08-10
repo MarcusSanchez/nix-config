@@ -315,7 +315,7 @@ spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
 // hot-reloads edits, --watch picks up hotplugged keyboards
 spawn-at-startup "xremap" "--watch=config,device" "/home/marcus/nix-config/home/marcus/common/dotfiles/xremap.yml"
 // TPM-backed virtual FIDO2 key (Windows-Hello-ish); pinentry prompts
-// on use. Plumbing in modules/desktop/security-keys.nix.
+// on use. Plumbing in modules/nixos/security-keys.nix.
 spawn-at-startup "tpm-fido"
 // Windows-style boot: auto-login lands on the LOCK screen, with the
 // session already warm behind it. ONLY for the boot session — greetd
@@ -728,7 +728,7 @@ binds {
     // region, satty opens it for arrows/text/blur, copy lands on the
     // clipboard, save lands next to niri's own screenshots. Esc in the
     // region picker cancels the whole pipeline. Tools installed by
-    // home/marcus/desktop/session-tools.nix.
+    // home/marcus/nixos/session-tools.nix.
     Mod+Shift+S hotkey-overlay-title="Snip + annotate" { spawn "sh" "-c" "mkdir -p ~/Pictures/Screenshots && grim -g \"$(slurp)\" - | satty --filename - --fullscreen --early-exit --copy-command wl-copy --output-filename ~/Pictures/Screenshots/'Snip from %Y-%m-%d %H-%M-%S.png'"; }
 
     // Applications such as remote-desktop clients and software KVM switches may
@@ -800,7 +800,7 @@ window-rule {
 }
 
 // compositor cursor + XCURSOR_* env for spawned apps; the theme package
-// and GTK-side settings live in home/marcus/desktop/theme.nix
+// and GTK-side settings live in home/marcus/nixos/theme.nix
 cursor {
     xcursor-theme "Adwaita"
     xcursor-size 24
@@ -808,7 +808,7 @@ cursor {
 
 // Output blocks (modes/scales/transforms/positions) live in
 // niri.outputs.kdl, because the DMS greeter's niri instance needs the
-// same layout (modules/desktop/greeter.nix hands it a store copy as
+// same layout (modules/nixos/greeter.nix hands it a store copy as
 // /etc/greetd/niri_overrides.kdl) — edit outputs THERE. The include is
 // resolved relative to ~/.config/niri/, where desktop/niri.nix links
 // both files side by side.

@@ -10,7 +10,7 @@
     # IDE manager only; the JetBrains IDEs themselves are installed and
     # updated inside Toolbox (into ~/.local — nix-ld makes them run)
     jetbrains-toolbox
-    # firewall port 53317 is opened in modules/desktop/networking.nix
+    # firewall port 53317 is opened in modules/nixos/networking.nix
     localsend
     # forced native-Wayland — the why lives in the wrapper's header
     (pkgs.callPackage ./pkgs/spotify-wayland.nix { })
@@ -18,11 +18,11 @@
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # (No Wootility app: the web Wootility in Chrome covers it — WebHID
-    # plus the udev rules from modules/desktop/peripherals.nix. zen can't;
+    # plus the udev rules from modules/nixos/peripherals.nix. zen can't;
     # firefox-based, no WebHID.)
 
     # GNOME Files — the GUI file explorer (yazi remains the terminal
-    # one); gvfs in modules/desktop/peripherals.nix backs its trash,
+    # one); gvfs in modules/nixos/peripherals.nix backs its trash,
     # USB and phone mounting
     nautilus
 

@@ -4,7 +4,7 @@
 # splash — compositors do NOT resurrect a forced-off connector (the
 # session would come up single-monitor) — so the wake-side-monitors
 # oneshot below un-forces them via sysfs right before greetd, and the
-# greeter lights them (blank-filtered, per modules/desktop/greeter.nix).
+# greeter lights them (blank-filtered, per modules/nixos/greeter.nix).
 # DP-2's rotation lives in niri.outputs.kdl as transform "90"; a
 # panel_orientation param would only rotate a plymouth that never draws
 # there (and niri composing param + transform flips the image — see

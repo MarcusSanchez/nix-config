@@ -7,6 +7,10 @@
 
 {
   imports = [
+    ./nix.nix
+    ./packages.nix
+    ./nix-ld.nix
+    ./users.nix
     ./wsl.nix
     ./keyring.nix
     ./autoupgrade.nix

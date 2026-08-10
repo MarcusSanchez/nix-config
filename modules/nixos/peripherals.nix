@@ -14,7 +14,7 @@
     printing.enable = true;
 
     # virtual filesystems for the file manager: trash, USB drives,
-    # MTP phones, network shares (nautilus in home/marcus/desktop/apps.nix)
+    # MTP phones, network shares (nautilus in home/marcus/nixos/apps.nix)
     gvfs.enable = true;
 
     # firmware updates (LVFS), and specifically the UEFI dbx revocation

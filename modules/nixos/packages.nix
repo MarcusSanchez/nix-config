@@ -1,5 +1,6 @@
-# Linux-only packages: build essentials the mac gets from Xcode CLT and
-# macOS itself (clang, make, bsdtar, curl). Everything shared lives in
+# System packages for the bare-metal machines: the build essentials the
+# mac gets from Xcode CLT and macOS itself (clang, make, bsdtar, curl),
+# plus the desk-only tools. Everything shared across platforms lives in
 # modules/common/packages.nix.
 { pkgs, ... }:
 
@@ -18,5 +19,16 @@
     # the emulator. (The other half of this is
     # shell-integration-features = ssh-terminfo in home/marcus/darwin/ghostty.nix.)
     ghostty.terminfo
+
+    # libsecret's secret-tool probes the org.freedesktop.secrets
+    # provider by hand: secret-tool store/lookup. watchman's
+    # folly/fbthrift closure is ~87 MiB — a desk can afford it (the mac
+    # gets its own from brew). ethtool reads and sets the NIC's own
+    # hardware flags — `ethtool <iface>` is how you confirm the
+    # Wake-on-LAN state that hosts/naut-dt/wake-on-lan.nix arms
+    # (`Wake-on: g` armed, `d` disabled).
+    ethtool
+    libsecret
+    watchman
   ];
 }

@@ -49,7 +49,7 @@
     (pkgs.xremap.override { withVariant = "niri"; })
 
     # TPM-backed virtual FIDO2 key (system plumbing in
-    # modules/desktop/security-keys.nix, spawned in niri.config.kdl).
+    # modules/nixos/security-keys.nix, spawned in niri.config.kdl).
     # It shells out to a bare `pinentry` for the touch-confirmation
     # prompt — ./pkgs/pinentry-alias.nix points that name at the gnome3
     # flavor, which prompts via gcr.

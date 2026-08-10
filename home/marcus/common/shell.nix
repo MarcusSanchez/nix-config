@@ -33,7 +33,7 @@
     # its only way to check laptop changes. No-op on WSL/mac.
     swaylock.enable = false;
     # autoEnable's GTK port would force Papirus icons over the Adwaita
-    # set home/marcus/desktop/theme.nix pins — and with Adwaita named,
+    # set home/marcus/nixos/theme.nix pins — and with Adwaita named,
     # apps fall through to their own hicolor icons (the native look).
     # Papirus itself works (ghostty's tab bar renders; the old laptop
     # breakage was Plasma-leftover fallout) — it stays off purely on

@@ -1,7 +1,7 @@
 # The compositor: niri (scrollable-tiling Wayland compositor) with its
 # session Exec routed through systemd-cat, plus the GNOME/GTK portals
 # programs.niri wires up. User-side pieces (DMS shell, niri config) live
-# in home/marcus/desktop/ (niri.nix + dms.nix); the greeter that enters this session
+# in home/marcus/nixos/ (niri.nix + dms.nix); the greeter that enters this session
 # is ./greeter.nix.
 { pkgs, ... }:
 
@@ -43,6 +43,6 @@ in
 
   # swaylock is the session's fallback locker (DMS's is primary); it
   # authenticates via PAM, and without this entry unlocking fails.
-  # Pairs with programs.swaylock in home/marcus/desktop/niri.nix.
+  # Pairs with programs.swaylock in home/marcus/nixos/niri.nix.
   security.pam.services.swaylock = { };
 }

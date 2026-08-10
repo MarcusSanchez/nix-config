@@ -1,5 +1,5 @@
 # User-side wiring of the niri session (the compositor itself and its
-# portals come from programs.niri in modules/desktop/niri.nix): the
+# portals come from programs.niri in modules/nixos/niri.nix): the
 # config links the compositor reads, the fallback locker, and the
 # xwayland bridge it spawns.
 #
@@ -8,7 +8,7 @@
 # niri.outputs.kdl must sit BESIDE config.kdl: its include is resolved
 # relative to the symlink's directory, not the target's (verified on
 # niri 26.04) — the same file also feeds the greeter's compositor via
-# /etc/greetd/niri_overrides.kdl (modules/desktop/greeter.nix).
+# /etc/greetd/niri_overrides.kdl (modules/nixos/greeter.nix).
 {
   config,
   pkgs,
@@ -37,7 +37,7 @@
       "niri/niri.host.kdl".source = link "niri.host.${osConfig.networking.hostName}.kdl";
     };
 
-  # fallback lock (PAM entry in modules/desktop/niri.nix) in case the
+  # fallback lock (PAM entry in modules/nixos/niri.nix) in case the
   # DMS lock ever misbehaves — run `swaylock` from a terminal
   programs.swaylock.enable = true;
 }

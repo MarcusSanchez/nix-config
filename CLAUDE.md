@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), a bare-metal NixOS laptop (host `tuf-laptop`, user `marcus` — ASUS TUF Dash F15, niri + DankMaterialShell desktop, absorbed from the archived `marcussanchez/tuf-nix-config` repo whose git history holds the rejected Plasma/GNOME/SDDM experiments), a bare-metal desktop (host `naut-dt` — the dual-boot side of the PC that also hosts naut-box; same desktop flavor as the laptop, its own RTX 5080 facts), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), a bare-metal NixOS laptop (host `tuf-laptop`, user `marcus` — ASUS TUF Dash F15, niri + DankMaterialShell desktop, absorbed from the archived `marcussanchez/tuf-nix-config` repo whose git history holds the rejected Plasma/GNOME/SDDM experiments), a bare-metal desktop (host `naut-dt` — the dual-boot side of the PC that also hosts naut-box; same desktop session as the laptop, its own RTX 5080 facts), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -26,8 +26,8 @@ nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-box.config.system.build
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.framework-dt.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.tuf-laptop.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-dt.config.system.build.toplevel.drvPath'
-                                               # eval the NixOS systems after touching nixos/ wsl/
-                                               # desktop/ or home/ (on any NixOS box, `nix flake
+                                               # eval the NixOS systems after touching modules/
+                                               # or home/ (on any NixOS box, `nix flake
                                                # check` already covers every NixOS host; the office
                                                # attrs differ from framework-dt only by hostname)
 
@@ -44,11 +44,11 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
-1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`tuf-laptop/`, `naut-dt/` — hardware-configuration.nix, nvidia facts, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth rides that attr's module list in flake.nix: the rustdesk bridge on the remotely-controlled PCs, secrets-super on the trusted machines). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; the WSL and darwin hosts declare it, the desktop hosts inherit the flavor's mkDefault).
-2. `modules/common/` (shared — only options that exist on both platforms), `modules/nixos/` (the shared **Linux core** — every NixOS host, WSL and bare metal alike), `modules/wsl/` and `modules/desktop/` (the two Linux **flavors** — Windows integration + weekly autoUpgrade vs the boot/niri/DMS desktop stack), and `modules/darwin/` — system layer, one PURPOSE per file: a purpose may span several related options (peripherals.nix carries bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The naming system across every layer: `common` is all platforms, OS names for OS cores (`nixos`, `darwin`), flavor names for flavors (`wsl`, `desktop`); `darwin` doubles as core and only-kind until a second darwin kind exists (a second mac would share `hosts/darwin` the way WSL boxes share `hosts/wsl`). Aggregators import `../common` (or, for flavors, just their own files): **a new module does nothing until added to an imports list.** Every WSL host imports `modules/nixos` + `modules/wsl` and adds `modules/wsl/tailscale.nix` at host level; both bare-metal hosts import `modules/nixos` + `modules/desktop` (whose aggregator carries tailscale — bare metal is always its own node). The HM bridge and the sops config live in `modules/common/` (`home-manager.nix`, `secrets.nix`), branching on `isDarwin` where the platforms differ; `modules/nixos/default.nix` and `modules/darwin/default.nix` carry the sops-nix/HM platform module imports that make those options exist. The bridge sets `backupFileExtension = "hm-backup"`.
-3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `darwin/` and `desktop/` (platform-only concern files), and `wsl.nix` / `darwin.nix` / `desktop.nix` as the per-host entry points (`home.stateVersion` + `./common` + whichever platform files that host wants; username/homeDirectory come from identity.* via the HM bridge). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
+1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`tuf-laptop/`, `naut-dt/` — hardware-configuration.nix, nvidia facts, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth rides that attr's module list in flake.nix: the rustdesk bridge on the remotely-controlled PCs, secrets-super on the trusted machines). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
+2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machines' whole world: account, nix daemon, and the boot/niri/DMS desktop stack — **no default.nix on purpose**; the desktop hosts import its files DECISIVELY, and the import order in their lists is not cosmetic, merged-list options order by module position), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (peripherals.nix carries bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and both desktop hosts), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
+3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop session's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `naut-dt.nix` / `tuf-laptop.nix` / `wsl.nix` / `darwin.nix` as the per-host entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; the two desktop entries list the same nixos/ files — duplication on purpose). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
 
-Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; Linux-only build tools → `modules/nixos/packages.nix` (lands on EVERY NixOS host, laptop included); WSL-only or desktop-only system config → `modules/wsl/` or `modules/desktop/` + their aggregator; mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/desktop/apps.nix`; new concern → new file + aggregator entry; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; platform-only user config → file in `home/marcus/wsl/`, `home/marcus/darwin/`, or `home/marcus/desktop/`, imported from the relevant entry point. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
+Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + BOTH desktop hosts' import lists (order aligned); WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from BOTH desktop home entries (naut-dt.nix + tuf-laptop.nix); mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
 **Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. Its own operational commands (`secrets:edit`, `secrets:status`, `age:place`, `config:check`) are plain executables in `bin/`, on PATH via the one-line `.envrc` (`PATH_add bin`) — devenv was tried for this and retired 2026-08-01: a 67 MiB profile and a second lockfile for four scripts whose tools all come from the system config. `./bin/<name>` works with no direnv at all.
 
@@ -80,7 +80,7 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            .nix is the generated truth from that install —
                            excluded from statix + deadnix like tuf's,
                            regenerate don't edit. RTX 5080 — the shared
-                           modules/desktop/nvidia.nix fits it as-is
+                           modules/nixos/nvidia.nix fits it as-is
   wake-on-lan.nix          arms WoL on the NIC declaratively
                            (systemd.network link file keyed by MAC)
   reboot-windows.nix       one-shot BootNext into the Windows entry by
@@ -104,7 +104,7 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            dropped dbx afterwards
 hosts/tuf-laptop/           the laptop: per-host values + its hardware truth
                            (MUX-discrete RTX 3070 — the shared
-                           modules/desktop/nvidia.nix fits it as-is)
+                           modules/nixos/nvidia.nix fits it as-is)
   hardware-configuration.nix  generated (nixos-generate-config) — excluded
                            from statix (statix.toml) and deadnix
                            (config:check + check.yml), regenerate don't edit
@@ -118,20 +118,29 @@ modules/common/            default.nix packages.nix claude-code.nix
                            declares the super.yaml secrets, and the
                            flake line must track key reality (its
                            header says why a mismatch loses everything)
-modules/nixos/             the shared Linux CORE — every NixOS host
-  default.nix              aggregator — a file here does nothing until
-                           listed; also carries the platform sops-nix + HM
-                           module imports for modules/common
-  packages.nix             Linux-only build tools + ghostty.terminfo, which
-                           fixes TERM for sessions ssh-ing *into* this box
-  nix-ld.nix               enable only — the desktop's GUI library list
-                           lives in modules/desktop/foreign-binaries.nix
-                           (libraries CONCATENATE across modules; proven
-                           by eval: WSL = base 14, laptop = 47)
-  nix.nix users.nix        (no ssh module — one existed only to make the
-                           host key that sops used before the single-key
-                           move)
-modules/wsl/               the WSL flavor — every WSL host
+modules/nixos/             the bare-metal machines' world — NO aggregator
+                           on purpose: both desktop hosts import these
+                           files DECISIVELY, and the order of the desktop
+                           run in their lists is not cosmetic (merged-list
+                           options order by module position; keep the two
+                           hosts' lists aligned)
+  packages.nix             build tools + ghostty.terminfo (fixes TERM for
+                           sessions ssh-ing *into* this box) + the
+                           desk-only tools (ethtool/libsecret/watchman)
+  nix-ld.nix               enable only — the GUI library list lives in
+                           ./foreign-binaries.nix (libraries CONCATENATE
+                           across modules; proven by eval: base 14,
+                           laptop 47)
+  users.nix                the account, groups included (input/uinput for
+                           xremap, networkmanager pairing with
+                           ./networking.nix) + hardware.uinput
+  nix.nix                  daemon settings + daily GC (no ssh module —
+                           one existed only to make the host key that
+                           sops used before the single-key move)
+  users.nix nix.nix        the WSL boxes' own copies — duplicated with
+  nix-ld.nix packages.nix  modules/nixos/'s on purpose (bad duplication
+                           beats bad abstraction; each directory reasons
+                           alone). packages.nix here has no desk tools
   wsl.nix keyring.nix      keyring = gnome-keyring for headless secretspec
                            (the desktop gets its keyring via niri instead)
   autoupgrade.nix          the weekly deploy timer — WSL only, deliberately
@@ -146,14 +155,6 @@ modules/wsl/               the WSL flavor — every WSL host
                            tailnet node lives in WSL while RustDesk runs on
                            Windows. Needs a one-time Windows-side checkbox —
                            its header has the ceremony
-modules/desktop/           the bare-metal flavor — the laptop and the
-                           naut-dt desktop
-  default.nix              aggregator; imports the dms-greeter flake module;
-                           carries tailscale.nix (aggregator placement is
-                           CORRECT here, unlike WSL — bare metal is always
-                           its own node). The niri..packages import order
-                           mirrors the old desktop.nix monolith — merged
-                           lists order by module position, don't reorder
   niri.nix                 the compositor + portals; session Exec routed
                            through systemd-cat (journalctl -t niri-session)
   greeter.nix              the whole login-screen story: dms-greeter,
@@ -168,7 +169,7 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            all screens, no value can strand the login);
                            the rest stay blank-but-on. Cross-layer on
                            purpose: reads home/marcus/common/dotfiles/ and
-                           desktop/assets/. Ships via `nixos-rebuild
+                           home/marcus/nixos/assets/. Ships via `nixos-rebuild
                            boot`, never switch
   peripherals.nix          plugged-in/paired devices, their firmware and
                            power: bluetooth, CUPS, fwupd (the dbx-restore
@@ -182,8 +183,6 @@ modules/desktop/           the bare-metal flavor — the laptop and the
   networking.nix           NetworkManager + the LAN firewall policy (dev
                            ports); the tailnet catch-all lives in
                            tailscale.nix (trustedInterfaces)
-  users.nix                desktop-only groups (input/uinput for xremap,
-                           networkmanager) — one list, order feeds merges
   boot.nix                 Plymouth + retain-splash handoff to the greeter —
                            several cooperating tricks, see its header and
                            Constraints before touching ANY of it (also
@@ -200,7 +199,7 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
-  nvidia.nix               the flavor's shared driver shape (every host
+  nvidia.nix               the shared driver shape (every desktop host
                            drives its panel off a discrete NVIDIA GPU):
                            early-KMS initrd, open modules, mkDefault
                            scalars as the host override point. The two
@@ -209,9 +208,11 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            initrd.kernelModules = [ ] at priority 100,
                            so mkDefault there would silently drop early
                            KMS
-  packages.nix locale.nix fonts.nix tailscale.nix
-                           (swaylock's PAM entry lives in niri.nix with
-                           the session it unlocks)
+  locale.nix fonts.nix tailscale.nix
+                           (tailscale trusts tailscale0 wholesale — the
+                           LAN firewall list in networking.nix stays
+                           tight because of it; swaylock's PAM entry
+                           lives in niri.nix with the session it unlocks)
 modules/darwin/
   default.nix              aggregator
   nix.nix                  nix.enable = false (Constraints)
@@ -229,7 +230,7 @@ modules/darwin/
   users.nix fonts.nix
 
 home/marcus/
-  wsl.nix darwin.nix desktop.nix  entry points — the HM bridges
+  naut-dt.nix tuf-laptop.nix wsl.nix darwin.nix  entry points — the HM bridges
                            import these, never common/ directly; each owns
                            its home.stateVersion (25.05 everywhere except
                            desktop = 26.05 — per-machine birth certificates,
@@ -253,13 +254,13 @@ home/marcus/
                            interactive-only). The no-config siblings live
                            in modules/common/packages.nix
     dotfiles-links.nix     the UI-managed-config links + drift auto-commit
-                           shared by darwin/ and desktop/ (message names the
+                           shared by the darwin and desktop entries (message names the
                            host via osConfig) — NOT in common/default.nix
                            on purpose: WSL manages none of those files
     ghostty.nix            shared ghostty settings — NOT in
                            common/default.nix on purpose: enable installs
                            the package, and WSL must not gain a GUI
-                           terminal. Imported by darwin/ + desktop/ ghostty.nix
+                           terminal. Imported by darwin/ghostty.nix + nixos/ghostty.nix
     dotfiles/              flat: zed.settings.json (ONE file for every
                            machine — font sizes and wsl_connections need
                            cross-machine consensus), zed.keymap.json (both
@@ -270,7 +271,7 @@ home/marcus/
                            absent monitors are inert, so one file serves
                            many machines — add output blocks, don't fork;
                            split out because the greeter's compositor
-                           consumes the same file via modules/desktop/
+                           consumes the same file via modules/nixos/
                            greeter.nix; DP-2's rotation comes from the
                            bedroom host's panel_orientation kernel param,
                            NOT a transform here — niri composes the two),
@@ -299,10 +300,10 @@ home/marcus/
                            be granted BY HAND; until it is, the event tap
                            never starts and the keys silently do nothing
     ghostty.nix
-  desktop/                 (split by concern like modules/desktop; the
-                           dms->niri->session-tools import order in
-                           desktop.nix preserves home.packages merge
-                           order — not cosmetic)
+  nixos/                   the desktop session's concern files, imported
+                           decisively by BOTH desktop home entries
+                           (naut-dt.nix + tuf-laptop.nix — keep the two
+                           lists aligned)
     theme.nix              GTK/dconf theme names + pointer cursor
                            (Adwaita everywhere; see Constraints for why
                            not Papirus)
@@ -338,7 +339,7 @@ home/marcus/
 
 - **Never commit a decrypted secret, and never print one.** Credentials live age-encrypted in `secrets/` (`secrets:edit` / `secrets:edit super`; `.sops.yaml` lists recipients). The repo is public, so the ciphertext is world-readable — that's fine, but a plaintext slip is permanent in git history and means revoking at the provider. **Two files, and the flake line is the tier**: `secrets.yaml` (gh low-scope token, croc, atuin) is opened by the roaming master key from Bitwarden — what `age:place` places on ordinary boxes; `super.yaml` (fly org token + future hot secrets) is opened ONLY by the per-machine keys of the trusted machines (each generated on-box, backed up nowhere — deliberately: vault compromise cannot open super) plus a buried paper-only recovery key. There is no tier option: a trusted machine's flake entry adds `modules/common/secrets-super.nix` to its module list, and that line MUST track key reality — `sops-install-secrets` aborts the WHOLE install on the first file it cannot decrypt (`decryptSecrets` returns on first error), so declaring super.yaml on a master-key box loses every secret on it, not just the super ones. Consequences to respect: onboarding an ordinary box never touches `.sops.yaml` (place master, switch; `age:place` re-locks rbw afterward — the vault holds the super RECOVERY key, so an unlocked hour would bridge the tiers); enrolling/replacing a TRUSTED machine edits `.sops.yaml` + runs `sops updatekeys` on both files (updatekeys for `super.yaml` must run where an existing recipient lives) + adds the secrets-super line to its flake entry; `secrets:drop` AND `age:place` both REFUSE on trusted boxes (capability probe: does the box's key open super.yaml) — drop would destroy the unbacked-up machine key, place would silently overwrite it with the master; **nothing unreissuable ever goes in `super.yaml`** — atuin_key stays in the lower tier so it remains Bitwarden-recoverable; the mac factory reset will destroy `&macbook-air` (re-enrollment joins that day's checklist). **A missing `keyFile` is fatal, not a fallback** (`sops-install-secrets`: "cannot read keyfile"), so a machine without a key fails the whole `setupSecrets` step — the expected first-switch error on a fresh box. Declared-but-missing VALUES are equally fatal ("the key 'x' cannot be found"), so a value lands in its yaml before or with its wiring.
 
-- **`modules/wsl/tailscale.nix` is imported by the WSL host modules, NOT the wsl aggregator — never move it there.** Every WSL2 distro on a Windows PC shares one network namespace (same IP, ports, routing table), so two `tailscaled` instances fight over `tailscale0`, UDP 41641 and the `100.64.0.0/10` route. One tailnet node per PC — every host module imports it today only because each instance lives on a PC of its own. Two sharing a PC means the second drops the import, and that per-machine fact is exactly what the aggregator cannot express. Also **never install Tailscale on Windows while this is on** — traffic would be encapsulated twice and Tailscale packets don't fit inside Tailscale packets. Running it inside WSL is viable only because mirrored networking gives `eth1` an MTU of 1500 (NAT mode's 1280 breaks SSH and TLS while ping keeps working) and NixOS-WSL runs systemd as PID 1. The node is up only while WSL is — that's accepted, not a bug. (The mac and both bare-metal hosts are their own nodes — `modules/darwin/tailscale.nix` (OSS daemon, not the GUI app) and `modules/desktop/tailscale.nix` (aggregator placement is fine on bare metal, and it trusts tailscale0 wholesale — the LAN firewall list in networking.nix stays tight because of it); see the file map.)
+- **`modules/wsl/tailscale.nix` is imported by the WSL host modules, NOT the wsl aggregator — never move it there.** Every WSL2 distro on a Windows PC shares one network namespace (same IP, ports, routing table), so two `tailscaled` instances fight over `tailscale0`, UDP 41641 and the `100.64.0.0/10` route. One tailnet node per PC — every host module imports it today only because each instance lives on a PC of its own. Two sharing a PC means the second drops the import, and that per-machine fact is exactly what the aggregator cannot express. Also **never install Tailscale on Windows while this is on** — traffic would be encapsulated twice and Tailscale packets don't fit inside Tailscale packets. Running it inside WSL is viable only because mirrored networking gives `eth1` an MTU of 1500 (NAT mode's 1280 breaks SSH and TLS while ping keeps working) and NixOS-WSL runs systemd as PID 1. The node is up only while WSL is — that's accepted, not a bug. (The mac and both bare-metal hosts are their own nodes — `modules/darwin/tailscale.nix` (OSS daemon, not the GUI app) and `modules/nixos/tailscale.nix` (in both desktop hosts' decisive lists — bare metal is always its own node — and it trusts tailscale0 wholesale; the LAN firewall list in networking.nix stays tight because of it); see the file map.)
 
 - **Never manage `~/.config/nvim` through Nix, and never re-enable `programs.neovim`.** It is marcus's own LazyVim fork (github.com/marcussanchez/neovim-config), a normal mutable git checkout — lazy.nvim writes `lazy-lock.json` and marcus commits/pushes from there. `programs.neovim` generates its own `init.lua` and symlinks it over the checkout, silently breaking the whole editor (this happened once; the fix was deliberate). `home/marcus/common/neovim.nix` installs the stable nixpkgs binary via `home.packages`, clone-bootstraps the config if `~/.config/nvim` doesn't exist, and otherwise ff-only pulls it during activation (only when the tree is clean — never touch that safety check). (Marcus prefers stable over nightly; a nightly-overlay setup existed before commit ~2026-07 if ever needed again.)
 - **Zig and ZLS must stay on matching versions or editor tooling breaks.** Both come from nixpkgs (`pkgs.zig` / `pkgs.zls` in `modules/common/packages.nix`), which builds zls against its own zig, so they stay in lockstep automatically — don't source one of them from somewhere else. If a just-released Zig is ever needed before nixpkgs catches up, the old two-input overlay approach (mitchellh/zig-overlay + zigtools/zls pinned ref) is in git history at `modules/nixos/zig.nix` before commit ~2026-07.
@@ -356,7 +357,7 @@ home/marcus/
   - **Greeter/display-manager changes ship via `nixos-rebuild boot`, not `switch`** — switch kills the live session out from under the user.
   - **`niri validate` does NOT catch duplicate keybinds**; the compositor rejects the whole live reload instead. After editing niri.config.kdl check the journal, not just the validator. Session logs: `journalctl -t niri-session`.
   - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `pkill quickshell`, then `niri msg action spawn -- dms run` (the supervisor may be long dead, so respawn explicitly). Verify pixels with `grim -o <output>` over SSH, not by asking state again.
-  - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/desktop/boot.nix` + `desktop.nix` headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
+  - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/nixos/boot.nix` + the hosts' headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
   - **Group membership changes (input/uinput) need a relogin** — the session that ran the switch doesn't have them yet.
   - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `desktop/theme.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus was trialed on naut-dt 2026-08-06 and proved technically fine — ghostty's tab bar renders; the old laptop breakage was Plasma-leftover fallout, not a Papirus deficiency — but its restyled app icons were rejected on looks. Re-enabling it is safe on clean installs; it is a taste decision, not a stability one.
   - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a DMS restart to be indexed.
