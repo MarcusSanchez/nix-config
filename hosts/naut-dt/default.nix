@@ -10,12 +10,7 @@
 # desktop session as tuf-laptop, plus this box's own hardware truth.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
-{
-  inputs,
-  hostName,
-  pkgs,
-  ...
-}:
+{ inputs, hostName, ... }:
 
 {
   imports = [
