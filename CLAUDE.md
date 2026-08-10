@@ -109,8 +109,9 @@ hosts/tuf-nixos/           the laptop: per-host values + its hardware truth
                            (config:check + check.yml), regenerate don't edit
 
 modules/common/            default.nix packages.nix claude-code.nix
-                           secrets.nix home-manager.nix — the shared sops
-                           config and HM bridge (platform files are shims)
+                           identity.nix secrets.nix home-manager.nix —
+                           the identity option, the shared sops config
+                           and the HM bridge (platform files are shims)
 modules/nixos/             the shared Linux CORE — every NixOS host
   default.nix              aggregator — a file here does nothing until
                            listed; also carries the platform sops-nix + HM
@@ -121,8 +122,9 @@ modules/nixos/             the shared Linux CORE — every NixOS host
                            lives in modules/desktop/foreign-binaries.nix
                            (libraries CONCATENATE across modules; proven
                            by eval: WSL = base 14, laptop = 47)
-  nix.nix users.nix        (no ssh.nix — it existed only to make the host key
-                           that sops used before the single-key move)
+  nix.nix users.nix        (no ssh module — one existed only to make the
+                           host key that sops used before the single-key
+                           move)
 modules/wsl/               the WSL flavor — both WSL host kinds
   wsl.nix keyring.nix      keyring = gnome-keyring for headless secretspec
                            (the desktop gets its keyring via niri instead)
@@ -187,7 +189,7 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            resolving shebangs against PATH, so Toolbox's
                            generated #!/bin/bash launchers run; desktop
                            only — not handed to the unattended WSL boxes)
-  security-keys.nix        (was tpm.nix) tpm-fido + libfido2 udev rules;
+  security-keys.nix        tpm-fido + libfido2 udev rules;
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
@@ -320,9 +322,10 @@ home/marcus/
                            Mod+Shift+S), cliphist, playerctl,
                            wallpapers (swaybg/mpvpaper), xremap,
                            tpm-fido
-    pkgs/                  callPackage wrappers (spotify-wayland,
-                           rustdesk-x11, pinentry-alias) — packaging
-                           workarounds as named files, why in each header
+    pkgs/                  callPackage wrappers — spotify-wayland.nix,
+                           rustdesk-x11.nix, pinentry-alias.nix:
+                           packaging workarounds as named files, why in
+                           each header
     appearance.nix         wallpaper + avatar from ./assets, linked to
                            stable paths under ~ — DMS records an ABSOLUTE
                            path in its session state, so a store path would

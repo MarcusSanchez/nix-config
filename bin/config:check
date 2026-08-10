@@ -4,22 +4,29 @@ set -e
 cd "$(git rev-parse --show-toplevel)"
 nix fmt
 statix check .
+# CLAUDE.md's hand-maintained file map, gated in BOTH directions and
+# scoped to the map section so prose can't vouch for a file. Forward:
+# every tracked .nix file's full basename must appear in the map (a new
+# file or rename can't be forgotten). Reverse: every .nix token the map
+# mentions must resolve to a tracked file (a rename can't leave a
+# corpse — the failure mode that actually happened).
+mapsec=$(sed -n '/^## File map/,/^## Constraints/p' CLAUDE.md)
+fail=0
+while IFS= read -rd '' f; do
+  grep -qF "$(basename "$f")" <<<"$mapsec" \
+    || { echo "CLAUDE.md file map does not mention: $f" >&2; fail=1; }
+done < <(git ls-files -z '*.nix')
+while IFS= read -r name; do
+  git ls-files '*.nix' | grep -qE "(^|/)$(basename "$name")\$" \
+    || { echo "CLAUDE.md file map mentions a .nix file that does not exist: $name" >&2; fail=1; }
+done < <(grep -oE '[A-Za-z0-9._/-]+\.nix' <<<"$mapsec" | sort -u)
+[ "$fail" = 0 ]
 # hardware-configuration.nix files are generated (nixos-generate-config)
 # and not held to repo style — statix.toml ignores them for the same reason
 deadnix --fail \
   --exclude hosts/tuf-nixos/hardware-configuration.nix \
             hosts/bedroom-nixos/hardware-configuration.nix \
   -- .
-# CLAUDE.md carries a hand-maintained file map; a tracked .nix file it
-# never mentions means the map lagged a rename or a new file — fail
-# instead of drifting (basenames only: coarse, but catches every case
-# that has actually happened)
-fail=0
-for f in $(git ls-files '*.nix'); do
-  grep -qF "$(basename "$f" .nix)" CLAUDE.md \
-    || { echo "CLAUDE.md file map does not mention: $f" >&2; fail=1; }
-done
-[ "$fail" = 0 ]
 nix flake check
 # flake check never touches darwinConfigurations — evaluate them the
 # same enumerated way CI does (a hostname rename broke a named eval once)
