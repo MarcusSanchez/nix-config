@@ -1,51 +1,34 @@
-# Ghostty settings shared by every machine that runs it — imported
-# EXPLICITLY by home/marcus/nixos/ghostty.nix and
-# home/marcus/darwin/ghostty.nix, and deliberately NOT aggregated by
-# common/default.nix: enable = true installs the package, and the WSL
-# boxes must not gain a GUI terminal (their ghostty is the Windows
-# side). Platform chrome (titlebar style, font size, blur) stays in
-# the importing files. The catppuccin module themes it automatically
-# (autoEnable).
-{ ... }:
+# Ghostty, one file for every machine that runs it: the package on the
+# bare-metal desktops (the mac's app is a brew cask — homebrew.nix),
+# and the config as out-of-store links like the rest of the UI-managed
+# rice — live-editable (reload with ctrl/cmd+shift+,), drift riding the
+# dotfiles auto-commit. Imported by the desktop and darwin entry
+# points, deliberately NOT common/default.nix: the WSL boxes must not
+# gain a GUI terminal (their ghostty is the Windows side).
+#
+# Two links, not one: ~/.config/ghostty/config points at the platform
+# entry file (ghostty.linux.config / ghostty.darwin.config), and the
+# shared ghostty.config base is linked BESIDE it because ghostty
+# resolves the entry's `config-file` include against the entry's own
+# directory — the same trap as niri's include.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
-  programs.ghostty = {
-    enable = true;
+  home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.ghostty ];
 
-    settings = {
-      # Ghostty sets TERM=xterm-ghostty, which remote hosts generally don't
-      # have — the line editor then redraws wrong and typing comes out
-      # duplicated. ssh-terminfo makes Ghostty install its terminfo on the
-      # remote on first connect (cached; `ghostty +ssh-cache` inspects it);
-      # ssh-env falls back to a sane TERM where it can't.
-      # modules/nixos/packages.nix ships ghostty.terminfo, fixing this from
-      # the other side for the fleet's machines; this covers everything else.
-      shell-integration-features = "ssh-env,ssh-terminfo";
-
-      font-family = "JetBrainsMono Nerd Font Mono";
-      window-title-font-family = "JetBrainsMono Nerd Font Mono";
-      # disable ligatures
-      font-feature = [
-        "-calt"
-        "-liga"
-      ];
-
-      window-padding-balance = true;
-      window-save-state = "always";
-      confirm-close-surface = false;
-
-      background-opacity = 0.75;
-
-      split-divider-color = "#f5c2e7";
-      cursor-color = "#F5E0DC";
-
-      quick-terminal-position = "bottom";
-      # The global: bind goes through the XDG GlobalShortcuts portal on
-      # Linux — best-effort; portal support for it varies by compositor.
-      keybind = [
-        "global:super+escape=toggle_quick_terminal"
-        "shift+enter=text:\\n"
-      ];
+  xdg.configFile =
+    let
+      dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
+      link = f: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${f}";
+      entry = if pkgs.stdenv.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config";
+    in
+    {
+      "ghostty/config".source = link entry;
+      "ghostty/ghostty.config".source = link "ghostty.config";
     };
-  };
 }

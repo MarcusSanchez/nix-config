@@ -5,7 +5,7 @@
 {
   imports = [
     ./common
-    ./darwin/ghostty.nix
+    ./common/ghostty.nix
     ./darwin/nix.nix
     # UI-managed-config links + drift auto-commit (the desktop entry
     # point imports the same file; WSL manages none of these)
