@@ -20,6 +20,15 @@ while IFS= read -r name; do
   git ls-files '*.nix' | grep -qE "(^|/)$(basename "$name")\$" \
     || { echo "CLAUDE.md file map mentions a .nix file that does not exist: $name" >&2; fail=1; }
 done < <(grep -oE '[A-Za-z0-9._/-]+\.nix' <<<"$mapsec" | sort -u)
+# ...and the same reverse pass over the whole README (it has no map
+# section to scope to). CLAUDE.md outside the map stays UNgated on
+# purpose: its constraints cite git-history paths (zig.nix) that no
+# longer exist and shouldn't.
+while IFS= read -r name; do
+  git ls-files '*.nix' | grep -qE "(^|/)$(basename "$name")\$" \
+    || { echo "README.md mentions a .nix file that does not exist: $name" >&2; fail=1; }
+done < <(grep -oP '[A-Za-z0-9._/-]+\.nix(?![\w-])' README.md | sort -u \
+  | grep -vx 'configuration.nix')  # the stock file on a fresh image — external, not ours
 [ "$fail" = 0 ]
 # hardware-configuration.nix files are generated (nixos-generate-config)
 # and not held to repo style — statix.toml ignores them for the same reason

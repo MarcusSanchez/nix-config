@@ -227,8 +227,8 @@ Commit, push, switch.
 Only relevant if that box will be a tailnet node. `hosts/wsl` imports
 `modules/wsl/networking.nix`, so every WSL host is
 one unless you drop the import. (The bare-metal hosts need none of this
-section: `modules/desktop/tailscale.nix` rides the flavor aggregator —
-bare metal is always its own node — and everything below about Windows
+section: the tailscale block in `modules/nixos/networking.nix` covers
+them — bare metal is always its own node — and everything below about Windows
 is WSL-specific. Enrolment is the same `sudo tailscale up` everywhere.)
 
 **Windows: mirrored networking is preferred.** This is a Windows-side
@@ -245,7 +245,7 @@ wsl --shutdown
 Order doesn't matter — before or after installing the distro, it just needs
 the `wsl --shutdown` to take effect.
 
-The MagicDNS fix in `tailscale.nix` points resolved at `10.255.255.254`,
+The MagicDNS fix in `modules/wsl/networking.nix` points resolved at `10.255.255.254`,
 a resolver that only exists in mirrored mode — without it, DNS falls
 back to `1.1.1.1`/`8.8.8.8`, so the internet works and LAN and tailnet
 names quietly don't. (Current WSL gives NAT mode a healthy 1500 MTU too,
@@ -269,5 +269,5 @@ lingers until restart.
 **One node per PC.** Two WSL distros on one machine share a network namespace,
 so two `tailscaled` would fight over `tailscale0`, UDP 41641 and the
 `100.64.0.0/10` route. If a PC ever hosts two, the second one drops the
-`tailscale.nix` import from its host module. Also don't run Tailscale on the
+`modules/wsl/networking.nix` import from its host module. Also don't run Tailscale on the
 Windows side while a distro has it — the traffic gets encapsulated twice.

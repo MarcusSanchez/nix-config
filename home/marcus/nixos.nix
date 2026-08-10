@@ -1,6 +1,8 @@
-# Home Manager entry point for naut-dt: shared config + the desktop
-# session, composed decisively — every concern this machine's user
-# runs is named here, imported from ./common and ./nixos.
+# Home Manager entry point for the bare-metal desktops — the world
+# entry beside wsl.nix and darwin.nix: shared config + the desktop
+# session, every concern named here, imported from ./common and
+# ./nixos. Both desktop machines run the same home; this file splits
+# per-host the day a real divergence appears.
 { ... }:
 
 {

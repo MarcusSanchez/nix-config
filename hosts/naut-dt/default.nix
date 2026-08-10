@@ -20,9 +20,7 @@
     ../../modules/nixos/nix.nix
     ../../modules/nixos/packages.nix
     ../../modules/nixos/users.nix
-    # the desktop session, in an order that is NOT cosmetic: merged-list
-    # options (systemPackages, udev.packages) order their entries by
-    # module position — keep this run aligned with tuf-laptop's
+    # the desktop session
     inputs.dank-material-shell.nixosModules.greeter
     ../../modules/nixos/boot.nix
     ../../modules/nixos/security.nix
@@ -47,7 +45,7 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  homeEntryPoint = ../../home/marcus/naut-dt.nix;
+  homeEntryPoint = ../../home/marcus/nixos.nix;
 
   # Connectors that carry the greeter's sign-in UI on this machine — the
   # 4K in the middle; the sides stay blank at the login screen.

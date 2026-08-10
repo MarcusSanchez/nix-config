@@ -1,11 +1,11 @@
 # The repo's operational scripts (bin/*), on PATH everywhere — thin
 # wrappers that run the LIVE working-tree scripts, so editing bin/
 # stays rebuild-free, the same philosophy as the dotfile links. Each
-# wrapper remembers the caller's directory, runs its script from the
-# repo root (the scripts resolve their pieces via git rev-parse), and
-# returns the caller where they started. One derivation carries all of
-# them because a store path's own NAME cannot contain the colon the
-# script names use — the files inside it can.
+# wrapper execs its script from the repo root (the scripts resolve
+# their pieces via git rev-parse); the caller's shell keeps its own
+# directory untouched, as any child process guarantees. One derivation
+# carries all of them because a store path's own NAME cannot contain
+# the colon the script names use — the files inside it can.
 #
 # Also carries the reboot-windows command, hostname-gated: only the
 # dual-boot desktop has a Windows half to reboot into.
@@ -24,12 +24,11 @@
         (name: ''
             cat > "$out/bin/${name}" <<'WRAP'
           #!/usr/bin/env bash
-          caller="$PWD"
+          # the cd is invisible to the caller: this wrapper is a child
+          # process, and a child's working directory never touches the
+          # invoking shell's
           cd ${config.identity.home}/nix-config || exit 1
-          ./bin/${name} "$@"
-          status=$?
-          cd "$caller" 2>/dev/null || true
-          exit $status
+          exec ./bin/${name} "$@"
           WRAP
             chmod +x "$out/bin/${name}"
         '')

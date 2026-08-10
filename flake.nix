@@ -76,9 +76,12 @@
       # and assigned there, so the two can't drift the way they would if the
       # module hardcoded its own name. Several entries may share a kind —
       # that's how a second identical WSL box gets added, as one line here
-      # and nothing else. Per-machine facts that aren't hardware truth live
-      # as hostname lists beside what they gate (secrets.nix's trusted,
-      # wsl/networking.nix's bridgedPCs).
+      # and nothing else. Per-machine facts that aren't hardware truth take
+      # one of two shapes, by kind: a fact that is ON or OFF per machine is
+      # a hostname list hardcoded at the option it gates (the super tier in
+      # secrets.nix, the rustdesk bridge in wsl/networking.nix); a fact
+      # where each machine supplies its own VALUE is an option set in
+      # hosts/ (greeterScreens).
       nixosConfigurations =
         let
           cfgs =
