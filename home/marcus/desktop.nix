@@ -7,13 +7,9 @@
     ./common
     ./desktop/ghostty.nix
     ./desktop/theme.nix
-    # session-tools -> niri -> dms: HM emits sibling imports'
-    # home.packages contributions in REVERSE import order (verified by
-    # derivation diff), so this backwards-looking order is what
-    # reproduces the pre-split package list byte-for-byte — not cosmetic
-    ./desktop/session-tools.nix
-    ./desktop/niri.nix
     ./desktop/dms.nix
+    ./desktop/niri.nix
+    ./desktop/session-tools.nix
     ./desktop/appearance.nix
     # UI-managed-config links + drift auto-commit. Desktop note: the
     # niri kdls (desktop/niri.nix), dms.settings.json (desktop/dms.nix)
@@ -23,10 +19,7 @@
     ./desktop/apps.nix
   ];
 
-  home = {
-    username = "marcus";
-    homeDirectory = "/home/marcus";
-    # Do not change after initial install.
-    stateVersion = "26.05";
-  };
+  # username/homeDirectory come from identity.* via the HM bridge
+  # Do not change after initial install.
+  home.stateVersion = "26.05";
 }

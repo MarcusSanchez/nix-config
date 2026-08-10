@@ -15,10 +15,7 @@
     ./darwin/hammerspoon.nix
   ];
 
-  home = {
-    username = "marcussanchez";
-    homeDirectory = "/Users/marcussanchez";
-    # Do not change after initial install.
-    stateVersion = "25.05";
-  };
+  # username/homeDirectory come from identity.* via the HM bridge
+  # Do not change after initial install.
+  home.stateVersion = "25.05";
 }

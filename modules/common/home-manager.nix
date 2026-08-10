@@ -24,6 +24,13 @@
     extraSpecialArgs = { inherit inputs; };
     # If a target dotfile already exists, move it aside instead of aborting.
     backupFileExtension = "hm-backup";
-    users.${config.identity.username} = import config.homeEntryPoint;
+    # The account name and home dir flow from identity.* so the entry
+    # points carry only what is genuinely per-host (their stateVersion);
+    # mkDefault leaves an entry point free to disagree.
+    users.${config.identity.username} = {
+      imports = [ config.homeEntryPoint ];
+      home.username = lib.mkDefault config.identity.username;
+      home.homeDirectory = lib.mkDefault config.identity.home;
+    };
   };
 }
