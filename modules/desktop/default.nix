@@ -2,10 +2,10 @@
 # DankMaterialShell session, and the hardware services a machine someone
 # sits in front of needs. Imports the dms-greeter module from the
 # dank-material-shell flake input — the ONLY thing that input supplies
-# (the shell itself is nixpkgs' dms-shell; see flake.nix). NVIDIA is NOT
-# here: modules encode per-machine GPU facts (MUX mode, open modules),
-# so each host carries its own — see hosts/tuf-nixos/nvidia.nix and
-# hosts/bedroom-nixos/nvidia.nix.
+# (the shell itself is nixpkgs' dms-shell; see flake.nix). NVIDIA lives
+# here too (./nvidia.nix): every host of this flavor shares the same
+# driver shape, and its mkDefault scalars are the override point for a
+# machine whose GPU genuinely deviates.
 #
 # tailscale.nix lives in this aggregator, unlike the WSL flavor's: a
 # bare-metal machine is always its own tailnet node, so the
@@ -34,5 +34,8 @@
     ./packages.nix
     ./fonts.nix
     ./foreign-binaries.nix
+    # appended last: sole definer of its merged lists in the flavor, so
+    # its position is order-inert
+    ./nvidia.nix
   ];
 }

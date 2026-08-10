@@ -78,8 +78,8 @@ hosts/bedroom-nixos/       the desktop PC, dual-booted beside Windows
                            (installed 2026-08-06). hardware-configuration
                            .nix is the generated truth from that install —
                            excluded from statix + deadnix like tuf's,
-                           regenerate don't edit. Its own RTX 5080
-                           nvidia.nix
+                           regenerate don't edit. RTX 5080 — the shared
+                           modules/desktop/nvidia.nix fits it as-is
   lanzaboote.nix           Secure Boot, LIVE since install. On a
                            reinstall, comment the import out until
                            `sbctl create-keys` has run, or the bootloader
@@ -91,12 +91,11 @@ hosts/bedroom-nixos/       the desktop PC, dual-booted beside Windows
                            --microsoft` succeeds; fwupd restores the
                            dropped dbx afterwards
 hosts/tuf-nixos/           the laptop: per-host values + its hardware truth
+                           (MUX-discrete RTX 3070 — the shared
+                           modules/desktop/nvidia.nix fits it as-is)
   hardware-configuration.nix  generated (nixos-generate-config) — excluded
                            from statix (statix.toml) and deadnix
                            (config:check + check.yml), regenerate don't edit
-  nvidia.nix               HOST-level on purpose: MUX-discrete RTX 3070,
-                           open modules, early-KMS initrd — a future
-                           desktop PC writes its own, never inherits this
 
 modules/common/            default.nix packages.nix claude-code.nix
                            secrets.nix home-manager.nix — the shared sops
@@ -181,6 +180,15 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
+  nvidia.nix               the flavor's shared driver shape (every host
+                           drives its panel off a discrete NVIDIA GPU):
+                           early-KMS initrd, open modules, mkDefault
+                           scalars as the host override point. The two
+                           LISTS stay normal priority on purpose —
+                           hardware-configuration.nix defines
+                           initrd.kernelModules = [ ] at priority 100,
+                           so mkDefault there would silently drop early
+                           KMS
   packages.nix locale.nix fonts.nix tailscale.nix
                            (swaylock's PAM entry lives in niri.nix with
                            the session it unlocks)

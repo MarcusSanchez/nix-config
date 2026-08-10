@@ -1,16 +1,16 @@
 # Host definition: the bedroom PC's bare-metal side (AMD CPU, NVIDIA
-# GPU), dual-booted next to the Windows that hosts bedroom-wsl —
-# same physical machine, two hosts in this flake, only ever one running.
-# Same desktop flavor as the TUF laptop; its own GPU facts in
-# ./nvidia.nix. hardware-configuration.nix is the generated truth from
-# the install (regenerate, don't edit).
+# GPU — the flavor's shared driver shape in modules/desktop/nvidia.nix
+# fits it as-is), dual-booted next to the Windows that hosts
+# bedroom-wsl — same physical machine, two hosts in this flake, only
+# ever one running. Same desktop flavor as the TUF laptop.
+# hardware-configuration.nix is the generated truth from the install
+# (regenerate, don't edit).
 { hostName, ... }:
 
 {
   imports = [
     ../../modules/nixos
     ../../modules/desktop
-    ./nvidia.nix
     ./hardware-configuration.nix
     ./wake-on-lan.nix
     # Secure Boot, live since install day. On a REINSTALL, comment this
