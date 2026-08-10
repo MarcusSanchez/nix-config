@@ -42,16 +42,6 @@
   ...
 }:
 
-let
-  # The PCs whose Windows side runs a RustDesk receiver — the bridge
-  # unit below exists only on these; the PC this desk sits at needs no
-  # doorway to itself.
-  bridgedPCs = [
-    "framework-dt"
-    "office-one"
-    "office-two"
-  ];
-in
 {
   services = {
     tailscale = {
@@ -122,8 +112,16 @@ in
   # working. On a machine not yet enrolled the unit fails after its
   # retries — expected until first enrolment; it heals on the next boot
   # or a restart of rustdesk-tailnet-bridge.
+  # ...on the PCs whose Windows side runs a RustDesk receiver — the
+  # hardcoded list is the gate, and it must track that Windows-side
+  # setup; the PC this desk sits at needs no doorway to itself.
   systemd.services.rustdesk-tailnet-bridge =
-    lib.mkIf (builtins.elem config.networking.hostName bridgedPCs)
+    lib.mkIf
+      (builtins.elem config.networking.hostName [
+        "framework-dt"
+        "office-one"
+        "office-two"
+      ])
       {
         description = "Publish the Windows RustDesk direct-access port on the tailnet";
         after = [

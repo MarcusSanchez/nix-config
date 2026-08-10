@@ -8,8 +8,9 @@
 #   * lite/temporary boxes hold the roaming master key from Bitwarden
 #     (placed by age:place) — it decrypts secrets/secrets.yaml only, so
 #     adding or losing such a box never edits .sops.yaml.
-#   * the trusted machines (the `trusted` list below) each hold their
-#     OWN machine key (generated on-box, backed up nowhere), a named
+#   * the trusted machines (hardcoded at the fly_token declaration
+#     below) each hold their OWN machine key (generated on-box,
+#     backed up nowhere), a named
 #     recipient of both secrets.yaml and super.yaml. Enrolling or
 #     replacing one means editing .sops.yaml + `sops updatekeys` + this
 #     file's list — see README "Enrolling a trusted machine".
@@ -35,17 +36,6 @@
 let
   user = config.identity.username;
   home = config.identity.home;
-  # The hostnames whose own age key opens secrets/super.yaml — must
-  # track .sops.yaml's recipients and key reality on the box:
-  # sops-install-secrets aborts the WHOLE install on the first file it
-  # cannot decrypt, so listing a master-key box here would cost it
-  # every secret, not just the super ones.
-  trusted = [
-    "naut-box"
-    "naut-dt"
-    "tuf-laptop"
-    "macbook-air"
-  ];
 in
 {
   config = lib.mkMerge [
@@ -111,22 +101,34 @@ in
               owner = user;
               mode = "0400";
             })
-          # The super tier, trusted machines only (the `trusted` list in
-          # the let above). fly_token: a fly ORG token (`fly tokens
-          # create org`), static unlike the session macaroon `fly auth
-          # login` leaves behind; exported as FLY_API_TOKEN by
+          # The super tier, trusted machines only: the hardcoded list is
+          # the tier, and it must track .sops.yaml's recipients and key
+          # reality on the box — sops-install-secrets aborts the WHOLE
+          # install on the first file it cannot decrypt, so listing a
+          # master-key box here would cost it every secret, not just the
+          # super ones. fly_token: a fly ORG token (`fly tokens create
+          # org`), static unlike the session macaroon `fly auth login`
+          # leaves behind; exported as FLY_API_TOKEN by
           # home/marcus/common/secrets.nix, whose read-guard makes boxes
           # without it skip the export with no home-layer branching.
           # Nothing unreissuable ever goes in super.yaml — a lost super
           # secret must be re-creatable at its provider (atuin_key stays
           # above, Bitwarden-recoverable, for exactly this reason).
-          // lib.optionalAttrs (builtins.elem config.networking.hostName trusted) {
-            fly_token = {
-              sopsFile = ../../secrets/super.yaml;
-              owner = user;
-              mode = "0400";
-            };
-          };
+          //
+            lib.optionalAttrs
+              (builtins.elem config.networking.hostName [
+                "naut-box"
+                "naut-dt"
+                "tuf-laptop"
+                "macbook-air"
+              ])
+              {
+                fly_token = {
+                  sopsFile = ../../secrets/super.yaml;
+                  owner = user;
+                  mode = "0400";
+                };
+              };
       };
     }
 
