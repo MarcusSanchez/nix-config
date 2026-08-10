@@ -44,7 +44,7 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
-1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`tuf-laptop/`, `naut-dt/` — hardware-configuration.nix, nvidia facts, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth rides that attr's module list in flake.nix: the rustdesk bridge on the remotely-controlled PCs). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
+1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`tuf-laptop/`, `naut-dt/` — hardware-configuration.nix, nvidia facts, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth lives as a hostname list beside what it gates: secrets.nix's `trusted`, wsl/networking.nix's `bridgedPCs`). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
 2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machines' whole world: account, nix daemon, and the boot/niri/DMS desktop stack — **no default.nix on purpose**; the desktop hosts import its files DECISIVELY, and the import order in their lists is not cosmetic, merged-list options order by module position), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and both desktop hosts), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
 3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop session's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `naut-dt.nix` / `tuf-laptop.nix` / `wsl.nix` / `darwin.nix` as the per-host entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; the two desktop entries list the same nixos/ files — duplication on purpose). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
 
@@ -146,13 +146,7 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
   tailscale.nix            NOT in the aggregator — host-level, and it carries
                            the systemd-resolved config MagicDNS needs on WSL
                            (Constraints)
-  rustdesk-bridge.nix      NOT in the aggregator — wired per-attr in
-                           flake.nix onto the remotely-controlled PCs:
-                           tailscale-serve doorway to the Windows side's
-                           RustDesk direct-access port (21118), because the
-                           tailnet node lives in WSL while RustDesk runs on
-                           Windows. Needs a one-time Windows-side checkbox —
-                           its header has the ceremony
+
   niri.nix                 the compositor + portals; session Exec routed
                            through systemd-cat (journalctl -t niri-session)
   greeter.nix              the whole login-screen story: dms-greeter,
@@ -170,15 +164,14 @@ modules/nixos/             the bare-metal machines' world — NO aggregator
                            home/marcus/nixos/assets/. Ships via `nixos-rebuild
                            boot`, never switch
   system.nix               machine-level settings and services:
-                           timezone/locale, fonts, bluetooth, CUPS, fwupd
+                           timezone/locale, fonts, pipewire (allowed-rates
+                           is a device-intersected MENU, not a forced
+                           rate), bluetooth, CUPS, fwupd
                            (the dbx-restore story), upower +
                            power-profiles-daemon (DMS widgets fail
                            QUIETLY without them), wooting udev rules
                            (deliberately not hardware.wooting.enable —
                            it bundles the app)
-  audio.nix                pipewire + rtkit; allowed-rates is a device-
-                           intersected MENU (content-rate following), not
-                           a forced rate
   networking.nix           NetworkManager + the LAN firewall policy (dev
                            ports); the tailnet catch-all lives in
                            tailscale.nix (trustedInterfaces)

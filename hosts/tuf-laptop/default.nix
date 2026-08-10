@@ -27,7 +27,6 @@
     ../../modules/nixos/niri.nix
     ../../modules/nixos/greeter.nix
     ../../modules/nixos/system.nix
-    ../../modules/nixos/audio.nix
     ../../modules/nixos/networking.nix
     ../../modules/nixos/nix-ld.nix
     ../../modules/nixos/nvidia.nix

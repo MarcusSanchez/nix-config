@@ -71,43 +71,33 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
       formatter.aarch64-darwin = nixpkgs-darwin.legacyPackages.aarch64-darwin.nixfmt-tree;
 
-      # hostname -> the module LIST that shapes it. Attribute names ARE the
-      # hostnames: each is passed to its modules as `hostName` via specialArgs
+      # hostname -> the host module that shapes it. Attribute names ARE the
+      # hostnames: each is passed to its module as `hostName` via specialArgs
       # and assigned there, so the two can't drift the way they would if the
       # module hardcoded its own name. Several entries may share a kind —
       # that's how a second identical WSL box gets added, as one line here
-      # and nothing else — and a per-machine fact that isn't hardware truth
-      # (the rustdesk bridge on the remotely-controlled PCs) rides the
-      # entry's list instead of forking the kind.
+      # and nothing else. Per-machine facts that aren't hardware truth live
+      # as hostname lists beside what they gate (secrets.nix's trusted,
+      # wsl/networking.nix's bridgedPCs).
       nixosConfigurations =
         let
           cfgs =
             nixpkgs.lib.mapAttrs
               (
-                hostName: hostModules:
+                hostName: hostModule:
                 nixpkgs.lib.nixosSystem {
                   specialArgs = { inherit inputs hostName; };
-                  modules = hostModules;
+                  modules = [ hostModule ];
                 }
               )
               {
-                naut-box = [ ./hosts/wsl ];
+                naut-box = ./hosts/wsl;
+                framework-dt = ./hosts/wsl;
+                office-one = ./hosts/wsl;
+                office-two = ./hosts/wsl;
 
-                framework-dt = [
-                  ./hosts/wsl
-                  ./modules/wsl/rustdesk-bridge.nix
-                ];
-                office-one = [
-                  ./hosts/wsl
-                  ./modules/wsl/rustdesk-bridge.nix
-                ];
-                office-two = [
-                  ./hosts/wsl
-                  ./modules/wsl/rustdesk-bridge.nix
-                ];
-
-                tuf-laptop = [ ./hosts/tuf-laptop ];
-                naut-dt = [ ./hosts/naut-dt ];
+                tuf-laptop = ./hosts/tuf-laptop;
+                naut-dt = ./hosts/naut-dt;
               };
         in
         cfgs
@@ -132,11 +122,11 @@
       # darwinConfigurations.<scutil --get LocalHostName>, so the two must
       # agree — deriving it means they can't drift.
       darwinConfigurations = nixpkgs.lib.mapAttrs (
-        hostName: hostModules:
+        hostName: hostModule:
         nix-darwin.lib.darwinSystem {
           specialArgs = { inherit inputs hostName; };
-          modules = hostModules;
+          modules = [ hostModule ];
         }
-      ) { macbook-air = [ ./hosts/darwin ]; };
+      ) { macbook-air = ./hosts/darwin; };
     };
 }

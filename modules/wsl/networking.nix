@@ -25,7 +25,7 @@
 # and NixOS-WSL runs systemd as PID 1, without which tailscaled won't
 # start at all. Which mode a PC runs matters elsewhere though: NAT means
 # the distro's 127.0.0.1 never reaches Windows — the Windows host is the
-# NAT gateway instead (see rustdesk-bridge.nix).
+# NAT gateway instead (see the bridge unit at the bottom of this file).
 #
 # Enrolment is interactive and stores nothing in the repo:
 #
@@ -35,8 +35,23 @@
 # expire after 90 days max, so it'd be a recurring rotation for two
 # interactively-used machines. Note extraUpFlags only applies when
 # authKeyFile is set — hence passing --ssh by hand above.)
-{ ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
+  # The PCs whose Windows side runs a RustDesk receiver — the bridge
+  # unit below exists only on these; the PC this desk sits at needs no
+  # doorway to itself.
+  bridgedPCs = [
+    "framework-dt"
+    "office-one"
+    "office-two"
+  ];
+in
 {
   services = {
     tailscale = {
@@ -79,4 +94,65 @@
   # /dev/net/tun already exists on this kernel; belt and braces, since
   # without it tailscaled fails with CreateTUN("tailscale0") failed.
   boot.kernelModules = [ "tun" ];
+
+  # Tailnet doorway to the Windows side's RustDesk receiver, on the
+  # remotely-controlled PCs only (the `bridged` list): the account-free
+  # "direct IP access" mode (the public rendezvous now gates ID-based
+  # connections behind an account login). RustDesk runs on WINDOWS on
+  # these PCs, but the tailnet node lives inside the distro — traffic
+  # to this host's tailnet name terminates in WSL, where nothing
+  # listens. `tailscale serve` accepts tailnet-only TCP 21118 (the
+  # direct-access port, RENDEZVOUS_PORT+2 in rustdesk's source) and
+  # dials the Windows host — the NAT default gateway, resolved at unit
+  # start, NOT 127.0.0.1 (loopback interop is a mirrored-mode feature,
+  # and the NAT subnet re-randomizes every Windows boot, which is why
+  # the mapping re-asserts each boot instead of trusting the serve
+  # state tailscaled persists). serve terminates inside tailscaled: no
+  # socket binds in WSL, no firewall port opens, unreachable from the
+  # LAN by construction. Windows Firewall admits WSL-subnet traffic to
+  # rustdesk.exe via the rules its installer adds.
+  #
+  # Windows-side hand-work, once per PC: RustDesk -> Security -> unlock
+  # -> "Enable direct IP access" + set a permanent password. Connect
+  # from any tailnet machine with the box's TAILNET IP —
+  # <100.x.y.z>:21118 — not its hostname: RustDesk only enters direct
+  # mode when the input parses as an IP; a hostname is treated as an ID
+  # and sent to the public rendezvous, which reports the device
+  # offline. Tailnet IPs are stable per node, so a saved session keeps
+  # working. On a machine not yet enrolled the unit fails after its
+  # retries — expected until first enrolment; it heals on the next boot
+  # or a restart of rustdesk-tailnet-bridge.
+  systemd.services.rustdesk-tailnet-bridge =
+    lib.mkIf (builtins.elem config.networking.hostName bridgedPCs)
+      {
+        description = "Publish the Windows RustDesk direct-access port on the tailnet";
+        after = [
+          "tailscaled.service"
+          "network-online.target"
+        ];
+        requires = [ "tailscaled.service" ];
+        wants = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        path = [
+          pkgs.iproute2
+          pkgs.coreutils
+        ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          for _ in $(seq 1 12); do
+            gw=$(ip route show default | head -n1 | cut -d" " -f3)
+            if [ -n "$gw" ] \
+              && ${lib.getExe config.services.tailscale.package} serve --bg --tcp=21118 "tcp://$gw:21118"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "tailscale serve mapping not applied (no default route, or node not enrolled yet?)" >&2
+          exit 1
+        '';
+      };
+
 }

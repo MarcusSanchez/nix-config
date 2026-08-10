@@ -1,8 +1,9 @@
 # Host definition: the WSL KIND, not one machine — every WSL attribute
-# in flake.nix points here, differing only in the hostName passed in
-# (and any per-attr extra modules wired there: the rustdesk bridge).
-# Headless and portable: a terminal into the shared
-# toolchains on whatever PC hosts the distro.
+# in flake.nix points here, differing only in the hostName passed in.
+# Headless and portable: a terminal into the shared toolchains on
+# whatever PC hosts the distro. Per-machine differences live as
+# hostname lists beside what they gate (wsl/networking.nix's
+# bridgedPCs, common/secrets.nix's trusted).
 #
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common

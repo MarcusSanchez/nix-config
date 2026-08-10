@@ -250,7 +250,7 @@ a resolver that only exists in mirrored mode — without it, DNS falls
 back to `1.1.1.1`/`8.8.8.8`, so the internet works and LAN and tailnet
 names quietly don't. (Current WSL gives NAT mode a healthy 1500 MTU too,
 and NAT is what the office boxes run — but NAT changes where the
-Windows host lives on the network; see `modules/wsl/rustdesk-bridge.nix`
+Windows host lives on the network; see the bridge unit in `modules/wsl/networking.nix`
 for the consequence.)
 
 **Then enrol the box**, which is interactive and stores nothing in the repo:
