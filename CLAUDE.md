@@ -81,18 +81,19 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            excluded from statix + deadnix like tuf's,
                            regenerate don't edit. RTX 5080 — the shared
                            modules/nixos/nvidia.nix fits it as-is
-  wake-on-lan.nix          arms WoL on the NIC declaratively
-                           (systemd.network link file keyed by MAC)
-  reboot-windows.nix       one-shot BootNext into the Windows entry by
-                           label lookup — the dual-boot switch without
-                           touching firmware menus
-  monitors.nix             boot-splash-on-one-monitor: the side
-                           connectors kernel-forced off through plymouth
-                           (`video=<conn>:d`) + the wake-side-monitors
-                           oneshot that un-forces them via sysfs right
-                           before greetd — the d-force is permanent for
-                           compositors otherwise
-  lanzaboote.nix           Secure Boot, LIVE since install. On a
+  default.nix              the machine's whole statement, quirks
+                           included: boot-splash-on-one-monitor (side
+                           connectors kernel-forced off through
+                           plymouth + the wake-side-monitors oneshot —
+                           the d-force is permanent for compositors
+                           otherwise), WoL armed via a systemd.network
+                           link file keyed by MAC, and the
+                           reboot-windows command (one-shot BootNext by
+                           label lookup — no firmware menus)
+  lanzaboote.nix           Secure Boot, LIVE since install — a separate
+                           file ON PURPOSE: a reinstall must comment its
+                           import out until `sbctl create-keys` has run
+                           (one line, one #). On a
                            reinstall, comment the import out until
                            `sbctl create-keys` has run, or the bootloader
                            install (and nixos-install with it) fails.

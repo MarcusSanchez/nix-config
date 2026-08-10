@@ -10,7 +10,12 @@
 # desktop session as tuf-laptop, plus this box's own hardware truth.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
-{ inputs, hostName, ... }:
+{
+  inputs,
+  hostName,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -33,14 +38,11 @@
     ../../modules/nixos/nix-ld.nix
     ../../modules/nixos/nvidia.nix
     ./hardware-configuration.nix
-    ./wake-on-lan.nix
     # Secure Boot, live since install day. On a REINSTALL, comment this
     # out until `sudo sbctl create-keys` has run — enabled without keys
     # on disk, the bootloader install (and therefore nixos-install)
     # fails. Full ceremony: lanzaboote.nix header.
     ./lanzaboote.nix
-    ./reboot-windows.nix
-    ./monitors.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -66,4 +68,90 @@
 
   # The release this machine was installed under — never changes.
   system.stateVersion = "26.05";
+
+  # Boot with only the main monitor lit: plymouth paints every active
+  # connector and has no per-monitor config, so the side connectors are
+  # kernel-disabled through the splash. The `d` force outlives the
+  # splash — compositors do NOT resurrect a forced-off connector (the
+  # session would come up single-monitor) — so the wake-side-monitors
+  # oneshot below un-forces them via sysfs right before greetd, and the
+  # greeter lights them (blank-filtered, per modules/nixos/greeter.nix).
+  # DP-2's rotation lives in niri.outputs.kdl as transform "90"; a
+  # panel_orientation param would only rotate a plymouth that never draws
+  # there (and niri composing param + transform flips the image — see
+  # niri.outputs.kdl). Known cosmetic cost: the brief SHUTDOWN splash
+  # still paints all three (the session re-enabled them), and sideways on
+  # DP-2. Host-level: this desk's connectors by name.
+
+  boot.kernelParams = [
+    "video=DP-1:d"
+    "video=DP-2:d"
+  ];
+
+  systemd.services.wake-side-monitors = {
+    description = "Un-force the boot-disabled side monitor connectors before the greeter";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "greetd.service" ];
+    after = [ "plymouth-quit.service" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      for conn in DP-1 DP-2; do
+        for f in /sys/class/drm/card*-"$conn"/status; do
+          [ -e "$f" ] && echo detect > "$f" || true
+        done
+      done
+    '';
+  };
+
+  # Arms the onboard NIC to wake this machine on a magic packet.
+  #
+  # Wake-on-LAN is not a persistent property of the card: the running
+  # driver switches the listener on, and the shutdown path is what leaves
+  # it armed. So whichever OS powered the machine down decides whether a
+  # packet gets through. Windows arms it as a side effect of its own
+  # shutdown (magic-packet wake is on by default in its driver, and Fast
+  # Startup's hybrid hibernate preserves that state), which is why WoL
+  # worked for free while Windows was the default boot entry. Linux
+  # leaves ethtool's wol flag at `d`, so making NixOS the default meant
+  # nothing armed the chip any more and the packets were ignored.
+  #
+  # A .link file is the mechanism rather than an ethtool service because
+  # udev honors .link units whether or not systemd-networkd is running
+  # (nixpkgs says so at the generation site) — NetworkManager owns this
+  # interface, and its own wake-on-lan default of `ignore` leaves the
+  # setting alone.
+  #
+  # Matched on MAC rather than interface name: the address is this
+  # machine's hardware truth and can't be renamed out from under the
+  # match the way a predictable interface name can.
+
+  systemd.network.links."40-wol" = {
+    matchConfig.MACAddress = "d8:43:ae:fa:bb:31";
+    linkConfig.WakeOnLan = "magic";
+  };
+
+  # One-shot boot into the Windows half of the dual-boot: sets the
+  # firmware's BootNext to the Windows Boot Manager entry and reboots.
+  # BootNext applies to exactly one boot — the boot after Windows
+  # returns to the default order (NixOS, instantly, no menu) — so this
+  # never changes BootOrder and needs no BIOS visit and no F11. The
+  # Windows entry is looked up by label at runtime rather than a
+  # hardcoded Boot#### (Windows updates have been known to recreate
+  # their entry under a new number).
+
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "reboot-windows" ''
+      set -euo pipefail
+      id=$(${pkgs.efibootmgr}/bin/efibootmgr \
+        | ${pkgs.gnused}/bin/sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\)\*\{0,1\}[[:space:]]*Windows Boot Manager.*/\1/p' \
+        | head -n1)
+      if [ -z "$id" ]; then
+        echo "reboot-windows: no 'Windows Boot Manager' entry in efibootmgr output" >&2
+        exit 1
+      fi
+      sudo ${pkgs.efibootmgr}/bin/efibootmgr --bootnext "$id" >/dev/null
+      echo "BootNext -> Windows Boot Manager ($id); rebooting..."
+      sudo systemctl reboot
+    '')
+  ];
 }

@@ -38,7 +38,7 @@ output "eDP-1" {
 // panel_orientation kernel param alongside it: niri COMPOSES the two
 // (property + transform "90" = 180°, sideways-flipped). The param
 // would also serve nothing — the side connectors are boot-disabled
-// (video=DP-2:d in hosts/naut-dt/monitors.nix), so plymouth
+// (video=DP-2:d in hosts/naut-dt/default.nix), so plymouth
 // never draws there, and plymouth-on-DP-2 is the only thing such a
 // param would rotate.
 output "DP-2" {
