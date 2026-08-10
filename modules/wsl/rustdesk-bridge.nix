@@ -19,8 +19,10 @@
 # gateway goes stale on reboot. Windows Firewall admits WSL-subnet
 # traffic to rustdesk.exe via the rules its installer adds.
 #
-# Imported by hosts/wsl-lite only — the lite PCs are the ones controlled
-# remotely. Windows-side hand-work, once per PC: RustDesk -> Security ->
+# Wired per-attr in flake.nix onto the remotely-controlled PCs (the
+# office boxes and the framework desktop), not into the WSL kind — the
+# PC this desk sits at needs no doorway to itself. Windows-side
+# hand-work, once per PC: RustDesk -> Security ->
 # unlock -> "Enable direct IP access" + set a permanent password.
 # Connect from any tailnet machine with the box's TAILNET IP —
 # <100.x.y.z>:21118 — not its hostname: RustDesk only enters direct

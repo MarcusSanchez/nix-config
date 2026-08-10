@@ -7,10 +7,8 @@
     ./common
     ./darwin/ghostty.nix
     ./darwin/nix.nix
-    # UI-managed-config links + drift auto-commit. Mac note: the WSL
-    # boxes reach the same files through win-sync copies instead of
-    # symlinks (wsl/dotfiles.nix) — Windows can't traverse Linux
-    # symlinks at all.
+    # UI-managed-config links + drift auto-commit (the desktop entry
+    # point imports the same file; WSL manages none of these)
     ./common/dotfiles-links.nix
     ./darwin/hammerspoon.nix
   ];

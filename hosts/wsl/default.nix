@@ -1,5 +1,8 @@
-# Host definition: the WSL machine. Everything host-specific lives here;
-# everything reusable lives in modules/.
+# Host definition: the WSL KIND, not one machine — every WSL attribute
+# in flake.nix points here, differing only in the hostName passed in
+# (and any per-attr extra modules wired there, e.g. the rustdesk
+# bridge). Headless and portable: a terminal into the shared
+# toolchains on whatever PC hosts the distro.
 { hostName, ... }:
 
 {

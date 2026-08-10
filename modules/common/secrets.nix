@@ -37,20 +37,6 @@ let
   home = config.identity.home;
 in
 {
-  # Which credential tier a host declares. "full" (bedroom-wsl, the mac)
-  # additionally decrypts secrets/super.yaml — the file whose recipients
-  # are the trusted machines' own keys, never the roaming master — so a
-  # "lite" box (hosts/wsl-lite) not only doesn't RECEIVE fly_token, its
-  # placed key cannot decrypt the file that holds it.
-  options.secretsTier = lib.mkOption {
-    type = lib.types.enum [
-      "full"
-      "lite"
-    ];
-    default = "full";
-    description = "Which credential tier this host declares.";
-  };
-
   config = lib.mkMerge [
     {
       sops = {
@@ -101,6 +87,13 @@ in
         #                   never in super.yaml
         #   atuin_username  with atuin_password, the activation-hook login
         #   atuin_password
+        # The super-tier declarations (fly_token from super.yaml) are NOT
+        # here — they live in ./secrets-super.nix, wired per-attr in
+        # flake.nix onto the trusted machines only. Declaring them
+        # everywhere is not an option: sops-install-secrets aborts the
+        # WHOLE install on the first file it cannot decrypt, so a
+        # master-key box declaring super.yaml would lose every secret,
+        # not just the super ones.
         secrets =
           lib.genAttrs
             [
@@ -113,19 +106,7 @@ in
             (_: {
               owner = user;
               mode = "0400";
-            })
-          # fly_token: full tier only, from super.yaml — a fly ORG token
-          # (`fly tokens create org`), static unlike the session macaroon
-          # `fly auth login` leaves behind; exported as FLY_API_TOKEN by
-          # home/marcus/common/secrets.nix, whose read-guard makes lite
-          # boxes skip the export without any home-layer branching.
-          // lib.optionalAttrs (config.secretsTier == "full") {
-            fly_token = {
-              sopsFile = ../../secrets/super.yaml;
-              owner = user;
-              mode = "0400";
-            };
-          };
+            });
       };
     }
 

@@ -37,7 +37,7 @@ chmod 600 "$HOME/.config/sops/age/keys.txt"
 
 # Re-lock the vault immediately: the fetches above leave the rbw agent
 # unlocked for lock_timeout (an hour), and the vault holds MORE than this
-# box's tier — the super RECOVERY key among it. An armed lite box must not
+# box's tier — the super RECOVERY key among it. An armed ordinary box must not
 # be a one-command bridge across the tier boundary; the master password
 # re-opens the vault whenever it's actually wanted.
 rbw lock 2>/dev/null || true

@@ -27,10 +27,10 @@ is the flake attribute on the first rebuild: the config sets the hostname
 from it via `/etc/wsl.conf`. (Pass `--name` only if a PC ever hosts a second
 distro — WSL refuses duplicates.)
 
-| flake attribute | what you get |
-|---|---|
-| `bedroom-wsl` | the dev machine — everything, including the Zed/IdeaVim sync with the Windows side |
-| `framework-wsl`, `office-lite-wsl-*` | headless: same toolchains and shell, minus that sync. Any attribute in `flake.nix` works — add a line there first |
+Every WSL attribute yields the same box — the shared toolchains and
+shell, a terminal into the fleet. Pick the attribute matching the PC
+(any attribute in `flake.nix` works; a new PC means adding a line
+there first).
 
 A fresh instance boots as the stock `nixos` user and the first rebuild creates
 `marcus`, which is why there's a restart in the middle.
@@ -171,7 +171,7 @@ keys open `super.yaml`.)
 
 ### Placing the key
 
-This is the whole of onboarding a lite/temporary machine — nothing to paste
+This is the whole of onboarding an ordinary/temporary machine — nothing to paste
 into `.sops.yaml`, no `updatekeys`, no second machine involved. On a
 trusted machine it refuses (placing the master would overwrite the
 unbacked-up machine key). As one command (after `direnv allow
@@ -181,7 +181,7 @@ unbacked-up machine key). As one command (after `direnv allow
 age:place    # logs into Bitwarden if needed (your master password),
              # fetches the key, places the machine copy AND the editing
              # copy, re-locks the vault (it holds the super recovery key —
-             # an armed lite box must not be a bridge across the tiers),
+             # an armed ordinary box must not be a bridge across the tiers),
              # verifies against .sops.yaml, and tells you the next step
 ```
 
@@ -225,8 +225,8 @@ Commit, push, switch.
 
 ## Tailscale on a new PC
 
-Only relevant if that box will be a tailnet node. Both `hosts/wsl` and
-`hosts/wsl-lite` import `modules/wsl/tailscale.nix`, so every WSL host is
+Only relevant if that box will be a tailnet node. `hosts/wsl` imports
+`modules/wsl/tailscale.nix`, so every WSL host is
 one unless you drop the import. (The bare-metal hosts need none of this
 section: `modules/desktop/tailscale.nix` rides the flavor aggregator —
 bare metal is always its own node — and everything below about Windows

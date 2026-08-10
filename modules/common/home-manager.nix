@@ -3,8 +3,8 @@
 # and that lives in each platform aggregator.
 #
 # Which entry point this host's user gets is per-host via homeEntryPoint,
-# set in hosts/ — the dev box and the lite boxes share this bridge but not
-# their home config, and the mac declares its entry the same way.
+# set in hosts/ (or defaulted by a flavor) — every WSL box shares one
+# entry point, the desktop hosts another, the mac its own.
 {
   inputs,
   config,

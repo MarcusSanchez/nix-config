@@ -71,42 +71,73 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
       formatter.aarch64-darwin = nixpkgs-darwin.legacyPackages.aarch64-darwin.nixfmt-tree;
 
-      # hostname -> which host module shapes it. Attribute names ARE the
-      # hostnames: each is passed to its module as `hostName` via specialArgs
+      # hostname -> the module LIST that shapes it. Attribute names ARE the
+      # hostnames: each is passed to its modules as `hostName` via specialArgs
       # and assigned there, so the two can't drift the way they would if the
-      # module hardcoded its own name. Several entries may share a module —
+      # module hardcoded its own name. Several entries may share a kind —
       # that's how a second identical WSL box gets added, as one line here
-      # and nothing else.
+      # and nothing else — and a per-machine fact that isn't hardware truth
+      # (the rustdesk bridge on the remotely-controlled PCs) rides the
+      # entry's list instead of forking the kind.
       nixosConfigurations =
         nixpkgs.lib.mapAttrs
           (
-            hostName: hostModule:
+            hostName: hostModules:
             nixpkgs.lib.nixosSystem {
               specialArgs = { inherit inputs hostName; };
-              modules = [ hostModule ];
+              modules = hostModules;
             }
           )
           {
-            bedroom-wsl = ./hosts/wsl;
+            # secrets-super on an entry = this machine holds its own age
+            # key, a recipient of secrets/super.yaml. The line must track
+            # key reality — see modules/common/secrets-super.nix.
+            bedroom-wsl = [
+              ./hosts/wsl
+              ./modules/common/secrets-super.nix
+            ];
 
-            framework-wsl = ./hosts/wsl-lite;
-            office-lite-wsl-1 = ./hosts/wsl-lite;
-            office-lite-wsl-2 = ./hosts/wsl-lite;
+            framework-wsl = [
+              ./hosts/wsl
+              ./modules/wsl/rustdesk-bridge.nix
+            ];
+            office-lite-wsl-1 = [
+              ./hosts/wsl
+              ./modules/wsl/rustdesk-bridge.nix
+            ];
+            office-lite-wsl-2 = [
+              ./hosts/wsl
+              ./modules/wsl/rustdesk-bridge.nix
+            ];
 
-            tuf-nixos = ./hosts/tuf-nixos;
-            bedroom-nixos = ./hosts/bedroom-nixos;
+            tuf-nixos = [
+              ./hosts/tuf-nixos
+              ./modules/common/secrets-super.nix
+            ];
+            bedroom-nixos = [
+              ./hosts/bedroom-nixos
+              ./modules/common/secrets-super.nix
+            ];
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as
       # `hostName`. Bare `sudo darwin-rebuild switch` resolves
       # darwinConfigurations.<scutil --get LocalHostName>, so the two must
       # agree — deriving it means they can't drift.
-      darwinConfigurations = nixpkgs.lib.mapAttrs (
-        hostName: hostModule:
-        nix-darwin.lib.darwinSystem {
-          specialArgs = { inherit inputs hostName; };
-          modules = [ hostModule ];
-        }
-      ) { macbook-air = ./hosts/darwin; };
+      darwinConfigurations =
+        nixpkgs.lib.mapAttrs
+          (
+            hostName: hostModules:
+            nix-darwin.lib.darwinSystem {
+              specialArgs = { inherit inputs hostName; };
+              modules = hostModules;
+            }
+          )
+          {
+            macbook-air = [
+              ./hosts/darwin
+              ./modules/common/secrets-super.nix
+            ];
+          };
     };
 }

@@ -9,9 +9,8 @@
 #
 # Imported EXPLICITLY by the desktop.nix and darwin.nix entry points,
 # and deliberately NOT aggregated by common/default.nix: the WSL boxes
-# reach these same files through win-sync (wsl/dotfiles.nix) — Windows
-# can't traverse Linux symlinks at all, and a second writer would fight
-# the sync engine.
+# manage none of these files — no GUI runs there, and the Windows sides
+# of those PCs are unmanaged on purpose.
 #
 # Per-FILE links, never a whole-dir one: ~/.config/zed stays a real
 # directory, so the prompt-library db and themes Zed writes beside its
