@@ -1,5 +1,5 @@
-# Host definition: the bedroom PC's bare-metal side (AMD 9800X3D,
-# RTX 5080), dual-booted next to the Windows that hosts bedroom-wsl —
+# Host definition: the bedroom PC's bare-metal side (AMD CPU, NVIDIA
+# GPU), dual-booted next to the Windows that hosts bedroom-wsl —
 # same physical machine, two hosts in this flake, only ever one running.
 # Same desktop flavor as the TUF laptop; its own GPU facts in
 # ./nvidia.nix. hardware-configuration.nix is the generated truth from

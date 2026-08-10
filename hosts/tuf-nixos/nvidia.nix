@@ -1,4 +1,4 @@
-# Proprietary NVIDIA driver for the RTX 3070 Mobile. HOST-level, not in
+# Proprietary NVIDIA driver for the laptop's discrete GPU. HOST-level, not in
 # modules/desktop, because everything here encodes THIS machine's GPU
 # facts — a future desktop PC writes its own nvidia.nix rather than
 # inheriting these. The MUX is in discrete mode — the laptop panel (eDP)
@@ -33,7 +33,7 @@
     modesetting.enable = true;
 
     # the open kernel module — NVIDIA's recommended path for Turing and
-    # newer; GA104 is Ampere, squarely supported
+    # newer; this card's generation is squarely supported
     open = true;
 
     nvidiaSettings = true;

@@ -1,4 +1,4 @@
-# Proprietary NVIDIA driver for the RTX 5080. HOST-level, not in
+# Proprietary NVIDIA driver for the desktop's discrete GPU. HOST-level, not in
 # modules/desktop, because everything here encodes THIS machine's GPU
 # facts. A desktop card has no MUX/PRIME story at all — the monitors hang
 # straight off the dGPU — so this is the simplest possible shape.
@@ -30,7 +30,7 @@
     # required for any Wayland compositor
     modesetting.enable = true;
 
-    # NOT a choice on this card: Blackwell (GB203) is supported ONLY by
+    # NOT a choice on this card: its generation is supported ONLY by
     # the open kernel module — the legacy proprietary blob never learned
     # these chips
     open = true;
@@ -44,7 +44,7 @@
     # card has no iGPU to offload from
     powerManagement.finegrained = false;
 
-    # Default driver pin. Blackwell needs 570+, which the default has
+    # Default driver pin. The card needs 570+, which the default has
     # long since passed; if a build ever breaks against a new kernel:
     #   package = config.boot.kernelPackages.nvidiaPackages.latest;
   };

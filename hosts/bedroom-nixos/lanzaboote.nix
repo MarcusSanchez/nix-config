@@ -9,7 +9,7 @@
 # until `sudo sbctl create-keys` has run — with lanzaboote enabled and
 # /var/lib/sbctl absent, the bootloader-install step fails, which would
 # break nixos-install itself. The full ceremony, in the shape that
-# actually works on this MSI board:
+# actually works on this board:
 #   sudo sbctl create-keys          # writes /var/lib/sbctl
 #   (import this file, switch — generations get signed)
 #   sudo sbctl verify               # everything on the ESP shows signed
