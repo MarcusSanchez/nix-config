@@ -312,8 +312,8 @@ home/marcus/
                            matugen — dms-shell does NOT bundle the
                            helpers; matugen missing = theme generation
                            silently no-ops) + out-of-store links for
-                           dms.settings.json and the dms-plugins/ bar
-                           widgets
+                           dms.settings.json and the assets/dms-plugins/
+                           bar widgets
     niri.nix               the session's config wiring: out-of-store
                            links for niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
@@ -323,10 +323,6 @@ home/marcus/
                            Mod+Shift+S), cliphist, playerctl,
                            wallpapers (swaybg/mpvpaper), xremap,
                            tpm-fido
-    pkgs/                  callPackage wrappers — spotify-wayland.nix,
-                           rustdesk-x11.nix, pinentry-alias.nix:
-                           packaging workarounds as named files, why in
-                           each header
     appearance.nix         wallpaper + avatar from ./assets, linked to
                            stable paths under ~ — DMS records an ABSOLUTE
                            path in its session state, so a store path would
