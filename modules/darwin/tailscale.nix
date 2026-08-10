@@ -46,7 +46,7 @@
     done
     if [ -S /var/run/tailscaled.socket ]; then
       ${lib.getExe' config.services.tailscale.package "tailscale"} set \
-        --ssh --operator=marcussanchez --accept-risk=lose-ssh \
+        --ssh --operator=${config.identity.username} --accept-risk=lose-ssh \
         || echo "tailscale set skipped (node not enrolled yet — sudo tailscale up --ssh)" >&2
     else
       echo "tailscaled socket never appeared (nix-darwin#1688) — run:" >&2

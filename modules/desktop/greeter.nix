@@ -4,7 +4,7 @@
 # AccountsService icon seed). Greeter/display-manager changes ship via
 # `nixos-rebuild boot` + reboot, not `switch` — switch would kill the
 # live session out from under the user.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   # The stock greeter puts a full sign-in UI on EVERY monitor
@@ -52,7 +52,7 @@ in
       dms-greeter = {
         enable = true;
         compositor.name = "niri";
-        configHome = "/home/marcus";
+        configHome = config.identity.home;
         package = greeterShell;
         # without this the greeter's niri/quickshell startup output
         # goes to the VT — a flash of yellow WARN lines on every
@@ -114,6 +114,6 @@ in
   # an asset change propagates at the next boot/activation instead of
   # being blocked by the existing copy.
   systemd.tmpfiles.rules = [
-    "C+ /var/lib/AccountsService/icons/marcus 0644 root root - ${../../home/marcus/desktop/assets/avatar-spaceman.png}"
+    "C+ /var/lib/AccountsService/icons/${config.identity.username} 0644 root root - ${../../home/marcus/desktop/assets/avatar-spaceman.png}"
   ];
 }

@@ -1,12 +1,17 @@
 # NixOS-WSL integration.
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
 
 {
   imports = [ inputs.nixos-wsl.nixosModules.default ];
 
   wsl = {
     enable = true;
-    defaultUser = "marcus";
+    defaultUser = config.identity.username;
     # systemd-binfmt can wipe WSL's own handler for Windows .exe files,
     # which breaks interop (powershell.exe: "Exec format error", wsl-open
     # dies). Registering it declaratively keeps it in place.

@@ -9,7 +9,6 @@
   inputs,
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -25,6 +24,6 @@
     extraSpecialArgs = { inherit inputs; };
     # If a target dotfile already exists, move it aside instead of aborting.
     backupFileExtension = "hm-backup";
-    users.${if pkgs.stdenv.isDarwin then "marcussanchez" else "marcus"} = import config.homeEntryPoint;
+    users.${config.identity.username} = import config.homeEntryPoint;
   };
 }

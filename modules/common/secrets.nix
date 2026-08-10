@@ -33,8 +33,8 @@
 }:
 
 let
-  user = if pkgs.stdenv.isDarwin then "marcussanchez" else "marcus";
-  home = if pkgs.stdenv.isDarwin then "/Users/marcussanchez" else "/home/marcus";
+  user = config.identity.username;
+  home = config.identity.home;
 in
 {
   # Which credential tier a host declares. "full" (bedroom-wsl, the mac)

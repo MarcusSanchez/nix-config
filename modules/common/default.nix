@@ -8,5 +8,6 @@
     ./secrets.nix
     ./home-manager.nix
     ./claude-code.nix
+    ./identity.nix
   ];
 }

@@ -6,7 +6,7 @@
 # cleanup = "zap": every formula, cask, and tap NOT declared below is
 # uninstalled on activation. Adding a tool imperatively with `brew install`
 # only lasts until the next rebuild — declare it here or lose it.
-{ ... }:
+{ config, ... }:
 
 {
   # The installation itself, which nix-darwin's homebrew.* options do NOT
@@ -20,7 +20,7 @@
     enable = true;
     # Owner of the prefix — the same account nix-darwin acts on, from
     # system.primaryUser in ./users.nix.
-    user = "marcussanchez";
+    user = config.identity.username;
     # Adopts the brew that is already on this machine instead of demanding
     # a clean prefix. Harmless once adopted; it is what makes the switch to
     # nix-homebrew a no-op for an existing install rather than a reinstall.

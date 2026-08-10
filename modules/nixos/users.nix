@@ -5,6 +5,11 @@
 { pkgs, ... }:
 
 {
+  # Source of truth for identity.username on NixOS (the option lives in
+  # modules/common/identity.nix); the account attr below stays literal
+  # beside it on purpose.
+  identity.username = "marcus";
+
   programs.zsh.enable = true;
 
   # Single-user machines: wheel escalates without a password. The prompt's
