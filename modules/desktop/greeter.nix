@@ -4,13 +4,19 @@
 # AccountsService icon seed). Greeter/display-manager changes ship via
 # `nixos-rebuild boot` + reboot, not `switch` — switch would kill the
 # live session out from under the user.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # The stock greeter puts a full sign-in UI on EVERY monitor
   # (GreeterSurface.qml hardcodes `model: Quickshell.screens`; unlike
   # the lock screen there is no screenPreferences filter). This derived
-  # copy of the same dms-shell filters that list to greeterScreens:
+  # copy of the same dms-shell filters that list to the host's
+  # greeterScreens option (declared below, assigned in hosts/):
   # listed connectors get the UI, the rest get NO surface — and a
   # surface-less output shows the greeter compositor's black
   # background, monitors on. Same clean blank as the lock screen,
@@ -23,15 +29,11 @@ let
   # config state can produce a greeter with nowhere to type. The
   # substitution uses --replace-fail on purpose: a DMS update that
   # moves the line breaks the BUILD, never the login screen.
-  greeterScreens = [
-    "DP-3"
-    "eDP-1"
-  ];
   greeterShell =
     pkgs.runCommand "dms-shell-greeter-screens"
       {
         base = pkgs.dms-shell;
-        wantList = builtins.toJSON greeterScreens;
+        wantList = builtins.toJSON config.greeterScreens;
       }
       ''
         cp -r --no-preserve=mode "$base" $out
@@ -41,79 +43,94 @@ let
       '';
 in
 {
-  services = {
-    displayManager = {
-      # DMS's greetd-based greeter — the login screen wears the same
-      # Material theme as the session shell. configHome points it at
-      # the user's DMS settings so wallpaper/colors stay in sync; the
-      # package is DERIVED from the same nixpkgs dms-shell the session
-      # uses (see greeterShell above), so greeter and shell still can't
-      # drift apart in version.
-      dms-greeter = {
-        enable = true;
-        compositor.name = "niri";
-        configHome = config.identity.home;
-        package = greeterShell;
-        # without this the greeter's niri/quickshell startup output
-        # goes to the VT — a flash of yellow WARN lines on every
-        # logout/login
-        logs.save = true;
-      };
-
-      # No auto-login: boot lands on the greeter. The boot-lock loop in
-      # niri.config.kdl keys on session id 1, which the greeter session
-      # occupies in this mode — so it stays dormant and a greeter login
-      # enters the desktop unlocked. Flipping autoLogin back on
-      # restores the boot-to-lock flow with no other changes needed.
-      defaultSession = "niri";
-    };
-
-    # DMS persists the profile picture through AccountsService; without
-    # the daemon, `dms ipc call profile setImage` claims SUCCESS but
-    # only sets session memory and the avatar vanishes on reboot.
-    accounts-daemon.enable = true;
+  options.greeterScreens = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "DP-3" ];
+    description = ''
+      Connector names that carry the greeter's sign-in UI; every other
+      screen shows the greeter compositor's blank background. The empty
+      default, single-screen machines and a no-match filter all fall
+      back to every screen — no value can produce a greeter with
+      nowhere to type.
+    '';
   };
 
-  # The greeter runs niri with its OWN generated config — the session's
-  # niri.config.kdl reaches only the session — so unaided it drives every monitor
-  # untransformed at scale 1: sideways on a vertical monitor, tiny on
-  # the 4K. The DMS
-  # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
-  # generated config when that file exists; hand it the session's
-  # connector-keyed output layout unmodified (which screens carry the
-  # sign-in UI is greeterShell's baked list above), plus one
-  # greeter-only extra: idle management. None exists at the greeter
-  # otherwise (the session's belongs to DMS, which only runs after
-  # login), so a remote wake-on-lan used to leave every monitor burning
-  # at the sign-in screen all night — swayidle powers the panels off
-  # after five idle minutes and any input wakes them (niri behavior).
-  # Store copy — updates on rebuild, not on save like the session's
-  # symlink.
-  environment.etc."greetd/niri_overrides.kdl".source =
-    pkgs.runCommand "greeter-niri-overrides.kdl"
-      {
-        base = ../../home/marcus/common/dotfiles/niri.outputs.kdl;
-        extra = pkgs.writeText "greeter-idle.kdl" ''
+  config = {
+    services = {
+      displayManager = {
+        # DMS's greetd-based greeter — the login screen wears the same
+        # Material theme as the session shell. configHome points it at
+        # the user's DMS settings so wallpaper/colors stay in sync; the
+        # package is DERIVED from the same nixpkgs dms-shell the session
+        # uses (see greeterShell above), so greeter and shell still can't
+        # drift apart in version.
+        dms-greeter = {
+          enable = true;
+          compositor.name = "niri";
+          configHome = config.identity.home;
+          package = greeterShell;
+          # without this the greeter's niri/quickshell startup output
+          # goes to the VT — a flash of yellow WARN lines on every
+          # logout/login
+          logs.save = true;
+        };
 
-          // greeter-only: dark screens after 5 idle minutes (any input
-          // wakes them) — the sign-in screen otherwise never sleeps
-          spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
+        # No auto-login: boot lands on the greeter. The boot-lock loop in
+        # niri.config.kdl keys on session id 1, which the greeter session
+        # occupies in this mode — so it stays dormant and a greeter login
+        # enters the desktop unlocked. Flipping autoLogin back on
+        # restores the boot-to-lock flow with no other changes needed.
+        defaultSession = "niri";
+      };
+
+      # DMS persists the profile picture through AccountsService; without
+      # the daemon, `dms ipc call profile setImage` claims SUCCESS but
+      # only sets session memory and the avatar vanishes on reboot.
+      accounts-daemon.enable = true;
+    };
+
+    # The greeter runs niri with its OWN generated config — the session's
+    # niri.config.kdl reaches only the session — so unaided it drives every monitor
+    # untransformed at scale 1: sideways on a vertical monitor, tiny on
+    # the 4K. The DMS
+    # launcher appends `include "/etc/greetd/niri_overrides.kdl"` to its
+    # generated config when that file exists; hand it the session's
+    # connector-keyed output layout unmodified (which screens carry the
+    # sign-in UI is greeterShell's baked list above), plus one
+    # greeter-only extra: idle management. None exists at the greeter
+    # otherwise (the session's belongs to DMS, which only runs after
+    # login), so a remote wake-on-lan used to leave every monitor burning
+    # at the sign-in screen all night — swayidle powers the panels off
+    # after five idle minutes and any input wakes them (niri behavior).
+    # Store copy — updates on rebuild, not on save like the session's
+    # symlink.
+    environment.etc."greetd/niri_overrides.kdl".source =
+      pkgs.runCommand "greeter-niri-overrides.kdl"
+        {
+          base = ../../home/marcus/common/dotfiles/niri.outputs.kdl;
+          extra = pkgs.writeText "greeter-idle.kdl" ''
+
+            // greeter-only: dark screens after 5 idle minutes (any input
+            // wakes them) — the sign-in screen otherwise never sleeps
+            spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
+          '';
+        }
+        ''
+          cat "$base" "$extra" > $out
         '';
-      }
-      ''
-        cat "$base" "$extra" > $out
-      '';
 
-  # The greeter's avatar probe checks, in order: its own cache,
-  # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
-  # dms-greeter user cannot read ~/.face through the 0700 home dir, and
-  # AccountsService only gets an icons/ copy when the avatar is set
-  # imperatively through the UI. Seed that copy declaratively from the
-  # same asset home/marcus/desktop/appearance.nix links to ~/.face, so
-  # a fresh machine's login screen has the face too. C+ overwrites, so
-  # an asset change propagates at the next boot/activation instead of
-  # being blocked by the existing copy.
-  systemd.tmpfiles.rules = [
-    "C+ /var/lib/AccountsService/icons/${config.identity.username} 0644 root root - ${../../home/marcus/desktop/assets/avatar-spaceman.png}"
-  ];
+    # The greeter's avatar probe checks, in order: its own cache,
+    # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
+    # dms-greeter user cannot read ~/.face through the 0700 home dir, and
+    # AccountsService only gets an icons/ copy when the avatar is set
+    # imperatively through the UI. Seed that copy declaratively from the
+    # same asset home/marcus/desktop/appearance.nix links to ~/.face, so
+    # a fresh machine's login screen has the face too. C+ overwrites, so
+    # an asset change propagates at the next boot/activation instead of
+    # being blocked by the existing copy.
+    systemd.tmpfiles.rules = [
+      "C+ /var/lib/AccountsService/icons/${config.identity.username} 0644 root root - ${../../home/marcus/desktop/assets/avatar-spaceman.png}"
+    ];
+  };
 }

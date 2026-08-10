@@ -23,6 +23,11 @@
 
   homeEntryPoint = ../../home/marcus/desktop.nix;
 
+  # Connectors that carry the greeter's sign-in UI on this machine — the
+  # built-in panel (external monitors, when plugged in, stay blank at
+  # the login screen).
+  greeterScreens = [ "eDP-1" ];
+
   # Trusted machine: own age key, recipient of both secrets files —
   # secretsTier defaults to "full", stated here to make the choice visible.
   secretsTier = "full";

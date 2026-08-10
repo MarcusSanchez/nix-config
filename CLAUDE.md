@@ -142,8 +142,12 @@ modules/desktop/           the bare-metal flavor — the laptop and the
                            seed (the greeter can't read ~/.face through
                            the 0700 home), and the generated
                            /etc/greetd/niri_overrides.kdl — the session's
-                           niri.outputs.kdl filtered so the bedroom side
-                           monitors are OFF at the greeter. Cross-layer on
+                           niri.outputs.kdl handed over unmodified.
+                           Which screens carry the sign-in UI is the
+                           per-host greeterScreens option (declared
+                           here, set in hosts/ like secretsTier; empty =
+                           all screens, no value can strand the login);
+                           the rest stay blank-but-on. Cross-layer on
                            purpose: reads home/marcus/common/dotfiles/ and
                            desktop/assets/. Ships via `nixos-rebuild
                            boot`, never switch

@@ -30,6 +30,10 @@
 
   homeEntryPoint = ../../home/marcus/desktop.nix;
 
+  # Connectors that carry the greeter's sign-in UI on this machine — the
+  # 4K in the middle; the sides stay blank at the login screen.
+  greeterScreens = [ "DP-3" ];
+
   # Trusted machine: own age key (generated on-box at install, enrolled
   # in .sops.yaml), recipient of both secrets files.
   secretsTier = "full";
