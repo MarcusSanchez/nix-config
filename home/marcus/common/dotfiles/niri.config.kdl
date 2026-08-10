@@ -728,7 +728,7 @@ binds {
     // region, satty opens it for arrows/text/blur, copy lands on the
     // clipboard, save lands next to niri's own screenshots. Esc in the
     // region picker cancels the whole pipeline. Tools installed by
-    // home/marcus/desktop/niri.nix.
+    // home/marcus/desktop/session-tools.nix.
     Mod+Shift+S hotkey-overlay-title="Snip + annotate" { spawn "sh" "-c" "mkdir -p ~/Pictures/Screenshots && grim -g \"$(slurp)\" - | satty --filename - --fullscreen --early-exit --copy-command wl-copy --output-filename ~/Pictures/Screenshots/'Snip from %Y-%m-%d %H-%M-%S.png'"; }
 
     // Applications such as remote-desktop clients and software KVM switches may
@@ -800,7 +800,7 @@ window-rule {
 }
 
 // compositor cursor + XCURSOR_* env for spawned apps; the theme package
-// and GTK-side settings live in home/marcus/desktop/niri.nix
+// and GTK-side settings live in home/marcus/desktop/theme.nix
 cursor {
     xcursor-theme "Adwaita"
     xcursor-size 24

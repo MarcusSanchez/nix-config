@@ -12,22 +12,8 @@
     jetbrains-toolbox
     # firewall port 53317 is opened in modules/desktop/networking.nix
     localsend
-    # native Wayland instead of xwayland-satellite, where its CEF drew
-    # an ugly fallback frame — and no decoration feature flag: CEF's
-    # own CSD is a retro blue titlebar (default-ON in this CEF, hence
-    # the explicit disable), and a tiled window needs none.
-    # The .desktop Exec resolves `spotify` via PATH, so wrapping bin/
-    # covers both launch paths.
-    (symlinkJoin {
-      name = "spotify-wayland";
-      paths = [ spotify ];
-      nativeBuildInputs = [ makeWrapper ];
-      postBuild = ''
-        rm $out/bin/spotify
-        makeWrapper ${spotify}/bin/spotify $out/bin/spotify \
-          --add-flags "--ozone-platform=wayland --disable-features=WaylandWindowDecorations"
-      '';
-    })
+    # forced native-Wayland — the why lives in the wrapper's header
+    (pkgs.callPackage ./pkgs/spotify-wayland.nix { })
     # zen isn't in nixpkgs; the flake input repackages official binaries
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
@@ -53,27 +39,9 @@
     # through /dev/uinput (group membership already exists for xremap).
     # `rustdesk`, not `rustdesk-flutter`: same upstream app, newer
     # release (the unfree mark is upstream's relicense, and unfree is
-    # allowed here anyway).
-    #
-    # Forced through xwayland: keyboard forwarding to the remote fails
-    # under native Wayland — legacy mode's rdev grab has no backend
-    # ("Failed to send grab command, no sender" in the client log) and
-    # map mode drops keys too.
-    # The Flutter shell is GTK-based, so GDK_BACKEND=x11 is honored.
-    # The .desktop Exec resolves `rustdesk` via PATH — wrapping bin/
-    # covers both launch paths, same as the spotify wrapper above.
-    (symlinkJoin {
-      name = "rustdesk-x11";
-      paths = [ rustdesk ];
-      nativeBuildInputs = [ makeWrapper ];
-      postBuild = ''
-        rm $out/bin/rustdesk
-        makeWrapper ${rustdesk}/bin/rustdesk $out/bin/rustdesk \
-          --set GDK_BACKEND x11 \
-          --set GDK_SCALE 2 \
-          --set XCURSOR_SIZE 12
-      '';
-    })
+    # allowed here anyway). Forced through xwayland — the why lives in
+    # the wrapper's header.
+    (pkgs.callPackage ./pkgs/rustdesk-x11.nix { })
   ];
 
   # Launcher hygiene: terminal apps and system plumbing ship .desktop

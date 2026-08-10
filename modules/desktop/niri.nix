@@ -1,7 +1,7 @@
 # The compositor: niri (scrollable-tiling Wayland compositor) with its
 # session Exec routed through systemd-cat, plus the GNOME/GTK portals
 # programs.niri wires up. User-side pieces (DMS shell, niri config) live
-# in home/marcus/desktop/niri.nix; the greeter that enters this session
+# in home/marcus/desktop/ (niri.nix + dms.nix); the greeter that enters this session
 # is ./greeter.nix.
 { pkgs, ... }:
 

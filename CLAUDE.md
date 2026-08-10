@@ -293,17 +293,31 @@ home/marcus/
                            be granted BY HAND; until it is, the event tap
                            never starts and the keys silently do nothing
     ghostty.nix
-  desktop/
-    niri.nix               user side of the session: DMS helper packages
-                           (quickshell/dgop/matugen — dms-shell does NOT
-                           bundle them; matugen missing = theme generation
-                           silently no-ops), GTK/dconf theme names
+  desktop/                 (split by concern like modules/desktop; the
+                           dms->niri->session-tools import order in
+                           desktop.nix preserves home.packages merge
+                           order — not cosmetic)
+    theme.nix              GTK/dconf theme names + pointer cursor
                            (Adwaita everywhere; see Constraints for why
-                           not Papirus), the snipping tool
-                           (grim/slurp/satty, Mod+Shift+S), and FOUR
-                           out-of-store links: niri/config.kdl,
-                           niri/niri.outputs.kdl, niri/niri.host.kdl
-                           (target picked by hostname), DMS settings.json
+                           not Papirus)
+    dms.nix                the shell stack (dms-shell/quickshell/dgop/
+                           matugen — dms-shell does NOT bundle the
+                           helpers; matugen missing = theme generation
+                           silently no-ops) + out-of-store links for
+                           dms.settings.json and the dms-plugins/ bar
+                           widgets
+    niri.nix               the session's config wiring: out-of-store
+                           links for niri/config.kdl, niri.outputs.kdl,
+                           niri.host.kdl (target picked by hostname) +
+                           swaylock fallback + xwayland-satellite
+    session-tools.nix      what niri.config.kdl's binds and spawns
+                           expect on PATH: snipping (grim/slurp/satty,
+                           Mod+Shift+S), cliphist, playerctl,
+                           wallpapers (swaybg/mpvpaper), xremap,
+                           tpm-fido
+    pkgs/                  callPackage wrappers (spotify-wayland,
+                           rustdesk-x11, pinentry-alias) — packaging
+                           workarounds as named files, why in each header
     appearance.nix         wallpaper + avatar from ./assets, linked to
                            stable paths under ~ — DMS records an ABSOLUTE
                            path in its session state, so a store path would
@@ -337,7 +351,7 @@ home/marcus/
   - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `pkill quickshell`, then `niri msg action spawn -- dms run` (the supervisor may be long dead, so respawn explicitly). Verify pixels with `grim -o <output>` over SSH, not by asking state again.
   - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/desktop/boot.nix` + `desktop.nix` headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
   - **Group membership changes (input/uinput) need a relogin** — the session that ran the switch doesn't have them yet.
-  - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `desktop/niri.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus was trialed on bedroom-nixos 2026-08-06 and proved technically fine — ghostty's tab bar renders; the old laptop breakage was Plasma-leftover fallout, not a Papirus deficiency — but its restyled app icons were rejected on looks. Re-enabling it is safe on clean installs; it is a taste decision, not a stability one.
+  - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `desktop/theme.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus was trialed on bedroom-nixos 2026-08-06 and proved technically fine — ghostty's tab bar renders; the old laptop breakage was Plasma-leftover fallout, not a Papirus deficiency — but its restyled app icons were rejected on looks. Re-enabling it is safe on clean installs; it is a taste decision, not a stability one.
   - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a DMS restart to be indexed.
   - When a GUI app misbehaves, run it from a terminal and read its output before theorizing about the launcher.
 - The zsh `initContent` in `home/marcus/common/shell.nix` is wrapped in `lib.mkOrder 1200` on purpose, so marcus's keybindings land after zoxide/atuin's shell hooks. Don't drop the ordering when editing it.

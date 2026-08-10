@@ -12,7 +12,7 @@
   # Desktop-only group memberships, layered onto the base user from
   # modules/nixos/users.nix (extraGroups lists merge): NetworkManager
   # control without polkit prompts, and evdev read + uinput write for
-  # xremap (home/marcus/desktop/niri.nix).
+  # xremap (home/marcus/desktop/session-tools.nix).
   users.users.${config.identity.username}.extraGroups = [
     "networkmanager"
     "input"
