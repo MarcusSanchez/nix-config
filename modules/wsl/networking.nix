@@ -6,17 +6,18 @@
 # same ports, same routing table (microsoft/WSL#4304). Two tailscaled
 # instances there would fight over tailscale0, UDP 41641, and the
 # 100.64.0.0/10 route. So the rule is one importing distro per PC, which is
-# a per-machine fact the aggregator cannot express — hence host-level. Every
-# host module imports it today because each instance lives on its own PC; two
-# that shared one would need the second to drop this import.
+# a per-machine fact the aggregator cannot express — hence host-level. The
+# same reasoning covers the Windows host itself: a PC's node is either
+# Windows-side Tailscale or one distro, and the hostname list at the import
+# in hosts/wsl records which distros sit that choice out.
 #
 # Also do NOT install Tailscale on Windows while this is enabled: traffic
 # would be encapsulated twice and Tailscale packets don't fit inside
 # Tailscale packets. Tailscale's own docs actually recommend the Windows
-# host over WSL; this config goes the other way because it makes this distro a
-# real node with its own MagicDNS name and inbound `tailscale ssh`, which
+# host over WSL; this config prefers the distro as the node because that
+# gives it its own MagicDNS name and inbound `tailscale ssh`, which
 # the Windows-side setup can't do without port-dispatching into wsl.exe.
-# If it misbehaves, that's the pivot.
+# If it misbehaves on a PC, that's the pivot — hence the hostname list.
 #
 # Two things that make this viable here and would not be true by default:
 # an MTU of 1500 on the WSL NIC (an MTU of 1280 breaks SSH and TLS while

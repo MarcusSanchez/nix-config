@@ -8,7 +8,12 @@
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common
 # to set; everything WSL lives in modules/wsl, self-contained.
-{ inputs, hostName, ... }:
+{
+  inputs,
+  hostName,
+  lib,
+  ...
+}:
 
 {
   imports = [
@@ -16,10 +21,12 @@
     inputs.sops-nix.nixosModules.sops
     inputs.home-manager.nixosModules.home-manager
     ../../modules/wsl
-    # Not in the wsl aggregator: only ONE WSL distro per Windows PC
-    # can be a tailnet node — they share a network namespace. See the file.
-    ../../modules/wsl/networking.nix
-  ];
+  ]
+  # Not in the wsl aggregator: a PC gets exactly one tailnet node — the
+  # Windows host or a single distro, never both (all its distros share
+  # one network namespace; see the file). The list is the distros whose
+  # PC carries the node elsewhere, so they skip this import.
+  ++ lib.optionals (!builtins.elem hostName [ "naut-box" ]) [ ../../modules/wsl/networking.nix ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
