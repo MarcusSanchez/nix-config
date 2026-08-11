@@ -24,11 +24,15 @@
     nautilus
 
     # remote desktop (TeamViewer-style, self-hostable) — used OUTBOUND,
-    # to control other machines; nothing here runs at startup, so this
-    # box is only controllable while the app is deliberately open.
-    # Should receiving ever matter: capture goes through the GNOME
-    # portal + PipeWire (already in place for screen sharing), input
-    # through /dev/uinput (group membership already exists for xremap).
+    # to control other machines; nothing here runs at startup, and
+    # RECEIVING cannot work on this desktop: niri's screencast offers
+    # dmabuf-only buffers with the modifier marked MANDATORY
+    # (pw_utils.rs, unchanged on niri main), while the capture pipeline
+    # here (pipewiresrc ! videoconvert) speaks only mappable system
+    # memory — the format intersection is empty, "no more input
+    # formats" on every connect. Input was never the problem
+    # (/dev/uinput worked). Graphical access INTO this box needs a
+    # KMS-capture tool (sunshine-class) instead.
     # `rustdesk`, not `rustdesk-flutter`: same upstream app, newer
     # release (the unfree mark is upstream's relicense, and unfree is
     # allowed here anyway).
@@ -37,8 +41,11 @@
     # under native Wayland — legacy mode's rdev grab has no backend
     # ("Failed to send grab command, no sender" in the client log) and
     # map mode drops keys too. The Flutter shell is GTK-based, so
-    # GDK_BACKEND is honored. The .desktop Exec resolves `rustdesk` via
-    # PATH, so wrapping bin/ covers both launch paths.
+    # GDK_BACKEND is honored; GDK_SCALE=2 sizes the raw-pixel xwayland
+    # window for a high-DPI monitor (integer-only, so slightly larger
+    # than native — the comfortable direction). The .desktop Exec
+    # resolves `rustdesk` via PATH, so wrapping bin/ covers both launch
+    # paths.
     (symlinkJoin {
       name = "rustdesk-x11";
       paths = [ rustdesk ];
@@ -46,7 +53,8 @@
       postBuild = ''
         rm $out/bin/rustdesk
         makeWrapper ${rustdesk}/bin/rustdesk $out/bin/rustdesk \
-          --set GDK_BACKEND x11
+          --set GDK_BACKEND x11 \
+          --set GDK_SCALE 2
       '';
     })
 
