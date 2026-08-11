@@ -88,7 +88,7 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            the d-force is permanent for compositors
                            otherwise), WoL armed via a systemd.network
                            link file keyed by MAC, and the
-                           reboot-windows command (one-shot BootNext by
+                           reboot:windows command (one-shot BootNext by
                            label lookup — no firmware menus)
   lanzaboote.nix           Secure Boot, LIVE since install — a separate
                            file ON PURPOSE: a reinstall must comment its
@@ -109,7 +109,7 @@ modules/common/            default.nix packages.nix (cross-platform CLIs
                            wrappers exec the LIVE working tree (edits
                            need no rebuild) and return the caller to
                            their starting directory; also the
-                           reboot-windows command, hostname-gated to
+                           reboot:windows command, hostname-gated to
                            the dual-boot desktop
                            identity.nix secrets.nix home-manager.nix —
                            the identity option, the shared sops config
