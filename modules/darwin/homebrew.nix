@@ -68,6 +68,10 @@
       # per-application key remapping; its config and the launchd agent
       # that keeps it running live in home/marcus/darwin/hammerspoon.nix
       "hammerspoon"
+      # video player for downloaded files — mpv's engine (the same one
+      # nixos' mpvpaper runs) behind a native mac UI, so mkv and its
+      # embedded subtitle tracks play without transcoding
+      "iina"
       # IDE manager only — the JetBrains IDEs themselves are installed and
       # updated inside Toolbox (declaring them as casks would just drift
       # against their self-updater)
