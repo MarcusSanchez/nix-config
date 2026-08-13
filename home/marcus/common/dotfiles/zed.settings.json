@@ -110,7 +110,8 @@
   "colorize_brackets": true,
   "icon_theme": {
     "mode": "light",
-    "light": "Catppuccin Mocha",
+    // "light": "Catppuccin Mocha",
+    "light": "Catppuccin Latte",
     "dark": "Catppuccin Mocha"
   },
   "diagnostics": {
@@ -149,7 +150,8 @@
   "buffer_font_size": 14.0,
   "theme": {
     "mode": "light",
-    "light": "Catppuccin Mocha",
+    // "light": "Catppuccin Mocha",
+    "light": "Catppuccin Latte",
     "dark": "Catppuccin Mocha",
   },
 
@@ -165,50 +167,88 @@
   "preferred_line_length": 120,
   "wrap_guides": [120],
 
+  // The mocha values, kept whole so flipping back is one block swap. Every
+  // role below has the same meaning in both — only the palette slot moves.
+  // "experimental.theme_overrides": {
+  //   "accents": [
+  //     "#f9e2af", "#cba6f7", "#f38ba8", "#89b4fa", "#89dceb", "#fab387",
+  //   ],
+  //   "syntax": {
+  //     "keyword": { "color": "#cba6f7", "font_style": "italic" },
+  //     "function": { "color": "#89b4fa" },
+  //     "function.builtin": { "color": "#89b4fa" },
+  //     "type": { "color": "#f9e2af" },
+  //     "type.builtin": { "color": "#cba6f7" },
+  //     "constructor": { "color": "#f9e2af" },
+  //     "enum": { "color": "#fab387" },
+  //     "constant": { "color": "#fab387" },
+  //     "boolean": { "color": "#cba6f7", "font_style": "italic" },
+  //     "constant.builtin": { "color": "#cba6f7", "font_style": "italic" },
+  //     "number": { "color": "#89dceb" },
+  //     "property": { "color": "#f38ba8" },
+  //     "field": { "color": "#f38ba8" },
+  //     "variable.member": { "color": "#f38ba8" },
+  //     "variable": { "color": "#bac2de" },
+  //     "variable.parameter": { "color": "#dabb9b" },
+  //     "attribute": { "color": "#dabb9b" },
+  //     "namespace": { "color": "#bac2de", "font_style": "italic" },
+  //     "tag": { "color": "#f9e2af" },
+  //     "operator": { "color": "#ff6ca9" },
+  //     "punctuation.delimiter": { "color": "#9399b2" },
+  //     "punctuation.bracket": { "color": "#9399b2" },
+  //     "punctuation.special": { "color": "#ff6ca9" },
+  //   },
+  // },
+
   // ported from GoLand's "M's Mocha" scheme (the source of truth for
-  // syntax colors — AppData\Roaming\JetBrains\GoLand*\colors\M_s Mocha.icls).
-  // Not expressible here: global-vs-local variables, exported-vs-local
-  // constants (Zed's captures don't distinguish them)
+  // syntax colors — AppData\Roaming\JetBrains\GoLand*\colors\M_s Mocha.icls),
+  // then moved slot-for-slot onto Latte. Not expressible here:
+  // global-vs-local variables, exported-vs-local constants (Zed's captures
+  // don't distinguish them).
+  //
+  // Two colours are NOT slot translations: operator and variable.parameter
+  // are off-palette in mocha and tuned to glow on a dark base, so both are
+  // re-derived DARKER for Latte's #eff1f5 instead of lightened.
   "experimental.theme_overrides": {
     // bracket-colorization cycle (colorize_brackets above), same colors
     // and order as GoLand's *_BRACKETS_RAINBOW_COLOR0-5
     "accents": [
-      "#f9e2af",
-      "#cba6f7",
-      "#f38ba8",
-      "#89b4fa",
-      "#89dceb",
-      "#fab387",
+      "#df8e1d",
+      "#8839ef",
+      "#d20f39",
+      "#1e66f5",
+      "#04a5e5",
+      "#fe640b",
     ],
     "syntax": {
-      "keyword": { "color": "#cba6f7", "font_style": "italic" },
-      "function": { "color": "#89b4fa" },
-      "function.builtin": { "color": "#89b4fa" },
-      "type": { "color": "#f9e2af" },
-      "type.builtin": { "color": "#cba6f7" },
-      "constructor": { "color": "#f9e2af" },
-      "enum": { "color": "#fab387" },
-      "constant": { "color": "#fab387" },
+      "keyword": { "color": "#8839ef", "font_style": "italic" },
+      "function": { "color": "#1e66f5" },
+      "function.builtin": { "color": "#1e66f5" },
+      "type": { "color": "#df8e1d" },
+      "type.builtin": { "color": "#8839ef" },
+      "constructor": { "color": "#df8e1d" },
+      "enum": { "color": "#fe640b" },
+      "constant": { "color": "#fe640b" },
       // true/false (boolean) and null/undefined/nil (constant.builtin)
       // read as keywords, per GoLand
-      "boolean": { "color": "#cba6f7", "font_style": "italic" },
-      "constant.builtin": { "color": "#cba6f7", "font_style": "italic" },
-      "number": { "color": "#89dceb" },
-      "property": { "color": "#f38ba8" },
-      "field": { "color": "#f38ba8" },
-      "variable.member": { "color": "#f38ba8" },
-      "variable": { "color": "#bac2de" },
-      "variable.parameter": { "color": "#dabb9b" },
-      "attribute": { "color": "#dabb9b" },
-      "namespace": { "color": "#bac2de", "font_style": "italic" },
+      "boolean": { "color": "#8839ef", "font_style": "italic" },
+      "constant.builtin": { "color": "#8839ef", "font_style": "italic" },
+      "number": { "color": "#04a5e5" },
+      "property": { "color": "#d20f39" },
+      "field": { "color": "#d20f39" },
+      "variable.member": { "color": "#d20f39" },
+      "variable": { "color": "#5c5f77" },
+      "variable.parameter": { "color": "#9c6644" },
+      "attribute": { "color": "#9c6644" },
+      "namespace": { "color": "#5c5f77", "font_style": "italic" },
       // GoLand: components yellow via class-reference resolution; Zed's
       // single tag capture can't split components from <div>s, so all
       // JSX tags go yellow
-      "tag": { "color": "#f9e2af" },
-      "operator": { "color": "#ff6ca9" },
-      "punctuation.delimiter": { "color": "#9399b2" },
-      "punctuation.bracket": { "color": "#9399b2" },
-      "punctuation.special": { "color": "#ff6ca9" },
+      "tag": { "color": "#df8e1d" },
+      "operator": { "color": "#d0308f" },
+      "punctuation.delimiter": { "color": "#7c7f93" },
+      "punctuation.bracket": { "color": "#7c7f93" },
+      "punctuation.special": { "color": "#d0308f" },
     },
   },
 }
