@@ -5,9 +5,12 @@
 # hardware-configuration.nix is the generated truth from the install
 # (regenerate, don't edit).
 #
-# Imports are DECISIVE: modules/nixos is a pool with no aggregator, and
-# this list is the whole statement of what the machine runs — the
-# desktop session, plus this box's own hardware truth.
+# modules/nixos is the bare-metal world, aggregated by its default.nix.
+# What stays spelled out here is this box's own hardware truth: the
+# generated hardware config, Secure Boot, and the NVIDIA driver shape —
+# that last one a pool file OUTSIDE the aggregator (it hardcodes the
+# video driver and early-KMS initrd, so a non-NVIDIA host must not get
+# it), the same way modules/wsl/networking.nix stays out of its own.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
 { inputs, hostName, ... }:
@@ -17,18 +20,7 @@
     ../../modules/common
     inputs.sops-nix.nixosModules.sops
     inputs.home-manager.nixosModules.home-manager
-    ../../modules/nixos/nix.nix
-    ../../modules/nixos/packages.nix
-    ../../modules/nixos/users.nix
-    # the desktop session
-    inputs.dank-material-shell.nixosModules.greeter
-    ../../modules/nixos/boot.nix
-    ../../modules/nixos/security.nix
-    ../../modules/nixos/niri.nix
-    ../../modules/nixos/greeter.nix
-    ../../modules/nixos/system.nix
-    ../../modules/nixos/networking.nix
-    ../../modules/nixos/nix-ld.nix
+    ../../modules/nixos
     ../../modules/nixos/nvidia.nix
     ./hardware-configuration.nix
     # Secure Boot, live since install day. On a REINSTALL, comment this

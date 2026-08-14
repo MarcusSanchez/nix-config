@@ -44,10 +44,10 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
 1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`naut-dt/` — hardware-configuration.nix, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth is a hostname list hardcoded at the option it gates: the super tier in secrets.nix, the rustdesk bridge in wsl/networking.nix). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
-2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machine's whole world: account, nix daemon, and the boot/niri/DMS desktop stack — **no default.nix on purpose**; the host imports its files DECISIVELY, the list being the full statement of what the machine runs; package order in the merged profile is functionally irrelevant absent file collisions — proven by derivation diff, twice), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and hosts/naut-dt), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
+2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machine's whole world: account, nix daemon, and the boot/niri/DMS desktop stack, aggregated by its default.nix — the desktop stack is in there because every bare-metal host here IS a desktop; the day a headless one appears that file splits into a base half and a desktop.nix half, with the information that split needs actually in hand. `nvidia.nix` is the one pool file OUTSIDE the aggregator, for the same reason `wsl/networking.nix` is outside its own: it hardcodes `services.xserver.videoDrivers` and the early-KMS initrd list at normal priority, so a non-NVIDIA host must not receive it — GPU vendor is per-machine hardware truth, imported by the host. Package order in the merged profile is functionally irrelevant absent file collisions — proven by derivation diff, twice), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and hosts/naut-dt), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
 3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop session's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `nixos.nix` / `wsl.nix` / `darwin.nix` as the per-world entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; nixos.nix serves the bare-metal world the way wsl.nix serves the four WSL boxes — a second bare-metal machine would share it, splitting per-host the day a real divergence appears). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
 
-Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + the host's import list; WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from the shared nixos.nix entry; mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
+Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + its aggregator; WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from the shared nixos.nix entry; mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
 **Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. Its own operational commands (`secrets:edit`, `secrets:status`, `age:place`, `secrets:drop`, `config:check`) are plain executables in `bin/`, on PATH fleet-wide through `modules/common/bin.nix` — thin wrappers that run the LIVE working-tree scripts, so editing bin/ needs no rebuild. `./bin/<name>` also works directly, no wrapper involved.
 
@@ -120,10 +120,9 @@ modules/common/            default.nix packages.nix (cross-platform CLIs
                            .sops.yaml's recipients and key reality (the
                            comment there says why a mismatch loses
                            everything)
-modules/nixos/             the bare-metal machine's world — NO aggregator
-                           on purpose: the host imports these files
-                           DECISIVELY, the list being the full statement
-                           of what the machine runs
+modules/nixos/             the bare-metal machine's world, aggregated by
+                           its default.nix — EXCEPT nvidia.nix, which the
+                           host imports itself (see below)
   packages.nix             build tools + ghostty.terminfo (fixes TERM for
                            sessions ssh-ing *into* this box) + the
                            desk-only tools (ethtool/libsecret/watchman)
@@ -153,7 +152,10 @@ modules/nixos/             the bare-metal machine's world — NO aggregator
 
   niri.nix                 the compositor + portals; session Exec routed
                            through systemd-cat (journalctl -t niri-session)
-  greeter.nix              the whole login-screen story: dms-greeter,
+  greeter.nix              the whole login-screen story: the
+                           dank-material-shell greeter module is imported
+                           HERE, not at host level — it is this file's own
+                           dependency. Also dms-greeter,
                            accounts-daemon + the AccountsService avatar
                            seed (the greeter can't read ~/.face through
                            the 0700 home), and the generated
@@ -198,10 +200,18 @@ modules/nixos/             the bare-metal machine's world — NO aggregator
                            the tpm-fido rules must sort BEFORE
                            70-uaccess.rules — numbered package file, NOT
                            services.udev.extraRules (lands at 99-, too late)
-  nvidia.nix               the shared driver shape (every desktop host
-                           drives its panel off a discrete NVIDIA GPU):
-                           early-KMS initrd, open modules, mkDefault
-                           scalars as the host override point. The two
+  nvidia.nix               NOT in the aggregator — host-level, like
+                           wsl/networking.nix: it hardcodes the video
+                           driver and the early-KMS initrd, so a host
+                           without a discrete NVIDIA GPU must not get it.
+                           GPU vendor is per-machine hardware truth; the
+                           file stays a reusable SHAPE (a second NVIDIA
+                           desktop imports the same one) rather than
+                           moving into hosts/naut-dt.
+                           No prime offload/sync — every bare-metal host
+                           so far drives its panel straight off the
+                           discrete GPU; mkDefault scalars are the host
+                           override point. The two
                            LISTS stay normal priority on purpose —
                            hardware-configuration.nix defines
                            initrd.kernelModules = [ ] at priority 100,

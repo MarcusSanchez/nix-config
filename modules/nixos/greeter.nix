@@ -4,8 +4,14 @@
 # AccountsService icon seed). Greeter/display-manager changes ship via
 # `nixos-rebuild boot` + reboot, not `switch` — switch would kill the
 # live session out from under the user.
+#
+# The dms-greeter module itself is imported here rather than at host
+# level: it is this file's own dependency (nixpkgs has no greetd module
+# for DMS — the flake input supplies ONLY that module, while the shell
+# stays nixpkgs' dms-shell for cache reasons).
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -43,6 +49,8 @@ let
       '';
 in
 {
+  imports = [ inputs.dank-material-shell.nixosModules.greeter ];
+
   options.greeterScreens = lib.mkOption {
     type = lib.types.listOf lib.types.str;
     default = [ ];
