@@ -1,0 +1,6 @@
+// Host-specific niri config for the TUF laptop — see
+// niri.host.naut-dt.kdl for how the include is wired. The
+// laptop currently wants nothing beyond the shared config (global
+// default-column-width 2/3 stands for every app); this file exists so
+// the "niri.host.kdl" include resolves. Add laptop-only window-rules
+// or binds here.

@@ -570,7 +570,8 @@
   "displayNameMode": "system",
   "screenPreferences": {
     "lockScreen": [
-      "DP-3"
+      "DP-3",
+      "eDP-1"
     ]
   },
   "showOnLastDisplay": {},
@@ -622,7 +623,8 @@
         "controlCenterButton"
       ],
       "screenPreferences": [
-        "DP-3"
+        "DP-3",
+        "eDP-1"
       ],
       "showOnLastDisplay": true,
       "spacing": 4,

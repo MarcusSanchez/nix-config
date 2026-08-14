@@ -98,6 +98,7 @@
             office-two = ./hosts/wsl;
 
             naut-dt = ./hosts/naut-dt;
+            tuf-laptop = ./hosts/tuf-laptop;
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as

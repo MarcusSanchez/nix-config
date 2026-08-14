@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), a bare-metal desktop (host `naut-dt`, user `marcus` — the dual-boot side of the PC that also hosts naut-box; niri + DankMaterialShell, its own RTX 5080 facts; the desktop stack was absorbed from the archived `marcussanchez/tuf-nix-config` repo, whose git history holds the rejected Plasma/GNOME/SDDM experiments — the TUF laptop itself is retired), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), two bare-metal NixOS machines sharing one desktop session (host `naut-dt`, the dual-boot side of the PC that also hosts naut-box, with its own RTX 5080 facts; and host `tuf-laptop`, an ASUS TUF Dash F15 whose MUX sits in discrete mode — both niri + DankMaterialShell, user `marcus`; the desktop stack was absorbed from the archived `marcussanchez/tuf-nix-config` repo, whose git history holds the rejected Plasma/GNOME/SDDM experiments), and a MacBook Air on nix-darwin + Determinate Nix (host `macbook-air`, user `marcussanchez`). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -25,6 +25,7 @@ sudo darwin-rebuild switch                     # apply — sudo pops a Touch ID 
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-box.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.framework-dt.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-dt.config.system.build.toplevel.drvPath'
+nix eval --raw '/etc/nix-darwin#nixosConfigurations.tuf-laptop.config.system.build.toplevel.drvPath'
                                                # eval the NixOS systems after touching modules/
                                                # or home/ (on any NixOS box, `nix flake
                                                # check` already covers every NixOS host; the office
@@ -37,7 +38,7 @@ nix flake update                               # bump inputs by hand (CI does it
                                                # update-flake-lock.yml, gated on the full eval)
 ```
 
-There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry — five: four WSL hosts and the desktop) + the darwin eval + a successful switch is the verification story. `./bin/config:check` runs the whole gate including the darwin eval. Each machine can switch only itself — changes for the others are flagged for the user to activate there.
+There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry — six: four WSL hosts and the two bare-metal machines) + the darwin eval + a successful switch is the verification story. `./bin/config:check` runs the whole gate including the darwin eval. Each machine can switch only itself — changes for the others are flagged for the user to activate there.
 
 ## Architecture
 
@@ -208,10 +209,13 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            file stays a reusable SHAPE (a second NVIDIA
                            desktop imports the same one) rather than
                            moving into hosts/naut-dt.
-                           No prime offload/sync — every bare-metal host
-                           so far drives its panel straight off the
-                           discrete GPU; mkDefault scalars are the host
-                           override point. The two
+                           No prime offload/sync — both bare-metal hosts
+                           drive their panel straight off the discrete
+                           GPU (the laptop's MUX is in discrete mode), so
+                           they import this same file; a hybrid-MUX or
+                           iGPU-offload machine adds its own prime block
+                           at host level, which the mkDefault scalars
+                           below are what make possible. The two
                            LISTS stay normal priority on purpose —
                            hardware-configuration.nix defines
                            initrd.kernelModules = [ ] at priority 100,
