@@ -13,7 +13,31 @@
 #
 # Both need network; if offline they warn and retry on the next activation,
 # never failing it.
+#
+# Components are ensured separately from the toolchain, and unconditionally,
+# because a toolchain that already exists can still be missing them: rustup
+# installs SHIMS for the whole tool family into PATH, rust-analyzer included,
+# and a shim whose component is absent does not fall through to anything else
+# — it exits with "unavailable for the active toolchain". So the editor's LSP
+# never starts, while mason's own perfectly good rust-analyzer sits further
+# down PATH and never gets reached. A fresh `toolchain install` does not carry
+# hand-added components either, so the WSL glibc repair above would drop them.
 { pkgs, lib, ... }:
+
+let
+  # rust-analyzer: the LSP itself. rust-src: what lets it resolve into the
+  # standard library (go-to-definition on Vec, etc.).
+  rustComponents = "rust-analyzer rust-src";
+
+  ensureRustComponents = ''
+    for c in ${rustComponents}; do
+      if ! ${pkgs.rustup}/bin/rustup component list --installed 2>/dev/null | grep -q "^$c"; then
+        run ${pkgs.rustup}/bin/rustup component add "$c" \
+          || echo "rustup: could not add $c (offline?); will retry on the next activation" >&2
+      fi
+    done
+  '';
+in
 
 {
   home.activation.rustupToolchain = lib.hm.dag.entryAfter [ "writeBoundary" ] (
@@ -26,6 +50,7 @@
             echo "rustup: toolchain install failed (offline?); will retry on the next activation" >&2
           fi
         fi
+        ${ensureRustComponents}
       ''
     else
       ''
@@ -39,6 +64,7 @@
             echo "rustup: toolchain install failed (offline?); rust stays broken until the next successful activation" >&2
           fi
         fi
+        ${ensureRustComponents}
       ''
   );
 
