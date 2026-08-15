@@ -73,6 +73,16 @@
       "b": "vim::NextWordEnd",
       "w": "vim::PreviousWordStart",
 
+      // the same mirror one level up: ideavimrc's `noremap W B / E W / B E`.
+      // ignore_punctuation is Zed's WORD variant — treats a punctuation-glued
+      // token as one word, so it lands where vim's uppercase motions do. The
+      // key is snake_case: the action SCHEMA spells it ignorePunctuation, but
+      // the keymap parser wants ignore_punctuation, and the camelCase form is
+      // accepted-then-ignored, silently giving you lowercase behaviour.
+      "shift-w": ["vim::PreviousWordStart", { "ignore_punctuation": true }],
+      "shift-e": ["vim::NextWordStart", { "ignore_punctuation": true }],
+      "shift-b": ["vim::NextWordEnd", { "ignore_punctuation": true }],
+
       "alt-J": "editor::MoveLineUp",
       "alt-K": "editor::MoveLineDown",
 
@@ -91,7 +101,13 @@
       ", a": "project_panel::ToggleFocus",
       ", q": "pane::CloseActiveItem",
       ", g": "editor::ToggleCodeActions",
-      ", c": "workspace::ToggleRightDock",
+      // Close the side windows from the editor. NOT CloseActiveDock: that
+      // one means the dock with FOCUS, so pressed from here — where the
+      // editor has focus and no dock does — it silently no-ops. And not
+      // ToggleAllDocks either: that reopens everything on a second press.
+      // CloseAllDocks closes what is open and stays closed. Zed ships it
+      // unbound; ToggleAllDocks is what its own defaults use.
+      ", c": "workspace::CloseAllDocks",
       ", t": "terminal_panel::ToggleFocus",
       // autosave writes the buffer after the format edits land
       ", f": "editor::Format",
@@ -128,6 +144,22 @@
       "s": "vim::PushSneak", // flash.search stand-in: 2-char jump
       "] e": "editor::GoToDiagnostic",
       "[ e": "editor::GoToPreviousDiagnostic",
+
+      // Git, the <leader>gh... family from .ideavimrc. Leader is space here
+      // the same way it is there, so these are the literal ports:
+      //   ghr  Vcs.RollbackChangedLines    -> discard the hunk under the cursor
+      //   ghl  Vcs.QuickListPopupAction    -> the git panel, Zed's VCS popup
+      //   ghd  VcsShowCurrentChangeMarker  -> expand the hunk's diff inline
+      "space g h r": "git::Restore",
+      "space g h l": "git_panel::ToggleFocus",
+      "space g h d": "editor::ToggleSelectedDiffHunks",
+      // no IdeaVim counterpart, but the rest of the gitsigns family the
+      // prefix implies — staging and hunk navigation
+      "space g h s": "git::ToggleStaged",
+      "space g h b": "editor::ToggleGitBlame",
+      "space g h D": "editor::ExpandAllDiffHunks",
+      "] h": "editor::GoToHunk",
+      "[ h": "editor::GoToPreviousHunk",
       "g shift-i": "editor::GoToImplementation",
       "g r": "editor::FindAllReferences",
       "g y": "editor::GoToTypeDefinition",
@@ -135,7 +167,15 @@
       // the same key must undo the fold (z o / z R also work)
       ", d": "editor::ToggleFold",
       // _ register delete left (backspace without yanking)
-      "backspace": ["workspace::SendKeystrokes", "# p r _ d h"]
+      "backspace": ["workspace::SendKeystrokes", "# p r _ d h"],
+      // ...and the same rightward, for ideavimrc's `noremap <Del> "_<Del>`
+      "delete": ["workspace::SendKeystrokes", "# p r _ d l"],
+
+      // occurrence multicursor in NORMAL mode too — the visual block below
+      // already has these, but ideavimrc binds them with both nmap and vmap,
+      // so from normal mode they did nothing here
+      "alt-L": "vim::SelectNext",
+      "alt-H": "editor::UndoSelection"
     }
   },
 
@@ -181,8 +221,10 @@
       "k": "menu::SelectNext",
       "j": "menu::SelectPrevious",
 
-      "ctrl-w": "workspace::ToggleRightDock",
-      "cmd-w": "workspace::ToggleRightDock"
+      // same action as ", c" in the editor: closes the dock this panel sits
+      // in, so moving the project panel to the left keeps working
+      "ctrl-w": "workspace::CloseActiveDock",
+      "cmd-w": "workspace::CloseActiveDock"
     }
   },
   {
