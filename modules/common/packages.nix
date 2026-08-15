@@ -74,6 +74,15 @@
     # language server stay on matching versions automatically
     zig
     zls
+
+    # Gleam: LSP included (`gleam lsp`), so no zls-style second package.
+    # It propagates nothing, so the runtime is explicit — erlang to run the
+    # default target, rebar3 to build Erlang-project Hex deps, the nodejs
+    # above for the JS one. beamPackages.* because pkgs.erlang is
+    # deprecated and warns on every eval.
+    gleam
+    beamPackages.erlang
+    beamPackages.rebar3
   ];
 
   # Claude Code, kept current via the claude-code-nix overlay. Its
