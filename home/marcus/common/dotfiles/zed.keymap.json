@@ -197,9 +197,14 @@
       // _ register delete (delete without yanking)
       "d": ["workspace::SendKeystrokes", "# p r _ d"],
 
-      // _ register paste (paste without yanking)
-      "p": ["workspace::SendKeystrokes", "# p r _ d P"],
-      "P": ["workspace::SendKeystrokes", "# p r _ d P"],
+      // Paste over the selection without the replaced text clobbering the
+      // register. Zed has this natively, so it no longer goes through
+      // SendKeystrokes "# p r _ d P" — that macro sent a `d`, and `d` is
+      // itself remapped just above, so it re-entered its own binding.
+      // preserve_clipboard is snake_case in the keymap (the action schema
+      // spells it preserveClipboard; the camelCase form is ignored).
+      "p": ["vim::Paste", { "preserve_clipboard": true }],
+      "P": ["vim::Paste", { "preserve_clipboard": true }],
 
       "alt-L": "vim::SelectNext",
       "alt-H": "editor::UndoSelection",
