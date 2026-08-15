@@ -58,6 +58,22 @@
     yazi = {
       enable = true;
       shellWrapperName = "y";
+
+      # j/k inverted. prepend_keymap rather than a bare `keymap`: prepend
+      # wins over the defaults while leaving every other binding intact,
+      # where a plain keymap would replace the whole default set.
+      keymap.mgr.prepend_keymap = [
+        {
+          on = [ "j" ];
+          run = "arrow -1";
+          desc = "Move cursor up";
+        }
+        {
+          on = [ "k" ];
+          run = "arrow 1";
+          desc = "Move cursor down";
+        }
+      ];
     };
 
     # the most-loved git TUI: hunk staging, interactive rebase, branch
