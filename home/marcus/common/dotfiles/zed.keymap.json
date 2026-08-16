@@ -41,6 +41,29 @@
     "bindings": {
       "ctrl-j": "editor::AddSelectionAbove",
       "ctrl-k": "editor::AddSelectionBelow",
+
+      // The whole zoom family, stated explicitly, because Zed's defaults
+      // give every one of these chords to something else in a real buffer:
+      //   cmd-0  -> git_panel::ToggleFocus at Pane scope, their own comment
+      //             reading "overrides `cmd-0` zoom reset"
+      //   cmd--  -> editor::Fold
+      //   cmd-+  -> editor::UnfoldLines
+      //   cmd-=  -> nothing at all; the macOS View menu was answering it,
+      //             which is why + alone seemed to work
+      // Font reset/inc/dec survive in the defaults only under Onboarding,
+      // Welcome, ImageViewer and SkillCreator — never a buffer you edit in.
+      // Editor is nested inside Pane, so these win. persist:false matches
+      // the default: session state, never written back, so buffer_font_size
+      // stays the source of truth. Nothing is lost — the git panel is on
+      // space-g-h-l and folding on ", d".
+      "ctrl-0": ["zed::ResetBufferFontSize", { "persist": false }],
+      "cmd-0": ["zed::ResetBufferFontSize", { "persist": false }],
+      "ctrl-=": ["zed::IncreaseBufferFontSize", { "persist": false }],
+      "cmd-=": ["zed::IncreaseBufferFontSize", { "persist": false }],
+      "ctrl-+": ["zed::IncreaseBufferFontSize", { "persist": false }],
+      "cmd-+": ["zed::IncreaseBufferFontSize", { "persist": false }],
+      "ctrl--": ["zed::DecreaseBufferFontSize", { "persist": false }],
+      "cmd--": ["zed::DecreaseBufferFontSize", { "persist": false }],
       // close tab (overrides JetBrains extend-selection and vim insert-mode
       // delete-word)
       "ctrl-w": "pane::CloseActiveItem",
