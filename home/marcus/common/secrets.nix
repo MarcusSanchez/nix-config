@@ -66,16 +66,25 @@
   # darwin — while age:place and the README put the key in ~/.config/sops/
   # age on every platform. Pinning the path makes editing work identically
   # everywhere (discovered when mac edits were DENIED with a valid key).
-  home.sessionVariables.SOPS_AGE_KEY_FILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+  home = {
+    # bw, the official Bitwarden CLI, alongside rbw above rather than
+    # instead of it: secretspec's bitwarden provider shells out to `bw` by
+    # name, so rbw cannot stand in however alike the two look. One vault,
+    # two clients — rbw for interactive lookups (agent, pinentry, the
+    # master-key backup), bw for anything reaching in programmatically.
+    packages = [ pkgs.bitwarden-cli ];
 
-  home.sessionVariablesExtra = ''
-    if [ -r /run/secrets/fly_token ]; then
-      export FLY_API_TOKEN="$(cat /run/secrets/fly_token)"
-    fi
-    if [ -r /run/secrets/croc_secret ]; then
-      export CROC_SECRET="$(cat /run/secrets/croc_secret)"
-    fi
-  '';
+    sessionVariables.SOPS_AGE_KEY_FILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+
+    sessionVariablesExtra = ''
+      if [ -r /run/secrets/fly_token ]; then
+        export FLY_API_TOKEN="$(cat /run/secrets/fly_token)"
+      fi
+      if [ -r /run/secrets/croc_secret ]; then
+        export CROC_SECRET="$(cat /run/secrets/croc_secret)"
+      fi
+    '';
+  };
 
   # atuin's per-machine login is deliberately NOT here: HM activation
   # can't do it reliably on either platform (darwin runs HM's text before
