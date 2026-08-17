@@ -41,7 +41,7 @@ in
 
 {
   home.activation.rustupToolchain = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-    if pkgs.stdenv.isDarwin then
+    if pkgs.stdenv.hostPlatform.isDarwin then
       ''
         if ! ${pkgs.rustup}/bin/rustup show active-toolchain >/dev/null 2>&1; then
           if run ${pkgs.rustup}/bin/rustup toolchain install stable; then

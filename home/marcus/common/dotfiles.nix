@@ -43,7 +43,7 @@ in
     # include). The package is elsewhere: home/marcus/nixos/apps.nix on
     # the desktops, a brew cask on the mac.
     "ghostty/config".source = link (
-      if pkgs.stdenv.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
+      if pkgs.stdenv.hostPlatform.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
     );
     "ghostty/ghostty.config".source = link "ghostty.config";
   };

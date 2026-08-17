@@ -165,7 +165,7 @@ in
       lib.mkMerge [
         # Order 1600: after sops-nix's mkAfter (1500) "Setting up
         # secrets...", as the user, who owns the secrets.
-        (lib.mkIf pkgs.stdenv.isDarwin {
+        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
           system.activationScripts.postActivation.text = lib.mkOrder 1600 ''
             sudo -u ${user} --set-home ${atuinLogin}
           '';
@@ -176,7 +176,7 @@ in
         # needed (--reset-env also sets the user's HOME, which atuin's data
         # dir hangs off). stringAfter orders it behind the decryption it
         # consumes.
-        (lib.mkIf pkgs.stdenv.isLinux {
+        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           system.activationScripts.atuinLogin = lib.stringAfter [ "setupSecrets" ] ''
             ${pkgs.util-linux}/bin/setpriv --reuid ${user} --regid users --init-groups --reset-env ${atuinLogin}
           '';

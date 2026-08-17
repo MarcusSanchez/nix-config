@@ -179,7 +179,7 @@
         #   green a6e3a1   red f38ba8    peach  fab387   sky   89dceb
         #   teal  94e2d5   blue 89b4fa   yellow f9e2af   mauve cba6f7
         PROMPT="%B${
-          if pkgs.stdenv.isDarwin then
+          if pkgs.stdenv.hostPlatform.isDarwin then
             "%F{#a6e3a1}(nix-darwin)"
           else if osConfig.wsl.enable or false then
             "%F{#f9e2af}(WSL-NixOS)"

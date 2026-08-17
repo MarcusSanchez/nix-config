@@ -28,7 +28,8 @@
     };
     home = lib.mkOption {
       type = lib.types.str;
-      default = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.identity.username;
+      default =
+        (if pkgs.stdenv.hostPlatform.isDarwin then "/Users/" else "/home/") + config.identity.username;
       defaultText = lib.literalExpression ''(if isDarwin then "/Users/" else "/home/") + config.identity.username'';
       description = "The account's home directory, derived from the platform convention.";
     };
