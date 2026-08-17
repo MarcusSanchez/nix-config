@@ -544,7 +544,6 @@
   "powerActionHoldDuration": 0.5,
   "powerMenuActions": [
     "reboot",
-    "rebootwindows",
     "logout",
     "poweroff",
     "lock",
