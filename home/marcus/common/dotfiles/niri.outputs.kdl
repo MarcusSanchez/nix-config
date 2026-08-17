@@ -41,12 +41,7 @@ output "eDP-1" {
 // (video=DP-2:d in hosts/naut-dt/default.nix), so plymouth
 // never draws there, and plymouth-on-DP-2 is the only thing such a
 // param would rotate.
-// TEMPORARY: every output off — the machine is being used remotely
-// (WoL + ssh) and the panels should stay dark, session and greeter
-// both. Revert this commit to light the desk again; until then the
-// greeter renders no visible sign-in UI.
 output "DP-2" {
-    off
     mode "1920x1080@179.998"
     transform "90"
     scale 1
@@ -54,7 +49,6 @@ output "DP-2" {
 }
 
 output "DP-3" {
-    off
     mode "3840x2160@240.000"
     scale 1.75
     position x=1080 y=343
@@ -65,7 +59,6 @@ output "DP-3" {
 // overlaps by a fraction and niri silently falls back to automatic
 // placement (which is how the y offset gets lost).
 output "DP-1" {
-    off
     mode "2560x1440@320.001"
     scale 1.25
     position x=3275 y=384
