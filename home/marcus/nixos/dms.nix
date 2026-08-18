@@ -39,6 +39,22 @@ let
       theme = "dms.theme.flake.json";
       comment = "The Nix flake on all three monitors, nix-logo blues";
     };
+    galaxy = {
+      dp1 = "galaxy-waves.jpg";
+      dp2 = "galaxy-waves.jpg";
+      dp3 = "galaxy-waves.jpg";
+      mpv = false;
+      theme = "dms.theme.galaxy.json";
+      comment = "The cosmic ocean vortex, icy steel blue on near-black slate";
+    };
+    swirls = {
+      dp1 = "swirls.jpg";
+      dp2 = "swirls.jpg";
+      dp3 = "swirls.jpg";
+      mpv = false;
+      theme = "dms.theme.swirls.json";
+      comment = "Pastel liquid marble, dusty rose accent on slate navy";
+    };
   };
 in
 {
@@ -160,8 +176,10 @@ in
       # also get these files) is unaffected.
       "Pictures/Wallpapers/space-stars-2560x1440.jpg".source = ./assets/space-stars-2560x1440.jpg;
       "Pictures/Wallpapers/space-stars-1080x1920.jpg".source = ./assets/space-stars-1080x1920.jpg;
-      # the flake group's single image (wallpaper:group above)
+      # the single-image looks (the looks table above)
       "Pictures/Wallpapers/nix-flake.png".source = ./assets/nix-flake.png;
+      "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
+      "Pictures/Wallpapers/swirls.jpg".source = ./assets/swirls.jpg;
       "Pictures/avatar-spaceman.png".source = ./assets/avatar-spaceman.png;
       ".face".source = ./assets/avatar-spaceman.png;
     };
