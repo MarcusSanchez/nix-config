@@ -1,12 +1,12 @@
-# Shell variety for the desk: noctalia (the 4.x quickshell shell — the
-# 5.x rewrite is ./noctalia5.nix, archived unimported until it
-# matures) installed ALONGSIDE DMS, selected per login at the
-# greeter's session menu — the "niri (noctalia)" entry
-# (modules/nixos/niri.nix) sets NIRI_SHELL, the spawn line in
+# ARCHIVED, NOT IMPORTED — noctalia 4.x, tried as shell variety and
+# retired with the experiment (the 5.x rewrite is ./noctalia5.nix,
+# same status). Everything else still speaks it, so re-enabling is:
+# import this file from nixos.nix and put the hostname back in the
+# sessionPackages gate in modules/nixos/niri.nix — the "niri
+# (noctalia)" session entry sets NIRI_SHELL, the spawn line in
 # niri.config.kdl reads it, and the binds route through shell-ipc
-# (./niri.nix) to whichever shell is running. DMS stays the default
-# session. The package bundles its own pinned quickshell (noctalia-qs)
-# — nothing extra to install.
+# (./niri.nix) to whichever shell answers. The package bundles its own
+# pinned quickshell (noctalia-qs) — nothing extra to install.
 #
 # Hostname-gated, same rule as the other per-machine ON/OFF facts: the
 # list lives at the option it gates. Kept deliberately STOCK — no bar

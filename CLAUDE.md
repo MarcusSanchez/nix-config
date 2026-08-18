@@ -340,20 +340,13 @@ home/marcus/
                            shell-ipc (the shell-neutral verbs the binds
                            call — routes to noctalia when running, DMS
                            otherwise)
-    noctalia.nix           the alternative shell (4.x), hostname-gated:
-                           installed beside DMS, chosen per login via
-                           the greeter's session menu ("niri
-                           (noctalia)" entry in modules/nixos/niri.nix
-                           sets NIRI_SHELL, the spawn line in
-                           niri.config.kdl reads it). Kept STOCK; its
-                           wallpaper is OFF in the machine-local
-                           settings (~/.config/noctalia/) — the
-                           compositor paints the desk instead (swaybg
-                           stills + mpvpaper in niri.host.naut-dt.kdl),
-                           identical in every shell
-    noctalia5.nix          the 5.x rewrite, ARCHIVED unimported (beta,
-                           too immature); its header is the
-                           re-enable recipe
+    noctalia.nix           the shell-variety experiment (4.x), ARCHIVED
+    noctalia5.nix          unimported along with the 5.x rewrite —
+                           the machinery that spoke them stays live
+                           (shell-ipc, the NIRI_SHELL spawn line, the
+                           emptied sessionPackages gate in
+                           modules/nixos/niri.nix), so noctalia.nix's
+                           header is a two-edit re-enable recipe
 
     apps.nix
                            the GTK chrome and Windows-Terminal keybinds

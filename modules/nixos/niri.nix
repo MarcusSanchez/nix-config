@@ -71,9 +71,9 @@ in
   # the noctalia session entry, only where the shell itself is
   # installed — the hostname list mirrors the gate in
   # home/marcus/nixos/noctalia.nix (a session entry without the shell
-  # would greet its picker into a shell-less niri)
+  # would greet its picker into a shell-less niri). EMPTY while the
+  # noctalia files sit archived off the import path.
   services.displayManager.sessionPackages = lib.mkIf (builtins.elem config.networking.hostName [
-    "naut-dt"
   ]) [ noctaliaSession ];
 
   # swaylock is the session's fallback locker (DMS's is primary); it
