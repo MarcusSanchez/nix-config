@@ -571,6 +571,15 @@
     "lockScreen": [
       "DP-3",
       "eDP-1"
+    ],
+    "notifications": [
+      "DP-3"
+    ],
+    "osd": [
+      "DP-3"
+    ],
+    "toast": [
+      "DP-3"
     ]
   },
   "showOnLastDisplay": {},
