@@ -11,6 +11,9 @@
     ./common
     ./nixos/theme.nix
     ./nixos/dms.nix
+    # the alternative shell, hostname-gated inside the file — a host
+    # off its list imports an empty module
+    ./nixos/noctalia.nix
     ./nixos/niri.nix
     # UI-managed-config links + drift auto-commit. Desktop note: the
     # niri kdls (nixos/niri.nix), dms.settings.json (nixos/dms.nix)

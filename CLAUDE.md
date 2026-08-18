@@ -336,7 +336,21 @@ home/marcus/
                            spawns expect on PATH — snipping
                            (grim/slurp/satty, Mod+Shift+S), cliphist,
                            playerctl, wallpapers (swaybg/mpvpaper),
-                           xremap, tpm-fido, xwayland-satellite
+                           xremap, tpm-fido, xwayland-satellite, and
+                           shell-ipc (the shell-neutral verbs the binds
+                           call — routes to noctalia when running, DMS
+                           otherwise)
+    noctalia.nix           the alternative shell, hostname-gated:
+                           installed beside DMS, chosen per login via
+                           the greeter's session menu ("niri
+                           (noctalia)" entry in modules/nixos/niri.nix
+                           sets NIRI_SHELL, the spawn line in
+                           niri.config.kdl reads it). Settings stay
+                           machine-local (~/.local/state/noctalia/ —
+                           noctalia rewrites geometry in place, a repo
+                           link would be drift noise); layout mirrors
+                           dms.settings.json by hand, `noctalia config
+                           validate` checks edits
 
     apps.nix
                            the GTK chrome and Windows-Terminal keybinds

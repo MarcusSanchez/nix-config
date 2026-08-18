@@ -78,6 +78,39 @@
       mkdir -p $out/bin
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
     '')
+
+    # shell-ipc: the shell-neutral verbs niri.config.kdl's binds call.
+    # Routes to whichever shell is running — noctalia when its IPC
+    # answers (asked directly, not via pgrep: the nixpkgs wrapper's
+    # process comm is ".noctalia-wrapp", and a name match would also
+    # self-match shells quoting the word), DMS otherwise — so one
+    # shared bind set serves every session. On hosts without noctalia
+    # the probe is a clean command-not-found = DMS branch. The
+    # islocked verb exits 0/1 for the boot-lock loop.
+    (pkgs.writeShellScriptBin "shell-ipc" ''
+      verb=$1
+      if noctalia msg status >/dev/null 2>&1; then
+        case "$verb" in
+          spotlight)      exec noctalia msg panel-toggle launcher ;;
+          lock)           exec noctalia msg session lock ;;
+          islocked)       noctalia msg status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '"locked": true' ;;
+          powermenu)      exec noctalia msg panel-toggle session ;;
+          control-center) exec noctalia msg panel-toggle control-center ;;
+          clipboard)      exec noctalia msg panel-toggle clipboard ;;
+          *)              echo "shell-ipc: unknown verb $verb" >&2; exit 64 ;;
+        esac
+      else
+        case "$verb" in
+          spotlight)      exec dms ipc call spotlight toggle ;;
+          lock)           exec dms ipc call lock lock ;;
+          islocked)       [ "$(dms ipc call lock isLocked 2>/dev/null)" = true ] ;;
+          powermenu)      exec dms ipc call powermenu toggle ;;
+          control-center) exec dms ipc call control-center toggle ;;
+          clipboard)      exec dms ipc call clipboard toggle ;;
+          *)              echo "shell-ipc: unknown verb $verb" >&2; exit 64 ;;
+        esac
+      fi
+    '')
   ];
 
   xdg.configFile =
