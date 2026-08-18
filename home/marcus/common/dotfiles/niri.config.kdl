@@ -198,8 +198,12 @@ layout {
         // - RGB hex: "#rgb", "#rgba", "#rrggbb", "#rrggbbaa"
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
-        // Color of the ring on the active monitor.
-        active-color "#89b4fa"
+        // Color of the ring on the active monitor. The trailing marker
+        // is the anchor wallpaper:<name> (home/marcus/nixos/dms.nix)
+        // rewrites, so the ring follows each desk look's accent —
+        // don't remove it, and don't hand-edit the hex expecting it
+        // to survive a look switch.
+        active-color "#de92a5" // look-accent
 
         // Color of the ring on inactive monitors.
         //
