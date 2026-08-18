@@ -307,8 +307,10 @@ layout {
 spawn-at-startup "sh" "-c" "[ \"$NIRI_SHELL\" = noctalia ] || swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
 // which shell: the greeter's session choice rides in as NIRI_SHELL
 // (the "niri (noctalia)" entry sets it; plain "niri" leaves it unset
-// = DMS). Binds stay shell-neutral via shell-ipc.
-spawn-at-startup "sh" "-c" "if [ \"$NIRI_SHELL\" = noctalia ]; then exec noctalia; else exec dms run; fi"
+// = DMS). Binds stay shell-neutral via shell-ipc. noctalia resolves
+// to whichever generation the host installs — 4.x (noctalia-shell)
+// preferred, the archived 5.x (noctalia) if that ever returns.
+spawn-at-startup "sh" "-c" "if [ \"$NIRI_SHELL\" = noctalia ]; then command -v noctalia-shell >/dev/null && exec noctalia-shell; exec noctalia; else exec dms run; fi"
 
 // clipboard-history store side: every copy (text and images) lands in
 // cliphist's db; Mod+V opens DMS's picker over it. Watchers, not a
