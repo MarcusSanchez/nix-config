@@ -618,6 +618,10 @@
         "cpuCombo",
         "gpuCombo",
         "memUsage",
+        "networkIndicator",
+        "claudeCodeUsage",
+        "bongoCat",
+        "catWidget",
         "notificationButton",
         "controlCenterButton"
       ],
