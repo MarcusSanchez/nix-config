@@ -833,3 +833,11 @@ window-rule {
     match app-id="spotify"
     open-on-output "DP-2"
 }
+
+// Chrome remembers a fullscreen exit state and reopens claiming the
+// whole output; deny the fullscreen state at open so it always lands
+// tiled. In-page fullscreen (F11, videos) after open is unaffected.
+window-rule {
+    match app-id="google-chrome"
+    open-fullscreen false
+}
