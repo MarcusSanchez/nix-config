@@ -16,6 +16,30 @@
 
 let
   wallpaper = "${config.home.homeDirectory}/Pictures/Wallpapers/astronaut-jellyfish.jpg";
+
+  # The desk looks: each becomes a wallpaper:<name> command and a
+  # spotlight entry (see home.packages / xdg.desktopEntries). A look
+  # names its three wallpapers (files under ~/Pictures/Wallpapers,
+  # shipped from ./assets), whether the animated middle layer runs,
+  # and the DMS theme that carries its accent + bar colors.
+  looks = {
+    astronaut = {
+      dp1 = "space-stars-2560x1440.jpg";
+      dp2 = "space-stars-1080x1920.jpg";
+      dp3 = "astronaut-jellyfish.jpg";
+      mpv = true;
+      theme = "dms.theme.blue.json";
+      comment = "Stars on the sides, the animated spaceman in the middle, mocha blue";
+    };
+    flake = {
+      dp1 = "nix-flake.png";
+      dp2 = "nix-flake.png";
+      dp3 = "nix-flake.png";
+      mpv = false;
+      theme = "dms.theme.flake.json";
+      comment = "The Nix flake on all three monitors, nix-logo blues";
+    };
+  };
 in
 {
 
@@ -41,23 +65,18 @@ in
       "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
     };
 
-  # the wallpaper groups as spotlight results: type "wall", click, the
-  # whole desk changes (wallpaper:group in home.packages below). DMS
+  # the looks as spotlight results: type "wall", click, the whole desk
+  # changes — wallpapers, animated layer and theme together. DMS
   # indexes new entries on shell restart.
-  xdg.desktopEntries = {
-    wallpaper-space = {
-      name = "Wallpaper: Space Desk";
-      comment = "Stars on the sides, the animated spaceman in the middle";
-      exec = "wallpaper:group space";
+  xdg.desktopEntries = lib.mapAttrs' (
+    name: look:
+    lib.nameValuePair "wallpaper-${name}" {
+      name = "Wallpaper: ${name}";
+      comment = look.comment;
+      exec = "wallpaper:${name}";
       icon = "preferences-desktop-wallpaper";
-    };
-    wallpaper-flake = {
-      name = "Wallpaper: Flake Desk";
-      comment = "The Nix flake on all three monitors";
-      exec = "wallpaper:group flake";
-      icon = "preferences-desktop-wallpaper";
-    };
-  };
+    }
+  ) looks;
 
   # Wallpaper and avatar, carried in the repo so a fresh desktop machine
   # looks like the others without hand-setting anything. The images live
@@ -93,41 +112,35 @@ in
       # theme generation silently does nothing
       pkgs.matugen
 
-      # whole-desk wallpaper sets in one action: three setFor calls
-      # (per-monitor session state, same as picking by hand) plus the
-      # animated layer commanded into a known state via
-      # mpvpaper:toggle's on/off verbs (niri.nix). Surfaced in the
-      # spotlight through the xdg.desktopEntries below — that is the
-      # clickable "menu" side of the command. Adding a group = one
-      # case here + one desktop entry. Colon name = the
-      # file-inside-a-derivation shape.
-      (pkgs.runCommand "wallpaper-group" { } ''
+    ]
+    # One command per desk look — wallpaper:<name> repaints all three
+    # monitors, commands the animated layer (mpvpaper:toggle on/off,
+    # niri.nix) AND swaps the DMS theme, so accent and bar color travel
+    # with the wallpaper. The theme flip edits customThemeFile through
+    # the settings symlink's TARGET (readlink) so the link survives;
+    # DMS hot-reloads the file. Surfaced in the spotlight via
+    # xdg.desktopEntries below. Adding a look = one attrset entry here
+    # + a dms.theme.<name>.json in common/dotfiles (+ its wallpaper in
+    # ./assets) + a desktop entry. Colon names = the
+    # file-inside-a-derivation shape.
+    ++ lib.mapAttrsToList (
+      name: look:
+      pkgs.runCommand "wallpaper-${name}" { } ''
         mkdir -p $out/bin
-        install -m755 ${pkgs.writeShellScript "wallpaper-group" ''
+        install -m755 ${pkgs.writeShellScript "wallpaper-${name}" ''
           W="$HOME/Pictures/Wallpapers"
-          case "''${1:-}" in
-            space)
-              dms ipc call wallpaper setFor DP-1 "$W/space-stars-2560x1440.jpg" >/dev/null
-              dms ipc call wallpaper setFor DP-2 "$W/space-stars-1080x1920.jpg" >/dev/null
-              dms ipc call wallpaper setFor DP-3 "$W/astronaut-jellyfish.jpg" >/dev/null
-              mpvpaper:toggle on >/dev/null
-              echo "wallpaper group: space"
-              ;;
-            flake)
-              for o in DP-1 DP-2 DP-3; do
-                dms ipc call wallpaper setFor "$o" "$W/nix-flake.png" >/dev/null
-              done
-              mpvpaper:toggle off >/dev/null
-              echo "wallpaper group: flake"
-              ;;
-            *)
-              echo "usage: wallpaper:group space|flake" >&2
-              exit 64
-              ;;
-          esac
-        ''} "$out/bin/wallpaper:group"
-      '')
-    ];
+          dms ipc call wallpaper setFor DP-1 "$W/${look.dp1}" >/dev/null
+          dms ipc call wallpaper setFor DP-2 "$W/${look.dp2}" >/dev/null
+          dms ipc call wallpaper setFor DP-3 "$W/${look.dp3}" >/dev/null
+          mpvpaper:toggle ${if look.mpv then "on" else "off"} >/dev/null
+          s=$(readlink -f "$HOME/.config/DankMaterialShell/settings.json")
+          ${pkgs.jq}/bin/jq '.currentThemeName = "custom"
+            | .customThemeFile = "~/nix-config/home/marcus/common/dotfiles/${look.theme}"' \
+            "$s" > "$s.tmp" && mv "$s.tmp" "$s"
+          echo "desk look: ${name}"
+        ''} "$out/bin/wallpaper:${name}"
+      ''
+    ) looks;
 
     file = {
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
