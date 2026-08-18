@@ -74,14 +74,6 @@ in
       # backs dms's wallpaper-driven dynamic theming; without it on PATH,
       # theme generation silently does nothing
       pkgs.matugen
-
-      # keystroke feed for the bongoCat bar plugin (machine-local
-      # plugin, but its tools ship here like dgop/matugen): `libinput
-      # debug-events` in all-devices mode, evtest when a single device
-      # is picked in its settings. Reading /dev/input rides the same
-      # input-group membership xremap already needs.
-      pkgs.libinput
-      pkgs.evtest
     ];
 
     file = {
