@@ -10,7 +10,12 @@ keymap:
 
   # Alt+J/K are up/down arrows EVERYWHERE — vim apps included.
   # J=up / K=down follows the same swapped convention as the niri binds.
+  # exact_match keeps chords with MORE modifiers out of these rules:
+  # xremap's default match allows extras and forwards them, so
+  # Super+Alt+L used to reach niri as Super+Right and eat the lock
+  # bind. Same guard on both arrow keymaps.
   - name: vertical-arrows-always
+    exact_match: true
     remap:
       alt-j: up
       alt-k: down
@@ -19,9 +24,10 @@ keymap:
   # outside apps that already speak vim: Zed, JetBrains IDEs, and
   # terminals whose title says nvim is running (ghostty's shell
   # integration titles the window after the foreground command; plain
-  # shells keep the remap). Exact modifier matching keeps the shifted
-  # and plain chords from colliding.
+  # shells keep the remap). exact_match keeps the shifted and plain
+  # chords from colliding — and Super/Ctrl combos out entirely.
   - name: horizontal-arrows-dynamic
+    exact_match: true
     application:
       not:
         - dev.zed.Zed
