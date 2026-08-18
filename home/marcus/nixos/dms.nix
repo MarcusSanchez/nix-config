@@ -41,6 +41,24 @@ in
       "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
     };
 
+  # the wallpaper groups as spotlight results: type "wall", click, the
+  # whole desk changes (wallpaper:group in home.packages below). DMS
+  # indexes new entries on shell restart.
+  xdg.desktopEntries = {
+    wallpaper-space = {
+      name = "Wallpaper: Space Desk";
+      comment = "Stars on the sides, the animated spaceman in the middle";
+      exec = "wallpaper:group space";
+      icon = "preferences-desktop-wallpaper";
+    };
+    wallpaper-flake = {
+      name = "Wallpaper: Flake Desk";
+      comment = "The Nix flake on all three monitors";
+      exec = "wallpaper:group flake";
+      icon = "preferences-desktop-wallpaper";
+    };
+  };
+
   # Wallpaper and avatar, carried in the repo so a fresh desktop machine
   # looks like the others without hand-setting anything. The images live
   # in ./assets and are linked to stable paths under ~ — not referenced
@@ -74,6 +92,41 @@ in
       # backs dms's wallpaper-driven dynamic theming; without it on PATH,
       # theme generation silently does nothing
       pkgs.matugen
+
+      # whole-desk wallpaper sets in one action: three setFor calls
+      # (per-monitor session state, same as picking by hand) plus the
+      # animated layer commanded into a known state via
+      # mpvpaper:toggle's on/off verbs (niri.nix). Surfaced in the
+      # spotlight through the xdg.desktopEntries below — that is the
+      # clickable "menu" side of the command. Adding a group = one
+      # case here + one desktop entry. Colon name = the
+      # file-inside-a-derivation shape.
+      (pkgs.runCommand "wallpaper-group" { } ''
+        mkdir -p $out/bin
+        install -m755 ${pkgs.writeShellScript "wallpaper-group" ''
+          W="$HOME/Pictures/Wallpapers"
+          case "''${1:-}" in
+            space)
+              dms ipc call wallpaper setFor DP-1 "$W/space-stars-2560x1440.jpg" >/dev/null
+              dms ipc call wallpaper setFor DP-2 "$W/space-stars-1080x1920.jpg" >/dev/null
+              dms ipc call wallpaper setFor DP-3 "$W/astronaut-jellyfish.jpg" >/dev/null
+              mpvpaper:toggle on >/dev/null
+              echo "wallpaper group: space"
+              ;;
+            flake)
+              for o in DP-1 DP-2 DP-3; do
+                dms ipc call wallpaper setFor "$o" "$W/nix-flake.png" >/dev/null
+              done
+              mpvpaper:toggle off >/dev/null
+              echo "wallpaper group: flake"
+              ;;
+            *)
+              echo "usage: wallpaper:group space|flake" >&2
+              exit 64
+              ;;
+          esac
+        ''} "$out/bin/wallpaper:group"
+      '')
     ];
 
     file = {
@@ -94,6 +147,8 @@ in
       # also get these files) is unaffected.
       "Pictures/Wallpapers/space-stars-2560x1440.jpg".source = ./assets/space-stars-2560x1440.jpg;
       "Pictures/Wallpapers/space-stars-1080x1920.jpg".source = ./assets/space-stars-1080x1920.jpg;
+      # the flake group's single image (wallpaper:group above)
+      "Pictures/Wallpapers/nix-flake.png".source = ./assets/nix-flake.png;
       "Pictures/avatar-spaceman.png".source = ./assets/avatar-spaceman.png;
       ".face".source = ./assets/avatar-spaceman.png;
     };
