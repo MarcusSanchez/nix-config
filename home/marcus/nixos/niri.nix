@@ -78,52 +78,6 @@
       mkdir -p $out/bin
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
     '')
-
-    # shell-ipc: the shell-neutral verbs niri.config.kdl's binds call.
-    # Routes to whichever shell is running by asking each shell's IPC
-    # directly (not pgrep: wrapper comms lie — ".noctalia-wrapp" — and
-    # a name match would self-match shells quoting the word): noctalia
-    # 5.x first, then 4.x, DMS otherwise — one shared bind set serves
-    # every session. On hosts without noctalia the probes are clean
-    # command-not-founds = DMS branch. The islocked verb exits 0/1 for
-    # the boot-lock loop; the 4.x shell exposes no runtime lock state,
-    # so its branch reports "IPC reachable" — quickshell IPC fails
-    # until the shell is up, which is exactly the readiness the loop
-    # retries for (the true-readback exists for DMS's lying exits).
-    (pkgs.writeShellScriptBin "shell-ipc" ''
-      verb=$1
-      if noctalia msg status >/dev/null 2>&1; then
-        case "$verb" in
-          spotlight)      exec noctalia msg panel-toggle launcher ;;
-          lock)           exec noctalia msg session lock ;;
-          islocked)       noctalia msg status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '"locked": true' ;;
-          powermenu)      exec noctalia msg panel-toggle session ;;
-          control-center) exec noctalia msg panel-toggle control-center ;;
-          clipboard)      exec noctalia msg panel-toggle clipboard ;;
-          *)              echo "shell-ipc: unknown verb $verb" >&2; exit 64 ;;
-        esac
-      elif noctalia-shell ipc call state all >/dev/null 2>&1; then
-        case "$verb" in
-          spotlight)      exec noctalia-shell ipc call launcher toggle ;;
-          lock)           exec noctalia-shell ipc call lockScreen lock ;;
-          islocked)       noctalia-shell ipc call state all >/dev/null 2>&1 ;;
-          powermenu)      exec noctalia-shell ipc call sessionMenu toggle ;;
-          control-center) exec noctalia-shell ipc call controlCenter toggle ;;
-          clipboard)      exec noctalia-shell ipc call launcher clipboard ;;
-          *)              echo "shell-ipc: unknown verb $verb" >&2; exit 64 ;;
-        esac
-      else
-        case "$verb" in
-          spotlight)      exec dms ipc call spotlight toggle ;;
-          lock)           exec dms ipc call lock lock ;;
-          islocked)       [ "$(dms ipc call lock isLocked 2>/dev/null)" = true ] ;;
-          powermenu)      exec dms ipc call powermenu toggle ;;
-          control-center) exec dms ipc call control-center toggle ;;
-          clipboard)      exec dms ipc call clipboard toggle ;;
-          *)              echo "shell-ipc: unknown verb $verb" >&2; exit 64 ;;
-        esac
-      fi
-    '')
   ];
 
   xdg.configFile =

@@ -336,17 +336,11 @@ home/marcus/
                            spawns expect on PATH — snipping
                            (grim/slurp/satty, Mod+Shift+S), cliphist,
                            playerctl, wallpapers (swaybg/mpvpaper),
-                           xremap, tpm-fido, xwayland-satellite, and
-                           shell-ipc (the shell-neutral verbs the binds
-                           call — routes to noctalia when running, DMS
-                           otherwise)
-    noctalia.nix           the shell-variety experiment (4.x), ARCHIVED
-    noctalia5.nix          unimported along with the 5.x rewrite —
-                           the machinery that spoke them stays live
-                           (shell-ipc, the NIRI_SHELL spawn line, the
-                           emptied sessionPackages gate in
-                           modules/nixos/niri.nix), so noctalia.nix's
-                           header is a two-edit re-enable recipe
+                           xremap, tpm-fido, xwayland-satellite
+                           (the noctalia shell-variety experiment —
+                           session picker, shell-ipc dispatcher, both
+                           shell generations — lived here briefly and
+                           was removed whole; git history has it)
 
     apps.nix
                            the GTK chrome and Windows-Terminal keybinds
