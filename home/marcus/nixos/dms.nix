@@ -71,8 +71,8 @@ in
   xdg.desktopEntries = lib.mapAttrs' (
     name: look:
     lib.nameValuePair "wallpaper-${name}" {
+      inherit (look) comment;
       name = "Wallpaper: ${name}";
-      comment = look.comment;
       exec = "wallpaper:${name}";
       icon = "preferences-desktop-wallpaper";
     }
