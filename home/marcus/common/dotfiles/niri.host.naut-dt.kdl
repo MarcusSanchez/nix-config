@@ -45,9 +45,8 @@ spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3"
 // seams wide enough to hide moving comets eat too much frame, and
 // three 4K-class decoders for two accent panels buy little over
 // stills from the identical star field. Painted by swaybg per output
-// so every shell shows the same desk: under DMS its own wallpaper
-// layer maps over these (same pixels, from session state); under
-// noctalia the shell's wallpaper is off (noctalia.nix) and these ARE
-// the side wallpapers.
+// as the instant base layer; DMS's own wallpaper layer maps over
+// these with the same pixels (from session state) once the shell is
+// up.
 spawn-at-startup "swaybg" "-o" "DP-1" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-2560x1440.jpg"
 spawn-at-startup "swaybg" "-o" "DP-2" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-1080x1920.jpg"
