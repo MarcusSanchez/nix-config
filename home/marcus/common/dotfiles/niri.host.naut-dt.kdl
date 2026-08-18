@@ -38,11 +38,7 @@ window-rule {
 // and below all windows, deterministically. The static astronaut
 // stays underneath as the crash/fallback frame. NVDEC decodes; ~6% of
 // one core, 8% GPU.
-// PAUSED while the nix-flake wallpaper covers all three monitors via
-// DMS's own layer (uncomment to bring the animated middle back —
-// mpvpaper's bottom layer sits above DMS's wallpaper, so the two
-// can't coexist on DP-3):
-// spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
+spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
 // only the middle monitor animates. The sides wear static comet
 // stills captured from the same loop (home/marcus/nixos/assets/
 // space-stars-*.jpg) — deliberately not derived side videos: mosaic
@@ -53,7 +49,5 @@ window-rule {
 // layer maps over these (same pixels, from session state); under
 // noctalia the shell's wallpaper is off (noctalia.nix) and these ARE
 // the side wallpapers.
-// (paused with mpvpaper above — the stars set gives way to the
-// nix-flake wallpaper for now)
-// spawn-at-startup "swaybg" "-o" "DP-1" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-2560x1440.jpg"
-// spawn-at-startup "swaybg" "-o" "DP-2" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-1080x1920.jpg"
+spawn-at-startup "swaybg" "-o" "DP-1" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-2560x1440.jpg"
+spawn-at-startup "swaybg" "-o" "DP-2" "-m" "fill" "-i" "/home/marcus/Pictures/Wallpapers/space-stars-1080x1920.jpg"
