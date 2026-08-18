@@ -29,6 +29,7 @@ let
       dp3 = "astronaut-jellyfish.jpg";
       mpv = true;
       theme = "dms.theme.blue.json";
+      accent = "#89b4fa";
       comment = "Stars on the sides, the animated spaceman in the middle, mocha blue";
     };
     flake = {
@@ -37,6 +38,7 @@ let
       dp3 = "nix-flake.png";
       mpv = false;
       theme = "dms.theme.flake.json";
+      accent = "#7ebae4";
       comment = "The Nix flake on all three monitors, nix-logo blues";
     };
     galaxy = {
@@ -45,6 +47,7 @@ let
       dp3 = "galaxy-waves.jpg";
       mpv = false;
       theme = "dms.theme.galaxy.json";
+      accent = "#a9cbe8";
       comment = "The cosmic ocean vortex, icy steel blue on near-black slate";
     };
     swirls = {
@@ -53,6 +56,7 @@ let
       dp3 = "swirls.jpg";
       mpv = false;
       theme = "dms.theme.swirls.json";
+      accent = "#de92a5";
       comment = "Pastel liquid marble, dusty rose accent on slate navy";
     };
   };
@@ -153,6 +157,11 @@ in
           ${pkgs.jq}/bin/jq '.currentThemeName = "custom"
             | .customThemeFile = "~/nix-config/home/marcus/common/dotfiles/${look.theme}"' \
             "$s" > "$s.tmp" && mv "$s.tmp" "$s"
+          # niri's focus ring follows the accent: rewrite the marked
+          # line in the live config (niri hot-reloads on save)
+          k=$(readlink -f "$HOME/.config/niri/config.kdl")
+          ${pkgs.gnused}/bin/sed -i \
+            's|active-color "#[0-9a-fA-F]*" // look-accent|active-color "${look.accent}" // look-accent|' "$k"
           echo "desk look: ${name}"
         ''} "$out/bin/wallpaper:${name}"
       ''
