@@ -592,10 +592,7 @@
       "borderThickness": 1,
       "bottomGap": 0,
       "centerWidgets": [
-        "bongoCat",
-        "catWidget",
-        "clock",
-        "weather"
+        "clock"
       ],
       "enabled": true,
       "fontScale": 1,
@@ -607,7 +604,8 @@
       "leftWidgets": [
         "launcherButton",
         "workspaceSwitcher",
-        "music"
+        "music",
+        "weather"
       ],
       "name": "Main Bar",
       "noBackground": false,
@@ -617,6 +615,7 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
+        "catWidget",
         "cpuUsage",
         "memUsage",
         "claudeCodeUsage",
