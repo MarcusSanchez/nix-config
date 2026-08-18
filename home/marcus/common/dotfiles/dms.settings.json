@@ -605,7 +605,8 @@
         "launcherButton",
         "workspaceSwitcher",
         "music",
-        "weather"
+        "weather",
+        "claudeCodeUsage"
       ],
       "name": "Main Bar",
       "noBackground": false,
@@ -618,7 +619,6 @@
         "catWidget",
         "cpuUsage",
         "memUsage",
-        "claudeCodeUsage",
         "notificationButton",
         "controlCenterButton"
       ],
