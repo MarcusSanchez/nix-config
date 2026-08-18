@@ -303,8 +303,12 @@ layout {
 // instant wallpaper while quickshell is still starting: swaybg maps in
 // milliseconds; DMS's own wallpaper layer stacks above it once ready.
 // The path comes from DMS's session state so the two can't disagree.
-spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
-spawn-at-startup "dms" "run"
+// (DMS sessions only — noctalia draws its own wallpaper from startup.)
+spawn-at-startup "sh" "-c" "[ \"$NIRI_SHELL\" = noctalia ] || swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
+// which shell: the greeter's session choice rides in as NIRI_SHELL
+// (the "niri (noctalia)" entry sets it; plain "niri" leaves it unset
+// = DMS). Binds stay shell-neutral via shell-ipc.
+spawn-at-startup "sh" "-c" "if [ \"$NIRI_SHELL\" = noctalia ]; then exec noctalia; else exec dms run; fi"
 
 // clipboard-history store side: every copy (text and images) lands in
 // cliphist's db; Mod+V opens DMS's picker over it. Watchers, not a
@@ -321,9 +325,11 @@ spawn-at-startup "tpm-fido"
 // session already warm behind it. ONLY for the boot session — greetd
 // gives the auto-login session id 1; sessions started by the greeter
 // get higher ids and must not re-lock right after the user typed
-// their password. Retries until dms confirms isLocked (its ipc exits
-// 0 even when the call lands too early); ~30 s bound.
-spawn-at-startup "sh" "-c" "[ \"$XDG_SESSION_ID\" = 1 ] || exit 0; for i in $(seq 1 150); do dms ipc call lock lock >/dev/null 2>&1; [ \"$(dms ipc call lock isLocked 2>/dev/null)\" = true ] && break; sleep 0.2; done"
+// their password. Retries until the shell confirms isLocked (exit
+// codes lie when the call lands too early); ~30 s bound. shell-ipc
+// re-picks the target each try, so it locks whichever shell the
+// session is starting.
+spawn-at-startup "sh" "-c" "[ \"$XDG_SESSION_ID\" = 1 ] || exit 0; for i in $(seq 1 150); do shell-ipc lock >/dev/null 2>&1; shell-ipc islocked && break; sleep 0.2; done"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
@@ -424,11 +430,11 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
     // macOS spotlight muscle memory
-    Alt+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
-    Mod+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: dms" { spawn "dms" "ipc" "call" "lock" "lock"; }
-    Ctrl+Alt+Delete hotkey-overlay-title="Power Menu: dms" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
-    Mod+X hotkey-overlay-title="Control Center: dms" { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "shell-ipc" "spotlight"; }
+    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "shell-ipc" "spotlight"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "shell-ipc" "lock"; }
+    Ctrl+Alt+Delete hotkey-overlay-title="Power Menu" { spawn "shell-ipc" "powermenu"; }
+    Mod+X hotkey-overlay-title="Control Center" { spawn "shell-ipc" "control-center"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
@@ -685,7 +691,7 @@ binds {
     // Mod+V is clipboard HISTORY (Windows Win+V muscle memory) — the
     // DMS picker over what the cliphist watchers stored. Float toggle
     // moved to Mod+Shift+V for it; layer-hop demoted to Mod+Ctrl+V.
-    Mod+V hotkey-overlay-title="Clipboard history" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
+    Mod+V hotkey-overlay-title="Clipboard history" { spawn "shell-ipc" "clipboard"; }
     Mod+Shift+V { toggle-window-floating; }
     Mod+Ctrl+V  { switch-focus-between-floating-and-tiling; }
 
