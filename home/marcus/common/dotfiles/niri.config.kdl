@@ -775,8 +775,16 @@ window-rule {
     open-floating true
 }
 
+// Blur intensity is GLOBAL (window-rules only turn blur on per app);
+// softened from the defaults (passes 3, offset 3) for a lighter
+// frost behind the near-transparent terminal.
+blur {
+    passes 1
+    offset 2
+}
+
 // Frosted-glass terminal: niri 26.04 grew blur support, so ghostty's
-// 0.75 background-opacity (set in ghostty.nix) gets real blur behind
+// translucent background (ghostty.linux.config) gets real blur behind
 // it instead of the tinted-glass look that made us go opaque. xray
 // blurs the wallpaper only — the stable variant; non-xray blur of
 // other windows is still experimental (vanishes during animations).
