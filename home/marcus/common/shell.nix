@@ -194,6 +194,14 @@
         ZSH_THEME_GIT_PROMPT_DIRTY="%F{#89b4fa}) %F{#f9e2af}✗%f"
         ZSH_THEME_GIT_PROMPT_CLEAN="%F{#89b4fa})%f"
 
+        # The colon-named commands (wallpaper:*, secrets:*, ...) trip
+        # zsh's modifier completion: Tab after "name:" offers the
+        # ''${var:h}-style modifier alphabet before the actual commands,
+        # and accepting one builds nonsense like "wallpaper:c:c:c:".
+        # Demote that tag so command names win; modifiers still
+        # complete where nothing else matches.
+        zstyle ':completion:*' tag-order '! modifiers' '-'
+
         bindkey '^I' autosuggest-accept
         # kcbt (back-tab) is undefined on terminals that don't report it —
         # notably over ssh, where the client's TERM may be missing or
