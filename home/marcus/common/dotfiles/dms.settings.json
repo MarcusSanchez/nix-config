@@ -592,7 +592,8 @@
       "borderThickness": 1,
       "bottomGap": 0,
       "centerWidgets": [
-        "music",
+        "bongoCat",
+        "catWidget",
         "clock",
         "weather"
       ],
@@ -605,7 +606,8 @@
       "innerPadding": 4,
       "leftWidgets": [
         "launcherButton",
-        "workspaceSwitcher"
+        "workspaceSwitcher",
+        "music"
       ],
       "name": "Main Bar",
       "noBackground": false,
@@ -615,13 +617,9 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
-        "cpuCombo",
-        "gpuCombo",
+        "cpuUsage",
         "memUsage",
-        "networkIndicator",
         "claudeCodeUsage",
-        "bongoCat",
-        "catWidget",
         "notificationButton",
         "controlCenterButton"
       ],
