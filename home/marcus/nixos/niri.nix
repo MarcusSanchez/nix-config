@@ -78,6 +78,29 @@
       mkdir -p $out/bin
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
     '')
+
+    # kill/revive the animated wallpaper on demand (games, benchmarks,
+    # or just wanting the still). The spawn line mirrors the
+    # spawn-at-startup in niri.host.naut-dt.kdl — with it off, the
+    # static astronaut beneath (swaybg/DMS layer) shows. Harmless on a
+    # host without that connector: mpvpaper just exits. Colon name =
+    # the reboot:windows file-inside-a-derivation shape.
+    (pkgs.runCommand "mpvpaper-toggle" { } ''
+      mkdir -p $out/bin
+      install -m755 ${pkgs.writeShellScript "mpvpaper-toggle" ''
+        # [b] keeps the regex from matching any process merely QUOTING
+        # the pattern (a shell command mentioning it, a pasted line) —
+        # only a real mpvpaper cmdline matches
+        if pgrep -f "mpvpaper -l [b]ottom" >/dev/null 2>&1; then
+          pkill -f "mpvpaper -l [b]ottom"
+          echo "mpvpaper: off"
+        else
+          nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
+            "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
+          echo "mpvpaper: on"
+        fi
+      ''} "$out/bin/mpvpaper:toggle"
+    '')
   ];
 
   xdg.configFile =
