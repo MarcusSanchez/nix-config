@@ -16,6 +16,11 @@
   ...
 }:
 
+let
+  # niri variant: tracks the focused window over niri IPC to gate the
+  # per-app remaps
+  xremapNiri = pkgs.xremap.override { withVariant = "niri"; };
+in
 {
   # Everything the session expects on PATH: what niri.config.kdl's
   # binds and spawn-at-startup lines call by name (removing one
@@ -64,9 +69,10 @@
     pkgs.wtype
 
     # per-application key remapping (alt+hjkl -> arrows outside vim-y
-    # apps); the niri variant tracks the focused window over niri IPC.
-    # Config: dotfiles/xremap.yml, spawned in niri.config.kdl.
-    (pkgs.xremap.override { withVariant = "niri"; })
+    # apps). Config: dotfiles/xremap.yml. On PATH for hand-runs; the
+    # SESSION copy is the systemd user service below, NOT a
+    # spawn-at-startup — see its comment for why that mattered.
+    xremapNiri
 
     # TPM-backed virtual FIDO2 key (system plumbing in
     # modules/nixos/security.nix, spawned in niri.config.kdl). It
@@ -126,6 +132,29 @@
       # one shared repo (a new host must commit its file first)
       "niri/niri.host.kdl".source = link "niri.host.${osConfig.networking.hostName}.kdl";
     };
+
+  # xremap as a session-bound user service, NOT a niri
+  # spawn-at-startup. niri scopes its spawn children into
+  # user@.service/app.slice, which OUTLIVES the niri session — so a
+  # spawn-started xremap kept its exclusive evdev grab (EVIOCGRAB) past
+  # logout, and the next login came up with a dead keyboard (the stale
+  # grabber still owned it). PartOf graphical-session.target makes
+  # logind stop it exactly when the session ends, releasing the grab;
+  # WantedBy starts it with the session. Restart on-failure covers a
+  # transient IPC hiccup.
+  systemd.user.services.xremap = {
+    Unit = {
+      Description = "Per-application key remapping (niri variant)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${xremapNiri}/bin/xremap --watch=config,device ${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/xremap.yml";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 
   # fallback lock (PAM entry in modules/nixos/niri.nix) in case the
   # DMS lock ever misbehaves — run `swaylock` from a terminal
