@@ -328,7 +328,15 @@ home/marcus/
                            linked to stable paths under ~ (DMS records
                            ABSOLUTE paths in session state — a store
                            path would rot at GC; avatar to ~/.face, the
-                           AccountsService fallback)
+                           AccountsService fallback). Also the desk
+                           LOOKS table: each entry generates a
+                           wallpaper:<name> command (repaints all three
+                           monitors + swaps DMS theme + niri accent +
+                           mpvpaper on/off) and a spotlight entry, and
+                           the table is projected to desk-looks.json for
+                           the wallpaperLook bar plugin's picker (nix is
+                           the single source). Adding a look = one table
+                           entry + a dms.theme.<name>.json + assets
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +

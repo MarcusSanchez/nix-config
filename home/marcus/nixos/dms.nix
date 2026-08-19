@@ -21,7 +21,8 @@ let
   # spotlight entry (see home.packages / xdg.desktopEntries). A look
   # names its three wallpapers (files under ~/Pictures/Wallpapers,
   # shipped from ./assets), whether the animated middle layer runs,
-  # and the DMS theme that carries its accent + bar colors.
+  # the DMS theme that carries its accent + bar colors, and a Material
+  # Symbols icon for the wallpaperLook bar plugin (assets/dms-plugins).
   looks = {
     astronaut = {
       dp1 = "space-stars-2560x1440.jpg";
@@ -30,6 +31,7 @@ let
       mpv = true;
       theme = "dms.theme.blue.json";
       accent = "#89b4fa";
+      icon = "rocket_launch";
       comment = "Stars on the sides, the animated spaceman in the middle, mocha blue";
     };
     flake = {
@@ -39,6 +41,7 @@ let
       mpv = false;
       theme = "dms.theme.flake.json";
       accent = "#7ebae4";
+      icon = "ac_unit";
       comment = "The Nix flake on all three monitors, nix-logo blues";
     };
     galaxy = {
@@ -48,6 +51,7 @@ let
       mpv = false;
       theme = "dms.theme.galaxy.json";
       accent = "#a9cbe8";
+      icon = "cyclone";
       comment = "The cosmic ocean vortex, icy steel blue on near-black slate";
     };
     swirls = {
@@ -57,9 +61,25 @@ let
       mpv = false;
       theme = "dms.theme.swirls.json";
       accent = "#de92a5";
+      icon = "water";
       comment = "Pastel liquid marble, dusty rose accent on slate navy";
     };
   };
+
+  # Menu manifest for the wallpaperLook plugin: a projection of the
+  # looks table (order fixed, not attr-sorted, so the picker reads
+  # sensibly) with only what the picker renders. nix stays the single
+  # source; this is a build artifact the QML reads at runtime.
+  lookOrder = [
+    "astronaut"
+    "flake"
+    "galaxy"
+    "swirls"
+  ];
+  lookManifest = map (name: {
+    inherit name;
+    inherit (looks.${name}) icon comment;
+  }) lookOrder;
 in
 {
 
@@ -83,6 +103,10 @@ in
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
       "DankMaterialShell/plugins/cpuCombo".source = pluginLink "cpuCombo";
       "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
+      "DankMaterialShell/plugins/wallpaperLook".source = pluginLink "wallpaperLook";
+      # the picker's menu, generated from the looks table above (nix is
+      # the source; the QML reads this at a stable path)
+      "DankMaterialShell/desk-looks.json".text = builtins.toJSON lookManifest;
     };
 
   # the looks as spotlight results: type "wall", click, the whole desk
@@ -162,6 +186,10 @@ in
           k=$(readlink -f "$HOME/.config/niri/config.kdl")
           ${pkgs.gnused}/bin/sed -i \
             's|active-color "#[0-9a-fA-F]*" // look-accent|active-color "${look.accent}" // look-accent|' "$k"
+          # record the active look so the wallpaperLook bar plugin can
+          # show it and highlight the current row in its picker
+          mkdir -p "$HOME/.local/state"
+          printf %s "${name}" > "$HOME/.local/state/desk-look"
           echo "desk look: ${name}"
         ''} "$out/bin/wallpaper:${name}"
       ''

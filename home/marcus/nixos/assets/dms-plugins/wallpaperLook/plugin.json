@@ -1,0 +1,11 @@
+{
+  "id": "wallpaperLook",
+  "name": "Wallpaper Look",
+  "description": "Shows the active desk look by icon + name; click for a sticky picker that switches wallpaper, theme and animated layer together (the wallpaper:<name> commands from dms.nix).",
+  "version": "1.0.0",
+  "author": "marcus",
+  "icon": "wallpaper",
+  "capabilities": ["dankbar-widget"],
+  "component": "./WallpaperLook.qml",
+  "permissions": ["process"]
+}
