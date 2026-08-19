@@ -315,9 +315,11 @@ spawn-at-startup "dms" "run"
 // daemon — wl-paste re-runs cliphist per copy event.
 spawn-at-startup "sh" "-c" "wl-paste --type text --watch cliphist store"
 spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
-// per-app key remapping (see dotfiles/xremap.yml); --watch=config
-// hot-reloads edits, --watch picks up hotplugged keyboards
-spawn-at-startup "xremap" "--watch=config,device" "/home/marcus/nix-config/home/marcus/common/dotfiles/xremap.yml"
+// per-app key remapping (see dotfiles/xremap.yml) is NOT spawned here:
+// niri's spawn children escape to user@.service/app.slice and outlive
+// the session, so a spawn-started xremap kept its keyboard grab past
+// logout and killed the next login's input. It's a session-bound
+// systemd user service instead (home/marcus/nixos/niri.nix).
 // TPM-backed virtual FIDO2 key (Windows-Hello-ish); pinentry prompts
 // on use. Plumbing in modules/nixos/security.nix.
 spawn-at-startup "tpm-fido"
