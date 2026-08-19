@@ -81,12 +81,14 @@
 
     # kill/revive the animated wallpaper on demand (games, benchmarks,
     # or just wanting the still), plus explicit on/off verbs so other
-    # tools (wallpaper:group in dms.nix) can command a known state.
-    # The spawn line mirrors the spawn-at-startup in
-    # niri.host.naut-dt.kdl — with it off, the static layer beneath
-    # (swaybg/DMS) shows. Harmless on a host without that connector:
-    # mpvpaper just exits. Colon name = the reboot:windows
-    # file-inside-a-derivation shape.
+    # tools (wallpaper:<name> in dms.nix) can command a known state.
+    # Every call PERSISTS its state to ~/.local/state/desk-mpvpaper, and
+    # the spawn-at-startup in niri.host.naut-dt.kdl reads it back — so a
+    # reboot restores the last look's choice instead of blindly starting
+    # the video over a still-wallpaper look (galaxy/flake/swirls). With
+    # it off, the static layer beneath (swaybg/DMS) shows. Harmless on a
+    # host without that connector: mpvpaper just exits. Colon name = the
+    # reboot:windows file-inside-a-derivation shape.
     (pkgs.runCommand "mpvpaper-toggle" { } ''
       mkdir -p $out/bin
       install -m755 ${pkgs.writeShellScript "mpvpaper-toggle" ''
@@ -99,10 +101,12 @@
           nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
             "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
         }
+        state="$HOME/.local/state/desk-mpvpaper"
+        save() { mkdir -p "$(dirname "$state")"; printf %s "$1" > "$state"; }
         case "''${1:-}" in
-          on) running || start; echo "mpvpaper: on" ;;
-          off) ! running || stop; echo "mpvpaper: off" ;;
-          "") if running; then stop; echo "mpvpaper: off"; else start; echo "mpvpaper: on"; fi ;;
+          on) running || start; save on; echo "mpvpaper: on" ;;
+          off) ! running || stop; save off; echo "mpvpaper: off" ;;
+          "") if running; then stop; save off; echo "mpvpaper: off"; else start; save on; echo "mpvpaper: on"; fi ;;
           *) echo "usage: mpvpaper:toggle [on|off]" >&2; exit 64 ;;
         esac
       ''} "$out/bin/mpvpaper:toggle"
