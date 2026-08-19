@@ -107,19 +107,29 @@ PluginComponent {
             headerText: "Desk Look"
             showCloseButton: true
 
-            property var closePopout: null
+            // PopoutComponent already declares closePopout + parentPopout
+            // (PluginPopout injects them). contentHandlesKeys is the gate:
+            // false (default) keeps DankPopout's own focus scope holding
+            // the keys (Escape only), so flip it true via the injected
+            // parentPopout to release focus to our FocusScope below.
+            onParentPopoutChanged: {
+                if (parentPopout) {
+                    parentPopout.contentHandlesKeys = true;
+                    Qt.callLater(() => keyScope.forceActiveFocus());
+                }
+            }
 
             FocusScope {
+                id: keyScope
                 width: parent.width
                 implicitHeight: lookColumn.implicitHeight
                 focus: true
 
-                // grab focus off PluginPopout's container so the arrow
-                // keys reach us; seed the cursor on the active look
-                Component.onCompleted: {
-                    root.selectedIndex = root.activeIndex();
-                    Qt.callLater(() => forceActiveFocus());
-                }
+                // seed the cursor on the active look; the focus grab is
+                // driven by onParentPopoutChanged above (parentPopout is
+                // injected after Component.onCompleted, so we can't rely
+                // on it here)
+                Component.onCompleted: root.selectedIndex = root.activeIndex()
 
                 Keys.onPressed: event => {
                     const n = root.looks.length;
