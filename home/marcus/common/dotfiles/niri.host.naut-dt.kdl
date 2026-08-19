@@ -38,7 +38,13 @@ window-rule {
 // and below all windows, deterministically. The static astronaut
 // stays underneath as the crash/fallback frame. NVDEC decodes; ~6% of
 // one core, 8% GPU.
-spawn-at-startup "mpvpaper" "-l" "bottom" "-o" "no-audio loop hwdec=auto" "DP-3" "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4"
+//
+// CONDITIONAL: mpvpaper:toggle (home/marcus/nixos/niri.nix) records
+// the last look's choice in ~/.local/state/desk-mpvpaper; replay it
+// here so a still-wallpaper look (galaxy/flake/swirls) doesn't get the
+// video slapped back over it on reboot. Default on = the astronaut
+// look, the desk's default.
+spawn-at-startup "sh" "-c" "mpvpaper:toggle \"$(cat ~/.local/state/desk-mpvpaper 2>/dev/null || echo on)\""
 // only the middle monitor animates. The sides wear static comet
 // stills captured from the same loop (home/marcus/nixos/assets/
 // space-stars-*.jpg) — deliberately not derived side videos: mosaic
