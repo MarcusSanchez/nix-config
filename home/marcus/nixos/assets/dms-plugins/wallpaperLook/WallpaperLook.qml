@@ -12,13 +12,6 @@
 // live desk without a shell restart. PluginComponent auto-anchors the
 // popout under the pill (no pillClickAction — that path is the shared
 // process list; popoutContent is the plugin-owned one).
-//
-// Keyboard-navigable: PluginPopout's own container keeps focus and only
-// handles Escape, so the picker wraps its rows in a FocusScope that
-// grabs focus on open and drives a selection cursor (Up/Down wrap,
-// Enter applies, Escape closes). Mouse hover moves the same cursor, so
-// the two input modes never disagree. The "active" look (currently
-// applied) is marked by accent border/text independently of the cursor.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -31,7 +24,6 @@ PluginComponent {
 
     property string activeLook: ""
     property var looks: []
-    property int selectedIndex: -1
 
     readonly property string homeDir: Quickshell.env("HOME")
 
@@ -40,18 +32,6 @@ PluginComponent {
             if (looks[i].name === name)
                 return looks[i].icon;
         return "wallpaper";
-    }
-
-    function activeIndex() {
-        for (var i = 0; i < looks.length; i++)
-            if (looks[i].name === activeLook)
-                return i;
-        return 0;
-    }
-
-    function apply(i) {
-        if (i >= 0 && i < looks.length)
-            Quickshell.execDetached(["wallpaper:" + looks[i].name]);
     }
 
     FileView {
@@ -103,125 +83,76 @@ PluginComponent {
 
     popoutContent: Component {
         PopoutComponent {
-            id: pop
             headerText: "Desk Look"
             showCloseButton: true
 
-            // PopoutComponent already declares closePopout + parentPopout
-            // (PluginPopout injects them). contentHandlesKeys is the gate:
-            // false (default) keeps DankPopout's own focus scope holding
-            // the keys (Escape only), so flip it true via the injected
-            // parentPopout to release focus to our FocusScope below.
-            onParentPopoutChanged: {
-                if (parentPopout) {
-                    parentPopout.contentHandlesKeys = true;
-                    Qt.callLater(() => keyScope.forceActiveFocus());
-                }
-            }
+            property var closePopout: null
 
-            FocusScope {
-                id: keyScope
+            Column {
                 width: parent.width
-                implicitHeight: lookColumn.implicitHeight
-                focus: true
+                spacing: Theme.spacingXS
 
-                // seed the cursor on the active look; the focus grab is
-                // driven by onParentPopoutChanged above (parentPopout is
-                // injected after Component.onCompleted, so we can't rely
-                // on it here)
-                Component.onCompleted: root.selectedIndex = root.activeIndex()
+                Repeater {
+                    model: root.looks
 
-                Keys.onPressed: event => {
-                    const n = root.looks.length;
-                    if (n === 0)
-                        return;
-                    if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
-                        root.selectedIndex = (root.selectedIndex + 1) % n;
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) {
-                        root.selectedIndex = (root.selectedIndex - 1 + n) % n;
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                        root.apply(root.selectedIndex);
-                        if (pop.closePopout)
-                            pop.closePopout();
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Escape) {
-                        if (pop.closePopout)
-                            pop.closePopout();
-                        event.accepted = true;
-                    }
-                }
+                    Rectangle {
+                        id: row
+                        required property var modelData
+                        readonly property bool active: modelData.name === root.activeLook
 
-                Column {
-                    id: lookColumn
-                    width: parent.width
-                    spacing: Theme.spacingXS
+                        width: parent.width
+                        height: 52
+                        radius: Theme.cornerRadius
+                        color: rowArea.containsMouse ? Theme.primaryHoverLight : (row.active ? Theme.primaryHover : Theme.surfaceContainerHigh)
+                        border.color: row.active ? Theme.primary : "transparent"
+                        border.width: row.active ? 2 : 0
 
-                    Repeater {
-                        model: root.looks
+                        Row {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: Theme.spacingM
+                            anchors.rightMargin: Theme.spacingM
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Theme.spacingM
 
-                        Rectangle {
-                            id: row
-                            required property int index
-                            required property var modelData
-                            readonly property bool active: modelData.name === root.activeLook
-                            readonly property bool selected: index === root.selectedIndex
-
-                            width: parent.width
-                            height: 52
-                            radius: Theme.cornerRadius
-                            color: row.selected ? Theme.primaryHoverLight : Theme.surfaceContainerHigh
-                            border.color: row.active ? Theme.primary : "transparent"
-                            border.width: row.active ? 2 : 0
-
-                            Row {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: Theme.spacingM
-                                anchors.rightMargin: Theme.spacingM
+                            DankIcon {
+                                name: row.modelData.icon
+                                size: Theme.iconSize
+                                color: row.active ? Theme.primary : Theme.surfaceText
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: Theme.spacingM
-
-                                DankIcon {
-                                    name: row.modelData.icon
-                                    size: Theme.iconSize
-                                    color: row.active ? Theme.primary : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                Column {
-                                    width: parent.width - Theme.iconSize - Theme.spacingM
-                                    spacing: 1
-                                    anchors.verticalCenter: parent.verticalCenter
-
-                                    StyledText {
-                                        text: row.modelData.name
-                                        font.pixelSize: Theme.fontSizeMedium
-                                        font.weight: Font.Medium
-                                        color: row.active ? Theme.primary : Theme.surfaceText
-                                    }
-
-                                    StyledText {
-                                        text: row.modelData.comment
-                                        width: parent.width
-                                        elide: Text.ElideRight
-                                        font.pixelSize: Theme.fontSizeSmall
-                                        color: Theme.surfaceVariantText
-                                    }
-                                }
                             }
 
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onEntered: root.selectedIndex = row.index
-                                onClicked: {
-                                    root.apply(row.index);
-                                    if (pop.closePopout)
-                                        pop.closePopout();
+                            Column {
+                                width: parent.width - Theme.iconSize - Theme.spacingM
+                                spacing: 1
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                StyledText {
+                                    text: row.modelData.name
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    font.weight: Font.Medium
+                                    color: row.active ? Theme.primary : Theme.surfaceText
                                 }
+
+                                StyledText {
+                                    text: row.modelData.comment
+                                    width: parent.width
+                                    elide: Text.ElideRight
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    color: Theme.surfaceVariantText
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: rowArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                Quickshell.execDetached(["wallpaper:" + row.modelData.name]);
+                                if (closePopout)
+                                    closePopout();
                             }
                         }
                     }
