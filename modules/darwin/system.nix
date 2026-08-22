@@ -50,6 +50,15 @@
     defaults.NSGlobalDomain = {
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
+    }
+    # Traditional desktop-mouse scroll direction (natural OFF), mini
+    # only. macOS has ONE global scroll-direction toggle — no per-device
+    # split — so this is safe only because the mini has no trackpad. If a
+    # Magic Trackpad is ever paired it flips too, and wanting them
+    # opposite would then need an event-tap app (Scroll Reverser). Also
+    # a next-LOGIN setting.
+    // lib.optionalAttrs (config.networking.hostName == "mac-mini") {
+      "com.apple.swipescrolldirection" = false;
     };
   };
 

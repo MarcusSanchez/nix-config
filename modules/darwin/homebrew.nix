@@ -6,12 +6,7 @@
 # cleanup = "zap": every formula, cask, and tap NOT declared below is
 # uninstalled on activation. Adding a tool imperatively with `brew install`
 # only lasts until the next rebuild — declare it here or lose it.
-{
-  config,
-  lib,
-  hostName,
-  ...
-}:
+{ config, ... }:
 
 {
   # The installation itself, which nix-darwin's homebrew.* options do NOT
@@ -88,16 +83,6 @@
       "stremio"
       "zed"
       "zen"
-    ]
-    # Desktop-mouse-only scroll inversion: flip the wheel to the
-    # traditional direction WITHOUT touching the trackpad. macOS can't
-    # split scroll direction per device, so Scroll Reverser does it. Mini
-    # only — the Air is trackpad-primary and keeps global natural scroll.
-    # Manual after install, same shape as hammerspoon's accessibility:
-    # grant Scroll Reverser Accessibility permission, then in its menu bar
-    # item set Reverse Mouse ON, Reverse Trackpad OFF, and Start at Login.
-    ++ lib.optionals (hostName == "mac-mini") [
-      "scroll-reverser"
     ];
   };
 }
