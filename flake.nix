@@ -105,12 +105,23 @@
       # `hostName`. Bare `sudo darwin-rebuild switch` resolves
       # darwinConfigurations.<scutil --get LocalHostName>, so the two must
       # agree — deriving it means they can't drift.
-      darwinConfigurations = nixpkgs.lib.mapAttrs (
-        hostName: hostModule:
-        nix-darwin.lib.darwinSystem {
-          specialArgs = { inherit inputs hostName; };
-          modules = [ hostModule ];
-        }
-      ) { macbook-air = ./hosts/darwin; };
+      darwinConfigurations =
+        nixpkgs.lib.mapAttrs
+          (
+            hostName: hostModule:
+            nix-darwin.lib.darwinSystem {
+              specialArgs = { inherit inputs hostName; };
+              modules = [ hostModule ];
+            }
+          )
+          {
+            # Both Macs share hosts/darwin the way the WSL boxes share
+            # hosts/wsl — per-machine values (account name, computer name)
+            # resolve from the hostName inside. marcuss-mac-mini's hostname
+            # is provisional; renaming it means updating this key AND the
+            # two hostName maps (modules/darwin/users.nix, hosts/darwin).
+            macbook-air = ./hosts/darwin;
+            marcuss-mac-mini = ./hosts/darwin;
+          };
     };
 }
