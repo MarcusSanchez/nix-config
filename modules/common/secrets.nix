@@ -117,8 +117,6 @@ in
           //
             lib.optionalAttrs
               (builtins.elem config.networking.hostName [
-                "naut-box"
-                "naut-dt"
                 "macbook-air"
                 "mac-mini"
               ])

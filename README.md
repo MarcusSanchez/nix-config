@@ -9,7 +9,9 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 |---|---|---|---|
 | `naut-box`, `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `naut-dt` | bare-metal desktop, dual-boot beside the PC that hosts `naut-box` | `marcus` | `/etc/nixos` |
+| `tuf-laptop` | bare-metal laptop, same desktop stack as `naut-dt` | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
+| `mac-mini` | nix-darwin, Determinate Nix; trusted sops machine | `marcus` | `/etc/nix-darwin` |
 
 The repo lives at `~/nix-config` everywhere; the symlink is what bare
 `nixos-rebuild` / `darwin-rebuild` look for. Everything below is
@@ -103,14 +105,27 @@ Then the last step: open `nvim` once so lazy.nvim installs plugins from
 
 ## Bootstrapping a new Mac
 
+**Prerequisite — Xcode Command Line Tools, verified BEFORE anything else.**
+The first activation runs `brew bundle`, and bottles (gcc among them) refuse
+to install without the CLT; that failure aborts activation halfway, *before*
+Home Manager runs, which presents as "the switch worked but no dotfiles
+appeared". `xcode-select --install` is the happy path — but on a fresh macOS
+release it can report the software "is not currently available from the
+update server". Two ways out of that: install the pending macOS point update
+first (it refreshes the catalog; the CLT install works right after), or
+download the CLT installer directly from developer.apple.com/download/all.
+Done when `xcode-select -p` prints `/Library/Developer/CommandLineTools`.
+
 Two blocks with a **mandatory new terminal between them** — that gap is the one
-thing a paste-the-whole-section run gets wrong. Each block on its own can be
-copied blindly.
+thing a paste-the-whole-section run gets wrong. Each block starts with
+`setopt interactive_comments` because a fresh mac's zsh errors on pasted
+`#` lines without it; with it, each block can be copied blindly.
 
 ```sh
-# Install Homebrew — it also installs the Xcode Command Line Tools, which
-# provide the git used below (a fresh Mac has neither). nix-darwin drives
-# brew declaratively but never installs it.
+setopt interactive_comments
+
+# Install Homebrew (brew itself — nix-darwin drives it declaratively but
+# never installs it)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Install Determinate Nix (needs sudo)
@@ -124,15 +139,20 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confi
 > here, and the next block dies on it. Quit the terminal and open a fresh one.
 
 ```sh
-# Clone the config
-git clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
+setopt interactive_comments
+
+# Which Mac this is — its entry in flake.nix (the one edit before pasting)
+attr=mac-mini   # or macbook-air
+
+# Clone the config — git comes via nix, so nothing needs preinstalling
+nix run nixpkgs#git -- clone https://github.com/MarcusSanchez/nix-config.git ~/nix-config
 
 # First activation (bootstraps darwin-rebuild itself; this is also where brew
 # installs everything declared in homebrew.nix, so it's slow).
-# The #macbook-air is needed exactly once: bare resolution goes by
-# LocalHostName, which Apple autogenerates on a fresh mac — this switch is
-# what sets it to macbook-air, and bare works from then on.
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config#macbook-air
+# The #attr is needed exactly once: bare resolution goes by LocalHostName,
+# which Apple autogenerates on a fresh mac — this switch is what sets the
+# hostname, and bare `sudo darwin-rebuild switch` works from then on.
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix-config#$attr
 
 # Symlink so bare `sudo darwin-rebuild switch` works — the analog of the WSL
 # machines keeping their config at /etc/nixos
@@ -147,8 +167,11 @@ sudo launchctl kickstart -k system/systems.determinate.nix-daemon
 Then open **one more terminal** — that activation replaced your login shell, and
 Home Manager's session variables only land in a shell started after it.
 
-Same expected `cannot read keyfile` error as on WSL, and the same fix: run
-[Placing the key](#placing-the-key) to place the age key, then
+Same expected `cannot read keyfile` error as on WSL, and the same fix: for
+an ordinary box, run [Placing the key](#placing-the-key); for a Mac joining
+the trusted tier, follow
+[Enrolling a trusted machine](#enrolling-a-trusted-machine) instead
+(`age:place` refuses on trusted machines by design). Then
 `nh darwin switch` again. After that the only thing left is opening `nvim`
 once — `gh`, `flyctl` and `atuin` all come up authenticated.
 
@@ -204,12 +227,22 @@ becomes a named recipient. On the new machine:
 
 ```sh
 age-keygen -o /tmp/machine.txt      # note the "Public key: age1..." line
+sudo install -d -m 0700 /var/lib/sops-nix
 sudo sh -c 'cat /tmp/machine.txt >> /var/lib/sops-nix/key.txt && chmod 0400 /var/lib/sops-nix/key.txt'
-cat /tmp/machine.txt >> ~/.config/sops/age/keys.txt && rm /tmp/machine.txt
+install -d -m 0700 ~/.config/sops/age
+cat /tmp/machine.txt >> ~/.config/sops/age/keys.txt && chmod 600 ~/.config/sops/age/keys.txt
+rm /tmp/machine.txt
 ```
 
+Both copies matter: the root one is what activation decrypts with, the
+user one is what `secrets:edit` reads — skip it and interactive sops
+reports no key can open the file.
+
 Then add the public key under `keys:` in `.sops.yaml` and to both creation
-rules, and re-encrypt:
+rules, add the hostname to the super gate's list in
+`modules/common/secrets.nix` (gate and recipients must always match — a
+host on the gate without a key aborts its whole secrets install), and
+re-encrypt:
 
 ```sh
 sops updatekeys secrets/secrets.yaml

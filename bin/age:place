@@ -4,8 +4,8 @@
 # copy (root, what activation decrypts with) and the editing copy (user,
 # what `sops` uses), then prove the key matches the master recipient in
 # .sops.yaml. The master opens the lower tier only — trusted machines
-# (bedroom-wsl, the mac) instead enroll their own generated key as a named
-# recipient; see README "Enrolling a trusted machine".
+# (the named anchors in .sops.yaml) instead enroll their own generated
+# key as a named recipient; see README "Enrolling a trusted machine".
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 

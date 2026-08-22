@@ -47,22 +47,27 @@
     # sluggish). Shared by both Macs. Takes effect on the next LOGIN — the
     # WindowServer reads these at session start, not on nix activation, so
     # log out/in (or reboot) after a first switch to feel it.
-    defaults.NSGlobalDomain = {
-      KeyRepeat = 2;
-      InitialKeyRepeat = 15;
-    }
-    # Traditional desktop-mouse scroll direction (natural OFF), mini
-    # only. macOS has ONE global scroll-direction toggle — no per-device
-    # split — so this is safe only because the mini has no trackpad. If a
-    # Magic Trackpad is ever paired it flips too, and wanting them
-    # opposite would then need an event-tap app (Scroll Reverser). Also
-    # a next-LOGIN setting.
-    // lib.optionalAttrs (config.networking.hostName == "mac-mini") {
-      "com.apple.swipescrolldirection" = false;
+    defaults = {
+      NSGlobalDomain = {
+        KeyRepeat = 2;
+        InitialKeyRepeat = 15;
+      }
+      # Traditional desktop-mouse scroll direction (natural OFF), mini
+      # only. macOS has ONE global scroll-direction toggle — no
+      # per-device split — so this is safe only because the mini has no
+      # trackpad. If a Magic Trackpad is ever paired it flips too, and
+      # wanting them opposite would then need an event-tap app (Scroll
+      # Reverser). Also a next-LOGIN setting.
+      // lib.optionalAttrs (config.networking.hostName == "mac-mini") {
+        "com.apple.swipescrolldirection" = false;
+      };
+
+      # The dock stays out of the way until the cursor asks for it.
+      # Applies live on activation (Dock restarts), no logout needed.
+      dock.autohide = true;
     };
   };
 
   # Examples for later, all under system.defaults:
-  #   system.defaults.dock.autohide = true;
   #   system.defaults.finder.AppleShowAllExtensions = true;
 }
