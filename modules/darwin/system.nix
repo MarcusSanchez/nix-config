@@ -33,16 +33,27 @@
   # other customized shortcut). activateSettings applies it without a
   # logout. Re-asserted on every rebuild — flipping Spotlight back on in
   # System Settings won't stick; delete this block to hand ⌘Space back.
-  system.activationScripts.postActivation.text = lib.mkAfter ''
-    sudo -u ${config.system.primaryUser} /usr/bin/defaults write \
-      com.apple.symbolichotkeys AppleSymbolicHotKeys \
-      -dict-add 64 '<dict><key>enabled</key><false/></dict>'
-    sudo -u ${config.system.primaryUser} \
-      /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
-  '';
+  system = {
+    activationScripts.postActivation.text = lib.mkAfter ''
+      sudo -u ${config.system.primaryUser} /usr/bin/defaults write \
+        com.apple.symbolichotkeys AppleSymbolicHotKeys \
+        -dict-add 64 '<dict><key>enabled</key><false/></dict>'
+      sudo -u ${config.system.primaryUser} \
+        /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+    '';
+
+    # Keyboard repeat: fast rate + short initial delay (these are the
+    # System Settings slider maximums; the macOS default leaves both
+    # sluggish). Shared by both Macs. Takes effect on the next LOGIN — the
+    # WindowServer reads these at session start, not on nix activation, so
+    # log out/in (or reboot) after a first switch to feel it.
+    defaults.NSGlobalDomain = {
+      KeyRepeat = 2;
+      InitialKeyRepeat = 15;
+    };
+  };
 
   # Examples for later, all under system.defaults:
   #   system.defaults.dock.autohide = true;
   #   system.defaults.finder.AppleShowAllExtensions = true;
-  #   system.defaults.NSGlobalDomain.KeyRepeat = 2;
 }
