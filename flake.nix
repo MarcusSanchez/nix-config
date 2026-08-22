@@ -117,11 +117,13 @@
           {
             # Both Macs share hosts/darwin the way the WSL boxes share
             # hosts/wsl — per-machine values (account name, computer name)
-            # resolve from the hostName inside. marcuss-mac-mini's hostname
-            # is provisional; renaming it means updating this key AND the
-            # two hostName maps (modules/darwin/users.nix, hosts/darwin).
+            # resolve from the hostName inside. Renaming a Mac means
+            # updating this key + the computerName map (hosts/darwin); a
+            # trusted sops machine (the mini) also carries its .sops.yaml
+            # recipient anchor and the super list in
+            # modules/common/secrets.nix.
             macbook-air = ./hosts/darwin;
-            marcuss-mac-mini = ./hosts/darwin;
+            mac-mini = ./hosts/darwin;
           };
     };
 }

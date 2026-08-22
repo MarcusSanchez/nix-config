@@ -120,6 +120,7 @@ in
                 "naut-box"
                 "naut-dt"
                 "macbook-air"
+                "mac-mini"
               ])
               {
                 fly_token = {

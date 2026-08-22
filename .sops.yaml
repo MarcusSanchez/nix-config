@@ -5,13 +5,14 @@
 #                 only — a lite box can never open super.yaml. Stays FIRST
 #                 under keys:, age:place verifies against the first age1
 #                 string in this file.
-#   naut-box      each trusted machine's own key, generated on-box and
-#   naut-dt       backed up nowhere (so a vault compromise cannot open
-#   macbook-air   super.yaml). Recipients of BOTH files. Enrolling or
+#   macbook-air   each trusted machine's own key, generated on-box and
+#   mac-mini      backed up nowhere (so a vault compromise cannot open
+#                 super.yaml). Recipients of BOTH files. Enrolling or
 #                 replacing one: README "Enrolling a trusted machine".
-#                 (naut-box and naut-dt are the two OSes of one
-#                 physical PC; each enrolls its own key, and a reinstall
-#                 means re-enrolment — the superseded key gets revoked.)
+#                 (The list here is the KEY reality; the super gate in
+#                 modules/common/secrets.nix must name exactly these
+#                 hosts, or a host declared super but absent here aborts
+#                 its whole secrets install.)
 #   super         recovery if both trusted machines die at once: Bitwarden
 #                 ("sops age key - super recovery (nix-config)") plus a
 #                 paper printout. Never placed on any machine.
@@ -25,6 +26,7 @@
 keys:
   - &master age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
   - &macbook-air age17z3w72l4nvnwjra5e2rk0s6gyga0a7xq04dp08pw45kdfdre8v6qag5ppt
+  - &mac-mini age1x2j596dxdg5qxfd6sewye0h33p2lydkt5u20ju6p4dy7xzxdru2qnjrw43
   - &super age1vkv5elnhd64gjy2sn66zwppaltcpmmxpfydz5w432uj63ywr456stsa7n7
 
 creation_rules:
@@ -32,10 +34,12 @@ creation_rules:
     key_groups:
       - age:
           - *macbook-air
+          - *mac-mini
           - *super
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
       - age:
           - *master
           - *macbook-air
+          - *mac-mini
           - *super

@@ -18,7 +18,7 @@
   networking.computerName =
     {
       macbook-air = "Marcus’s MacBook Air";
-      marcuss-mac-mini = "Marcus’s Mac mini";
+      mac-mini = "Marcus’s Mac mini";
     }
     .${hostName};
 
