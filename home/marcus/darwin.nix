@@ -10,7 +10,6 @@
     # point imports the same file; WSL manages none of these)
     ./common/dotfiles.nix
     ./darwin/hammerspoon.nix
-    ./darwin/hushlogin.nix
   ];
 
   # username/homeDirectory come from identity.* via the HM bridge

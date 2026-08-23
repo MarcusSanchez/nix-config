@@ -43,24 +43,32 @@
     gtk.icon.enable = false;
   };
 
-  home.sessionVariables = {
-    # NixOS ships nano as the default $EDITOR; make git/rebase/etc. open nvim
-    EDITOR = "nvim";
-    SUDO_EDITOR = "nvim";
+  home = {
+    sessionVariables = {
+      # NixOS ships nano as the default $EDITOR; make git/rebase/etc. open nvim
+      EDITOR = "nvim";
+      SUDO_EDITOR = "nvim";
 
-    # Bare `nh os switch` / `nh darwin switch` find the flake here. The
-    # repo lives at ~/nix-config on every machine; /etc/nixos and
-    # /etc/nix-darwin are symlinks to it, so pointing nh at the working
-    # tree directly is the same target on both platforms.
-    NH_FLAKE = "${config.home.homeDirectory}/nix-config";
+      # Bare `nh os switch` / `nh darwin switch` find the flake here. The
+      # repo lives at ~/nix-config on every machine; /etc/nixos and
+      # /etc/nix-darwin are symlinks to it, so pointing nh at the working
+      # tree directly is the same target on both platforms.
+      NH_FLAKE = "${config.home.homeDirectory}/nix-config";
 
-    # Let `npm install -g` work natively: install into a writable prefix
-    # instead of the read-only nix store. Deliberately impure — global npm
-    # CLIs are throwaway convenience tools here, and nix-ld covers any
-    # native binaries they ship.
-    NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+      # Let `npm install -g` work natively: install into a writable prefix
+      # instead of the read-only nix store. Deliberately impure — global npm
+      # CLIs are throwaway convenience tools here, and nix-ld covers any
+      # native binaries they ship.
+      NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+    };
+    sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
+
+    # Silence login(1)'s "Last login: ..." banner — macOS terminals start
+    # every tab through /usr/bin/login, which prints it unless
+    # ~/.hushlogin exists. Fleet-wide because it's inert on Linux (no
+    # terminal there spawns shells via login); the mac is the audience.
+    file.".hushlogin".text = "";
   };
-  home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
 
   programs = {
     zoxide.enable = true;
