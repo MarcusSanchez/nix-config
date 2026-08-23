@@ -17,6 +17,17 @@
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
 
+  # Passwordless sudo on the mini, matching the Linux boxes — what lets
+  # non-interactive sessions (Claude, scripts over ssh) run
+  # darwin-rebuild themselves instead of handing the command back to a
+  # human. NOPASSWD skips authentication entirely, so it also works
+  # where Touch ID can't reach (no tty, ssh, launchd Background
+  # domain). Scoped to the one account, not %admin. The Air stays
+  # prompt-and-Touch-ID; add its hostname here the day that changes.
+  security.sudo.extraConfig = lib.mkIf (config.networking.hostName == "mac-mini") ''
+    ${config.identity.username} ALL=(ALL:ALL) NOPASSWD: ALL
+  '';
+
   # Remote Login. NOT part of the keyless SSH story — Tailscale SSH is
   # served by tailscaled itself, which intercepts port 22 on the tailnet
   # before Apple's sshd ever sees it. This is the fallback for when
