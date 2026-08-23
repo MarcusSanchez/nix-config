@@ -1,4 +1,4 @@
-# Home Manager entry point for the MacBook: identity + shared config +
+# Home Manager entry point for the Macs: identity + shared config +
 # mac-only concerns.
 { ... }:
 
@@ -10,6 +10,7 @@
     # point imports the same file; WSL manages none of these)
     ./common/dotfiles.nix
     ./darwin/hammerspoon.nix
+    ./darwin/hushlogin.nix
   ];
 
   # username/homeDirectory come from identity.* via the HM bridge

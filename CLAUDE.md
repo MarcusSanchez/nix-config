@@ -310,6 +310,8 @@ home/marcus/
                            where the WSL side copies instead)
     nix.nix                user GC launchd agent + HM manpages off (they
                            warn on every eval under Determinate Nix)
+    hushlogin.nix          ~/.hushlogin, silencing login(1)'s Last-login
+                           banner in every new terminal tab
     hammerspoon.nix        the mac's xremap — per-app remaps matched on
                            bundle id AND window title, which is why it is
                            not Karabiner (bundle ids only, and its DriverKit
