@@ -17,14 +17,14 @@
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # Passwordless sudo on the mini, matching the Linux boxes — what lets
+  # Passwordless sudo, matching the Linux boxes — what lets
   # non-interactive sessions (Claude, scripts over ssh) run
   # darwin-rebuild themselves instead of handing the command back to a
   # human. NOPASSWD skips authentication entirely, so it also works
   # where Touch ID can't reach (no tty, ssh, launchd Background
-  # domain). Scoped to the one account, not %admin. The Air stays
-  # prompt-and-Touch-ID; add its hostname here the day that changes.
-  security.sudo.extraConfig = lib.mkIf (config.networking.hostName == "mac-mini") ''
+  # domain); Touch ID above stays for anything else PAM-gated. Scoped
+  # to the one account, not %admin.
+  security.sudo.extraConfig = ''
     ${config.identity.username} ALL=(ALL:ALL) NOPASSWD: ALL
   '';
 
