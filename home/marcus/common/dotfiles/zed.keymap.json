@@ -186,6 +186,9 @@
       "g shift-i": "editor::GoToImplementation",
       "g r": "editor::FindAllReferences",
       "g y": "editor::GoToTypeDefinition",
+      // project symbol search without the shift — Zed's builtin chord
+      // is g S; ideavimrc drops the shift on its gS (GotoSymbol) too
+      "g s": "project_symbols::Toggle",
       // toggle, not Fold: Zed has no cursor-into-fold auto-expand, so
       // the same key must undo the fold (z o / z R also work)
       ", d": "editor::ToggleFold",

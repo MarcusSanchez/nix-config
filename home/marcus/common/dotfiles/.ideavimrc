@@ -159,15 +159,19 @@ nmap ge <Action>(ShowErrorDescription)
 nmap gI <Action>(GotoImplementation)
 nmap gr <Action>(ShowUsages)
 nmap gy <Action>(GotoTypeDeclaration)
-nmap gs <Action>(GotoSuperMethod)
+" super-method takes the shifted chord; the unshifted gs belongs to
+" symbol search below (the more-used of the pair gets the easier keys)
+nmap gS <Action>(GotoSuperMethod)
 
 " Zed-style g-mappings. g/ is the star: grep across every file in the
 " project (FindInPath); in visual mode the selection arrives prefilled
 " as the query.
 nmap g/ <Action>(FindInPath)
 vmap g/ <Action>(FindInPath)
-" project-wide symbol search / current-file outline, Zed's other two
-nmap gS <Action>(GotoSymbol)
+" project-wide symbol search / current-file outline (gs is bound to the
+" same chord in zed.keymap.json — Zed's builtin is g S, the shift is
+" dropped in both editors together)
+nmap gs <Action>(GotoSymbol)
 nmap gO <Action>(FileStructurePopup)
 
 " Multicursor occurrences — the IDE's builtin pair lives on Alt+J,
