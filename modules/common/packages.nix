@@ -35,6 +35,12 @@
     # tailscale0 is not trusted. The macs have no app firewall and the
     # desktop trusts tailscale0, so tailnet mosh needs nothing there.
     mosh
+    # session persistence for those connections: detach/attach a
+    # terminal session (Ctrl-\ detaches, `abduco -a <name>` returns) so
+    # a dropped link or closed laptop doesn't kill the work — the
+    # lightweight single-session answer where tmux would be a full
+    # multiplexer
+    abduco
 
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>
     nvd
