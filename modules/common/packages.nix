@@ -36,11 +36,14 @@
     # desktop trusts tailscale0, so tailnet mosh needs nothing there.
     mosh
     # session persistence for those connections: detach/attach a
-    # terminal session (Ctrl-\ detaches, `abduco -a <name>` returns) so
-    # a dropped link or closed laptop doesn't kill the work — the
-    # lightweight single-session answer where tmux would be a full
-    # multiplexer
-    abduco
+    # terminal session (`zmx attach <name>`; Ctrl-\ detaches, and `zmx
+    # detach` from any shell is the deterministic fallback — on the mac,
+    # TUI output coalescing can swallow the chord) so a dropped link or
+    # closed laptop doesn't kill the work. The lightweight answer where
+    # tmux would be a full multiplexer; replaced abduco, whose client
+    # only ever tested the first byte of each read for its detach key.
+    # A bare attach spawns a login $SHELL, so no command export needed.
+    zmx
 
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>
     nvd

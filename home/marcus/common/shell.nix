@@ -55,24 +55,16 @@
       # tree directly is the same target on both platforms.
       NH_FLAKE = "${config.home.homeDirectory}/nix-config";
 
-      # What a bare `abduco -c <name>` runs: without this it executes the
-      # compiled-in default, dvtm — deliberately not installed (mosh +
-      # abduco + ghostty splits cover the niche). zsh rather than $SHELL:
-      # these exports are static strings, and zsh is the login shell on
-      # every machine here.
-      ABDUCO_CMD = "zsh";
-
-      # Pin where abduco keeps its session sockets. The nixpkgs build
-      # probes ABDUCO_SOCKET_DIR, then XDG_RUNTIME_DIR, then $HOME — so a
-      # session launched from a shell without XDG_RUNTIME_DIR (a spawned
-      # non-login shell, a bare ssh exec) parks its socket in ~/.abduco
-      # while every login shell looks in /run/user/<uid>/abduco: the
-      # session survives but `abduco` lists nothing and -a can't find it
-      # by name (bitten on office-one, 2026-08-25). Pinning the first
-      # candidate makes create and lookup agree in every shell these
-      # exports reach — which is all of them, via hm-session-vars in
-      # .zshenv. abduco nests <dir>/abduco/<user>/ (0700) underneath.
-      ABDUCO_SOCKET_DIR = "${config.home.homeDirectory}/.local/state";
+      # Pin where zmx keeps its session sockets (and logs, nested
+      # underneath). Unpinned it derives $TMPDIR/zmx-<uid>, and TMPDIR
+      # is environment-dependent — set for GUI/login shells, absent in
+      # a bare ssh exec — so two shells can disagree about where
+      # sessions live and `zmx list` misses what `zmx attach` created.
+      # Same failure shape as the abduco socket split bitten on
+      # office-one 2026-08-25; pinning makes create and lookup agree in
+      # every shell these exports reach — all of them, via
+      # hm-session-vars in .zshenv.
+      ZMX_DIR = "${config.home.homeDirectory}/.local/state/zmx";
 
       # Let `npm install -g` work natively: install into a writable prefix
       # instead of the read-only nix store. Deliberately impure — global npm
