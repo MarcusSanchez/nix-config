@@ -29,11 +29,11 @@
 
     # roaming SSH: survives IP changes, sleep and long lag, with
     # local echo over bad links. One package = mosh-server (spawned
-    # by the ssh login) + the mosh client. Needs UDP 60000-61000 open
-    # wherever it is reached across a firewalled interface — see the
-    # networking.nix files (LAN on the desktop, tailnet on the WSL
-    # boxes; the macs have no app firewall, and the desktop trusts
-    # tailscale0 already).
+    # by the ssh login) + the mosh client. Its UDP range (60000-61000)
+    # is opened wherever a firewall gates the path in — see the
+    # networking.nix files; the enabling case is the WSL boxes, whose
+    # tailscale0 is not trusted. The macs have no app firewall and the
+    # desktop trusts tailscale0, so tailnet mosh needs nothing there.
     mosh
 
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>

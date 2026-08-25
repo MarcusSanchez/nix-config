@@ -44,8 +44,11 @@
         9009
       ];
       # mosh (common/packages.nix) picks a server port from this
-      # range. tailscale0 is trusted below, so tailnet mosh needs
-      # nothing — this is what opens mosh over the LAN too.
+      # range. The working path is the tailnet: tailscale0 is trusted
+      # below, so those packets never consult this list. The LAN
+      # opening is forward-looking only — mosh bootstraps over SSH and
+      # nothing serves SSH on the LAN here (Tailscale SSH only, per
+      # the block below), so a LAN-side session cannot start today.
       allowedUDPPortRanges = [
         {
           from = 60000;
