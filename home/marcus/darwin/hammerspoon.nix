@@ -27,6 +27,13 @@
   # back to their defaults with no signal. Program points at the binary
   # inside the cask's bundle rather than using `open`, which would exit
   # immediately and have KeepAlive respawn it in a loop.
+  #
+  # This agent is the ONLY launcher: decline the app's own
+  # launch-at-login prompt on a fresh machine (and delete any
+  # "Hammerspoon" entry under System Settings > General > Login Items).
+  # Two launchers race at login, the loser cannot create the hs.ipc
+  # message port, and init.lua dies at require("hs.ipc") with "failed
+  # to create new local port".
   launchd.agents.hammerspoon = {
     enable = true;
     config = {
