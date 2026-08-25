@@ -23,8 +23,11 @@
   # off the network until someone touches it. Wake-on-demand is no
   # substitute: over Wi-Fi it needs a Bonjour sleep proxy on the LAN,
   # and tailscale's UDP is not an advertised service that would trigger
-  # one anyway. Display sleep stays — blanking the monitor costs no
-  # reachability. Mini only; the Air is a laptop and sleeps normally.
+  # one anyway. The DISPLAY still sleeps — blanking the monitor costs no
+  # reachability — but at 5 minutes rather than the stock 10: the
+  # countdown restarts on any keyboard or mouse event, and ten
+  # uninterrupted minutes is a long time to never nudge the desk. Mini
+  # only; the Air is a laptop and sleeps normally.
   #
   # restartAfterPowerFailure is the `autorestart` pref, which fires only
   # after an UNEXPECTED loss while running — a deliberate shutdown stays
@@ -33,7 +36,7 @@
   power = lib.mkIf (config.networking.hostName == "mac-mini") {
     sleep = {
       computer = "never";
-      display = 10;
+      display = 5;
     };
     restartAfterPowerFailure = true;
     restartAfterFreeze = true;
