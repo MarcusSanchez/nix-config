@@ -62,6 +62,18 @@
       # every machine here.
       ABDUCO_CMD = "zsh";
 
+      # Pin where abduco keeps its session sockets. The nixpkgs build
+      # probes ABDUCO_SOCKET_DIR, then XDG_RUNTIME_DIR, then $HOME — so a
+      # session launched from a shell without XDG_RUNTIME_DIR (a spawned
+      # non-login shell, a bare ssh exec) parks its socket in ~/.abduco
+      # while every login shell looks in /run/user/<uid>/abduco: the
+      # session survives but `abduco` lists nothing and -a can't find it
+      # by name (bitten on office-one, 2026-08-25). Pinning the first
+      # candidate makes create and lookup agree in every shell these
+      # exports reach — which is all of them, via hm-session-vars in
+      # .zshenv. abduco nests <dir>/abduco/<user>/ (0700) underneath.
+      ABDUCO_SOCKET_DIR = "${config.home.homeDirectory}/.local/state";
+
       # Let `npm install -g` work natively: install into a writable prefix
       # instead of the read-only nix store. Deliberately impure — global npm
       # CLIs are throwaway convenience tools here, and nix-ld covers any
