@@ -27,6 +27,15 @@
     trippy # traceroute+ping TUI
     doggo # dig, readable
 
+    # roaming SSH: survives IP changes, sleep and long lag, with
+    # local echo over bad links. One package = mosh-server (spawned
+    # by the ssh login) + the mosh client. Needs UDP 60000-61000 open
+    # wherever it is reached across a firewalled interface — see the
+    # networking.nix files (LAN on the desktop, tailnet on the WSL
+    # boxes; the macs have no app firewall, and the desktop trusts
+    # tailscale0 already).
+    mosh
+
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>
     nvd
     nh

@@ -85,6 +85,18 @@
   # without it tailscaled fails with CreateTUN("tailscale0") failed.
   boot.kernelModules = [ "tun" ];
 
+  # mosh (common/packages.nix) over the tailnet: tailscale0 is NOT a
+  # trusted interface here (it's [ "lo" ], unlike the desktop), and
+  # the NixOS firewall does gate that interface, so open mosh's UDP
+  # range for it. The LAN path into a WSL box is Windows' firewall,
+  # not this one — so this is purely for the tailnet reach.
+  networking.firewall.allowedUDPPortRanges = [
+    {
+      from = 60000;
+      to = 61000;
+    }
+  ];
+
   # Tailnet doorway to the Windows side's RustDesk receiver, on the
   # remotely-controlled PCs only (the `bridged` list): the account-free
   # "direct IP access" mode (the public rendezvous now gates ID-based

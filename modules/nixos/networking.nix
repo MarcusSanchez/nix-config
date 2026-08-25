@@ -43,6 +43,15 @@
         # croc LAN peer discovery
         9009
       ];
+      # mosh (common/packages.nix) picks a server port from this
+      # range. tailscale0 is trusted below, so tailnet mosh needs
+      # nothing — this is what opens mosh over the LAN too.
+      allowedUDPPortRanges = [
+        {
+          from = 60000;
+          to = 61000;
+        }
+      ];
     };
   };
 
