@@ -17,6 +17,28 @@
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
 
+  # The mini never sleeps: it is a desktop on AC that serves ssh and
+  # mosh over the tailnet, and macOS sleep is a genuine suspend — sshd,
+  # mosh-server and tailscaled all freeze, so a sleeping mac is simply
+  # off the network until someone touches it. Wake-on-demand is no
+  # substitute: over Wi-Fi it needs a Bonjour sleep proxy on the LAN,
+  # and tailscale's UDP is not an advertised service that would trigger
+  # one anyway. Display sleep stays — blanking the monitor costs no
+  # reachability. Mini only; the Air is a laptop and sleeps normally.
+  #
+  # restartAfterPowerFailure is the `autorestart` pref, which fires only
+  # after an UNEXPECTED loss while running — a deliberate shutdown stays
+  # down. The pref that WOULD power the machine on whenever AC returns
+  # is `autorestartatconnect`, which nothing here sets (it stays 0).
+  power = lib.mkIf (config.networking.hostName == "mac-mini") {
+    sleep = {
+      computer = "never";
+      display = 10;
+    };
+    restartAfterPowerFailure = true;
+    restartAfterFreeze = true;
+  };
+
   # Passwordless sudo, matching the Linux boxes — what lets
   # non-interactive sessions (Claude, scripts over ssh) run
   # darwin-rebuild themselves instead of handing the command back to a
