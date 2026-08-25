@@ -55,6 +55,13 @@
       # tree directly is the same target on both platforms.
       NH_FLAKE = "${config.home.homeDirectory}/nix-config";
 
+      # What a bare `abduco -c <name>` runs: without this it executes the
+      # compiled-in default, dvtm — deliberately not installed (mosh +
+      # abduco + ghostty splits cover the niche). zsh rather than $SHELL:
+      # these exports are static strings, and zsh is the login shell on
+      # every machine here.
+      ABDUCO_CMD = "zsh";
+
       # Let `npm install -g` work natively: install into a writable prefix
       # instead of the read-only nix store. Deliberately impure — global npm
       # CLIs are throwaway convenience tools here, and nix-ld covers any
