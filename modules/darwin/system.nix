@@ -17,29 +17,16 @@
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # The mini never sleeps: it is a desktop on AC that serves ssh and
-  # mosh over the tailnet, and macOS sleep is a genuine suspend — sshd,
-  # mosh-server and tailscaled all freeze, so a sleeping mac is simply
-  # off the network until someone touches it. Wake-on-demand is no
-  # substitute: over Wi-Fi it needs a Bonjour sleep proxy on the LAN,
-  # and tailscale's UDP is not an advertised service that would trigger
-  # one anyway. The DISPLAY still sleeps — blanking the monitor costs no
-  # reachability — but at 5 minutes rather than the stock 10: the
-  # countdown restarts on any keyboard or mouse event, and ten
-  # uninterrupted minutes is a long time to never nudge the desk. Mini
-  # only; the Air is a laptop and sleeps normally.
-  #
-  # restartAfterPowerFailure is the `autorestart` pref, which fires only
-  # after an UNEXPECTED loss while running — a deliberate shutdown stays
-  # down. The pref that WOULD power the machine on whenever AC returns
-  # is `autorestartatconnect`, which nothing here sets (it stays 0).
+  # The mini's display blanks at 5 minutes (the stock 10 restarts its
+  # countdown on any keyboard or mouse nudge and rarely got to fire);
+  # SYSTEM sleep stays at macOS's own defaults on purpose. For remote
+  # work, ttyskeepawake (a pmset default) already holds the machine
+  # awake while an ssh session is active, and planned unattended runs
+  # get `caffeinate -dims <cmd>` (or `caffeinate -t <secs>`) instead of
+  # a machine that never sleeps. A deliberate shutdown stays down
+  # either way. Mini only; the Air sleeps like the laptop it is.
   power = lib.mkIf (config.networking.hostName == "mac-mini") {
-    sleep = {
-      computer = "never";
-      display = 5;
-    };
-    restartAfterPowerFailure = true;
-    restartAfterFreeze = true;
+    sleep.display = 5;
   };
 
   # Passwordless sudo, matching the Linux boxes — what lets
