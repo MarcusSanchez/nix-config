@@ -17,18 +17,6 @@
   # of sudo_local). The one deliberate addition over the pre-nix machine.
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # The mini's display blanks at 5 minutes (the stock 10 restarts its
-  # countdown on any keyboard or mouse nudge and rarely got to fire);
-  # SYSTEM sleep stays at macOS's own defaults on purpose. For remote
-  # work, ttyskeepawake (a pmset default) already holds the machine
-  # awake while an ssh session is active, and planned unattended runs
-  # get `caffeinate -dims <cmd>` (or `caffeinate -t <secs>`) instead of
-  # a machine that never sleeps. A deliberate shutdown stays down
-  # either way. Mini only; the Air sleeps like the laptop it is.
-  power = lib.mkIf (config.networking.hostName == "mac-mini") {
-    sleep.display = 5;
-  };
-
   # Passwordless sudo, matching the Linux boxes — what lets
   # non-interactive sessions (Claude, scripts over ssh) run
   # darwin-rebuild themselves instead of handing the command back to a
