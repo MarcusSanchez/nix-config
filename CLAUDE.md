@@ -87,39 +87,41 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            modules/nixos/nvidia.nix fits it as-is.
                            The PC is SOLD; this host and naut-box stay
                            in the flake pending decommission
-hosts/hero/          the successor desk PC, INSTALL PENDING:
-                           hardware-configuration.nix is a placeholder
-                           (fictional root, replace with the generated
-                           file at install), lanzaboote.nix sits
-                           commented until the sbctl ceremony, and
-                           greeterScreens stays default until the
-                           connectors are known. Deliberately carries
-                           NONE of naut-dt's monitor machinery (splash
-                           forcing, wake/hide oneshots, WoL link) — the
-                           new desk is the 4K + a vertical 1440p on its
-                           LEFT, connectors TBD via `niri msg outputs`
-  default.nix              the machine's whole statement, quirks
-                           included: boot-splash-on-one-monitor (side
-                           connectors kernel-forced off through
-                           plymouth + the wake-side-monitors oneshot —
-                           the d-force is permanent for compositors
-                           otherwise), WoL armed via a systemd.network
-                           link file keyed by MAC, and the
-                           reboot:windows command (one-shot BootNext by
-                           label lookup — no firmware menus)
-  lanzaboote.nix           Secure Boot, LIVE since install — a separate
-                           file ON PURPOSE: a reinstall must comment its
-                           import out until `sbctl create-keys` has run
-                           (one line, one #). On a
-                           reinstall, comment the import out until
-                           `sbctl create-keys` has run, or the bootloader
-                           install (and nixos-install with it) fails.
-                           The working MSI ceremony (its header):
-                           firmware "Delete all Secure Boot variables" =
-                           TRUE Setup Mode (delete-PK-only leaves db/KEK
-                           immutable), then runtime `sbctl enroll-keys
-                           --microsoft` succeeds; fwupd restores the
-                           dropped dbx afterwards
+                           (naut-dt's default.nix carries its own
+                           splash forcing, WoL link file and lanzaboote
+                           with the MSI delete-all-variables ceremony —
+                           details in those files' headers, relevant
+                           only until decommission)
+hosts/hero/          the successor desk PC, INSTALLED and live
+                           (2026-08-30): the ASUS X870E build with the
+                           RTX 5090 and the MT7927 combo card. Real
+                           generated hardware-configuration.nix; the
+                           desk is the 4K (DP-3, greeterScreens) with
+                           the 1440p portrait (HDMI-A-1) on its LEFT
+  default.nix              the machine's statement: the same
+                           boot-splash-on-one-monitor machinery the old
+                           desk proved (portrait kernel-forced off
+                           through plymouth, wake/hide oneshots) keyed
+                           to hero's connector. No WoL link yet — the
+                           tablet relay re-arm is pending
+  lanzaboote.nix           Secure Boot, LIVE — a separate file ON
+                           PURPOSE: a reinstall must comment its import
+                           out until `sbctl create-keys` has run (one
+                           line, one #) or the bootloader install (and
+                           nixos-install with it) fails. THIS board's
+                           working ceremony differs from the MSI one:
+                           runtime `sbctl enroll-keys` is silently
+                           DISCARDED at POST (AMI NVRAM_Verify) — the
+                           firmware's own Key Management UI appends the
+                           exported db cert instead, factory PK/KEK/dbx
+                           untouched; the header has the whole ritual
+  bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
+                           btusb: backported btusb/btmtk built from the
+                           mediatek-mt7927-dkms release deb (which also
+                           ships the BT firmware linux-firmware lacks),
+                           landing in updates/ so depmod prefers them.
+                           Self-retires at kernel 7.1; wifi half
+                           deliberately unbuilt (wired desk)
 modules/common/            default.nix packages.nix (cross-platform CLIs
                            + the claude-code overlay and package)
   bin.nix                  the repo's bin/ scripts on PATH everywhere —

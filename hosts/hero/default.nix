@@ -24,6 +24,7 @@
     # without keys on disk, the bootloader install (and therefore
     # nixos-install) fails. Full ceremony: lanzaboote.nix header.
     ./lanzaboote.nix
+    ./bluetooth.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
