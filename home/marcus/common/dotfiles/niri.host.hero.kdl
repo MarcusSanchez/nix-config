@@ -7,3 +7,11 @@
 // blocks belong in niri.outputs.kdl keyed by connector — add them once
 // the machine reports its names (`niri msg outputs`); until then every
 // monitor auto-places. Nothing monitor-specific lives here yet.
+
+// the animated middle layer, replayed from the last look's recorded
+// choice (mpvpaper:toggle persists on/off — see niri.nix). The video
+// itself (~/Pictures/Wallpapers/live/spaceman.mp4) was machine-local
+// on the predecessor desk and is NOT in the repo — until a copy lands
+// at that path, an "on" replay starts mpvpaper which exits instantly:
+// harmless, and the static wallpaper shows.
+spawn-at-startup "sh" "-c" "mpvpaper:toggle \"$(cat ~/.local/state/desk-mpvpaper 2>/dev/null || echo off)\""

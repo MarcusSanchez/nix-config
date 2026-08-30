@@ -123,7 +123,8 @@
     {
       "id": "brightnessSlider",
       "enabled": true,
-      "width": 50
+      "width": 50,
+      "deviceName": "leds:igc-0b00-led0"
     },
     {
       "id": "wifi",
@@ -675,8 +676,7 @@
         "controlCenterButton"
       ],
       "screenPreferences": [
-        "DP-1",
-        "DP-2"
+        "HDMI-A-1"
       ],
       "showOnLastDisplay": false,
       "spacing": 4,
