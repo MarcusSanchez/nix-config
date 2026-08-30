@@ -19,35 +19,40 @@ let
 
   # The desk looks: each becomes a wallpaper:<name> command and a
   # spotlight entry (see home.packages / xdg.desktopEntries). A look
-  # names its three wallpapers (files under ~/Pictures/Wallpapers,
-  # shipped from ./assets), whether the animated middle layer runs,
-  # the DMS theme that carries its accent + bar colors, and a Material
-  # Symbols icon for the wallpaperLook bar plugin (assets/dms-plugins).
+  # maps CONNECTORS to wallpapers (files under ~/Pictures/Wallpapers,
+  # shipped from ./assets) — a connector the machine doesn't have is a
+  # silently-inert setFor, so one table serves the fleet; the names
+  # below are hero's desk (HDMI-A-1 portrait left, DP-3 the 4K).
+  # mpv drives the animated middle layer via mpvpaper:toggle, and the
+  # DMS theme carries each look's accent + bar colors.
   looks = {
     astronaut = {
-      dp1 = "space-stars-2560x1440.jpg";
-      dp2 = "space-stars-1080x1920.jpg";
-      dp3 = "astronaut-jellyfish.jpg";
+      walls = {
+        "HDMI-A-1" = "space-stars-1080x1920.jpg";
+        "DP-3" = "astronaut-jellyfish.jpg";
+      };
       mpv = true;
       theme = "dms.theme.blue.json";
       accent = "#89b4fa";
       icon = "rocket_launch";
-      comment = "Stars on the sides, the animated spaceman in the middle, mocha blue";
+      comment = "Stars on the portrait, the animated spaceman on the 4K, mocha blue";
     };
     flake = {
-      dp1 = "nix-flake.png";
-      dp2 = "nix-flake.png";
-      dp3 = "nix-flake.png";
+      walls = {
+        "HDMI-A-1" = "nix-flake.png";
+        "DP-3" = "nix-flake.png";
+      };
       mpv = false;
       theme = "dms.theme.flake.json";
       accent = "#7ebae4";
       icon = "ac_unit";
-      comment = "The Nix flake on all three monitors, nix-logo blues";
+      comment = "The Nix flake on every monitor, nix-logo blues";
     };
     galaxy = {
-      dp1 = "galaxy-waves.jpg";
-      dp2 = "galaxy-waves.jpg";
-      dp3 = "galaxy-waves.jpg";
+      walls = {
+        "HDMI-A-1" = "galaxy-waves.jpg";
+        "DP-3" = "galaxy-waves.jpg";
+      };
       mpv = false;
       theme = "dms.theme.galaxy.json";
       accent = "#a9cbe8";
@@ -55,9 +60,10 @@ let
       comment = "The cosmic ocean vortex, icy steel blue on near-black slate";
     };
     swirls = {
-      dp1 = "swirls.jpg";
-      dp2 = "swirls.jpg";
-      dp3 = "swirls.jpg";
+      walls = {
+        "HDMI-A-1" = "swirls.jpg";
+        "DP-3" = "swirls.jpg";
+      };
       mpv = false;
       theme = "dms.theme.swirls.json";
       accent = "#de92a5";
@@ -157,8 +163,8 @@ in
       pkgs.matugen
 
     ]
-    # One command per desk look — wallpaper:<name> repaints all three
-    # monitors, commands the animated layer (mpvpaper:toggle on/off,
+    # One command per desk look — wallpaper:<name> repaints every mapped
+    # connector, commands the animated layer (mpvpaper:toggle on/off,
     # niri.nix) AND swaps the DMS theme, so accent and bar color travel
     # with the wallpaper. The theme flip edits customThemeFile through
     # the settings symlink's TARGET (readlink) so the link survives;
@@ -173,9 +179,11 @@ in
         mkdir -p $out/bin
         install -m755 ${pkgs.writeShellScript "wallpaper-${name}" ''
           W="$HOME/Pictures/Wallpapers"
-          dms ipc call wallpaper setFor DP-1 "$W/${look.dp1}" >/dev/null
-          dms ipc call wallpaper setFor DP-2 "$W/${look.dp2}" >/dev/null
-          dms ipc call wallpaper setFor DP-3 "$W/${look.dp3}" >/dev/null
+          ${lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (
+              conn: img: ''dms ipc call wallpaper setFor ${conn} "$W/${img}" >/dev/null''
+            ) look.walls
+          )}
           mpvpaper:toggle ${if look.mpv then "on" else "off"} >/dev/null
           s=$(readlink -f "$HOME/.config/DankMaterialShell/settings.json")
           ${pkgs.jq}/bin/jq '.currentThemeName = "custom"
