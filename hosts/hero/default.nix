@@ -26,6 +26,7 @@
     ./lanzaboote.nix
     ./bluetooth.nix
     ./lianli.nix
+    ./tryx.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

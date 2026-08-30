@@ -115,6 +115,12 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            firmware's own Key Management UI appends the
                            exported db cert instead, factory PK/KEK/dbx
                            untouched; the header has the whole ritual
+  tryx.nix                 the AIO's AMOLED (a USB printer-class device
+                           that resets every ~70s unless the runtime
+                           holds it): community Qt manager, pinned —
+                           tryx-panorama-runtime as a user service
+                           (D-Bus org.tryx.Panorama) + the GUI in the
+                           spotlight for media upload
   lianli.nix               the case's Lian Li screens/fans/RGB via a
                            pinned lian-li-linux daemon build (daemon
                            crate only — no GUI; everything speaks
