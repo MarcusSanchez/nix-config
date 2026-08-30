@@ -14,7 +14,13 @@
 #   (import this file, switch — sbctl verify shows everything signed)
 #   BIOS: set an Administrator password AND Fast Boot off — without
 #     both, runtime enrollment returns permission-denied on this
-#     firmware family
+#     firmware family. The password matters only for the enrollment
+#     WRITE; once keys are in NVRAM it may be removed (enforcement
+#     doesn't need it — it only seals the BIOS against physical
+#     tampering), and a future re-enrollment sets it again.
+#   (enroll-keys may report "File is immutable" on KEK/db — that's
+#     the kernel's efivarfs safety flag, not the firmware refusing:
+#     `chattr -i` the two named files and re-run.)
 #   BIOS: Boot -> Secure Boot -> Secure Boot Mode = Custom (Key
 #     Management is hidden until this); Key Management -> "Save all
 #     Secure Boot variables" to USB (the escape hatch), then
