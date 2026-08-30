@@ -1,7 +1,12 @@
 # GUI apps — the Linux render of the mac's homebrew casks (minus stremio,
 # minus raycast, which has no Linux build; DMS's spotlight covers that
 # slot).
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   home.packages = with pkgs; [
@@ -112,6 +117,24 @@
       nixos-manual = hide "NixOS Manual";
       "org.quickshell" = hide "Quickshell";
     };
+
+  # zen as the DEFAULT browser, declaratively: HM renders the
+  # mimeapps.list that xdg-open and the portals consult, so links from
+  # any app land in zen on every desktop machine — instead of the
+  # mutable file zen's own "make default" prompt writes, which dies
+  # with each install. The flake package ships beta-channel naming:
+  # zen-beta.desktop / the zen-beta binary.
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = lib.genAttrs [
+      "text/html"
+      "application/xhtml+xml"
+      "x-scheme-handler/http"
+      "x-scheme-handler/https"
+      "x-scheme-handler/about"
+      "x-scheme-handler/unknown"
+    ] (_: "zen-beta.desktop");
+  };
 
   # the zed-editor package names its CLI `zeditor`; muscle memory says zed
   home.shellAliases.zed = "zeditor";
