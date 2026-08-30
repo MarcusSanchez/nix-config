@@ -7,4 +7,5 @@ disabled = ["empty_pattern"]
 ignore = [
   "hosts/tuf-laptop/hardware-configuration.nix",
   "hosts/naut-dt/hardware-configuration.nix",
+  "hosts/hero/hardware-configuration.nix",
 ]

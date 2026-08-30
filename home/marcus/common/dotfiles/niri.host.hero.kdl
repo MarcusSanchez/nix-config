@@ -1,0 +1,9 @@
+// Host-specific niri config for hero — see niri.host.naut-dt.kdl for
+// how the include is wired; this file exists so the "niri.host.kdl"
+// include resolves (a new desktop host must commit its tail BEFORE the
+// first switch or HM links against nothing).
+//
+// The desk: the 4K main with the 1440p VERTICAL on its LEFT. Output
+// blocks belong in niri.outputs.kdl keyed by connector — add them once
+// the machine reports its names (`niri msg outputs`); until then every
+// monitor auto-places. Nothing monitor-specific lives here yet.

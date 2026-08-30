@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), two bare-metal NixOS machines sharing one desktop session (host `naut-dt`, the dual-boot side of the PC that also hosts naut-box, with its own RTX 5080 facts; and host `tuf-laptop`, an ASUS TUF Dash F15 whose MUX sits in discrete mode — both niri + DankMaterialShell, user `marcus`; the desktop stack was absorbed from the archived `marcussanchez/tuf-nix-config` repo, whose git history holds the rejected Plasma/GNOME/SDDM experiments), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), three bare-metal NixOS machines sharing one desktop session (host `naut-dt`, the dual-boot side of the PC that also hosts naut-box, with its own RTX 5080 facts — that PC is SOLD, its two hosts kept in the flake pending decommission; host `hero`, its successor desk PC, fresh install pending with a placeholder hardware-configuration.nix and lanzaboote commented until the sbctl ceremony; and host `tuf-laptop`, an ASUS TUF Dash F15 whose MUX sits in discrete mode — all niri + DankMaterialShell, user `marcus`; the desktop stack was absorbed from the archived `marcussanchez/tuf-nix-config` repo, whose git history holds the rejected Plasma/GNOME/SDDM experiments), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -28,6 +28,7 @@ nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-box.config.system.build
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.framework-dt.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.naut-dt.config.system.build.toplevel.drvPath'
 nix eval --raw '/etc/nix-darwin#nixosConfigurations.tuf-laptop.config.system.build.toplevel.drvPath'
+nix eval --raw '/etc/nix-darwin#nixosConfigurations.hero.config.system.build.toplevel.drvPath'
                                                # eval the NixOS systems after touching modules/
                                                # or home/ (on any NixOS box, `nix flake
                                                # check` already covers every NixOS host; the office
@@ -40,7 +41,7 @@ nix flake update                               # bump inputs by hand (CI does it
                                                # update-flake-lock.yml, gated on the full eval)
 ```
 
-There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry — six: four WSL hosts and the two bare-metal machines) + the darwin eval + a successful switch is the verification story. `./bin/config:check` runs the whole gate including the darwin eval. Each machine can switch only itself — changes for the others are flagged for the user to activate there.
+There are no tests; `nix flake check` (which evaluates every `nixosConfigurations` entry — seven: four WSL hosts and the three bare-metal machines) + the darwin eval + a successful switch is the verification story. `./bin/config:check` runs the whole gate including the darwin eval. Each machine can switch only itself — changes for the others are flagged for the user to activate there.
 
 ## Architecture
 
@@ -83,7 +84,20 @@ hosts/naut-dt/       the desktop PC, dual-booted beside Windows
                            .nix is the generated truth from that install —
                            excluded from statix + deadnix,
                            regenerate don't edit. RTX 5080 — the shared
-                           modules/nixos/nvidia.nix fits it as-is
+                           modules/nixos/nvidia.nix fits it as-is.
+                           The PC is SOLD; this host and naut-box stay
+                           in the flake pending decommission
+hosts/hero/          the successor desk PC, INSTALL PENDING:
+                           hardware-configuration.nix is a placeholder
+                           (fictional root, replace with the generated
+                           file at install), lanzaboote.nix sits
+                           commented until the sbctl ceremony, and
+                           greeterScreens stays default until the
+                           connectors are known. Deliberately carries
+                           NONE of naut-dt's monitor machinery (splash
+                           forcing, wake/hide oneshots, WoL link) — the
+                           new desk is the 4K + a vertical 1440p on its
+                           LEFT, connectors TBD via `niri msg outputs`
   default.nix              the machine's whole statement, quirks
                            included: boot-splash-on-one-monitor (side
                            connectors kernel-forced off through

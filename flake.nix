@@ -99,6 +99,9 @@
 
             naut-dt = ./hosts/naut-dt;
             tuf-laptop = ./hosts/tuf-laptop;
+            # the naut PC's successor desk — fresh install pending; its
+            # hardware-configuration.nix is a placeholder until then
+            hero = ./hosts/hero;
           };
 
       # Same shape as above: the attribute IS the hostname, passed down as

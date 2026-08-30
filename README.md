@@ -10,6 +10,7 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 | `naut-box`, `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
 | `naut-dt` | bare-metal desktop, dual-boot beside the PC that hosts `naut-box` | `marcus` | `/etc/nixos` |
 | `tuf-laptop` | bare-metal laptop, same desktop stack as `naut-dt` | `marcus` | `/etc/nixos` |
+| `hero` | bare-metal desktop, `naut-dt`'s successor — install pending | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 | `mac-mini` | nix-darwin, Determinate Nix; trusted sops machine | `marcus` | `/etc/nix-darwin` |
 
