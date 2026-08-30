@@ -832,7 +832,7 @@ include "niri.host.kdl"
 // the desk settles.
 window-rule {
     match app-id="spotify"
-    open-on-output "DP-2"
+    open-on-output "HDMI-A-1"
 }
 
 // Chrome remembers a fullscreen exit state and reopens claiming the

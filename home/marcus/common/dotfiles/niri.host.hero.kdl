@@ -12,3 +12,11 @@
 // starts mpvpaper which exits instantly: harmless, and the static
 // wallpaper shows.
 spawn-at-startup "sh" "-c" "mpvpaper:toggle \"$(cat ~/.local/state/desk-mpvpaper 2>/dev/null || echo off)\""
+
+// music takes the portrait's whole width (it lands there via the
+// open-on-output rule in niri.config.kdl); a single window in the
+// column already gets the full height
+window-rule {
+    match app-id="spotify"
+    default-column-width { proportion 1.0; }
+}
