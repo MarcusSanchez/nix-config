@@ -28,11 +28,11 @@
     ../../modules/nixos
     ../../modules/nixos/nvidia.nix
     ./hardware-configuration.nix
-    # Secure Boot, COMMENTED for the first install: enabled without keys
-    # on disk, the bootloader install (and therefore nixos-install)
-    # fails. After `sudo sbctl create-keys`, uncomment and run the full
-    # ceremony — lanzaboote.nix header.
-    # ./lanzaboote.nix
+    # Secure Boot, live since the sbctl ceremony. On a REINSTALL,
+    # comment this out until `sudo sbctl create-keys` has run — enabled
+    # without keys on disk, the bootloader install (and therefore
+    # nixos-install) fails. Full ceremony: lanzaboote.nix header.
+    ./lanzaboote.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

@@ -2,26 +2,39 @@
 # keys generated ON THIS MACHINE (sbctl). HOST-level on purpose: only
 # this machine's firmware enrolls these keys.
 #
-# NOT YET IMPORTED — the import in default.nix stays commented until
-# `sudo sbctl create-keys` has run: with lanzaboote enabled and
-# /var/lib/sbctl absent, the bootloader-install step fails, which would
-# break nixos-install itself. The full ceremony below is the shape that
-# worked on the predecessor desk's board; expect the same dance, but
-# verify each step against this firmware:
-#   sudo sbctl create-keys          # writes /var/lib/sbctl
-#   (import this file, switch — generations get signed)
-#   sudo sbctl verify               # everything on the ESP shows signed
-#   firmware: Secure Boot -> Mode = Custom -> Key Management ->
-#   "Delete all Secure Boot variables". That is the ONLY route to true
-#   Setup Mode here: deleting just the PK leaves db/KEK Microsoft-owned
-#   and runtime enrolment gets EPERM despite SetupMode=1. Deleting all
-#   DOES drop the dbx revocation database — deliberate, restored later.
-#   sudo sbctl enroll-keys --microsoft   # succeeds at runtime now
-#   # --microsoft is LOAD-BEARING: it keeps Microsoft's certificates
-#   # enrolled, which is what lets Windows AND the GPU's option ROM keep
-#   # booting. Never enroll without it on this machine.
-#   reboot, enable Secure Boot; `bootctl status` = "enabled (user)"
-#   fwupdmgr update                 # restores the dbx (fwupd.nix)
+# On a REINSTALL, comment this import out in default.nix until
+# `sudo sbctl create-keys` has run — with lanzaboote enabled and
+# /var/lib/sbctl absent, the bootloader-install step fails, which
+# would break nixos-install itself.
+#
+# The ceremony for THIS board (ASUS ROG Crosshair X870E Hero — per the
+# official X870E BIOS manual + a confirmed same-family report; gentler
+# than the predecessor MSI board's delete-everything dance):
+#   sudo sbctl create-keys            # writes /var/lib/sbctl
+#   (import this file, switch — sbctl verify shows everything signed)
+#   BIOS: set an Administrator password AND Fast Boot off — without
+#     both, runtime enrollment returns permission-denied on this
+#     firmware family
+#   BIOS: Boot -> Secure Boot -> Secure Boot Mode = Custom (Key
+#     Management is hidden until this); Key Management -> "Save all
+#     Secure Boot variables" to USB (the escape hatch), then
+#     PK Management -> Delete key. PK-only: enters Setup Mode AND
+#     preserves the dbx. ("Clear Secure Boot keys" = the full wipe,
+#     fallback only; fwupdmgr update restores the dropped dbx.)
+#   sudo sbctl enroll-keys --microsoft
+#   # --microsoft is LOAD-BEARING: Windows' boot manager and the GPU
+#   # option ROM verify against Microsoft's certs (sbctl >= 0.17
+#   # enrolls the 2011 AND 2023 CA sets — Blackwell-era GOPs may be
+#   # 2023-signed). NEVER --firmware-builtin on ASUS: it duplicates
+#   # vendor certs and the next boot dies with a Secure Boot
+#   # Violation before the boot manager.
+#   BIOS: OS Type = "Windows UEFI Mode" — the actual enforcement
+#     switch ("Other OS" leaves Secure Boot effectively off).
+#   bootctl status = "enabled (user)"; boot Windows once (a one-time
+#   BitLocker recovery prompt is normal — custom keys shift the PCRs).
+#   Anti-cheat escape hatch if ever needed: BIOS "Install Default
+#   Secure Boot keys" restores factory state (and unsigns NixOS out
+#   of booting until re-enrollment).
 {
   inputs,
   lib,
