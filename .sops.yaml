@@ -7,7 +7,7 @@
 #                 string in this file.
 #   macbook-air   each trusted machine's own key, generated on-box and
 #   mac-mini      backed up nowhere (so a vault compromise cannot open
-#                 super.yaml). Recipients of BOTH files. Enrolling or
+#   hero          super.yaml). Recipients of BOTH files. Enrolling or
 #                 replacing one: README "Enrolling a trusted machine".
 #                 (The list here is the KEY reality; the super gate in
 #                 modules/common/secrets.nix must name exactly these
@@ -27,6 +27,7 @@ keys:
   - &master age17fldh0lkvjg2prs0455uredhev45f30ahhp8vwe4y4x4fknydsaq36rc6u
   - &macbook-air age17z3w72l4nvnwjra5e2rk0s6gyga0a7xq04dp08pw45kdfdre8v6qag5ppt
   - &mac-mini age1x2j596dxdg5qxfd6sewye0h33p2lydkt5u20ju6p4dy7xzxdru2qnjrw43
+  - &hero age1wv78d2ae9qqckxdm6n2lz0hut4j8p6rf959yh8lc5jwenuq8y9kq2fp7wy
   - &super age1vkv5elnhd64gjy2sn66zwppaltcpmmxpfydz5w432uj63ywr456stsa7n7
 
 creation_rules:
@@ -35,6 +36,7 @@ creation_rules:
       - age:
           - *macbook-air
           - *mac-mini
+          - *hero
           - *super
   - path_regex: secrets/[^/]+\.yaml$
     key_groups:
@@ -42,4 +44,5 @@ creation_rules:
           - *master
           - *macbook-air
           - *mac-mini
+          - *hero
           - *super

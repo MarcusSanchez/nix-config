@@ -119,6 +119,7 @@ in
               (builtins.elem config.networking.hostName [
                 "macbook-air"
                 "mac-mini"
+                "hero"
               ])
               {
                 fly_token = {
