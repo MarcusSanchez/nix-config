@@ -44,9 +44,9 @@
 
   homeEntryPoint = ../../home/marcus/nixos.nix;
 
-  # greeterScreens stays at its default ([] = the sign-in UI on every
-  # screen — no value can strand the login) until the machine reports
-  # its connector names; then pin the 4K here like the other desktops.
+  # Connectors that carry the greeter's sign-in UI on this machine — the
+  # 4K; the portrait 1440p stays blank at the login screen.
+  greeterScreens = [ "DP-3" ];
 
   # The release this machine was installed under — set at install time
   # to whatever the installer produces, then never changes.

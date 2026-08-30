@@ -24,42 +24,38 @@ output "eDP-1" {
     scale 1.1
 }
 
-// naut-dt: three monitors, left to right — DP-2 vertical, the 4K
-// in the middle, DP-1 on the right. Connector-keyed, so these blocks are
-// inert on the laptop (which has only eDP-1). Modes are each panel's
-// maximum; y positions centre the shorter panels against the vertical
-// one's 1920 logical height, so the cursor crosses at a steady height.
+// hero: two monitors, left to right — the 1440p VERTICAL on HDMI-A-1,
+// the 4K on DP-3 (same panel and, coincidentally, the same connector
+// name its predecessor desk used). Connector-keyed, so these blocks
+// are inert on the laptop (which has only eDP-1). Modes are each
+// panel's maximum — the 1440p's preferred mode is a lazy 60 Hz, so
+// the 320 Hz mode must be pinned or that is what you get. The 4K is
+// centred against the portrait's 2048 logical height
+// ((2048-1234)/2 = 407) so the cursor crosses at a steady height.
 //
-// The desk works as: side monitors hold static things (video, music),
-// the 4K in the middle is the scrollable workspace. Verify the connector
-// names with `niri msg outputs` after any cable change — the layout
-// follows the PORT, not the panel.
-// transform "90" is the rotation source. Do NOT add a
-// panel_orientation kernel param alongside it: niri COMPOSES the two
-// (property + transform "90" = 180°, sideways-flipped). The param
-// would also serve nothing — the side connectors are boot-disabled
-// (video=DP-2:d in hosts/naut-dt/default.nix), so plymouth
-// never draws there, and plymouth-on-DP-2 is the only thing such a
-// param would rotate.
-output "DP-2" {
-    mode "1920x1080@179.998"
-    transform "90"
-    scale 1
+// The desk works as: the portrait holds static/reading things, the 4K
+// is the scrollable workspace. Verify connector names with `niri msg
+// outputs` after any cable change — the layout follows the PORT, not
+// the panel.
+//
+// transform "270" is the rotation source (the panel stands rotated
+// the OPPOSITE way from the old desk's convention — if text renders
+// upside down, the fix is "90" here). Do NOT add a panel_orientation
+// kernel param alongside it: niri COMPOSES the two.
+//
+// Portrait logical size at scale 1.25: 1440/1.25 = 1152 exactly, so
+// the 4K's x=1152 has no fractional-overlap trap (unlike the old
+// desk's x=3275 story — see git history if a fractional edge ever
+// returns).
+output "HDMI-A-1" {
+    mode "2560x1440@320.001"
+    transform "270"
+    scale 1.25
     position x=0 y=0
 }
 
 output "DP-3" {
     mode "3840x2160@240.000"
     scale 1.75
-    position x=1080 y=343
-}
-
-// x=3275, not 3274: at scale 1.75 the 4K's logical width is
-// 3840/1.75 = 2194.29, so it really ends at 3274.29 — asking for 3274
-// overlaps by a fraction and niri silently falls back to automatic
-// placement (which is how the y offset gets lost).
-output "DP-1" {
-    mode "2560x1440@320.001"
-    scale 1.25
-    position x=3275 y=384
+    position x=1152 y=407
 }
