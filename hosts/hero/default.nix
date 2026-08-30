@@ -48,6 +48,25 @@
   # to whatever the installer produces, then never changes.
   system.stateVersion = "26.05";
 
+  # The other OS's volume, readable at /mnt/windows — READ-ONLY on
+  # purpose: Linux never writes a filesystem Windows believes it owns.
+  # Files flow one way: drop them anywhere on C:\ from the Windows
+  # side, copy them out of /mnt/windows here. (The reverse direction
+  # has no local path — Windows cannot read this ext4 — so anything
+  # bound for Windows travels over the network instead.) uid/gid make
+  # the files the user's without chmod theater; nofail keeps boot
+  # unbothered if the partition ever vanishes.
+  fileSystems."/mnt/windows" = {
+    device = "/dev/disk/by-uuid/64523010522FE590";
+    fsType = "ntfs3";
+    options = [
+      "ro"
+      "nofail"
+      "uid=1000"
+      "gid=100"
+    ];
+  };
+
   # Boot with only the main monitor lit: plymouth paints every active
   # connector and has no per-monitor config, so the portrait connector
   # is kernel-disabled through the splash. The `d` force outlives the
