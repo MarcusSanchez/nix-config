@@ -25,6 +25,7 @@
     # nixos-install) fails. Full ceremony: lanzaboote.nix header.
     ./lanzaboote.nix
     ./bluetooth.nix
+    ./lianli.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

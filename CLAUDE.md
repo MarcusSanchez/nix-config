@@ -115,6 +115,17 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            firmware's own Key Management UI appends the
                            exported db cert instead, factory PK/KEK/dbx
                            untouched; the header has the whole ritual
+  lianli.nix               the case's Lian Li screens/fans/RGB via a
+                           pinned lian-li-linux daemon build (daemon
+                           crate only — no GUI; everything speaks
+                           newline-JSON on $XDG_RUNTIME_DIR/
+                           lianli-daemon.sock, e.g. SetLcdMedia).
+                           Package ships the udev rules; evdi module
+                           for the Universal Screen's desktop mode;
+                           user service owns it. LCD assignments
+                           persist in ~/.config/lianli/config.json
+                           keyed by serial = the full "hid:..." id
+                           (a serial-less entry orphans on restart)
   bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
                            btusb: backported btusb/btmtk built from the
                            mediatek-mt7927-dkms release deb (which also
