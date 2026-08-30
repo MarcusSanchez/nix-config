@@ -1,17 +1,14 @@
-// Host-specific niri config for hero — see niri.host.naut-dt.kdl for
-// how the include is wired; this file exists so the "niri.host.kdl"
-// include resolves (a new desktop host must commit its tail BEFORE the
-// first switch or HM links against nothing).
-//
-// The desk: the 4K main with the 1440p VERTICAL on its LEFT. Output
-// blocks belong in niri.outputs.kdl keyed by connector — add them once
-// the machine reports its names (`niri msg outputs`); until then every
-// monitor auto-places. Nothing monitor-specific lives here yet.
+// Host-specific niri config for hero — niri.config.kdl includes the
+// stable name niri.host.kdl, which desktop/niri.nix links at this file
+// per hostname; the file exists so that include resolves (a new
+// desktop host must commit its tail BEFORE the first switch or HM
+// links against nothing). Output blocks belong in niri.outputs.kdl,
+// keyed by connector.
 
 // the animated middle layer, replayed from the last look's recorded
 // choice (mpvpaper:toggle persists on/off — see niri.nix). The video
-// itself (~/Pictures/Wallpapers/live/spaceman.mp4) was machine-local
-// on the predecessor desk and is NOT in the repo — until a copy lands
-// at that path, an "on" replay starts mpvpaper which exits instantly:
-// harmless, and the static wallpaper shows.
+// itself (~/Pictures/Wallpapers/live/spaceman.mp4) is machine-local,
+// NOT in the repo — until a copy lands at that path, an "on" replay
+// starts mpvpaper which exits instantly: harmless, and the static
+// wallpaper shows.
 spawn-at-startup "sh" "-c" "mpvpaper:toggle \"$(cat ~/.local/state/desk-mpvpaper 2>/dev/null || echo off)\""

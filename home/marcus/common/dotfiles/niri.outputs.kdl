@@ -25,8 +25,7 @@ output "eDP-1" {
 }
 
 // hero: two monitors, left to right — the 1440p VERTICAL on HDMI-A-1,
-// the 4K on DP-3 (same panel and, coincidentally, the same connector
-// name its predecessor desk used). Connector-keyed, so these blocks
+// the 4K on DP-3. Connector-keyed, so these blocks
 // are inert on the laptop (which has only eDP-1). Modes are each
 // panel's maximum — the 1440p's preferred mode is a lazy 60 Hz, so
 // the 320 Hz mode must be pinned or that is what you get. The 4K is
@@ -38,15 +37,13 @@ output "eDP-1" {
 // outputs` after any cable change — the layout follows the PORT, not
 // the panel.
 //
-// transform "270" is the rotation source (the panel stands rotated
-// the OPPOSITE way from the old desk's convention — if text renders
+// transform "270" is the rotation source (if text ever renders
 // upside down, the fix is "90" here). Do NOT add a panel_orientation
 // kernel param alongside it: niri COMPOSES the two.
 //
 // Portrait logical size at scale 1.25: 1440/1.25 = 1152 exactly, so
-// the 4K's x=1152 has no fractional-overlap trap (unlike the old
-// desk's x=3275 story — see git history if a fractional edge ever
-// returns).
+// the 4K's x=1152 has no fractional-overlap trap — keep the division
+// exact if the scale ever changes.
 output "HDMI-A-1" {
     mode "2560x1440@320.001"
     transform "270"

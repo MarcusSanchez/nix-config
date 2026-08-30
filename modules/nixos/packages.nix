@@ -25,8 +25,8 @@
     # folly/fbthrift closure is ~87 MiB — a desk can afford it (the mac
     # gets its own from brew). ethtool reads and sets the NIC's own
     # hardware flags — `ethtool <iface>` is how you confirm the
-    # Wake-on-LAN state that hosts/naut-dt/default.nix arms
-    # (`Wake-on: g` armed, `d` disabled).
+    # Wake-on-LAN state a host's link file arms (`Wake-on: g` armed,
+    # `d` disabled).
     ethtool
     libsecret
     watchman

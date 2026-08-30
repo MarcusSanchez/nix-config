@@ -205,20 +205,16 @@ in
 
     file = {
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
-      # spaceman-free stills for the bedroom desk's side monitors: frame
-      # captures from the live spaceman loop's measured-clean star fields
-      # (x 0-1010 and 2740-3840 of the 4K source), chosen for comets and
-      # composed so every comet flies top-left to bottom-right — mirrored
-      # filler pieces are comet-free by audit, since a mirror would
-      # reverse the direction (one sub-threshold streak was inpainted out
-      # for exactly that reason). The 1440p is a four-column mosaic with
-      # 80px gradient-feathered seams; the portrait is a single native
-      # rip. Only the middle monitor animates (mpvpaper in
-      # niri.host.naut-dt.kdl); these are the sides' whole
-      # wallpaper now, not just the fallback. Assigned per-monitor via
-      # `dms ipc call wallpaper setFor <connector> <path>` — recorded in
-      # machine-local session state, so another desktop host (which would
-      # also get these files) is unaffected.
+      # star-field stills ripped from the live spaceman loop's
+      # measured-clean regions (x 0-1010 and 2740-3840 of the 4K
+      # source), composed so every comet flies top-left to bottom-right
+      # — mirrored filler pieces are comet-free by audit, since a
+      # mirror would reverse the direction. The 1440p is a four-column
+      # mosaic with 80px gradient-feathered seams; the portrait is a
+      # single native rip. Assigned per-monitor via `dms ipc call
+      # wallpaper setFor <connector> <path>` — recorded in
+      # machine-local session state, so a host that doesn't use them
+      # (while still shipping the files) is unaffected.
       "Pictures/Wallpapers/space-stars-2560x1440.jpg".source = ./assets/space-stars-2560x1440.jpg;
       "Pictures/Wallpapers/space-stars-1080x1920.jpg".source = ./assets/space-stars-1080x1920.jpg;
       # the single-image looks (the looks table above)

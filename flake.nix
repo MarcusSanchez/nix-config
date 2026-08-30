@@ -46,8 +46,8 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Secure Boot signing for the dual-boot desktop (naut-dt only —
-    # Windows on the same machine effectively requires SB). Pinned to a
+    # Secure Boot signing for the dual-boot desktops (Windows on the
+    # same machine effectively requires SB). Pinned to a
     # release tag on purpose; bump deliberately, not via flake update.
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.1.0";
@@ -99,8 +99,6 @@
 
             naut-dt = ./hosts/naut-dt;
             tuf-laptop = ./hosts/tuf-laptop;
-            # the naut PC's successor desk — fresh install pending; its
-            # hardware-configuration.nix is a placeholder until then
             hero = ./hosts/hero;
           };
 

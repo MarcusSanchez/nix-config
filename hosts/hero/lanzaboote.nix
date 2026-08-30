@@ -7,8 +7,8 @@
 # /var/lib/sbctl absent, the bootloader-install step fails, which
 # would break nixos-install itself.
 #
-# The ceremony for THIS board (ASUS ROG Crosshair X870E Hero), as
-# actually performed 2026-08-30 — NOT the documented sbctl path:
+# The ceremony for THIS board's firmware, as actually performed —
+# NOT the documented sbctl path:
 # this firmware DISCARDS runtime-written key variables at POST (the
 # AMI NVRAM_Verify tamper check) and quietly reinstates its factory
 # keys, so `sbctl enroll-keys` "succeeds" and then the first enforced

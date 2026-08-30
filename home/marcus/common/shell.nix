@@ -60,8 +60,8 @@
       # is environment-dependent — set for GUI/login shells, absent in
       # a bare ssh exec — so two shells can disagree about where
       # sessions live and `zmx list` misses what `zmx attach` created.
-      # Same failure shape as the abduco socket split bitten on
-      # office-one 2026-08-25; pinning makes create and lookup agree in
+      # Same failure shape as an abduco socket split bitten here
+      # before; pinning makes create and lookup agree in
       # every shell these exports reach — all of them, via
       # hm-session-vars in .zshenv.
       ZMX_DIR = "${config.home.homeDirectory}/.local/state/zmx";

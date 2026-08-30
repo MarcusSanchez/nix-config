@@ -1,21 +1,12 @@
-# Host definition: hero, the desk PC that succeeds the sold naut
-# machine — same desk role and the same feel (full modules/nixos
-# stack), different hardware and a different monitor topology: the 4K
-# main with the 1440p VERTICAL on its LEFT (the old 1080p portrait is
-# gone). Everything monitor-shaped from the predecessor is deliberately
-# NOT carried: the boot-splash single-monitor machinery, the
-# wake/hide-side-monitors oneshots and the WoL link file were all keyed
-# to that desk's connectors and MAC — add hero's own once the machine
-# reports them (`niri msg outputs`; the NIC's MAC from `ip link`).
+# Host definition: hero, a dual-boot desk PC on the full modules/nixos
+# stack — the 4K main with the 1440p VERTICAL on its LEFT.
 #
 # modules/nixos is the bare-metal world, aggregated by its default.nix.
 # What stays spelled out here is this box's own hardware truth: the
-# generated hardware config (PLACEHOLDER until install — see its
-# header), Secure Boot (commented until the sbctl ceremony), and the
+# generated hardware config, Secure Boot (lanzaboote.nix), and the
 # NVIDIA driver shape — a pool file OUTSIDE the aggregator (it
 # hardcodes the video driver and early-KMS initrd, so a non-NVIDIA host
-# must not get it); drop that import if this build turns out not to
-# carry an NVIDIA card.
+# must not get it).
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
 { inputs, hostName, ... }:
