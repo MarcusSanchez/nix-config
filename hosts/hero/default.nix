@@ -27,6 +27,8 @@
     ./bluetooth.nix
     ./lianli.nix
     ./tryx.nix
+    ./rgb.nix
+    ./tuning.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

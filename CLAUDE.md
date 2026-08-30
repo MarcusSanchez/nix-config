@@ -115,6 +115,18 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            firmware's own Key Management UI appends the
                            exported db cert instead, factory PK/KEK/dbx
                            untouched; the header has the whole ritual
+  rgb.nix                  OpenRGB server for the rest of the lighting
+                           (board Aura zones, GPU, DDR5 sticks — the
+                           spd5118 blacklist trades RAM temp sensors
+                           for stick RGB access); the NvidiaLinuxPatch
+                           red/blue quirk fix is machine-local user
+                           config, see the header
+  tuning.nix               hwmon + fan/GPU control: nct6775 in-tree,
+                           asus_ec_sensors as a pinned out-of-tree
+                           build in updates/ (this board postdates the
+                           in-tree DMI table — drop when the kernel
+                           catches up), CoolerControl + LACT daemons
+                           with GUIs in the spotlight, lm_sensors
   tryx.nix                 the AIO's AMOLED (a USB printer-class device
                            that resets every ~70s unless the runtime
                            holds it): community Qt manager, pinned —
