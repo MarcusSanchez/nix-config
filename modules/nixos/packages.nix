@@ -30,5 +30,10 @@
     ethtool
     libsecret
     watchman
+    # lspci/lsusb — the first questions hardware diagnosis asks (which
+    # chip is this, which driver bound); their absence was felt the day
+    # a wedged bluetooth combo card needed identifying
+    pciutils
+    usbutils
   ];
 }
