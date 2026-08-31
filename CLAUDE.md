@@ -102,8 +102,9 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            boot-splash-on-one-monitor machinery the old
                            desk proved (portrait kernel-forced off
                            through plymouth, wake/hide oneshots) keyed
-                           to hero's connector. No WoL link yet — the
-                           tablet relay re-arm is pending
+                           to hero's connector, the WoL link file
+                           keyed to the wired NIC's MAC, and the
+                           read-only /mnt/windows mount
   lanzaboote.nix           Secure Boot, LIVE — a separate file ON
                            PURPOSE: a reinstall must comment its import
                            out until `sbctl create-keys` has run (one
@@ -158,7 +159,7 @@ modules/common/            default.nix packages.nix (cross-platform CLIs
                            need no rebuild) and return the caller to
                            their starting directory; also the
                            reboot:windows command, hostname-gated to
-                           the dual-boot desktop
+                           the dual-boot desktops
                            identity.nix secrets.nix home-manager.nix —
                            the identity option, the shared sops config
                            and the HM bridge (platform files are shims)

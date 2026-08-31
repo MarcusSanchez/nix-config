@@ -56,6 +56,24 @@
   # bound for Windows travels over the network instead.) uid/gid make
   # the files the user's without chmod theater; nofail keeps boot
   # unbothered if the partition ever vanishes.
+  # Arms the wired NIC to wake this machine on a magic packet. WoL is
+  # not a persistent property of the card: the running driver switches
+  # the listener on, and the shutdown path is what leaves it armed —
+  # whichever OS powered the machine down decides whether a packet
+  # gets through. A .link file rather than an ethtool service because
+  # udev honors .link units whether or not systemd-networkd runs, and
+  # NetworkManager's own wake-on-lan default of `ignore` leaves the
+  # setting alone. Matched on MAC — hardware truth that can't be
+  # renamed out from under the match; this board carries a second
+  # ethernet port (…:53, one below), deliberately left unarmed while
+  # nothing is plugged into it. The waker is any LAN device sending a
+  # broadcast magic packet for this MAC (an L2 send — it cannot cross
+  # the tailnet, which is L3 and has no address for a sleeping box).
+  systemd.network.links."40-wol" = {
+    matchConfig.MACAddress = "08:bf:b8:23:74:54";
+    linkConfig.WakeOnLan = "magic";
+  };
+
   fileSystems."/mnt/windows" = {
     device = "/dev/disk/by-uuid/64523010522FE590";
     fsType = "ntfs3";
