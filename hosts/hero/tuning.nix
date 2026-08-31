@@ -12,7 +12,8 @@
 #     DMS widgets and CoolerControl alike.
 #   - CoolerControl: fan curves driven off any hwmon sensor, with a
 #     GUI (in the spotlight); its daemon applies curves headlessly
-#     from then on. nvidiaSupport wires its view of the GPU's fans.
+#     from then on, and finds the GPU's fans through the driver on
+#     its own.
 #   - LACT: the GPU tuning daemon + GUI (power limits, clocks, fan
 #     control). Its voltage-curve editor leans on undocumented driver
 #     paths — the power-limit and PowerMizer knobs are the safe

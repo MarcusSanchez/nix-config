@@ -2,11 +2,14 @@
 # stack — the 4K main with the 1440p VERTICAL on its LEFT.
 #
 # modules/nixos is the bare-metal world, aggregated by its default.nix.
-# What stays spelled out here is this box's own hardware truth: the
-# generated hardware config, Secure Boot (lanzaboote.nix), and the
-# NVIDIA driver shape — a pool file OUTSIDE the aggregator (it
-# hardcodes the video driver and early-KMS initrd, so a non-NVIDIA host
-# must not get it).
+# What stays spelled out at host level is this box's own hardware
+# truth: the generated hardware config; the NVIDIA driver shape — a
+# pool file OUTSIDE the aggregator (it hardcodes the video driver and
+# early-KMS initrd, so a non-NVIDIA host must not get it); the sibling
+# concern files (Secure Boot, the combo card's bluetooth backport, the
+# case and cooler screens, RGB, sensors/tuning — each explains
+# itself); and, inline below, the dual-boot plumbing (WoL, the
+# read-only Windows mount) and the one-monitor boot splash.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
 { inputs, hostName, ... }:
@@ -48,14 +51,6 @@
   # to whatever the installer produces, then never changes.
   system.stateVersion = "26.05";
 
-  # The other OS's volume, readable at /mnt/windows — READ-ONLY on
-  # purpose: Linux never writes a filesystem Windows believes it owns.
-  # Files flow one way: drop them anywhere on C:\ from the Windows
-  # side, copy them out of /mnt/windows here. (The reverse direction
-  # has no local path — Windows cannot read this ext4 — so anything
-  # bound for Windows travels over the network instead.) uid/gid make
-  # the files the user's without chmod theater; nofail keeps boot
-  # unbothered if the partition ever vanishes.
   # Arms the wired NIC to wake this machine on a magic packet. WoL is
   # not a persistent property of the card: the running driver switches
   # the listener on, and the shutdown path is what leaves it armed —
@@ -74,6 +69,14 @@
     linkConfig.WakeOnLan = "magic";
   };
 
+  # The other OS's volume, readable at /mnt/windows — READ-ONLY on
+  # purpose: Linux never writes a filesystem Windows believes it owns.
+  # Files flow one way: drop them anywhere on C:\ from the Windows
+  # side, copy them out of /mnt/windows here. (The reverse direction
+  # has no local path — Windows cannot read this ext4 — so anything
+  # bound for Windows travels over the network instead.) uid/gid make
+  # the files the user's without chmod theater; nofail keeps boot
+  # unbothered if the partition ever vanishes.
   fileSystems."/mnt/windows" = {
     device = "/dev/disk/by-uuid/64523010522FE590";
     fsType = "ntfs3";
