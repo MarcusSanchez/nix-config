@@ -10,6 +10,9 @@
 
 {
   home.packages = with pkgs; [
+    # desktop-only by choice, unlike most of this list's mac twins
+    discord
+
     google-chrome
 
     # config rides the dotfiles links (common/dotfiles.nix); the mac's
