@@ -12,10 +12,11 @@
 # uninstall + reboot, not coexistence.
 #
 # MagicDNS needs no hand-holding here: /etc/resolv.conf is a decoy on macOS
-# (resolution goes through mDNSResponder), and the nix-darwin module drops
-# /etc/resolver/ts.net -> nameserver 100.100.100.100, macOS's split-DNS
-# hook, so *.ts.net resolves system-wide. If bare hostnames ever fail where
-# the FQDN works, that's the search domain — add
+# (resolution goes through mDNSResponder), and /etc/resolver/<file> is the
+# split-DNS hook tailscaled writes into directly — the per-tailnet suffix,
+# the reverse zones and bare ts.net, all pointing at 100.100.100.100 — so
+# *.ts.net resolves system-wide. If bare hostnames ever fail where the FQDN
+# works, that's the search domain — add
 # `networking.search = [ "tailc8bd6a.ts.net" ]` rather than debugging DNS.
 #
 # Known wart, accepted: nix-darwin#1688 (open) — after some switches the
@@ -31,6 +32,17 @@
 
 {
   services.tailscale.enable = true;
+
+  # The nix-darwin module also declares environment.etc."resolver/ts.net",
+  # which lands as a symlink into the store. Since 1.102 tailscaled writes
+  # its resolver files through an openat rooted at /etc/resolver and refuses
+  # to follow a link out of that directory, so the symlink turns into a
+  # standing health warning ("openat ts.net: path escapes from parent") and
+  # the daemon can never update or clean up that one file. Disabling the
+  # entry hands the file back to tailscaled, which writes the same
+  # nameserver plus the IPv6 one; the etc activation deletes the stale link
+  # on the next switch, and a tailscaled restart repopulates it.
+  environment.etc."resolver/ts.net".enable = false;
 
   # `set`, not `up`: set changes only the flags given and is idempotent,
   # where up resets every unspecified pref to its default. Same idea as
