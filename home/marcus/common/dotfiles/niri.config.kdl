@@ -203,7 +203,7 @@ layout {
         // rewrites, so the ring follows each desk look's accent —
         // don't remove it, and don't hand-edit the hex expecting it
         // to survive a look switch.
-        active-color "#a9cbe8" // look-accent
+        active-color "#89b4fa" // look-accent
 
         // Color of the ring on inactive monitors.
         //
