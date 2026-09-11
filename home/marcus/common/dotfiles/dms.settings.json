@@ -124,7 +124,7 @@
       "id": "brightnessSlider",
       "enabled": true,
       "width": 50,
-      "deviceName": "leds:igc-0b00-led0"
+      "deviceName": "ddc:i2c-6"
     },
     {
       "id": "wifi",
