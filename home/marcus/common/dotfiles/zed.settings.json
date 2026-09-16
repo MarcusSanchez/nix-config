@@ -35,7 +35,47 @@
         "token_modifiers": ["readonly", "defaultLibrary"],
         "style": ["constant"],
         "font_style": "normal"
-      }
+      },
+      // rust-analyzer, aligned with what the nvim catppuccin config renders
+      // for the same tokens (nvim links each @lsp.type.* to a treesitter
+      // capture; rust-analyzer's own token names have no link there and
+      // fall through to treesitter). Zed's defaults route several of them
+      // to theme styles that do not exist in that scheme: enum types via
+      // the "enum" override (peach), variants via "variant" (red), macros
+      // via "function.macro" (rosewater), primitives via "type" (yellow)
+      { "token_type": "enum", "style": ["type"] },
+      { "token_type": "enumMember", "foreground_color": "#fab387" },
+      { "token_type": "macro", "style": ["function"] },
+      { "token_type": "builtinType", "style": ["type.builtin"] },
+      { "token_type": "character", "style": ["character"] },
+      // {} in format strings: nvim leaves them string-green
+      { "token_type": "formatSpecifier", "style": ["string"] },
+      // Zed's rust rules send labels to the lifetime style
+      { "token_type": "label", "style": ["label"] },
+      // attributes: #[derive]/#[test]/#[cfg] names and derive helpers
+      // (#[serde(..)]) are treesitter @function.macro pink in nvim; the
+      // derived traits are types; proc-macro attributes go through
+      // @lsp.type.decorator -> @attribute -> peach
+      { "token_type": "builtinAttribute", "foreground_color": "#f5c2e7" },
+      { "token_type": "deriveHelper", "foreground_color": "#f5c2e7" },
+      { "token_type": "derive", "style": ["type"] },
+      { "token_type": "decorator", "style": ["constant"] },
+      // punctuation is requested from rust-analyzer (lsp block below) for
+      // one token: the ":" of type annotations, which Zed's rust query
+      // captures as @operator while nvim's has it as a delimiter. The
+      // brackets ride along and are left transparent (an empty rule) so
+      // colorize_brackets keeps painting them; "." and "::" never arrive
+      // here — rust-analyzer classes them as operators, in both editors
+      { "token_type": "colon", "style": ["punctuation.delimiter"] },
+      { "token_type": "comma", "style": ["punctuation.delimiter"] },
+      { "token_type": "semicolon", "style": ["punctuation.delimiter"] },
+      { "token_type": "dot", "style": ["punctuation.delimiter"] },
+      { "token_type": "angle" },
+      { "token_type": "brace" },
+      { "token_type": "bracket" },
+      { "token_type": "parenthesis" },
+      { "token_type": "attributeBracket" },
+      { "token_type": "punctuation" }
     ]
   },
   "lsp": {
@@ -44,6 +84,19 @@
         // match nvim (LazyVim lang.go: goimports+gofumpt) and goland:
         // stricter formatting incl. stdlib imports as their own group
         "gofumpt": true
+      }
+    },
+    "rust-analyzer": {
+      "initialization_options": {
+        "semanticHighlighting": {
+          // off by default; on so the colon/comma/semicolon rules in
+          // global_lsp_settings have tokens to act on. specialization is
+          // what splits brackets out from the rest (kept transparent there)
+          "punctuation": {
+            "enable": true,
+            "specialization": { "enable": true }
+          }
+        }
       }
     }
   },
@@ -185,7 +238,15 @@
       "function": { "color": "#89b4fa" },
       "function.builtin": { "color": "#89b4fa" },
       "type": { "color": "#f9e2af" },
-      "type.builtin": { "color": "#cba6f7" },
+      // the catppuccin theme ships type.builtin and type.interface italic;
+      // nvim has both upright (i32 mauve, traits plain yellow)
+      "type.builtin": { "color": "#cba6f7", "font_style": "normal" },
+      "type.interface": { "color": "#f9e2af", "font_style": "normal" },
+      // self/this: nvim's @variable.builtin, red and upright
+      "variable.special": { "color": "#f38ba8", "font_style": "normal" },
+      // 'a — the theme has no lifetime style at all, so these rendered as
+      // plain text; nvim paints the name peach (treesitter @attribute)
+      "lifetime": { "color": "#fab387" },
       "constructor": { "color": "#f9e2af" },
       "enum": { "color": "#fab387" },
       "constant": { "color": "#fab387" },
