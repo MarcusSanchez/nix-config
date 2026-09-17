@@ -24,6 +24,12 @@
 -- never started looks exactly like a key that does nothing.
 require("hs.ipc")
 
+-- No menu bar icon: everything it offers (console, reload) is reachable
+-- through the hs CLI above, and the remapper has nothing to show. The
+-- call persists to the app's preferences, but stating it here keeps a
+-- fresh machine's first load consistent with the rest.
+hs.menuIcon(false)
+
 local home = os.getenv("HOME")
 local DOTFILES = home .. "/nix-config/home/marcus/common/dotfiles/"
 
