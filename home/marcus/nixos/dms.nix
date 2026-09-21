@@ -72,20 +72,6 @@ let
     };
   };
 
-  # Menu manifest for the wallpaperLook plugin: a projection of the
-  # looks table (order fixed, not attr-sorted, so the picker reads
-  # sensibly) with only what the picker renders. nix stays the single
-  # source; this is a build artifact the QML reads at runtime.
-  lookOrder = [
-    "astronaut"
-    "flake"
-    "galaxy"
-    "swirls"
-  ];
-  lookManifest = map (name: {
-    inherit name;
-    inherit (looks.${name}) icon comment;
-  }) lookOrder;
 in
 {
 
@@ -96,23 +82,9 @@ in
     let
       dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
       link = f: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${f}";
-      # custom DMS bar widgets (one dir per plugin id), linked out-of-store
-      # like the rest of the rice so QML edits hot-reload without a rebuild.
-      # A plugin only LOADS where plugin_settings.json (machine-local DMS
-      # state, not managed here) has it enabled — a bar entry for a plugin
-      # the machine hasn't enabled simply doesn't render, so the shared
-      # dms.settings.json stays safe across hosts.
-      plugins = "${config.home.homeDirectory}/nix-config/home/marcus/nixos/assets/dms-plugins";
-      pluginLink = p: config.lib.file.mkOutOfStoreSymlink "${plugins}/${p}";
     in
     {
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
-      "DankMaterialShell/plugins/cpuCombo".source = pluginLink "cpuCombo";
-      "DankMaterialShell/plugins/gpuCombo".source = pluginLink "gpuCombo";
-      "DankMaterialShell/plugins/wallpaperLook".source = pluginLink "wallpaperLook";
-      # the picker's menu, generated from the looks table above (nix is
-      # the source; the QML reads this at a stable path)
-      "DankMaterialShell/desk-looks.json".text = builtins.toJSON lookManifest;
     };
 
   # the looks as spotlight results: type "wall", click, the whole desk
@@ -194,10 +166,6 @@ in
           k=$(readlink -f "$HOME/.config/niri/config.kdl")
           ${pkgs.gnused}/bin/sed -i \
             's|active-color "#[0-9a-fA-F]*" // look-accent|active-color "${look.accent}" // look-accent|' "$k"
-          # record the active look so the wallpaperLook bar plugin can
-          # show it and highlight the current row in its picker
-          mkdir -p "$HOME/.local/state"
-          printf %s "${name}" > "$HOME/.local/state/desk-look"
           echo "desk look: ${name}"
         ''} "$out/bin/wallpaper:${name}"
       ''
