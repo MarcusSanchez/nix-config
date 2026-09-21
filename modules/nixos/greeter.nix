@@ -5,13 +5,12 @@
 # `nixos-rebuild boot` + reboot, not `switch` — switch would kill the
 # live session out from under the user.
 #
-# The dms-greeter module itself is imported here rather than at host
-# level: it is this file's own dependency (nixpkgs has no greetd module
-# for DMS — the flake input supplies ONLY that module, while the shell
-# stays nixpkgs' dms-shell for cache reasons).
+# Module and package both come from nixpkgs (the greeter split into
+# its own dank-greeter repo upstream, nixpkgs adopted both halves, and
+# the dank-material-shell flake input that used to carry the module
+# retired with that).
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -20,36 +19,36 @@
 let
   # The stock greeter puts a full sign-in UI on EVERY monitor
   # (GreeterSurface.qml hardcodes `model: Quickshell.screens`; unlike
-  # the lock screen there is no screenPreferences filter). This derived
-  # copy of the same dms-shell filters that list to the host's
+  # the lock screen there is no screenPreferences filter). This build
+  # of the same dms-greeter filters that list to the host's
   # greeterScreens option (declared below, assigned in hosts/):
   # listed connectors get the UI, the rest get NO surface — and a
   # surface-less output shows the greeter compositor's black
   # background, monitors on. Same clean blank as the lock screen,
   # instead of the old cut-the-signal approach (output off), which
   # dropped the side monitors into no-signal standby. The list is
-  # BAKED into the QML at build time — an env var does not survive the
-  # greetd -> script -> niri ->
-  # quickshell inheritance chain. Safety: single-screen machines and a
-  # filter that matches nothing both fall back to every screen — no
-  # config state can produce a greeter with nowhere to type. The
-  # substitution uses --replace-fail on purpose: a DMS update that
-  # moves the line breaks the BUILD, never the login screen.
-  greeterShell =
-    pkgs.runCommand "dms-shell-greeter-screens"
-      {
-        base = pkgs.dms-shell;
-        wantList = builtins.toJSON config.greeterScreens;
-      }
-      ''
-        cp -r --no-preserve=mode "$base" $out
-        substituteInPlace $out/share/quickshell/dms/Modules/Greetd/GreeterSurface.qml \
-          --replace-fail 'model: Quickshell.screens' \
-          "model: (function () { var want = $wantList; if (Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()"
-      '';
+  # BAKED in at build time — an env var does not survive the
+  # greetd -> script -> niri -> quickshell inheritance chain, and the
+  # greeter's QML rides INSIDE the Go binary (`make sync-shell`
+  # embeds quickshell/ before the build), so the filter is patched
+  # into the source rather than the installed tree. Safety:
+  # single-screen machines and a filter that matches nothing both
+  # fall back to every screen — no config state can produce a greeter
+  # with nowhere to type. The substitution uses --replace-fail on
+  # purpose: an update that moves the line breaks the BUILD, never
+  # the login screen.
+  greeterShell = pkgs.dms-greeter.overrideAttrs (old: {
+    env = (old.env or { }) // {
+      wantList = builtins.toJSON config.greeterScreens;
+    };
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace quickshell/Modules/Greetd/GreeterSurface.qml \
+        --replace-fail 'model: Quickshell.screens' \
+        "model: (function () { var want = $wantList; if (Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()"
+    '';
+  });
 in
 {
-  imports = [ inputs.dank-material-shell.nixosModules.greeter ];
 
   options.greeterScreens = lib.mkOption {
     type = lib.types.listOf lib.types.str;
@@ -70,9 +69,9 @@ in
         # DMS's greetd-based greeter — the login screen wears the same
         # Material theme as the session shell. configHome points it at
         # the user's DMS settings so wallpaper/colors stay in sync; the
-        # package is DERIVED from the same nixpkgs dms-shell the session
-        # uses (see greeterShell above), so greeter and shell still can't
-        # drift apart in version.
+        # package is the screen-filtered dms-greeter build above. Both
+        # greeter and shell come from the same nixpkgs, which is as
+        # close as their versions pair since the upstream repo split.
         dms-greeter = {
           enable = true;
           compositor.name = "niri";

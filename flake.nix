@@ -39,13 +39,6 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # ONLY for nixosModules.greeter (the dms-greeter greetd module nixpkgs
-    # lacks) — the shell itself is nixpkgs' dms-shell so it rides the
-    # binary cache. Don't collapse the split.
-    dank-material-shell = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     # Secure Boot signing for the dual-boot desktops (Windows on the
     # same machine effectively requires SB). Pinned to a
     # release tag on purpose; bump deliberately, not via flake update.

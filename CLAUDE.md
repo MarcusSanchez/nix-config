@@ -60,10 +60,7 @@ Where things go: CLI tool for every machine → `modules/common/packages.nix`, o
 Every `.nix` file here opens with a header comment explaining itself, so this map only records what a single file *cannot* tell you — where it sits in the wiring, and which ones are traps. Unannotated names are exactly what they sound like; open them.
 
 ```
-flake.nix                  inputs + all host wirings. dank-material-shell
-                           input supplies ONLY the dms-greeter module (the
-                           shell is nixpkgs' dms-shell — cache reasons;
-                           don't collapse the split). nix-homebrew takes no
+flake.nix                  inputs + all host wirings. nix-homebrew takes no
                            follows — it has no nixpkgs input, only the brew
                            source it pins
 bin/                       repo-operations scripts (secrets:edit,
@@ -201,10 +198,11 @@ modules/nixos/             the bare-metal machine's world, aggregated by
 
   niri.nix                 the compositor + portals; session Exec routed
                            through systemd-cat (journalctl -t niri-session)
-  greeter.nix              the whole login-screen story: the
-                           dank-material-shell greeter module is imported
-                           HERE, not at host level — it is this file's own
-                           dependency. Also dms-greeter,
+  greeter.nix              the whole login-screen story: nixpkgs'
+                           dms-greeter module + a screen-filtered
+                           overrideAttrs of pkgs.dms-greeter (the QML is
+                           embedded in the Go binary, so the filter
+                           patches SOURCE, pre-embed). Also dms-greeter,
                            accounts-daemon + the AccountsService avatar
                            seed (the greeter can't read ~/.face through
                            the 0700 home), and the generated
