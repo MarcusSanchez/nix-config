@@ -45,4 +45,11 @@ in
   # authenticates via PAM, and without this entry unlocking fails.
   # Pairs with programs.swaylock in home/marcus/nixos/niri.nix.
   security.pam.services.swaylock = { };
+
+  # session apps that ignore SIGTERM once the compositor is gone
+  # (mpvpaper blocks on the dead Wayland socket) otherwise hold the
+  # user manager for its default 90s at shutdown — every session app
+  # here stops in a second or two, so bound the wait and let the
+  # SIGKILL land early
+  systemd.user.settings.Manager.DefaultTimeoutStopSec = "15s";
 }

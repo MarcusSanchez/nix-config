@@ -78,4 +78,11 @@ in
 {
   boot.extraModulePackages = lib.mkIf (lib.versionOlder kernel.version "7.1") [ btModules ];
   hardware.firmware = [ btFirmware ];
+
+  # the card's USB half sometimes comes up wedged at cold boot
+  # (descriptor reads time out, the kernel retries and power-cycles
+  # the port for ~60s before giving up) and the initrd's udevd stop
+  # sits behind that whole cycle, stalling switch-root. Bound the wait
+  # — the real root starts a fresh udevd and coldplugs anyway
+  boot.initrd.systemd.services.systemd-udevd.serviceConfig.TimeoutStopSec = 10;
 }
