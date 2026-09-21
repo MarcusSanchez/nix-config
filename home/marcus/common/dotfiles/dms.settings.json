@@ -615,8 +615,7 @@
         "launcherButton",
         "workspaceSwitcher",
         "music",
-        "weather",
-        "claudeCodeUsage"
+        "weather"
       ],
       "name": "Main Bar",
       "noBackground": false,
@@ -626,7 +625,6 @@
       "position": 0,
       "rightWidgets": [
         "systemTray",
-        "catWidget",
         "cpuUsage",
         "memUsage",
         "notificationButton",
