@@ -17,8 +17,8 @@
 let
   wallpaper = "${config.home.homeDirectory}/Pictures/Wallpapers/astronaut-jellyfish.jpg";
 
-  # The desk looks: each becomes a wallpaper:<name> command and a
-  # spotlight entry (see home.packages / xdg.desktopEntries). A look
+  # The desk looks: each becomes a wallpaper:<name> command on PATH
+  # (see home.packages), run from a terminal. A look
   # maps CONNECTORS to wallpapers (files under ~/Pictures/Wallpapers,
   # shipped from ./assets) — a connector the machine doesn't have is a
   # silently-inert setFor, so one table serves the fleet; the names
@@ -87,19 +87,6 @@ in
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
     };
 
-  # the looks as spotlight results: type "wall", click, the whole desk
-  # changes — wallpapers, animated layer and theme together. DMS
-  # indexes new entries on shell restart.
-  xdg.desktopEntries = lib.mapAttrs' (
-    name: look:
-    lib.nameValuePair "wallpaper-${name}" {
-      inherit (look) comment;
-      name = "Wallpaper: ${name}";
-      exec = "wallpaper:${name}";
-      icon = "preferences-desktop-wallpaper";
-    }
-  ) looks;
-
   # Wallpaper and avatar, carried in the repo so a fresh desktop machine
   # looks like the others without hand-setting anything. The images live
   # in ./assets and are linked to stable paths under ~ — not referenced
@@ -140,11 +127,9 @@ in
     # niri.nix) AND swaps the DMS theme, so accent and bar color travel
     # with the wallpaper. The theme flip edits customThemeFile through
     # the settings symlink's TARGET (readlink) so the link survives;
-    # DMS hot-reloads the file. Surfaced in the spotlight via
-    # xdg.desktopEntries below. Adding a look = one attrset entry here
+    # DMS hot-reloads the file. Adding a look = one attrset entry here
     # + a dms.theme.<name>.json in common/dotfiles (+ its wallpaper in
-    # ./assets) + a desktop entry. Colon names = the
-    # file-inside-a-derivation shape.
+    # ./assets). Colon names = the file-inside-a-derivation shape.
     ++ lib.mapAttrsToList (
       name: look:
       pkgs.runCommand "wallpaper-${name}" { } ''
