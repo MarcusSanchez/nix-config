@@ -627,7 +627,6 @@
       "rightWidgets": [
         "systemTray",
         "catWidget",
-        "wallpaperLook",
         "cpuUsage",
         "memUsage",
         "notificationButton",
