@@ -72,6 +72,20 @@ let
     # Tauri/webkit tree
     buildAndTestSubdir = "crates/lianli-daemon";
 
+    # wireless discovery can finish AFTER start_fan_control at startup;
+    # the stable-count DevicePoll path then re-arms the RGB controller
+    # but not fan control, stranding every wireless curve group on
+    # "wireless not available" until the next IPC config write. Re-arm
+    # fan control there too (drop when upstream fixes the race). The
+    # 16-space indent pins the DevicePoll site; SystemResumed's copy
+    # sits deeper and already restarts fan control
+    postPatch = ''
+      sed -i 's/^\( \{16\}\)self\.rebuild_rgb_controller();$/&\n\1self.restart_fan_control();/' \
+        crates/lianli-daemon/src/service/mod.rs
+      [ "$(grep -c 'self.restart_fan_control();' crates/lianli-daemon/src/service/mod.rs)" = 2 ] \
+        || { echo "fan-control re-arm patch did not apply"; exit 1; }
+    '';
+
     postInstall = ''
       # the evdi-node access rule calls /bin/chmod, which the udev-rules
       # checker rejects — point it at the store's coreutils
@@ -183,7 +197,13 @@ in
     after = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
     wantedBy = [ "graphical-session.target" ];
-    path = [ pkgs.ffmpeg ];
+    # nvidia-smi feeds the daemon's GPU temp sensor (fan curves); the
+    # unit's PATH doesn't include the system profile, so hand it the
+    # driver's bin output directly
+    path = [
+      pkgs.ffmpeg
+      config.hardware.nvidia.package.bin
+    ];
     serviceConfig = {
       ExecStart = "${lianli-daemon}/bin/lianli-daemon";
       Restart = "on-failure";
