@@ -56,12 +56,24 @@ in
       ''
         stamp="$HOME/.rustup/.nix-glibc-stamp"
         if [ "$(cat "$stamp" 2>/dev/null)" != "${pkgs.glibc}" ]; then
-          run ${pkgs.rustup}/bin/rustup toolchain uninstall stable || true
-          if run ${pkgs.rustup}/bin/rustup toolchain install stable; then
-            run ${pkgs.rustup}/bin/rustup default stable
-            run sh -c "printf '%s' '${pkgs.glibc}' > '$stamp'"
+          # the repair must not destroy before it can rebuild: at boot this
+          # hook can run before the network is up, and an uninstall followed
+          # by a failed download leaves no toolchain at all — the rustup
+          # proxies then auto-install a bare stable on first use, WITHOUT
+          # the components below, which presents as a dead LSP beside a
+          # working rustc. Probe the channel first; offline, keep the old
+          # toolchain (the previous glibc usually survives until GC) and
+          # retry on the next activation.
+          if ${pkgs.rustup}/bin/rustup check >/dev/null 2>&1; then
+            run ${pkgs.rustup}/bin/rustup toolchain uninstall stable || true
+            if run ${pkgs.rustup}/bin/rustup toolchain install stable; then
+              run ${pkgs.rustup}/bin/rustup default stable
+              run sh -c "printf '%s' '${pkgs.glibc}' > '$stamp'"
+            else
+              echo "rustup: toolchain install failed (offline?); rust stays broken until the next successful activation" >&2
+            fi
           else
-            echo "rustup: toolchain install failed (offline?); rust stays broken until the next successful activation" >&2
+            echo "rustup: channel unreachable (boot before network?); glibc repair deferred to the next activation" >&2
           fi
         fi
         ${ensureRustComponents}
