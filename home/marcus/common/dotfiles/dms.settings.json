@@ -2,9 +2,7 @@
   "currentThemeName": "custom",
   "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.galaxy.json",
   "useFahrenheit": true,
-  "nightModeEnabled": false,
   "barElevationEnabled": false,
-  "batteryPillPercentSign": false,
   "controlCenterWidgets": [
     {
       "id": "volumeSlider",
@@ -52,8 +50,6 @@
   "batteryLockTimeout": 600,
   "batterySuspendTimeout": 900,
   "lockBeforeSuspend": true,
-  "gtkThemingEnabled": false,
-  "qtThemingEnabled": false,
   "lockScreenVideoPath": "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4",
   "osdMediaVolumeEnabled": false,
   "osdMediaPlaybackEnabled": true,
@@ -170,6 +166,32 @@
       "widgetTransparency": 1
     }
   ],
+  "desktopClockCustomColor": {
+    "r": 1,
+    "g": 1,
+    "b": 1,
+    "a": 1,
+    "hsvHue": -1,
+    "hsvSaturation": 0,
+    "hsvValue": 1,
+    "hslHue": -1,
+    "hslSaturation": 0,
+    "hslLightness": 1,
+    "valid": true
+  },
+  "systemMonitorCustomColor": {
+    "r": 1,
+    "g": 1,
+    "b": 1,
+    "a": 1,
+    "hsvHue": -1,
+    "hsvSaturation": 0,
+    "hsvValue": 1,
+    "hslHue": -1,
+    "hslSaturation": 0,
+    "hslLightness": 1,
+    "valid": true
+  },
   "builtInPluginSettings": {
     "dms_settings_search": {
       "trigger": "?"
@@ -178,6 +200,5 @@
       "trigger": "cb"
     }
   },
-  "configVersion": 18,
-  "closeNiriOverviewOnWindowFocus": true
+  "configVersion": 18
 }
