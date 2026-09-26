@@ -102,8 +102,31 @@ in
         # the pattern (a shell command mentioning it, a pasted line) —
         # only a real mpvpaper cmdline matches
         running() { pgrep -f "mpvpaper -l [b]ottom" >/dev/null 2>&1; }
-        stop() { pkill -f "mpvpaper -l [b]ottom"; }
+        # mpvpaper can deadlock during init (a futex hang before its
+        # layer surface ever maps — seen when spawned amid a look
+        # switch's repaint), and a wedged instance ignores SIGTERM: the
+        # handler runs through the very event loop that hung. So stop
+        # escalates to SIGKILL, and start verifies the surface actually
+        # mapped (niri msg layers) — a running-but-unmapped instance is
+        # put down and retried once. A host without the connector is
+        # untouched by the verify: there mpvpaper exits by design, and
+        # the retry only fires while a live process has no surface.
+        stop() {
+          pkill -f "mpvpaper -l [b]ottom"
+          for _ in 1 2 3; do running || return 0; sleep 1; done
+          pkill -9 -f "mpvpaper -l [b]ottom"
+        }
+        mapped() { niri msg layers 2>/dev/null | grep -q '"mpvpaper"'; }
         start() {
+          nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
+            "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
+          for _ in 1 2 3 4 5 6 7 8; do
+            sleep 1
+            mapped && return 0
+            running || return 0
+          done
+          echo "mpvpaper: started but never mapped — restarting it" >&2
+          pkill -9 -f "mpvpaper -l [b]ottom"
           nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
             "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
         }
