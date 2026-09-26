@@ -51,6 +51,28 @@ in
     # shells racing for the bar/notifications/StatusNotifierWatcher
     # would fight — iNiR runs only when shell:inir asks it to
     service.enable = false;
+    # the launcher finds its shell payload ONLY at the traditional
+    # paths (~/.config/quickshell/inir, /usr/...), never through its
+    # own runtime-dir env vars — without this link every `inir run`
+    # dies with "Could not find an iNiR shell payload". (The running
+    # instance still registers under the RESOLVED store path, so
+    # `qs -c inir` cannot address it — the niri binds go through
+    # `inir ipc`, whose own discovery finds the instance.)
+    configSymlink.enable = true;
+    # upstream's launcher runs under `set -e`, and its niri-config
+    # env-import loop ends on `[[ -n $value ]] && export ...` — a
+    # config that doesn't set the loop's last variable
+    # (ELECTRON_OZONE_PLATFORM_HINT; the project's own installer
+    # always writes one) makes that test the function's failing last
+    # statement and -e kills the launch with no output at all.
+    # --replace-fail so an upstream fix retires this loudly.
+    package = inputs.inir.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+      postFixup = (old.postFixup or "") + ''
+        substituteInPlace $out/share/quickshell/inir/scripts/inir \
+          --replace-fail '[[ -n "$value" ]] && export "''${name}=''${value}"' \
+                         'if [[ -n "$value" ]]; then export "''${name}=''${value}"; fi'
+      '';
+    });
   };
 
   home.packages = [

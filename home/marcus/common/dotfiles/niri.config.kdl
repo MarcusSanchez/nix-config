@@ -434,12 +434,13 @@ binds {
     // trial — home/marcus/nixos/inir.nix), so the chords survive the
     // shell swap; the [d] keeps pgrep from matching this bind's own
     // sh -c line.
-    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else qs -c inir ipc call overview toggle; fi"; }
-    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else qs -c inir ipc call overview toggle; fi"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; else qs -c inir ipc call lock activate; fi"; }
-    // iNiR-only: cycle its panel families (ii / waffle / iRiS);
-    // instant no-op while DMS is the running shell
-    Mod+Shift+W hotkey-overlay-title="iNiR: cycle panel family" { spawn "qs" "-c" "inir" "ipc" "call" "panelFamily" "cycle"; }
+    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else inir ipc overview toggle; fi"; }
+    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else inir ipc overview toggle; fi"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; else inir ipc lock activate; fi"; }
+    // iNiR-only: cycle its panel families (ii / waffle / iRiS); the
+    // pgrep gate keeps a stray press under DMS from leaving an
+    // `inir ipc` process waiting for a shell that isn't coming
+    Mod+Shift+W hotkey-overlay-title="iNiR: cycle panel family" { spawn-sh "pgrep -f '[i]nir run' >/dev/null && inir ipc panelFamily cycle"; }
     Ctrl+Alt+Delete hotkey-overlay-title="Power Menu: dms" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+X hotkey-overlay-title="Control Center: dms" { spawn "dms" "ipc" "call" "control-center" "toggle"; }
 
