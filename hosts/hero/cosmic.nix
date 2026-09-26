@@ -37,11 +37,17 @@ let
   # included) are identical in both sessions — shedding exactly what
   # the DE replaces: every spawn-at-startup (DMS, swaybg, cliphist,
   # tpm-fido, the boot lock — cosmic-bg paints the wallpaper, the
-  # panel is cosmic's) and the host tail include (more spawns). The
-  # outputs include keeps resolving because the shared file is copied
-  # beside the derived config; the one spawn the session does need is
-  # appended. A bind edit in niri.config.kdl reaches this session at
-  # the next rebuild, not on save — the price of the store copy.
+  # panel is cosmic's). The host tail comes along spawn-stripped under
+  # the stable name its include expects (its window rules — spotify's
+  # full-width portrait — apply here too); the outputs include keeps
+  # resolving because the shared file is copied beside. Two spawns are
+  # appended: the session-API shim, and an env import + xremap bounce
+  # — cosmic-session starts niri WITHOUT its --session wrapper, so
+  # NIRI_SOCKET never reaches the user manager on its own, and a
+  # blind xremap applies the per-app remaps everywhere (the `not:`
+  # matchers pass vacuously with no focused-window feed). A bind edit
+  # in niri.config.kdl reaches this session at the next rebuild, not
+  # on save — the price of the store copy.
   cosmicNiriConfig =
     pkgs.runCommand "cosmic-niri-config"
       {
@@ -50,9 +56,12 @@ let
       ''
         mkdir -p $out
         cp "$dotfiles/niri.outputs.kdl" $out/
-        sed -e '/^spawn-at-startup /d' -e '/^include "niri.host.kdl"$/d' \
-          "$dotfiles/niri.config.kdl" > $out/config.kdl
-        echo 'spawn-at-startup "${cosmic-ext-alternative-startup}/bin/cosmic-ext-alternative-startup"' >> $out/config.kdl
+        sed '/^spawn-at-startup /d' "$dotfiles/niri.host.hero.kdl" > $out/niri.host.kdl
+        sed '/^spawn-at-startup /d' "$dotfiles/niri.config.kdl" > $out/config.kdl
+        {
+          echo 'spawn-at-startup "${cosmic-ext-alternative-startup}/bin/cosmic-ext-alternative-startup"'
+          echo 'spawn-at-startup "sh" "-c" "systemctl --user import-environment NIRI_SOCKET WAYLAND_DISPLAY DISPLAY; systemctl --user restart xremap"'
+        } >> $out/config.kdl
       '';
 
   startCosmicNiri = pkgs.writeShellScript "start-cosmic-ext-niri" ''
