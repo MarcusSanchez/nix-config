@@ -50,6 +50,14 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # iNiR, the niri session's trial second shell (quickshell-based
+    # like DMS; home/marcus/nixos/inir.nix wires it and the shell:*
+    # switch commands) — the input carries its packaging flake and HM
+    # module
+    inir = {
+      url = "github:snowarch/iNiR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

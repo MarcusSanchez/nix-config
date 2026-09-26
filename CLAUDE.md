@@ -383,6 +383,10 @@ home/marcus/
                            the wallpaperLook bar plugin's picker (nix is
                            the single source). Adding a look = one table
                            entry + a dms.theme.<name>.json + assets
+    inir.nix               the trial second shell (iNiR, via its own
+                           flake input's HM module — autostart OFF, DMS
+                           stays the boot default) + the shell:inir /
+                           shell:dms live-swap commands, lock-guarded
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
