@@ -40,7 +40,19 @@ in
     pkgs.noctalia
 
     (mkShellSwitch "noctalia" ''
+      # quickshell-family shells share a first-run race: on virgin
+      # state the daemonized child can die mid-initialization, and the
+      # second start — config now seeded — succeeds. Verify and retry
+      # once rather than leaving a shell-less session.
       noctalia -d >/dev/null 2>&1
+      for _ in 1 2 3 4; do
+        sleep 1
+        pgrep "[n]octalia" >/dev/null && break
+      done
+      if ! pgrep "[n]octalia" >/dev/null; then
+        echo "noctalia: first start died (first-run init) — retrying" >&2
+        noctalia -d >/dev/null 2>&1
+      fi
       echo "shell: noctalia (Space binds dispatch to its launcher; shell:dms returns)"
     '')
     (mkShellSwitch "dms" ''
