@@ -142,6 +142,14 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            persist in ~/.config/lianli/config.json
                            keyed by serial = the full "hid:..." id
                            (a serial-less entry orphans on restart)
+  cosmic.nix               TRIAL: the COSMIC-on-niri session (nixpkgs
+                           cosmic-session grew compositor argv; the
+                           Drakulix alternative-startup shim is built
+                           here) + plain COSMIC beside it, both picked
+                           at the greeter; the session runs niri on its
+                           own store-built config so the regular
+                           session's spawns stay out. Retires by
+                           deleting file + import
   bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
                            btusb: backported btusb/btmtk built from the
                            mediatek-mt7927-dkms release deb (which also
@@ -383,6 +391,12 @@ home/marcus/
                            the wallpaperLook bar plugin's picker (nix is
                            the single source). Adding a look = one table
                            entry + a dms.theme.<name>.json + assets
+    noctalia.nix           the trial second shell (Noctalia v5 from
+                           nixpkgs — no autostart, DMS stays the boot
+                           default) + the shell:noctalia / shell:dms
+                           live-swap commands, lock-guarded; the
+                           spotlight/lock binds in niri.config.kdl
+                           dispatch to whichever shell runs
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
