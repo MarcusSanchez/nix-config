@@ -1,6 +1,6 @@
 {
   "currentThemeName": "custom",
-  "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.galaxy.json",
+  "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.blue.json",
   "useFahrenheit": true,
   "barElevationEnabled": false,
   "controlCenterWidgets": [
