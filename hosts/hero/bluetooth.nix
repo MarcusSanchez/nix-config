@@ -25,10 +25,13 @@
 }:
 
 let
-  version = "2.14-6";
+  # 2.16-1 carries the btmtk missing-firmware reset fix (pending
+  # upstream) — aimed at the half-wedged boots where firmware init
+  # fails and the chip stays hung instead of being reset
+  version = "2.16-1";
   deb = pkgs.fetchurl {
     url = "https://github.com/jetm/mediatek-mt7927-dkms/releases/download/v${version}/mediatek-mt7927-dkms_${version}_all.deb";
-    hash = "sha256-1WUpQ/AZd/rpQ9zUSVP63XLfWF9RXI9Fu0hVCHYY2YA=";
+    hash = "sha256-q3ibe6XKjoUxaISneQyML3CW3tjcR59AisRymZdWUBo=";
   };
 
   # the deb, unpacked verbatim: usr/src/... carries the patched
