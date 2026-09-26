@@ -434,9 +434,9 @@ binds {
     // shell:noctalia trial — home/marcus/nixos/noctalia.nix), so the
     // chords survive the shell swap; the [d] keeps pgrep from
     // matching this bind's own sh -c line.
-    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else noctalia msg panel-toggle launcher; fi"; }
-    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else noctalia msg panel-toggle launcher; fi"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; else noctalia msg session lock; fi"; }
+    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; elif pgrep -f '[c]osmic-session' >/dev/null; then cosmic-launcher; else noctalia msg panel-toggle launcher; fi"; }
+    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; elif pgrep -f '[c]osmic-session' >/dev/null; then cosmic-launcher; else noctalia msg panel-toggle launcher; fi"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; elif pgrep -f '[c]osmic-session' >/dev/null; then loginctl lock-session; else noctalia msg session lock; fi"; }
     Ctrl+Alt+Delete hotkey-overlay-title="Power Menu: dms" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+X hotkey-overlay-title="Control Center: dms" { spawn "dms" "ipc" "call" "control-center" "toggle"; }
 

@@ -32,40 +32,28 @@ let
     cargoHash = "sha256-DeMkAG2iINGden0Up013M9mWDN4QHrF+FXoNqpGB+mg=";
   };
 
-  # the session's own niri config: shared outputs, the session-API
-  # shim, and enough binds to live in — the DE's own surfaces do the
-  # rest. J up / K down follows the house convention.
-  cosmicNiriConfig = pkgs.writeText "cosmic-niri.kdl" ''
-    include "${../../home/marcus/common/dotfiles/niri.outputs.kdl}"
-
-    spawn-at-startup "${cosmic-ext-alternative-startup}/bin/cosmic-ext-alternative-startup"
-
-    prefer-no-csd
-
-    binds {
-        Mod+Shift+Slash { show-hotkey-overlay; }
-        Mod+T hotkey-overlay-title="Terminal" { spawn "ghostty"; }
-        Mod+D hotkey-overlay-title="COSMIC launcher" { spawn "cosmic-launcher"; }
-        Mod+Q { close-window; }
-        Mod+F { maximize-column; }
-        Mod+Shift+F { fullscreen-window; }
-        Mod+H { focus-column-left; }
-        Mod+L { focus-column-right; }
-        Mod+J { focus-window-or-workspace-up; }
-        Mod+K { focus-window-or-workspace-down; }
-        Mod+Ctrl+H { move-column-left; }
-        Mod+Ctrl+L { move-column-right; }
-        Mod+Ctrl+J { move-window-up-or-to-workspace-up; }
-        Mod+Ctrl+K { move-window-down-or-to-workspace-down; }
-        Mod+R { switch-preset-column-width; }
-        Mod+1 { focus-workspace 1; }
-        Mod+2 { focus-workspace 2; }
-        Mod+3 { focus-workspace 3; }
-        Mod+4 { focus-workspace 4; }
-        Mod+Shift+E { quit; }
-        Print { screenshot; }
-    }
-  '';
+  # the session's niri config, DERIVED from the desk's real one at
+  # build time so binds, layout and window rules (the frosted ghostty
+  # included) are identical in both sessions — shedding exactly what
+  # the DE replaces: every spawn-at-startup (DMS, swaybg, cliphist,
+  # tpm-fido, the boot lock — cosmic-bg paints the wallpaper, the
+  # panel is cosmic's) and the host tail include (more spawns). The
+  # outputs include keeps resolving because the shared file is copied
+  # beside the derived config; the one spawn the session does need is
+  # appended. A bind edit in niri.config.kdl reaches this session at
+  # the next rebuild, not on save — the price of the store copy.
+  cosmicNiriConfig =
+    pkgs.runCommand "cosmic-niri-config"
+      {
+        dotfiles = ../../home/marcus/common/dotfiles;
+      }
+      ''
+        mkdir -p $out
+        cp "$dotfiles/niri.outputs.kdl" $out/
+        sed -e '/^spawn-at-startup /d' -e '/^include "niri.host.kdl"$/d' \
+          "$dotfiles/niri.config.kdl" > $out/config.kdl
+        echo 'spawn-at-startup "${cosmic-ext-alternative-startup}/bin/cosmic-ext-alternative-startup"' >> $out/config.kdl
+      '';
 
   startCosmicNiri = pkgs.writeShellScript "start-cosmic-ext-niri" ''
     # stale failed units from a previous graphical session would break
@@ -84,7 +72,7 @@ let
     if [ -z "''${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
       export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
     fi
-    exec ${pkgs.cosmic-session}/bin/cosmic-session niri --config ${cosmicNiriConfig}
+    exec ${pkgs.cosmic-session}/bin/cosmic-session niri --config ${cosmicNiriConfig}/config.kdl
   '';
 
   cosmicNiriSession = pkgs.writeTextFile {
