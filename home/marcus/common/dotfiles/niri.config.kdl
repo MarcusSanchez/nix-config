@@ -429,10 +429,17 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
-    // macOS spotlight muscle memory
-    Alt+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
-    Mod+Space hotkey-overlay-title="Run an Application: dms spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: dms" { spawn "dms" "ipc" "call" "lock" "lock"; }
+    // macOS spotlight muscle memory. Spotlight and lock dispatch to
+    // whichever shell is up (DMS by default, iNiR during a shell:inir
+    // trial — home/marcus/nixos/inir.nix), so the chords survive the
+    // shell swap; the [d] keeps pgrep from matching this bind's own
+    // sh -c line.
+    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else qs -c inir ipc call overview toggle; fi"; }
+    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; else qs -c inir ipc call overview toggle; fi"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; else qs -c inir ipc call lock activate; fi"; }
+    // iNiR-only: cycle its panel families (ii / waffle / iRiS);
+    // instant no-op while DMS is the running shell
+    Mod+Shift+W hotkey-overlay-title="iNiR: cycle panel family" { spawn "qs" "-c" "inir" "ipc" "call" "panelFamily" "cycle"; }
     Ctrl+Alt+Delete hotkey-overlay-title="Power Menu: dms" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+X hotkey-overlay-title="Control Center: dms" { spawn "dms" "ipc" "call" "control-center" "toggle"; }
 
