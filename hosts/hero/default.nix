@@ -32,9 +32,6 @@
     ./tryx.nix
     ./rgb.nix
     ./tuning.nix
-    # TRIAL: the COSMIC-on-niri session (and plain COSMIC with it),
-    # picked at the greeter — retires by deleting the import + file
-    ./cosmic.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

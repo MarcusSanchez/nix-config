@@ -429,18 +429,10 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
-    // macOS spotlight muscle memory. Spotlight and lock dispatch to
-    // whichever shell is up (DMS by default, iNiR during a shell:inir
-    // trial — home/marcus/nixos/inir.nix, COSMIC in that session), so
-    // the chords survive the shell swap; the [d] keeps pgrep from
-    // matching this bind's own sh -c line.
-    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; elif pgrep -f '[c]osmic-session' >/dev/null; then cosmic-launcher; else inir ipc overview toggle; fi"; }
-    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call spotlight toggle; elif pgrep -f '[c]osmic-session' >/dev/null; then cosmic-launcher; else inir ipc overview toggle; fi"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn-sh "if pgrep -f '[d]ms run' >/dev/null; then dms ipc call lock lock; elif pgrep -f '[c]osmic-session' >/dev/null; then loginctl lock-session; else inir ipc lock activate; fi"; }
-    // iNiR-only: cycle its panel families (ii / waffle / iRiS); the
-    // pgrep gate keeps a stray press under DMS from leaving an
-    // `inir ipc` process waiting for a shell that isn't coming
-    Mod+Shift+W hotkey-overlay-title="iNiR: cycle panel family" { spawn-sh "pgrep -f '[i]nir run' >/dev/null && inir ipc panelFamily cycle"; }
+    // macOS spotlight muscle memory
+    Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+    Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
     Ctrl+Alt+Delete hotkey-overlay-title="Power Menu: dms" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+X hotkey-overlay-title="Control Center: dms" { spawn "dms" "ipc" "call" "control-center" "toggle"; }
 
