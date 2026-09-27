@@ -11,7 +11,7 @@
     ./common
     ./nixos/theme.nix
     ./nixos/dms.nix
-    ./nixos/noctalia.nix
+    ./nixos/inir.nix
     ./nixos/niri.nix
     # UI-managed-config links + drift auto-commit. Desktop note: the
     # niri kdls (nixos/niri.nix), dms.settings.json (nixos/dms.nix)

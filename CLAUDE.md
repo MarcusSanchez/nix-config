@@ -391,12 +391,16 @@ home/marcus/
                            the wallpaperLook bar plugin's picker (nix is
                            the single source). Adding a look = one table
                            entry + a dms.theme.<name>.json + assets
-    noctalia.nix           the trial second shell (Noctalia v5 from
-                           nixpkgs — no autostart, DMS stays the boot
-                           default) + the shell:noctalia / shell:dms
-                           live-swap commands, lock-guarded; the
-                           spotlight/lock binds in niri.config.kdl
-                           dispatch to whichever shell runs
+    inir.nix               the trial second shell, round two (iNiR via
+                           its own flake input's HM module — autostart
+                           OFF, DMS stays the boot default) + the
+                           shell:inir / shell:dms live-swap commands,
+                           lock-guarded; its header lists the four
+                           load-bearing scars (payload symlink, set -e
+                           launcher patch, first-run retry, `inir ipc`
+                           addressing). The spotlight/lock binds in
+                           niri.config.kdl dispatch to whichever shell
+                           runs
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
