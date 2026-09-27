@@ -165,6 +165,15 @@ in
   # logind stop it exactly when the session ends, releasing the grab;
   # WantedBy starts it with the session. Restart on-failure covers a
   # transient IPC hiccup.
+  #
+  # The wrapper exists because a user service snapshots the manager
+  # environment at SPAWN, and at login xremap can win the race against
+  # niri's NIRI_SOCKET import — it then runs blind: no focused-window
+  # feed, the per-app `not:` matchers pass vacuously, and the alt-hjkl
+  # remaps capture inside neovim/Zed/JetBrains. Reading the CURRENT
+  # manager environment (and waiting briefly for the import) at exec
+  # time makes the service immune to login ordering in every session
+  # that runs niri, the COSMIC one included.
   systemd.user.services.xremap = {
     Unit = {
       Description = "Per-application key remapping (niri variant)";
@@ -172,7 +181,21 @@ in
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${xremapNiri}/bin/xremap --watch=config,device ${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/xremap.yml";
+      ExecStart = toString (
+        pkgs.writeShellScript "xremap-with-niri-socket" ''
+          for _ in $(seq 1 30); do
+            sock=$(systemctl --user show-environment | ${pkgs.gnused}/bin/sed -n 's/^NIRI_SOCKET=//p')
+            [ -n "$sock" ] && [ -S "$sock" ] && break
+            sleep 0.5
+          done
+          if [ -n "''${sock:-}" ] && [ -S "$sock" ]; then
+            export NIRI_SOCKET="$sock"
+          else
+            echo "xremap: NIRI_SOCKET never appeared — running without focused-window tracking" >&2
+          fi
+          exec ${xremapNiri}/bin/xremap --watch=config,device ${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/xremap.yml
+        ''
+      );
       Restart = "on-failure";
       RestartSec = 1;
     };
