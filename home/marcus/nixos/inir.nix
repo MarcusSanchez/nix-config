@@ -40,6 +40,19 @@
 }:
 
 let
+  # the Material You generator (scripts/colors/generate_colors_material
+  # .py, run on every wallpaper set) expects the python venv upstream's
+  # installer pip-builds; INIR_VENV is the script's own override, and a
+  # nix python env quacks enough like one (bin/python3 present, the
+  # activate source is `|| true`). Without it color generation dies
+  # SILENTLY and the shell keeps its fallback palette — the
+  # nothing-like-the-gallery look.
+  inirPython = pkgs.python3.withPackages (ps: [
+    ps.numpy
+    ps.pillow
+    ps.materialyoucolor
+  ]);
+
   mkShellSwitch =
     name: script:
     pkgs.runCommand "shell-${name}" { } ''
@@ -80,8 +93,41 @@ in
     });
   };
 
+  # iNiR's wallpaper pipeline writes GTK settings.ini on every set
+  # (its apps-and-shell theming, which also feeds the shell's own
+  # colors.json and must stay on) — force lets every switch stomp that
+  # spray instead of dying on the backup collision. The trial's other
+  # writer risks are handled elsewhere: terminal theming is OFF in the
+  # machine-local config (it EDITS the repo-linked ghostty config —
+  # caught once, reverted), and the zed/chrome/spicetify writers only
+  # touch machine-local theme files.
+  xdg.configFile = {
+    "gtk-3.0/settings.ini".force = true;
+    "gtk-4.0/settings.ini".force = true;
+  };
+
   home.packages = [
+    # iNiR's runtime expectations, named by its own --issues log: magick
+    # processes wallpapers (its absence rendered the workspace previews
+    # as placeholder blocks AND starved the Material color generation),
+    # qalc is the launcher's calculator, ddcutil the external-monitor
+    # brightness path, swayidle its idle/lock automation. Trial-scoped
+    # on purpose — these retire with the file.
+    pkgs.imagemagick
+    pkgs.libqalculate
+    pkgs.ddcutil
+    pkgs.swayidle
+
     (mkShellSwitch "inir" ''
+      # without an icon theme NAME, every QIcon lookup fails — the
+      # image-missing fallback included (the placeholder-checker look).
+      # The gtk3 platform theme would provide one, but iNiR's bundled
+      # Qt lacks the plugin; QS_ICON_THEME is quickshell's own
+      # override, and Adwaita chains to hicolor where the app icons
+      # live. Verified: failures went from dozens to zero.
+      export QS_ICON_THEME=Adwaita
+      export QT_QPA_PLATFORMTHEME=gtk3
+      export INIR_VENV=${inirPython}
       setsid inir run >/dev/null 2>&1 </dev/null &
       for _ in 1 2 3 4 5 6; do
         sleep 1
