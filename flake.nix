@@ -50,6 +50,13 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Ryoku, the trial desktop beside the niri/DMS session (Hyprland +
+    # Quickshell; hosts/hero/ryoku.nix wires it and carries the whole
+    # story). Deliberately NO follows: the port's design has Ryoku own
+    # its compositor ABI from its own locked nixpkgs — the exact set
+    # its CI builds — and a follows also trips our newer nixpkgs' EOL
+    # marking on the electron its RyoMotion pins.
+    ryoku.url = "github:aethctl/Ryoku-on-NixOS";
   };
 
   outputs =

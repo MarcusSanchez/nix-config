@@ -32,6 +32,10 @@
     ./tryx.nix
     ./rgb.nix
     ./tuning.nix
+    # TRIAL: the Ryoku desktop, picked at the greeter as "Hyprland" —
+    # retires by deleting the import + file (+ its HM half, see the
+    # file's header)
+    ./ryoku.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

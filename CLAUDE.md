@@ -142,6 +142,17 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            persist in ~/.config/lianli/config.json
                            keyed by serial = the full "hid:..." id
                            (a serial-less entry orphans on restart)
+  ryoku.nix                TRIAL: the Ryoku desktop (Hyprland +
+                           Quickshell, via the maintained NixOS port's
+                           module) beside the niri/DMS session, picked
+                           at the greeter as "Hyprland". Its niri
+                           flavor is deliberately unused — niri's one
+                           config entrypoint belongs to DMS, and the
+                           header documents the materializer collision
+                           + containment (ExecStartPost re-link here,
+                           HM force in home/marcus/nixos/ryoku.nix).
+                           Retires by deleting file + import + HM half
+                           + flake input
   bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
                            btusb: backported btusb/btmtk built from the
                            mediatek-mt7927-dkms release deb (which also
@@ -383,6 +394,12 @@ home/marcus/
                            the wallpaperLook bar plugin's picker (nix is
                            the single source). Adding a look = one table
                            entry + a dms.theme.<name>.json + assets
+    ryoku.nix              TRIAL: the home half of hosts/hero's Ryoku
+                           desktop — force on the config files Ryoku's
+                           materializer replaces (the niri entrypoint
+                           link + theming files), so every switch
+                           restores HM's ownership instead of dying on
+                           the clobber check. Retires with the trial
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
