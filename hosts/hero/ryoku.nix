@@ -1,19 +1,26 @@
 # TRIAL: the Ryoku desktop (Hyprland + Quickshell, the maintained
-# NixOS port's module) beside the regular niri/DMS session — picked at
-# the greeter as "Hyprland", which Ryoku owns wholesale on this box:
-# its config tree (~/.config/hypr) has no other owner here, so the
-# whole product runs exactly as shipped. Its niri flavor is
-# deliberately NOT used — niri's one config entrypoint
-# (~/.config/niri/config.kdl) already belongs to the DMS session, and
-# two desktops cannot share it. Retires by deleting this file + import
-# + the HM half (home/marcus/nixos/ryoku.nix) + the flake input.
+# NixOS port's module) — and FOR NOW it owns niri too: both greeter
+# doors (niri, Hyprland) land in Ryoku. niri reads exactly one config
+# entrypoint (~/.config/niri/config.kdl), so handing Ryoku the niri
+# session meant handing over that file — the HM half stops linking it
+# on this host and Ryoku's materializer lays and maintains its own.
+# DMS stays installed but dormant (its spawn-at-startup lived in the
+# repo's niri config, which nothing reads here now); the other
+# bare-metal hosts keep DMS-on-niri untouched. Giving niri back to
+# DMS = revert the commit that handed it over (restores the HM link,
+# a restore oneshot, and this header's previous form — git history
+# has all three). Full retirement additionally deletes this file +
+# import + the HM half (home/marcus/nixos/ryoku.nix) + flake input.
+# Per-user tweaks under Ryoku-niri belong in ~/.config/niri/user.kdl,
+# the machine-owned last word of their include chain; hand-pinned
+# display modes in monitors_user.kdl beside it.
 #
 # What the module drags in and why it's accepted:
 #   - programs.niri.package gets mkForce'd to Ryoku's niri, built from
-#     the port's own locked nixpkgs (no follows — see flake.nix): the
-#     regular niri/DMS session runs that build for the trial's
-#     duration. Same major (26.04) as the host set today; the freeze
-#     ends with the trial or the port's own lock bumps.
+#     the port's own locked nixpkgs (no follows — see flake.nix). With
+#     the niri session handed to Ryoku that force is simply correct;
+#     it means niri versions ride the port's lock, not the host's,
+#     while the trial lasts.
 #   - virtualisation.docker (mkDefault, enableOnBoot=false) for its
 #     Cobalt workflow; hardware.bluetooth General.Experimental
 #     (mkDefault true) — watch the MT7927 latch canary after this
@@ -24,27 +31,17 @@
 #     variant appends Ryoku's prompt/alias init to /etc/zshrc, which
 #     would fight the HM zsh setup in every session.
 #
-# The one real collision, and its containment: Ryoku's materializer
-# (ryoku-materialize.service, run at every Ryoku session start; also
-# `ryoku materialize` by hand) lays its config payload into ~/.config,
-# REPLACING whatever sits at a shipped path — including the repo link
-# at niri/config.kdl (their niri entrypoint, not a seed; seeds like
-# nvim/ and ghostty/config respect existing files and symlinks, so
-# those stay safe by upstream's own design). ExecStartPost below
-# re-links it before anything else in the session can order after
-# materialization; the HM half force-restores it (and the other
-# replaced theming files) on every switch, which also self-heals
-# `ryoku update` (its NixOS backend ends in a switch). The uncovered
-# sliver: a hand-run `ryoku materialize`/`ryoku reload` mid-session
-# leaves Ryoku's entrypoint in place until the next Ryoku session
-# start or home-manager activation — if the niri session ever greets
-# as Ryoku instead of DMS, that's what happened; rebuild or relog into
-# Hyprland once.
+# The materializer (ryoku-materialize.service at every Ryoku session
+# start; also `ryoku materialize` by hand) lays its config payload
+# into ~/.config, REPLACING whatever sits at a shipped path. With
+# niri handed over that's now wanted for the entrypoint; the HM half
+# still force-restores the theming files it replaces (gtk settings,
+# btop) on every switch. Seeds like nvim/ and ghostty/config respect
+# existing files and symlinks by upstream's own design, so those
+# stay the repo's.
 {
   inputs,
-  config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -67,22 +64,5 @@
   programs.ryoku = {
     enable = true;
     shell = "fish";
-  };
-
-  # A sibling oneshot rather than an ExecStartPost on their service —
-  # the module already uses that slot for its qylock materializer, and
-  # systemd unit options don't merge two definitions of it.
-  systemd.user.services.ryoku-restore-niri-entrypoint = {
-    description = "Re-link niri's config entrypoint after Ryoku materialization";
-    wantedBy = [ "ryoku-session.target" ];
-    after = [ "ryoku-materialize.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.writeShellScript "ryoku-restore-niri-entrypoint" ''
-        ln -sfn ${config.identity.home}/nix-config/home/marcus/common/dotfiles/niri.config.kdl \
-          "$HOME/.config/niri/config.kdl"
-      ''}";
-    };
   };
 }

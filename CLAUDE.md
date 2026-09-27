@@ -144,13 +144,12 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            (a serial-less entry orphans on restart)
   ryoku.nix                TRIAL: the Ryoku desktop (Hyprland +
                            Quickshell, via the maintained NixOS port's
-                           module) beside the niri/DMS session, picked
-                           at the greeter as "Hyprland". Its niri
-                           flavor is deliberately unused — niri's one
-                           config entrypoint belongs to DMS, and the
-                           header documents the materializer collision
-                           + containment (ExecStartPost re-link here,
-                           HM force in home/marcus/nixos/ryoku.nix).
+                           module) — currently owning BOTH greeter
+                           doors: its niri flavor holds niri's one
+                           config entrypoint (the HM half releases
+                           the link on this host), DMS is dormant.
+                           The header has the handover, the
+                           materializer semantics and the way back.
                            Retires by deleting file + import + HM half
                            + flake input
   bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
@@ -395,11 +394,13 @@ home/marcus/
                            the single source). Adding a look = one table
                            entry + a dms.theme.<name>.json + assets
     ryoku.nix              TRIAL: the home half of hosts/hero's Ryoku
-                           desktop — force on the config files Ryoku's
-                           materializer replaces (the niri entrypoint
-                           link + theming files), so every switch
-                           restores HM's ownership instead of dying on
-                           the clobber check. Retires with the trial
+                           desktop — releases the niri config.kdl link
+                           on the Ryoku host (Ryoku owns that session
+                           now; hostname-gated so other desktops keep
+                           DMS) + force on the theming files its
+                           materializer replaces, so switches never
+                           die on the clobber check. Retires with the
+                           trial
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
