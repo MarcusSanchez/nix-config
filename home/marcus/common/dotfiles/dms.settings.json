@@ -46,6 +46,12 @@
   ],
   "launcherLogoMode": "os",
   "terminalsAlwaysDark": true,
+  "showDock": true,
+  "dockOpenOnOverview": true,
+  "dockIconSize": 38,
+  "dockLauncherEnabled": true,
+  "dockLauncherLogoMode": "os",
+  "dockLauncherLogoColorOverride": "primary",
   "screenPreferences": {
     "lockScreen": [
       "DP-3",
