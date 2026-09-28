@@ -324,7 +324,8 @@ home/marcus/
                            niri.host.kdl, linked per hostname; a NEW
                            desktop host must commit its file BEFORE
                            first switch or HM links against nothing),
-                           dms.settings.json + dms.theme.<look>.json,
+                           dms.settings.json (starts empty — the DMS
+                           settings UI fills it as drift),
                            xremap.yml,
                            hammerspoon.init.lua (the mac's xremap; watches
                            this directory and reloads itself on save, so
@@ -349,24 +350,16 @@ home/marcus/
     theme.nix              GTK/dconf theme names + pointer cursor
                            (Adwaita everywhere; see Constraints for why
                            not Papirus)
-    dms.nix                the shell stack (dms-shell/quickshell/dgop/
-                           matugen — dms-shell does NOT bundle the
-                           helpers; matugen missing = theme generation
-                           silently no-ops) + out-of-store links for
-                           dms.settings.json + wallpaper/avatar from
-                           ./assets, linked to stable paths under ~
-                           (DMS records ABSOLUTE paths in session
-                           state — a store path would rot at GC;
-                           avatar to ~/.face, the AccountsService
-                           fallback). Also the desk LOOKS table: each
-                           entry generates a wallpaper:<name> command
-                           (repaints every monitor + swaps DMS theme +
-                           niri accent + mpvpaper on/off) and a
-                           spotlight entry, and the table is projected
-                           to desk-looks.json for the wallpaperLook
-                           bar plugin's picker (nix is the single
-                           source). Adding a look = one table entry +
-                           a dms.theme.<name>.json + assets
+    dms.nix                the shell stack, STOCK by choice (dms-shell/
+                           quickshell/dgop/matugen — dms-shell does NOT
+                           bundle the helpers; matugen missing = theme
+                           generation silently no-ops) + the
+                           out-of-store link for dms.settings.json
+                           (starts as {}; the settings UI fills it as
+                           git drift). The retired looks system —
+                           wallpaper:<name> commands, per-look theme
+                           jsons, shipped wallpapers/avatar, the niri
+                           accent-sed — is whole in git history
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
