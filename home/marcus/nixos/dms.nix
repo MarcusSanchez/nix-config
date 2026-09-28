@@ -93,6 +93,11 @@
       # the tint, and the colored one's two lambda tones survive as two
       # brightnesses — a lopsided-looking glyph. A uniform MID-GRAY ink
       # is the fix: one luminance, so the tint lands evenly and exact.
+      # (launcherLogoSizeOffset 2 in settings is load-bearing too: the
+      # colorization layer snaps the icon texture to whole pixels, and
+      # at the default size that snap landed the glyph measurably left
+      # of the pill's center — the +2 size flips the parity so the snap
+      # lands centered. Remeasure if bar thickness or font scale moves.)
       ".local/share/dms/nix-snowflake.svg".source = pkgs.runCommand "nix-snowflake-gray.svg" { } ''
         sed 's/#ffffff/#808080/g' \
           ${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg > $out
