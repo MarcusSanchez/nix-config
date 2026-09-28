@@ -65,7 +65,26 @@
     '';
 
     packages = [
-      pkgs.dms-shell
+      # dms-shell with one source patch (same pre-embed technique as the
+      # greeter's screen filter in modules/nixos/greeter.nix — the QML
+      # is embedded in the Go binary, so patches must land on SOURCE):
+      # the bar's custom launcher logo gets a 1px downward nudge. The
+      # icon item's integer snap consistently rounds it high in its
+      # pill, and nothing settings-side can move it — quickshell's SVG
+      # rendering auto-fits the artwork's ink bounds, so
+      # translate/viewBox/canvas edits in the SVG itself are all no-ops
+      # (proven empirically). launcherLogoSizeOffset 2 in settings fixes
+      # the same snap's horizontal half by flipping size parity. The
+      # --replace-fail anchor means a DMS update that reshapes the line
+      # breaks the BUILD, never the bar.
+      (pkgs.dms-shell.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace ../quickshell/Modules/DankBar/Widgets/LauncherButton.qml \
+            --replace-fail 'anchors.centerIn: parent' \
+            'anchors.centerIn: parent
+                anchors.verticalCenterOffset: 1'
+        '';
+      }))
       # dms spawns `qs` from PATH; its package doesn't bundle quickshell
       pkgs.quickshell
       # backs dms's system-monitor widgets (cpu/mem/process list)
