@@ -1,5 +1,5 @@
 {
-  "currentThemeName": "custom",
+  "currentThemeName": "dynamic",
   "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.blue.json",
   "useFahrenheit": true,
   "barElevationEnabled": false,
@@ -122,7 +122,9 @@
       "squareCorners": false,
       "transparency": 1,
       "visible": true,
-      "widgetTransparency": 1
+      "widgetTransparency": 1,
+      "shadowIntensity": 0,
+      "attachToScreenEdge": false
     },
     {
       "autoHide": false,
@@ -163,7 +165,9 @@
       "squareCorners": false,
       "transparency": 1,
       "visible": true,
-      "widgetTransparency": 1
+      "widgetTransparency": 1,
+      "shadowIntensity": 0,
+      "attachToScreenEdge": false
     }
   ],
   "desktopClockCustomColor": {

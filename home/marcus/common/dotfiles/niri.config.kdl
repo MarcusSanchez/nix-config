@@ -842,3 +842,11 @@ window-rule {
     match app-id="google-chrome"
     open-fullscreen false
 }
+
+// Dynamic accent: matugen renders the wallpaper's primary color into
+// this include on every dynamic-theme regeneration (the template
+// lives in home/marcus/nixos/dms.nix, which also seeds the file —
+// niri hard-errors on a missing include). Loaded LAST so it outranks
+// the marked look-accent line in the layout section whenever dynamic
+// theming has written it.
+include "niri.accent.kdl"
