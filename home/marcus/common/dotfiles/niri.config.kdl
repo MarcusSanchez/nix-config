@@ -845,6 +845,15 @@ window-rule {
     open-fullscreen false
 }
 
+// Rounded corners on every window, matched to DMS's cornerRadius (12
+// in dms.settings.json) so windows and shell chrome share one curve.
+// clip-to-geometry makes apps that paint square corners (terminals,
+// chromium) actually get cut to the radius instead of poking through.
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
 // Dynamic accent: DMS's matugen pass renders the active palette's
 // primary into this include on every wallpaper change and theme
 // switch (the template lives in home/marcus/nixos/dms.nix, which also
