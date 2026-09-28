@@ -5,65 +5,163 @@
   "matugenSourceMode": "wallpaper",
   "cornerRadius": 12,
   "barElevationEnabled": false,
+  "controlCenterWidgets": [
+    {
+      "id": "volumeSlider",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "brightnessSlider",
+      "enabled": true,
+      "width": 50,
+      "deviceName": "ddc:i2c-6"
+    },
+    {
+      "id": "wifi",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "bluetooth",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "audioOutput",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "audioInput",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "idleInhibitor",
+      "enabled": true,
+      "width": 50
+    }
+  ],
   "terminalsAlwaysDark": true,
+  "screenPreferences": {
+    "lockScreen": [
+      "DP-3",
+      "eDP-1"
+    ],
+    "notifications": [
+      "DP-3"
+    ],
+    "osd": [
+      "DP-3"
+    ],
+    "toast": [
+      "DP-3"
+    ],
+    "wallpaper": [
+      "all"
+    ]
+  },
   "barConfigs": [
     {
-      "id": "default",
-      "name": "Main Bar",
-      "enabled": true,
-      "position": 0,
-      "screenPreferences": [
-        "all"
+      "autoHide": false,
+      "autoHideDelay": 250,
+      "borderColor": "surfaceText",
+      "borderEnabled": true,
+      "borderOpacity": 0.05,
+      "borderThickness": 1,
+      "bottomGap": 0,
+      "centerWidgets": [
+        "clock"
       ],
-      "showOnLastDisplay": true,
+      "enabled": true,
+      "fontScale": 1,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 2,
+      "gothCornersEnabled": true,
+      "id": "default",
+      "innerPadding": 4,
       "leftWidgets": [
         "launcherButton",
         "workspaceSwitcher",
-        "focusedWindow"
-      ],
-      "centerWidgets": [
         "music",
-        "clock",
         "weather"
       ],
+      "name": "Main Bar",
+      "noBackground": false,
+      "openOnOverview": false,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "position": 2,
       "rightWidgets": [
         "systemTray",
-        "clipboard",
         "cpuUsage",
         "memUsage",
         "notificationButton",
-        "battery",
         "controlCenterButton"
       ],
+      "screenPreferences": [
+        "DP-3",
+        "eDP-1"
+      ],
+      "showOnLastDisplay": true,
       "spacing": 4,
-      "innerPadding": 4,
-      "bottomGap": 0,
-      "transparency": 1,
-      "widgetTransparency": 1,
       "squareCorners": false,
-      "noBackground": false,
-      "gothCornersEnabled": true,
-      "gothCornerRadiusOverride": false,
-      "gothCornerRadiusValue": 12,
-      "borderEnabled": true,
-      "borderColor": "surfaceText",
-      "borderOpacity": 0.1,
-      "borderThickness": 1,
-      "fontScale": 1,
-      "autoHide": false,
-      "autoHideDelay": 250,
-      "openOnOverview": false,
+      "transparency": 1,
       "visible": true,
-      "popupGapsAuto": true,
-      "popupGapsManual": 4,
+      "widgetTransparency": 1,
       "shadowIntensity": 0,
       "attachToScreenEdge": true,
-      "island": false,
-      "useOverlayLayer": false,
       "maximizeWidgetIcons": false,
+      "maximizeWidgetText": false,
+      "removeWidgetPadding": false,
       "widgetOutlineEnabled": true,
-      "widgetOutlineOpacity": 0.25,
-      "shadowOpacity": 60
+      "widgetOutlineOpacity": 0.15,
+      "widgetOutlineColor": "surfaceText",
+      "useOverlayLayer": true
+    },
+    {
+      "autoHide": false,
+      "autoHideDelay": 250,
+      "borderColor": "surfaceText",
+      "borderEnabled": false,
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "bottomGap": 0,
+      "centerWidgets": [
+        "clock"
+      ],
+      "enabled": true,
+      "fontScale": 1,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "gothCornersEnabled": false,
+      "id": "side",
+      "innerPadding": 4,
+      "leftWidgets": [
+        "launcherButton",
+        "workspaceSwitcher"
+      ],
+      "name": "Side Bar",
+      "noBackground": false,
+      "openOnOverview": false,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "position": 0,
+      "rightWidgets": [
+        "controlCenterButton"
+      ],
+      "screenPreferences": [
+        "HDMI-A-1"
+      ],
+      "showOnLastDisplay": false,
+      "spacing": 4,
+      "squareCorners": false,
+      "transparency": 1,
+      "visible": true,
+      "widgetTransparency": 1,
+      "shadowIntensity": 0,
+      "attachToScreenEdge": false
     }
   ],
   "desktopClockCustomColor": {
