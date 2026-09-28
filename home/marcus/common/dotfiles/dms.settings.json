@@ -5,6 +5,7 @@
   "matugenSmartMode": true,
   "matugenSourceMode": "wallpaper",
   "popupTransparency": 0.95,
+  "dockTransparency": 0.5,
   "cornerRadius": 12,
   "barElevationEnabled": false,
   "controlCenterWidgets": [
@@ -46,7 +47,7 @@
     }
   ],
   "mediaUseAlbumArtAccent": true,
-  "launcherStyle": "island",
+  "launcherStyle": "spotlight",
   "dashTabs": [
     {
       "id": "media",
@@ -76,6 +77,7 @@
   "launcherLogoSizeOffset": 2,
   "terminalsAlwaysDark": true,
   "showDock": true,
+  "dockGroupByApp": true,
   "dockOpenOnOverview": true,
   "dockSpacing": 8,
   "dockMargin": 10,
@@ -83,6 +85,7 @@
   "dockLauncherEnabled": true,
   "dockLauncherLogoMode": "os",
   "dockLauncherLogoColorOverride": "primary",
+  "dockTrashFileManager": "nautilus",
   "screenPreferences": {
     "lockScreen": [
       "DP-3",
