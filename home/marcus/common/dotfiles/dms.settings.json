@@ -73,6 +73,7 @@
   "launcherLogoCustomPath": "/home/marcus/.local/share/dms/nix-snowflake.svg",
   "launcherLogoColorOverride": "primary",
   "launcherLogoBrightness": 0,
+  "launcherLogoSizeOffset": 2,
   "terminalsAlwaysDark": true,
   "showDock": true,
   "dockOpenOnOverview": true,
