@@ -64,24 +64,14 @@
     serviceConfig.UnsetEnvironment = "GDK_BACKEND";
   };
 
-  services = {
-    # Ryoku's login screen: SDDM wearing the module's "ryoku" theme
-    # (the module applies theme + Qt deps whenever sddm is enabled).
-    # The plymouth retain-splash handoff in ./boot.nix is
-    # greeter-agnostic and carries over. Boot lands on the niri
-    # session — Ryoku's.
-    displayManager = {
-      sddm = {
-        enable = true;
-        wayland.enable = true;
-      };
-      defaultSession = "niri";
-    };
+  # The login screen is ./greeter.nix (the recreated dms-greeter —
+  # SDDM with Ryoku's theme was tried and couldn't rotate the portrait
+  # or filter screens; its theming block in their module sits inert
+  # while sddm stays off).
 
-    # Avatars persist through AccountsService (SDDM reads it; Ryoku's
-    # profile page writes it)
-    accounts-daemon.enable = true;
-  };
+  # Avatars persist through AccountsService (the greeter reads it;
+  # Ryoku's profile page writes it)
+  services.accounts-daemon.enable = true;
 
   # backs HM's dconf.settings and the gsettings calls Ryoku's session
   # bootstrap makes (color-scheme, gtk-theme)

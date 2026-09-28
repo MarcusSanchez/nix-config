@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), one bare-metal NixOS desktop (host `hero`, the daily desk, dual-booted beside a gaming-only Windows) running the Ryoku desktop — Hyprland + Quickshell via its maintained NixOS port, SDDM login; modules/nixos/ryoku.nix — which replaced the niri + DankMaterialShell world whole in 2026-09 (that world, its dms-greeter, its niri kdl files and the decommissioned hosts that ran it — naut-dt/naut-box on the SOLD predecessor PC, the retired tuf-laptop — live in git history, as do the rejected Plasma/GNOME/SDDM experiments from the archived `marcussanchez/tuf-nix-config` repo; modules/nixos still reads as a fleet world on purpose — a second desktop is one hosts/ dir away), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The macs and hero have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), one bare-metal NixOS desktop (host `hero`, the daily desk, dual-booted beside a gaming-only Windows) running the Ryoku desktop — Hyprland + Quickshell via its maintained NixOS port, entered through the recreated dms-greeter login screen; modules/nixos/ryoku.nix + greeter.nix — which replaced the niri + DankMaterialShell world whole in 2026-09 (that world, its dms-greeter, its niri kdl files and the decommissioned hosts that ran it — naut-dt/naut-box on the SOLD predecessor PC, the retired tuf-laptop — live in git history, as do the rejected Plasma/GNOME/SDDM experiments from the archived `marcussanchez/tuf-nix-config` repo; modules/nixos still reads as a fleet world on purpose — a second desktop is one hosts/ dir away), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The macs and hero have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -185,8 +185,7 @@ modules/nixos/             the bare-metal machine's world, aggregated by
 
   ryoku.nix                the desktop: Ryoku (Hyprland + Quickshell via
                            its maintained NixOS port's module) — both
-                           sessions, the SDDM login screen wearing its
-                           theme, wallpaper/theming/locker, plus the
+                           sessions, wallpaper/theming/locker, plus the
                            pieces absorbed from the retired niri/DMS
                            stack (dconf, swaylock PAM, the user-manager
                            stop timeout, accounts-daemon). The header
@@ -196,10 +195,25 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            (first materialize needs a Hyprland login or
                            a hand-run), and the module side effects
                            accepted (forced niri package from the
-                           port's lock, docker, BlueZ Experimental).
-                           Home half: home/marcus/ryoku.nix ->
-                           home/marcus/nixos/ryoku.nix. Login-screen
-                           changes still ship via `nixos-rebuild boot`
+                           port's lock, docker, BlueZ Experimental;
+                           its SDDM theming sits inert — see
+                           greeter.nix). Home half:
+                           home/marcus/ryoku.nix ->
+                           home/marcus/nixos/ryoku.nix
+  greeter.nix              the login screen: the dms-greeter machinery
+                           recreated after the SDDM interlude (SDDM
+                           couldn't rotate the portrait or filter
+                           screens): nixpkgs' dms-greeter module + the
+                           screen-filtered overrideAttrs (QML embedded
+                           in the Go binary — the filter patches
+                           SOURCE, pre-embed), the per-host
+                           greeterScreens AND greeterOutputs options
+                           (both set in hosts/ — outputs restate the
+                           machine-local monitors_user.kdl the greeter
+                           cannot read), the AccountsService avatar
+                           seed from ./assets, and the generated
+                           /etc/greetd/niri_overrides.kdl. Ships via
+                           `nixos-rebuild boot`, never switch
   system.nix               machine-level settings and services:
                            timezone/locale, fonts, pipewire (allowed-rates
                            is a device-intersected MENU, not a forced

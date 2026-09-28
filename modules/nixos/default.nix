@@ -19,6 +19,7 @@
     ./boot.nix
     ./security.nix
     ./ryoku.nix
+    ./greeter.nix
     ./system.nix
     ./networking.nix
     ./nix-ld.nix

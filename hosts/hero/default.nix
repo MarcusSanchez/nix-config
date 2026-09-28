@@ -43,6 +43,26 @@
 
   homeEntryPoint = ../../home/marcus/ryoku.nix;
 
+  # Which connectors carry the greeter's sign-in UI (the 4K; the
+  # portrait stays blank-but-on), and the greeter compositor's output
+  # layout — keep the blocks in step with the machine-local
+  # ~/.config/niri/monitors_user.kdl, which the greeter cannot read.
+  greeterScreens = [ "DP-3" ];
+  greeterOutputs = ''
+    output "HDMI-A-1" {
+        mode "2560x1440@320.001"
+        transform "270"
+        scale 1.25
+        position x=0 y=0
+    }
+
+    output "DP-3" {
+        mode "3840x2160@240.000"
+        scale 1.75
+        position x=1152 y=407
+    }
+  '';
+
   # The release this machine was installed under — set at install time
   # to whatever the installer produces, then never changes.
   system.stateVersion = "26.05";
@@ -105,10 +125,13 @@
     services.wake-side-monitors = {
       description = "Un-force the boot-disabled portrait connector before the greeter";
       wantedBy = [ "multi-user.target" ];
-      # display-manager.service: SDDM carries the login screen
-      # (modules/nixos/ryoku.nix), and every display manager provides
-      # this alias
-      before = [ "display-manager.service" ];
+      # both spellings so the ordering holds whichever unit the login
+      # screen runs as (greetd.service today — modules/nixos/greeter.nix;
+      # a nonexistent unit in an ordering list is simply ignored)
+      before = [
+        "display-manager.service"
+        "greetd.service"
+      ];
       after = [ "plymouth-quit.service" ];
       serviceConfig.Type = "oneshot";
       script = ''
