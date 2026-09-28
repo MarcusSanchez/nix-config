@@ -87,11 +87,13 @@
       # dms.settings.json points here. Custom over "os" mode on purpose —
       # "os" renders the distro's Nerd Font glyph, whose ink sits
       # off-center in its em box; an SVG through IconImage centers true.
-      # Same stable-path reasoning as the wallpapers below; the color
-      # override in settings recolors it, so white-vs-colored source is
-      # moot.
+      # Same stable-path reasoning as the wallpapers below. The COLORED
+      # variant, not nix-snowflake-white.svg, on purpose: the settings
+      # color override colorizes by luminance, so a pure-white source
+      # stays white no matter the tint — mid-luminance ink is what lets
+      # the accent actually land.
       ".local/share/dms/nix-snowflake.svg".source =
-        "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg";
+        "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
 
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
       "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
