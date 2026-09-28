@@ -105,7 +105,22 @@
       # the python env feeds its wallpaper beat-glow, which analyses
       # the wallpaper for bright spots to pulse. The plugin probes both
       # from PATH and quietly loses features when they're missing.
-      # niri.config.kdl carries the matching audiofx layer-rules.
+      # The local checkout carries TWO hand patches that an update or
+      # reinstall will silently revert — reapply both or the visualizer
+      # goes invisible again:
+      #   - AudioFxDaemon.qml: WlrLayer.Background -> WlrLayer.Bottom
+      #     on both surfaces. On the background layer the wallpaper
+      #     races it for stacking order per output; Bottom sits above
+      #     wallpaper, below windows, deterministically (the upstream
+      #     README's place-within-backdrop niri rules assume a
+      #     backdrop-wallpaper desktop and bury it here — the comment
+      #     in niri.config.kdl has that story).
+      #   - AudioFxCanvas.qml: autosens=0 -> autosens=1 in the cava
+      #     conf template. Upstream's fixed gain (sensitivity 100,
+      #     1% draw threshold, hide-after-silence) leaves quiet
+      #     playback below threshold and the canvas fades out
+      #     entirely; auto-gain is what made the Ryoku visualizer
+      #     dance at any volume.
       pkgs.cava
       (pkgs.python3.withPackages (ps: [
         ps.numpy
