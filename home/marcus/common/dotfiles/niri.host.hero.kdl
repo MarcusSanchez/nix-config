@@ -5,14 +5,6 @@
 // links against nothing). Output blocks belong in niri.outputs.kdl,
 // keyed by connector.
 
-// the animated middle layer, replayed from the recorded on/off
-// choice (mpvpaper:toggle persists it — see niri.nix). The video
-// itself (~/Pictures/Wallpapers/live/spaceman.mp4) is machine-local,
-// NOT in the repo — until a copy lands at that path, an "on" replay
-// starts mpvpaper which exits instantly: harmless, and the static
-// wallpaper shows.
-spawn-at-startup "sh" "-c" "mpvpaper:toggle \"$(cat ~/.local/state/desk-mpvpaper 2>/dev/null || echo off)\""
-
 // music takes the portrait's whole width (it lands there via the
 // open-on-output rule in niri.config.kdl); a single window in the
 // column already gets the full height
