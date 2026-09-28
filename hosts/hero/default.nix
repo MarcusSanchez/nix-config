@@ -43,23 +43,22 @@
 
   homeEntryPoint = ../../home/marcus/ryoku.nix;
 
-  # Which connectors carry the greeter's sign-in UI (the 4K; the
-  # portrait stays blank-but-on), and the greeter compositor's output
-  # layout — keep the blocks in step with the machine-local
-  # ~/.config/niri/monitors_user.kdl, which the greeter cannot read.
+  # Which connectors carry the greeter's sign-in UI, and the greeter
+  # compositor's output layout: only the 4K runs at the login screen —
+  # the portrait's SIGNAL is cut (`off`) until the session's niri
+  # lights it with the machine-local monitors_user.kdl pins (a fresh
+  # compositor inherits nothing from the greeter's). Keep the DP-3
+  # block in step with monitors_user.kdl, which the greeter cannot
+  # read.
   greeterScreens = [ "DP-3" ];
   greeterOutputs = ''
     output "HDMI-A-1" {
-        mode "2560x1440@320.001"
-        transform "270"
-        scale 1.25
-        position x=0 y=0
+        off
     }
 
     output "DP-3" {
         mode "3840x2160@240.000"
         scale 1.75
-        position x=1152 y=407
     }
   '';
 

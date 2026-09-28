@@ -24,11 +24,12 @@ let
   # the lock screen there is no screenPreferences filter). This build
   # of the same dms-greeter filters that list to the host's
   # greeterScreens option (declared below, assigned in hosts/):
-  # listed connectors get the UI, the rest get NO surface — and a
-  # surface-less output shows the greeter compositor's black
-  # background, monitors on. Same clean blank as the lock screen,
-  # instead of the old cut-the-signal approach (output off), which
-  # dropped the side monitors into no-signal standby. The list is
+  # listed connectors get the UI, the rest get NO surface — a
+  # surface-less output that stays on shows the greeter compositor's
+  # black background. Whether a side monitor stays on-but-blank or
+  # loses its signal entirely is the host's greeterOutputs call (an
+  # `off` block cuts it; the session's own compositor lights it again
+  # at login). The list is
   # BAKED in at build time — an env var does not survive the
   # greetd -> script -> niri -> quickshell inheritance chain, and the
   # greeter's QML rides INSIDE the Go binary (`make sync-shell`
