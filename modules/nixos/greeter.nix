@@ -137,6 +137,24 @@ in
     # being blocked by the existing copy.
     systemd.tmpfiles.rules = [
       "C+ /var/lib/AccountsService/icons/${config.identity.username} 0644 root root - ${./assets/avatar-spaceman.png}"
+      # The module's greetd pre-start syncs DMS state from configHome
+      # and REWRITES the synced session.json's wallpaper paths to its
+      # own /var/lib copies. With no DMS state in the home any more
+      # (the DMS world retired), a stale synced session.json survives
+      # forever — and its rewritten path makes the next sync `cp` a
+      # file onto itself, which the script's set -e turns into greetd
+      # refusing to start: a BLACK login screen with no way in
+      # (2026-09-28, the recreation's first boot). Purge the sync
+      # products every boot; the greeter starts from its defaults, and
+      # a machine that ever grows real DMS state again just re-syncs
+      # fresh.
+      "r! /var/lib/dms-greeter/session.json"
+      "r! /var/lib/dms-greeter/settings.json"
+      "r! /var/lib/dms-greeter/settings.orig.json"
+      "r! /var/lib/dms-greeter/colors.json"
+      "r! /var/lib/dms-greeter/dms-colors.json"
+      "r! /var/lib/dms-greeter/custom-theme.json"
+      "r! /var/lib/dms-greeter/wallpaper*"
     ];
   };
 }
