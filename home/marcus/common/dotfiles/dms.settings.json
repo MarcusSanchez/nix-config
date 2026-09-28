@@ -1,8 +1,12 @@
 {
   "currentThemeName": "dynamic",
+  "currentThemeCategory": "dynamic",
   "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.blue.json",
+  "matugenScheme": "scheme-smart",
+  "matugenSmartMode": true,
   "useFahrenheit": true,
   "barElevationEnabled": false,
+  "wallpaperBackgroundCustomColor": "#8bc34a",
   "controlCenterWidgets": [
     {
       "id": "volumeSlider",
