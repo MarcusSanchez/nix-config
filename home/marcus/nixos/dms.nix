@@ -87,13 +87,16 @@
       # dms.settings.json points here. Custom over "os" mode on purpose —
       # "os" renders the distro's Nerd Font glyph, whose ink sits
       # off-center in its em box; an SVG through IconImage centers true.
-      # Same stable-path reasoning as the wallpapers below. The COLORED
-      # variant, not nix-snowflake-white.svg, on purpose: the settings
-      # color override colorizes by luminance, so a pure-white source
-      # stays white no matter the tint — mid-luminance ink is what lets
-      # the accent actually land.
-      ".local/share/dms/nix-snowflake.svg".source =
-        "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+      # Same stable-path reasoning as the wallpapers below. Neither
+      # shipped variant works as-is: the settings color override
+      # colorizes by luminance, so the white SVG stays white no matter
+      # the tint, and the colored one's two lambda tones survive as two
+      # brightnesses — a lopsided-looking glyph. A uniform MID-GRAY ink
+      # is the fix: one luminance, so the tint lands evenly and exact.
+      ".local/share/dms/nix-snowflake.svg".source = pkgs.runCommand "nix-snowflake-gray.svg" { } ''
+        sed 's/#ffffff/#808080/g' \
+          ${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg > $out
+      '';
 
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
       "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
