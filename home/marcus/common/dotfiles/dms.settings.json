@@ -4,6 +4,7 @@
   "matugenScheme": "scheme-smart",
   "matugenSmartMode": true,
   "matugenSourceMode": "wallpaper",
+  "popupTransparency": 0.95,
   "cornerRadius": 12,
   "barElevationEnabled": false,
   "controlCenterWidgets": [
@@ -129,7 +130,7 @@
       "openOnOverview": false,
       "popupGapsAuto": true,
       "popupGapsManual": 4,
-      "position": 0,
+      "position": 2,
       "rightWidgets": [
         "systemTray",
         "cpuUsage",
@@ -155,7 +156,11 @@
       "widgetOutlineEnabled": true,
       "widgetOutlineOpacity": 0.15,
       "widgetOutlineColor": "surfaceText",
-      "useOverlayLayer": true
+      "useOverlayLayer": true,
+      "island": false,
+      "barInsetPadding": 4,
+      "barLengthPadding": 0,
+      "widgetPadding": 8
     },
     {
       "autoHide": false,
