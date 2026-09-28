@@ -130,16 +130,19 @@ in
       spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
     '';
 
-    # The greeter's avatar probe checks, in order: its own cache,
-    # /var/lib/AccountsService/icons/<user>, then ~/.face — but the
-    # dms-greeter user cannot read ~/.face through the 0700 home dir,
-    # and AccountsService only gets an icons/ copy when the avatar is
-    # set imperatively through a UI. Seed that copy declaratively, so a
-    # fresh machine's login screen has the face too. C+ overwrites, so
-    # an asset change propagates at the next boot/activation instead of
-    # being blocked by the existing copy.
+    # No avatar is seeded right now (the old one retired, its
+    # replacement pending). When one lands: the greeter's avatar probe
+    # checks, in order, its own cache, /var/lib/AccountsService/
+    # icons/<user>, then ~/.face — but the dms-greeter user cannot
+    # read ~/.face through the 0700 home dir, and AccountsService only
+    # gets an icons/ copy when the avatar is set imperatively through
+    # a UI. So the declarative seed is a tmpfiles rule here: C+ the
+    # asset onto /var/lib/AccountsService/icons/<identity.username>,
+    # 0644 root root (the removed rule's exact shape is in git
+    # history; C+ overwrites, so an asset change propagates at the
+    # next boot/activation instead of being blocked by an existing
+    # copy).
     systemd.tmpfiles.rules = [
-      "C+ /var/lib/AccountsService/icons/${config.identity.username} 0644 root root - ${./assets/avatar-spaceman.png}"
       # The module's greetd pre-start syncs DMS state from configHome
       # and REWRITES the synced session.json's wallpaper paths to its
       # own /var/lib copies. With no DMS state in the home any more

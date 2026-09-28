@@ -188,10 +188,12 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            dms-greeter module + the screen-filtered
                            overrideAttrs (the QML is embedded in the Go
                            binary, so the filter patches SOURCE,
-                           pre-embed), accounts-daemon + the
-                           AccountsService avatar seed from ./assets
-                           (the greeter can't read ~/.face through the
-                           0700 home), the per-host greeterScreens AND
+                           pre-embed), accounts-daemon + the avatar-seed
+                           slot (currently EMPTY, replacement pending —
+                           the comment there has the probe order and
+                           the rule shape; the greeter can't read
+                           ~/.face through the 0700 home), the
+                           per-host greeterScreens AND
                            greeterOutputs options (both set in hosts/ —
                            outputs restate the machine's blocks from
                            niri.outputs.kdl, which the greeter
