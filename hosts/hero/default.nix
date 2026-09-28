@@ -32,10 +32,6 @@
     ./tryx.nix
     ./rgb.nix
     ./tuning.nix
-    # TRIAL: the Ryoku desktop, picked at the greeter as "Hyprland" —
-    # retires by deleting the import + file (+ its HM half, see the
-    # file's header)
-    ./ryoku.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -45,9 +41,6 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  # The Ryoku world's entry, not the DMS desktops' nixos.nix — this
-  # desk committed to Ryoku (see ./ryoku.nix, which also swaps the
-  # login screen, so greeterScreens has no meaning here).
   homeEntryPoint = ../../home/marcus/ryoku.nix;
 
   # The release this machine was installed under — set at install time
@@ -96,13 +89,12 @@
   # is kernel-disabled through the splash. The `d` force outlives the
   # splash — compositors do NOT resurrect a forced-off connector (the
   # session would come up single-monitor) — so the wake-side-monitors
-  # oneshot below un-forces it via sysfs right before greetd, and the
-  # greeter lights it (blank-filtered, per modules/nixos/greeter.nix
-  # and greeterScreens above). The portrait's rotation lives in
-  # niri.outputs.kdl as transform "270"; a panel_orientation param
-  # would only rotate a plymouth that never draws there (and niri
-  # composing param + transform flips the image — see
-  # niri.outputs.kdl). The SHUTDOWN splash is the mirror problem — by
+  # oneshot below un-forces it via sysfs right before the display
+  # manager, which lights it. The portrait's rotation lives in the
+  # machine-local ~/.config/niri/monitors_user.kdl as transform "270";
+  # a panel_orientation param would only rotate a plymouth that never
+  # draws there (and niri composing param + transform flips the
+  # image). The SHUTDOWN splash is the mirror problem — by
   # then the session has re-enabled the portrait, so
   # hide-side-monitors (below) forces it off again before the shutdown
   # splashes draw. Host-level: this desk's connectors by name.

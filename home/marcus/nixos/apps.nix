@@ -1,6 +1,6 @@
 # GUI apps — the Linux render of the mac's homebrew casks (minus stremio,
-# minus raycast, which has no Linux build; DMS's spotlight covers that
-# slot).
+# minus raycast, which has no Linux build; the shell's launcher covers
+# that slot).
 {
   inputs,
   lib,
@@ -98,10 +98,10 @@
   ];
 
   # Launcher hygiene: terminal apps and system plumbing ship .desktop
-  # entries that clutter the DMS spotlight. A user-level entry with the
+  # entries that clutter the launcher. A user-level entry with the
   # SAME id and NoDisplay shadows the package's copy (XDG precedence) —
   # the binaries stay on PATH, only the launcher rows disappear. Delete
-  # a line to bring one back; DMS reindexes on shell restart.
+  # a line to bring one back; the shell reindexes on restart.
   xdg.desktopEntries =
     let
       hide = name: {

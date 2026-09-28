@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), three bare-metal NixOS machines sharing one desktop session (host `naut-dt`, the dual-boot side of the PC that also hosts naut-box, with its own RTX 5080 facts — that PC is SOLD, its two hosts kept in the flake pending decommission; host `hero`, its successor desk PC, fresh install pending with a placeholder hardware-configuration.nix and lanzaboote commented until the sbctl ceremony — the one desktop running Ryoku (Hyprland + Quickshell, SDDM login; hosts/hero/ryoku.nix) instead of the shared session; and host `tuf-laptop`, an ASUS TUF Dash F15 whose MUX sits in discrete mode — the others niri + DankMaterialShell, user `marcus`; the desktop stack was absorbed from the archived `marcussanchez/tuf-nix-config` repo, whose git history holds the rejected Plasma/GNOME/SDDM experiments), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`naut-box`, `framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), three bare-metal NixOS machines sharing one desktop session — Ryoku (Hyprland + Quickshell via its maintained NixOS port, SDDM login; modules/nixos/ryoku.nix), which replaced the niri + DankMaterialShell world whole in 2026-09 (that world, its dms-greeter and its niri kdl files live in git history, as do the rejected Plasma/GNOME/SDDM experiments from the archived `marcussanchez/tuf-nix-config` repo) — (host `naut-dt`, the dual-boot side of the PC that also hosts naut-box, with its own RTX 5080 facts — that PC is SOLD, its two hosts kept in the flake pending decommission; host `hero`, its successor desk PC, the daily desk; and host `tuf-laptop`, an ASUS TUF Dash F15 whose MUX sits in discrete mode — user `marcus`), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The mac and both bare-metal hosts have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -48,10 +48,10 @@ There are no tests; `nix flake check` (which evaluates every `nixosConfiguration
 Three layers per platform, wired in `flake.nix`. Flake inputs are passed everywhere as `specialArgs`/`extraSpecialArgs`, so any module can take `inputs` as an argument. Two nixpkgs inputs on purpose: `nixpkgs` (nixos-unstable, Linux) and `nixpkgs-darwin` (nixpkgs-unstable, where darwin caches populate first) — don't collapse them.
 
 1. `hosts/` — the entries in `flake.nix`. The naming rule: dirs with hardware truth on disk are 1:1 with a machine and named by its EXACT hostname (`naut-dt/` — hardware-configuration.nix, lanzaboote); dirs without hardware truth are shareable KINDS (`wsl/`, `darwin/` — several flake attrs may point at one, and a per-machine fact that isn't hardware truth is a hostname list hardcoded at the option it gates: the super tier in secrets.nix, the rustdesk bridge in wsl/networking.nix). Host-specific values only (platform, `system.stateVersion`, `networking.hostName` from the `hostName` specialArg, and `homeEntryPoint` — the option `modules/common/home-manager.nix` reads to decide which home config this host's user gets; every host declares it).
-2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machine's whole world: account, nix daemon, and the boot/niri/DMS desktop stack, aggregated by its default.nix — the desktop stack is in there because every bare-metal host here IS a desktop; the day a headless one appears that file splits into a base half and a desktop.nix half, with the information that split needs actually in hand. `nvidia.nix` is the one pool file OUTSIDE the aggregator, for the same reason `wsl/networking.nix` is outside its own: it hardcodes `services.xserver.videoDrivers` and the early-KMS initrd list at normal priority, so a non-NVIDIA host must not receive it — GPU vendor is per-machine hardware truth, imported by the host. Package order in the merged profile is functionally irrelevant absent file collisions — proven by derivation diff, twice), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and hosts/naut-dt), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
-3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop session's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `nixos.nix` / `wsl.nix` / `darwin.nix` as the per-world entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; nixos.nix serves the bare-metal world the way wsl.nix serves the four WSL boxes — a second bare-metal machine would share it, splitting per-host the day a real divergence appears). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
+2. `modules/` — four directories, each self-contained for its kind of machine: `common/` (both platforms — identity, secrets, the HM bridge, cross-platform CLIs), `nixos/` (the bare-metal machine's whole world: account, nix daemon, and the boot/Ryoku desktop stack, aggregated by its default.nix — the desktop stack is in there because every bare-metal host here IS a desktop; the day a headless one appears that file splits into a base half and a desktop.nix half, with the information that split needs actually in hand. `nvidia.nix` is the one pool file OUTSIDE the aggregator, for the same reason `wsl/networking.nix` is outside its own: it hardcodes `services.xserver.videoDrivers` and the early-KMS initrd list at normal priority, so a non-NVIDIA host must not receive it — GPU vendor is per-machine hardware truth, imported by the host. Package order in the merged profile is functionally irrelevant absent file collisions — proven by derivation diff, twice), `wsl/` (the WSL machines' whole world, aggregated by its default.nix — including its OWN users.nix/nix.nix/nix-ld.nix/packages.nix, duplicated with nixos/'s on purpose: **bad duplication beats bad abstraction**, each directory reasons alone), and `darwin/` (the mac). One PURPOSE per file everywhere: a purpose may span several related options (system.nix carries locale+fonts+bluetooth+printing+fwupd+power+wooting), but never becomes a grab-bag — that is how the old desktop.nix monolith grew. The sops-nix/HM platform module imports that make the sops.* and home-manager.* options exist are listed directly in the host modules (hosts/wsl and hosts/naut-dt), beside `modules/common`; `modules/darwin/default.nix` carries its own. The bridge sets `backupFileExtension = "hm-backup"`.
+3. `home/marcus/` — Home Manager, mirroring the system layer's shape: `common/` (shared concern files, aggregated by its `default.nix`), `nixos/` (the desktop world's concern files — no default.nix, imported decisively) and `darwin/` (mac concern files), with `ryoku.nix` / `wsl.nix` / `darwin.nix` as the per-world entry points (`home.stateVersion` + decisive imports; username/homeDirectory come from identity.* via the HM bridge; ryoku.nix serves the bare-metal desktops the way wsl.nix serves the four WSL boxes — it carries only what Ryoku's own materialized config space doesn't). `wsl.nix` imports only `./common` — WSL is a terminal into the shared toolchains, no GUI and no UI-managed links, and the Windows sides of those PCs are unmanaged on purpose. The bridges import the entry points, never `common/` directly.
 
-Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + its aggregator; WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from the shared nixos.nix entry; mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
+Where things go: CLI tool for every machine → `modules/common/packages.nix`, or `home/marcus/common/packages.nix` if user-scoped; desktop-machine system config → `modules/nixos/<file>` + its aggregator; WSL system config → `modules/wsl/` + its aggregator; build tools → the owning directory's `packages.nix` (nixos and wsl each carry their own — duplication on purpose); mac GUI app → cask in `modules/darwin/homebrew.nix`; desktop GUI app → `home/marcus/nixos/apps.nix`; shared user config → concern file in `home/marcus/common/` + import in its `default.nix`; desktop-only user config → file in `home/marcus/nixos/`, imported from the shared ryoku.nix entry — UNLESS Ryoku's own config space covers it: session/shell/theming choices belong in the machine-local `~/.config/niri/user.kdl` / `monitors_user.kdl` / `~/.config/ryoku/desktop.json`, not in nix; mac-only user config → `home/marcus/darwin/`. There is no `modules/darwin/packages.nix` — the mac gets its build tools from the Xcode CLT, so create that file only if a mac-only system package ever appears.
 
 **Project-specific tooling never goes in this repo.** It belongs to the project, via devenv: `devenv init` there, declare `packages`/`languages.*`/`services.*` in its `devenv.nix`, and auto-load on `cd` with `use devenv` in its `.envrc` (or `use flake` for a plain flake devShell). This repo carries only what every machine needs. Its own operational commands (`secrets:edit`, `secrets:status`, `age:place`, `secrets:drop`, `config:check`) are plain executables in `bin/`, on PATH fleet-wide through `modules/common/bin.nix` — thin wrappers that run the LIVE working-tree scripts, so editing bin/ needs no rebuild. `./bin/<name>` also works directly, no wrapper involved.
 
@@ -93,8 +93,8 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            (2026-08-30): the ASUS X870E build with the
                            RTX 5090 and the MT7927 combo card. Real
                            generated hardware-configuration.nix; the
-                           desk is the 4K (DP-3, greeterScreens) with
-                           the 1440p portrait (HDMI-A-1) on its LEFT
+                           desk is the 4K (DP-3) with the 1440p
+                           portrait (HDMI-A-1) on its LEFT
   default.nix              the machine's statement: the same
                            boot-splash-on-one-monitor machinery the old
                            desk proved (portrait kernel-forced off
@@ -142,16 +142,6 @@ hosts/hero/          the successor desk PC, INSTALLED and live
                            persist in ~/.config/lianli/config.json
                            keyed by serial = the full "hid:..." id
                            (a serial-less entry orphans on restart)
-  ryoku.nix                THE desktop on this machine (Hyprland +
-                           Quickshell via the maintained NixOS port's
-                           module, promoted from trial): both sessions,
-                           the SDDM login screen (dms-greeter
-                           force-disabled here, still serving the DMS
-                           desktops), wallpaper/theming/locker. The
-                           header has the materializer semantics, where
-                           user tweaks live (user.kdl / desktop.json)
-                           and the way back (git history). Home half:
-                           home/marcus/ryoku.nix -> nixos/ryoku.nix
   bluetooth.nix            the MT7927/MT6639 chip predates kernel 7.1's
                            btusb: backported btusb/btmtk built from the
                            mediatek-mt7927-dkms release deb (which also
@@ -206,35 +196,29 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            Windows-side checkbox, the comment has the
                            ceremony
 
-  niri.nix                 the compositor + portals; session Exec routed
-                           through systemd-cat (journalctl -t niri-session)
-  greeter.nix              the DMS desktops' login-screen story (hero
-                           opts out — dms-greeter force-disabled in
-                           hosts/hero/ryoku.nix, SDDM + Ryoku's theme
-                           instead): nixpkgs'
-                           dms-greeter module + a screen-filtered
-                           overrideAttrs of pkgs.dms-greeter (the QML is
-                           embedded in the Go binary, so the filter
-                           patches SOURCE, pre-embed). Also dms-greeter,
-                           accounts-daemon + the AccountsService avatar
-                           seed (the greeter can't read ~/.face through
-                           the 0700 home), and the generated
-                           /etc/greetd/niri_overrides.kdl — the session's
-                           niri.outputs.kdl handed over unmodified.
-                           Which screens carry the sign-in UI is the
-                           per-host greeterScreens option (declared
-                           here, set in hosts/ like secretsTier; empty =
-                           all screens, no value can strand the login);
-                           the rest stay blank-but-on. Cross-layer on
-                           purpose: reads home/marcus/common/dotfiles/ and
-                           home/marcus/nixos/assets/. Ships via `nixos-rebuild
-                           boot`, never switch
+  ryoku.nix                the desktop: Ryoku (Hyprland + Quickshell via
+                           its maintained NixOS port's module) — both
+                           sessions, the SDDM login screen wearing its
+                           theme, wallpaper/theming/locker, plus the
+                           pieces absorbed from the retired niri/DMS
+                           stack (dconf, swaylock PAM, the user-manager
+                           stop timeout, accounts-daemon). The header
+                           has the materializer semantics, where user
+                           tweaks live (user.kdl / monitors_user.kdl /
+                           desktop.json), the fresh-machine bootstrap
+                           (first materialize needs a Hyprland login or
+                           a hand-run), and the module side effects
+                           accepted (forced niri package from the
+                           port's lock, docker, BlueZ Experimental).
+                           Home half: home/marcus/ryoku.nix ->
+                           home/marcus/nixos/ryoku.nix. Login-screen
+                           changes still ship via `nixos-rebuild boot`
   system.nix               machine-level settings and services:
                            timezone/locale, fonts, pipewire (allowed-rates
                            is a device-intersected MENU, not a forced
                            rate), bluetooth, CUPS, fwupd
                            (the dbx-restore story), upower +
-                           power-profiles-daemon (DMS widgets fail
+                           power-profiles-daemon (shell widgets fail
                            QUIETLY without them), wooting udev rules
                            (deliberately not hardware.wooting.enable —
                            it bundles the app)
@@ -242,10 +226,11 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            ports) + the tailscale block whose
                            trustedInterfaces catch-all the tight LAN
                            port list leans on
-  boot.nix                 Plymouth + retain-splash handoff to the greeter —
-                           several cooperating tricks, see its header and
-                           Constraints before touching ANY of it (also
-                           carries zramSwap, independent of that web)
+  boot.nix                 Plymouth + retain-splash handoff to the login
+                           screen — several cooperating tricks, see its
+                           header and Constraints before touching ANY of
+                           it (also carries zramSwap, independent of
+                           that web)
   nix-ld.nix               the two shims for non-nix binaries, both for
                            the JetBrains/Toolbox story: nix-ld (enable +
                            the X11/GTK/NSS/JCEF library list —
@@ -283,8 +268,8 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            (networking.nix carries the tailscale block —
                            trustedInterfaces is the tailnet catch-all its
                            tight LAN port list leans on; swaylock's PAM
-                           entry lives in niri.nix with the session it
-                           unlocks)
+                           entry lives in ryoku.nix with the desktop it
+                           backs)
 modules/darwin/
   default.nix              aggregator
   nix.nix                  nix.enable = false (Constraints)
@@ -302,15 +287,15 @@ modules/darwin/
   users.nix
 
 home/marcus/
-  nixos.nix wsl.nix darwin.nix ryoku.nix  entry points — the HM bridges
+  ryoku.nix wsl.nix darwin.nix  entry points — the HM bridges
                            import these, never common/ directly; each owns
                            its home.stateVersion (25.05 everywhere except
                            the desktops' 26.05 — per-machine birth
                            certificates, can't live in common/).
-                           ryoku.nix is hero's world (the per-host split
-                           nixos.nix always anticipated): common + dotfile
-                           links + apps + nixos/ryoku.nix, no DMS/theme/
-                           niri files — Ryoku owns all of that
+                           ryoku.nix is the bare-metal desktops' world:
+                           common + dotfile links + apps +
+                           nixos/ryoku.nix, nothing more — Ryoku's own
+                           config space owns the session
   common/                  aggregated by its default.nix
     secrets.nix            user side of /run/secrets (FLY_API_TOKEN/
                            CROC_SECRET exports) + rbw, the root of the
@@ -343,25 +328,13 @@ home/marcus/
                            machine — font sizes and wsl_connections need
                            cross-machine consensus), zed.keymap.json (both
                            cmd- and ctrl- variants), .ideavimrc,
-                           niri.config.kdl (binds/layout; also hardcodes
-                           the absolute xremap.yml path),
-                           niri.outputs.kdl (connector-keyed outputs:
-                           absent monitors are inert, so one file serves
-                           many machines — add output blocks, don't fork;
-                           split out because the greeter's compositor
-                           consumes the same file via modules/nixos/
-                           greeter.nix; DP-2's rotation comes from the
-                           bedroom host's panel_orientation kernel param,
-                           NOT a transform here — niri composes the two),
-                           niri.host.<hostname>.kdl (per-host tail —
-                           config.kdl includes the stable name
-                           niri.host.kdl, linked per hostname; a NEW
-                           desktop host must commit its file BEFORE first
-                           switch or HM links against nothing),
-                           dms.settings.json, xremap.yml,
+                           xremap.yml (the desktops' per-app remap
+                           config, read straight from this repo path by
+                           the xremap service — no link needed),
                            hammerspoon.init.lua (the mac's xremap; watches
                            this directory and reloads itself on save, so
-                           edits need no rebuild)
+                           edits need no rebuild). The retired niri/DMS
+                           kdl+json files live in git history
     toolchains.nix         rustup repair/bootstrap (isDarwin branch) + the
                            JetBrains GOROOT symlink — see Constraints
     neovim.nix             see Constraints
@@ -377,50 +350,18 @@ home/marcus/
                            driver is broken on macOS 26). Accessibility must
                            be granted BY HAND; until it is, the event tap
                            never starts and the keys silently do nothing
-  nixos/                   the desktop session's concern files, imported
-                           decisively by the shared nixos.nix entry
-    theme.nix              GTK/dconf theme names + pointer cursor
-                           (Adwaita everywhere; see Constraints for why
-                           not Papirus)
-    dms.nix                the shell stack (dms-shell/quickshell/dgop/
-                           matugen — dms-shell does NOT bundle the
-                           helpers; matugen missing = theme generation
-                           silently no-ops) + out-of-store links for
-                           dms.settings.json and the assets/dms-plugins/
-                           bar widgets + wallpaper/avatar from ./assets,
-                           linked to stable paths under ~ (DMS records
-                           ABSOLUTE paths in session state — a store
-                           path would rot at GC; avatar to ~/.face, the
-                           AccountsService fallback). Also the desk
-                           LOOKS table: each entry generates a
-                           wallpaper:<name> command (repaints all three
-                           monitors + swaps DMS theme + niri accent +
-                           mpvpaper on/off) and a spotlight entry, and
-                           the table is projected to desk-looks.json for
-                           the wallpaperLook bar plugin's picker (nix is
-                           the single source). Adding a look = one table
-                           entry + a dms.theme.<name>.json + assets
-    ryoku.nix              the home half of hosts/hero's Ryoku desktop,
-                           imported only by the ryoku.nix entry point:
-                           xremap + tpm-fido as session-bound user
-                           services (the DMS world spawns both from its
-                           niri config; Ryoku's config is not ours to
-                           edit), the swaylock fallback, and force on
-                           btop.conf (the one HM file Ryoku's
-                           materializer replaces)
-    niri.nix               the session: out-of-store links for
-                           niri/config.kdl, niri.outputs.kdl,
-                           niri.host.kdl (target picked by hostname) +
-                           swaylock fallback + everything the binds and
-                           spawns expect on PATH — snipping
-                           (grim/slurp/satty, Mod+Shift+S), cliphist,
-                           playerctl, wallpapers (swaybg/mpvpaper),
-                           xremap, tpm-fido, xwayland-satellite
-                           (the noctalia shell-variety experiment —
-                           session picker, shell-ipc dispatcher, both
-                           shell generations — lived here briefly and
-                           was removed whole; git history has it)
-
+  nixos/                   the desktop world's concern files, imported
+                           decisively by the ryoku.nix entry
+    ryoku.nix              the Ryoku desktop's home half: xremap +
+                           tpm-fido as session-bound user services (the
+                           retired DMS world spawned both from its niri
+                           config; Ryoku's config is not ours to edit —
+                           xremap reads dotfiles/xremap.yml straight
+                           from the repo), the swaylock fallback, and
+                           force on btop.conf (the one HM file Ryoku's
+                           materializer replaces). The xremap service
+                           reads the live manager env at exec — the
+                           NIRI_SOCKET race story is in its comment
     apps.nix
                            the GTK chrome and Windows-Terminal keybinds
 ```
@@ -443,13 +384,14 @@ home/marcus/
 - **The usernames differ per machine** — `marcus` on Linux, `marcussanchez` on the mac; don't "unify" them. The single source of truth is `identity.username`, assigned in each platform's `users.nix` (option declared in `modules/common/identity.nix`, with `identity.home` derived); modules read `config.identity.*` instead of hardcoding or branching on isDarwin. The assignment must stay an unconditional literal — consumers use it in dynamic attr names, and a conditional value invites infinite recursion (identity.nix's header has the guard rails).
 - **stateVersions must never change — they are not "the version we're on".** Per machine: `system.stateVersion` "25.05" (WSL), "26.05" (naut-dt), `6` (darwin); `home.stateVersion` lives in each entry point ("25.05" everywhere except nixos.nix's "26.05") and can never move back into `home/marcus/common/` — the machines were installed under different releases.
 
-- **Desktop-stack rules, distilled from the absorbed repo's two hard-won days** — the full briefing is MERGE-NOTES.md in the archived `marcussanchez/tuf-nix-config`:
+- **Desktop-stack rules** (the greeter/boot ones distilled from the absorbed repo's two hard-won days — MERGE-NOTES.md in the archived `marcussanchez/tuf-nix-config` — the Ryoku ones from its adoption):
   - **Greeter/display-manager changes ship via `nixos-rebuild boot`, not `switch`** — switch kills the live session out from under the user.
-  - **`niri validate` does NOT catch duplicate keybinds**; the compositor rejects the whole live reload instead. After editing niri.config.kdl check the journal, not just the validator. Session logs: `journalctl -t niri-session`.
-  - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `pkill quickshell`, then `niri msg action spawn -- dms run` (the supervisor may be long dead, so respawn explicitly). Verify pixels with `grim -o <output>` over SSH, not by asking state again.
-  - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/nixos/boot.nix` + the hosts' headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
+  - **Ryoku owns its config space; nix stays out of it.** The materializer lays and maintains `~/.config/niri/config.kdl` and the rest of its payload, REPLACING whatever sits at a shipped path — never manage those paths through HM (btop.conf, the one collision, is force-stomped back each switch; ghostty and nvim survive by Ryoku's own seed logic). The user's knobs are machine-local: `~/.config/niri/user.kdl` (binds/rules, last word of the include chain), `monitors_user.kdl` (display pins), `~/.config/ryoku/desktop.json` (the Hub's neutral store — prefer editing it over user.kdl for anything the Hub exposes, so the Hub agrees; `ryoku-wm-niri apply` regenerates from it). A machine's FIRST Ryoku login must be Hyprland (its session-start materialize lays the niri side too) or preceded by a hand-run materializer — the niri session has no config until then.
+  - **`ryoku update` is a nixos-rebuild switch in disguise** (advances the ryoku flake input, builds, switches) — it bypasses `config:check` and the commit discipline, so prefer the normal repo flow.
+  - **`niri validate` does NOT catch duplicate keybinds**; the compositor rejects the whole live reload instead. After editing user.kdl check the journal, not just the validator (Ryoku's generated `rebinds.kdl` + user.kdl resolve chords last-wins across files, but duplicates within one file still reject).
+  - **Shell state and pixels can disagree** — verify shell/wallpaper outcomes with `grim -o <output>` and by querying state back, never by exit codes; when they disagree, `systemctl --user restart ryoku-shell` (also the reset for its runtime-only per-monitor state, e.g. a visualizer stuck in overlay mode).
+  - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, `systemd.show_status=false`) — `modules/nixos/boot.nix` + the hosts' headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~130 MB per early-KMS initrd).
   - **Group membership changes (input/uinput) need a relogin** — the session that ran the switch doesn't have them yet.
-  - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `desktop/theme.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus was trialed on naut-dt 2026-08-06 and proved technically fine — ghostty's tab bar renders; the breakage once blamed on it was Plasma-leftover fallout, not a Papirus deficiency — but its restyled app icons were rejected on looks. Re-enabling it is safe on clean installs; it is a taste decision, not a stability one.
-  - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a DMS restart to be indexed.
+  - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a shell restart to be indexed.
   - When a GUI app misbehaves, run it from a terminal and read its output before theorizing about the launcher.
 - The zsh `initContent` in `home/marcus/common/shell.nix` is wrapped in `lib.mkOrder 1200` on purpose, so marcus's keybindings land after zoxide/atuin's shell hooks. Don't drop the ordering when editing it.

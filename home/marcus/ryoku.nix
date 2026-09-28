@@ -1,11 +1,12 @@
-# Home Manager entry point for the Ryoku desktop (hero) — the world
-# entry beside nixos.nix, wsl.nix and darwin.nix, split out the day the
-# desk committed to Ryoku while the other bare-metal hosts stayed on
-# niri + DMS (the divergence nixos.nix's header always anticipated).
-# Ryoku owns the session wholesale — shell, wallpaper, theming, locker,
-# niri config — so this entry carries only what Ryoku doesn't:
-# the shared toolchains, the UI-managed dotfile links, the desktop GUI
-# apps, and the session helpers in nixos/ryoku.nix.
+# Home Manager entry point for the bare-metal desktops — the world
+# entry beside wsl.nix and darwin.nix, serving every NixOS machine with
+# a screen the way wsl.nix serves the WSL boxes (it replaced the
+# niri + DMS world's nixos.nix when the fleet converged on Ryoku; that
+# world is whole in git history). Ryoku owns the session wholesale —
+# shell, wallpaper, theming, locker, niri config — so this entry
+# carries only what Ryoku doesn't: the shared toolchains, the
+# UI-managed dotfile links, the desktop GUI apps, and the session
+# helpers in nixos/ryoku.nix.
 { ... }:
 
 {

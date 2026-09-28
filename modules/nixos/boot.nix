@@ -42,12 +42,12 @@
     ];
   };
 
-  # Bridge the splash -> greeter gap: stock plymouth-quit clears the
-  # framebuffer to black before greetd starts (greetd orders itself
-  # after plymouth-quit-wait). --retain-splash leaves the splash's
-  # last frame on screen until the greeter's compositor draws over it.
-  # (greetd's greeterManagesPlymouth would be the native route, but
-  # dank-greeter doesn't manage plymouth — it would hang the boot.)
+  # Bridge the splash -> login-screen gap: stock plymouth-quit clears
+  # the framebuffer to black before the display manager starts (it
+  # orders itself after plymouth-quit-wait). --retain-splash leaves the
+  # splash's last frame on screen until the login screen draws over it.
+  # Greeter-agnostic — proven under greetd/dms-greeter, carried over
+  # unchanged to SDDM.
   systemd.services.plymouth-quit.serviceConfig.ExecStart =
     lib.mkForce "-${pkgs.plymouth}/bin/plymouth quit --retain-splash";
 

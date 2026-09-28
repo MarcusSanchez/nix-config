@@ -9,7 +9,7 @@
 #     when `modinfo asus_ec_sensors` grows this board's alias.
 #     nct6775 reads the Nuvoton super-I/O (fan headers and voltage
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`,
-#     DMS widgets and CoolerControl alike.
+#     shell widgets and CoolerControl alike.
 #   - CoolerControl: fan curves driven off any hwmon sensor, with a
 #     GUI (in the spotlight); its daemon applies curves headlessly
 #     from then on, and finds the GPU's fans through the driver on

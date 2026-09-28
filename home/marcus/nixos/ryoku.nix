@@ -1,4 +1,4 @@
-# The Ryoku desktop's home half (system half: hosts/hero/ryoku.nix,
+# The Ryoku desktop's home half (system half: modules/nixos/ryoku.nix,
 # where the whole story lives). Ryoku owns the session — shell,
 # wallpaper, theming, locker, and niri's one config entrypoint
 # (~/.config/niri/config.kdl, laid and maintained by its materializer;
@@ -6,11 +6,10 @@
 # What lives here is only what Ryoku doesn't bring:
 #
 #   - xremap, the per-app remapper (alt-hjkl -> arrows outside vim-y
-#     apps), as a session-bound user service — the same shape the DMS
-#     world uses (home/marcus/nixos/niri.nix), duplicated on purpose.
-#   - tpm-fido, which the DMS world spawns from its niri config; Ryoku's
-#     config is not ours to edit, so here it is a user service instead.
-#   - the swaylock fallback (PAM entry in modules/nixos/niri.nix) for
+#     apps), as a session-bound user service.
+#   - tpm-fido as a user service (the retired DMS world spawned it from
+#     its niri config; Ryoku's config is not ours to edit).
+#   - the swaylock fallback (PAM entry in modules/nixos/ryoku.nix) for
 #     when qylock misbehaves.
 #   - force on btop.conf: Ryoku's materializer replaces it (a replaced
 #     link is the "would be clobbered" activation failure), and HM

@@ -48,8 +48,8 @@
     # restores it — `fwupdmgr update` offers "UEFI dbx" as a device
     fwupd.enable = true;
 
-    # DMS reads battery state through UPower — without it the bar's
-    # battery widget silently hides — and drives the control center's
+    # the shell reads battery state through UPower — without it the
+    # bar's battery widget silently hides — and drives its power-mode
     # performance/balanced/saver switch through power-profiles-daemon.
     # Both fail QUIETLY if removed.
     upower.enable = true;

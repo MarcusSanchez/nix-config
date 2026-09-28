@@ -37,11 +37,7 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  homeEntryPoint = ../../home/marcus/nixos.nix;
-
-  # Connectors that carry the greeter's sign-in UI on this machine — the
-  # 4K in the middle; the sides stay blank at the login screen.
-  greeterScreens = [ "DP-3" ];
+  homeEntryPoint = ../../home/marcus/ryoku.nix;
 
   # Windows lives on its own ESP (the factory ~100 MB one); NixOS gets a
   # dedicated 1 GB ESP, so systemd-boot can't auto-detect Windows across
@@ -59,12 +55,12 @@
   # kernel-disabled through the splash. The `d` force outlives the
   # splash — compositors do NOT resurrect a forced-off connector (the
   # session would come up single-monitor) — so the wake-side-monitors
-  # oneshot below un-forces them via sysfs right before greetd, and the
-  # greeter lights them (blank-filtered, per modules/nixos/greeter.nix).
-  # DP-2's rotation lives in niri.outputs.kdl as transform "90"; a
+  # oneshot below un-forces them via sysfs right before the display
+  # manager, which lights them. DP-2's rotation belongs in the
+  # machine-local ~/.config/niri/monitors_user.kdl as transform "90"; a
   # panel_orientation param would only rotate a plymouth that never draws
-  # there (and niri composing param + transform flips the image — see
-  # niri.outputs.kdl). The SHUTDOWN splash is the mirror problem — by
+  # there (and niri composing param + transform flips the image).
+  # The SHUTDOWN splash is the mirror problem — by
   # then the session has re-enabled the sides, so hide-side-monitors
   # (below) forces them off again before the shutdown splashes draw.
   # Host-level: this desk's connectors by name.
@@ -78,7 +74,7 @@
     services.wake-side-monitors = {
       description = "Un-force the boot-disabled side monitor connectors before the greeter";
       wantedBy = [ "multi-user.target" ];
-      before = [ "greetd.service" ];
+      before = [ "display-manager.service" ];
       after = [ "plymouth-quit.service" ];
       serviceConfig.Type = "oneshot";
       script = ''
