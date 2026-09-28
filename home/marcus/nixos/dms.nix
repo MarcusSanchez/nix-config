@@ -96,6 +96,21 @@
       # backs dms's wallpaper-driven dynamic theming; without it on PATH,
       # theme generation silently does nothing
       pkgs.matugen
+
+      # the AudioFX plugin's runtime (the plugin itself is imperative —
+      # `dms plugins install audioFx` into ~/.config/DankMaterialShell/
+      # plugins, restorable via `dms plugins lock`/`restore`): cava is
+      # the spectrum analyser (the same engine Ryoku's desktop
+      # visualiser used — PipeWire playback monitor in, bands out), and
+      # the python env feeds its wallpaper beat-glow, which analyses
+      # the wallpaper for bright spots to pulse. The plugin probes both
+      # from PATH and quietly loses features when they're missing.
+      # niri.config.kdl carries the matching audiofx layer-rules.
+      pkgs.cava
+      (pkgs.python3.withPackages (ps: [
+        ps.numpy
+        ps.pillow
+      ]))
     ];
 
   };

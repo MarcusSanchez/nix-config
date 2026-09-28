@@ -857,18 +857,15 @@ window-rule {
 }
 
 // The AudioFX plugin's surfaces (edge visualizer + wallpaper glow —
-// runtime deps and install story in home/marcus/nixos/dms.nix) join
-// the backdrop, per the plugin's own niri guidance: they stay
-// stationary through the overview instead of riding the workspace
-// zoom. Inert while the plugin is absent — layer-rules match nothing.
-layer-rule {
-    match namespace="^audiofx$"
-    place-within-backdrop true
-}
-layer-rule {
-    match namespace="^audiofx-glow$"
-    place-within-backdrop true
-}
+// runtime deps and install story in home/marcus/nixos/dms.nix) stay
+// on the plain background layer. The plugin README's
+// place-within-backdrop rules are deliberately NOT used: they assume
+// a desktop whose wallpaper also lives in the backdrop behind a
+// transparent workspace background, and on this config (wallpaper on
+// the workspace's own layer over the opaque layout background-color)
+// they bury the visualizer where only the overview can see it —
+// proven by pixel diff. Trade-off: the surfaces ride along with
+// workspace switches instead of staying fixed.
 
 // Dynamic accent: DMS's matugen pass renders the active palette's
 // primary into this include on every wallpaper change and theme
