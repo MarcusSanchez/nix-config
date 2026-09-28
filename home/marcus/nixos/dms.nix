@@ -98,20 +98,5 @@
       pkgs.matugen
     ];
 
-    # The wallpaper collection, carried in the repo so a fresh desktop
-    # machine has them to pick from — linked to stable paths under ~
-    # rather than referenced by store path, because DMS records an
-    # ABSOLUTE path in its session state and a store path would rot on
-    # the next GC. Selection happens in the settings UI; nothing here
-    # sets one. (avatar-spaceman.png sits beside them in ./assets,
-    # unlinked, for whenever a profile picture is wanted again.)
-    file = {
-      "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
-      "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
-      "Pictures/Wallpapers/nix-flake.png".source = ./assets/nix-flake.png;
-      "Pictures/Wallpapers/space-stars-2560x1440.jpg".source = ./assets/space-stars-2560x1440.jpg;
-      "Pictures/Wallpapers/space-stars-1080x1920.jpg".source = ./assets/space-stars-1080x1920.jpg;
-      "Pictures/Wallpapers/swirls.jpg".source = ./assets/swirls.jpg;
-    };
   };
 }

@@ -37,10 +37,6 @@ in
     # with the path read from DMS's session state)
     pkgs.swaybg
 
-    # video wallpapers (the live spaceman on the 4K): mpv on the
-    # background layer, spawned per-output
-    pkgs.mpvpaper
-
     # the snipping tool (Mod+Shift+S in niri.config.kdl): slurp picks a
     # region, grim captures it, satty annotates (arrows/text/blur) and
     # copies via wl-clipboard. niri's built-in Print overlay stays for
@@ -84,61 +80,6 @@ in
     (pkgs.runCommand "pinentry-alias" { } ''
       mkdir -p $out/bin
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
-    '')
-
-    # kill/revive the animated wallpaper on demand (games, benchmarks,
-    # or just wanting the still), plus explicit on/off verbs so scripts
-    # can command a known state instead of blindly toggling. Every call
-    # PERSISTS its state to ~/.local/state/desk-mpvpaper, and the
-    # spawn-at-startup in niri.host.hero.kdl reads it back — so a
-    # reboot restores the last choice instead of blindly starting the
-    # video. With it off, the static layer beneath (swaybg/DMS) shows.
-    # Harmless on a host without that connector: mpvpaper just exits.
-    # Colon name = the reboot:windows file-inside-a-derivation shape.
-    (pkgs.runCommand "mpvpaper-toggle" { } ''
-      mkdir -p $out/bin
-      install -m755 ${pkgs.writeShellScript "mpvpaper-toggle" ''
-        # [b] keeps the regex from matching any process merely QUOTING
-        # the pattern (a shell command mentioning it, a pasted line) —
-        # only a real mpvpaper cmdline matches
-        running() { pgrep -f "mpvpaper -l [b]ottom" >/dev/null 2>&1; }
-        # mpvpaper can deadlock during init (a futex hang before its
-        # layer surface ever maps — seen when spawned amid a look
-        # switch's repaint), and a wedged instance ignores SIGTERM: the
-        # handler runs through the very event loop that hung. So stop
-        # escalates to SIGKILL, and start verifies the surface actually
-        # mapped (niri msg layers) — a running-but-unmapped instance is
-        # put down and retried once. A host without the connector is
-        # untouched by the verify: there mpvpaper exits by design, and
-        # the retry only fires while a live process has no surface.
-        stop() {
-          pkill -f "mpvpaper -l [b]ottom"
-          for _ in 1 2 3; do running || return 0; sleep 1; done
-          pkill -9 -f "mpvpaper -l [b]ottom"
-        }
-        mapped() { niri msg layers 2>/dev/null | grep -q '"mpvpaper"'; }
-        start() {
-          nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
-            "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
-          for _ in 1 2 3 4 5 6 7 8; do
-            sleep 1
-            mapped && return 0
-            running || return 0
-          done
-          echo "mpvpaper: started but never mapped — restarting it" >&2
-          pkill -9 -f "mpvpaper -l [b]ottom"
-          nohup mpvpaper -l bottom -o "no-audio loop hwdec=auto" DP-3 \
-            "$HOME/Pictures/Wallpapers/live/spaceman.mp4" >/dev/null 2>&1 &
-        }
-        state="$HOME/.local/state/desk-mpvpaper"
-        save() { mkdir -p "$(dirname "$state")"; printf %s "$1" > "$state"; }
-        case "''${1:-}" in
-          on) running || start; save on; echo "mpvpaper: on" ;;
-          off) ! running || stop; save off; echo "mpvpaper: off" ;;
-          "") if running; then stop; save off; echo "mpvpaper: off"; else start; save on; echo "mpvpaper: on"; fi ;;
-          *) echo "usage: mpvpaper:toggle [on|off]" >&2; exit 64 ;;
-        esac
-      ''} "$out/bin/mpvpaper:toggle"
     '')
   ];
 

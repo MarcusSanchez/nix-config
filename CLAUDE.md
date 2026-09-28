@@ -357,9 +357,9 @@ home/marcus/
                            matugen — dms-shell does NOT bundle the
                            helpers; matugen missing = theme generation
                            silently no-ops) + the out-of-store link for
-                           dms.settings.json (starts as {}; the settings
-                           UI fills it as git drift) + the wallpaper
-                           collection linked to ~/Pictures/Wallpapers +
+                           dms.settings.json (the settings UI's git
+                           drift; a few keys pair load-bearingly with
+                           this file — see its settings-link comment) +
                            the matugen user config that renders the
                            palette's primary into niri's focus ring
                            (niri.accent.kdl — the toml's three landmines
@@ -383,7 +383,8 @@ home/marcus/
                            swaylock fallback + everything the binds and
                            spawns expect on PATH — snipping
                            (grim/slurp/satty, Mod+Shift+S), cliphist,
-                           playerctl, wallpapers (swaybg/mpvpaper),
+                           playerctl, swaybg (the startup wallpaper
+                           under DMS's layer),
                            xremap, tpm-fido, xwayland-satellite. The
                            xremap service reads the live manager env at
                            exec — the NIRI_SOCKET race story is in its

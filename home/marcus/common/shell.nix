@@ -212,7 +212,7 @@
         ZSH_THEME_GIT_PROMPT_DIRTY="%F{#89b4fa}) %F{#f9e2af}✗%f"
         ZSH_THEME_GIT_PROMPT_CLEAN="%F{#89b4fa})%f"
 
-        # The colon-named commands (secrets:*, mpvpaper:*, ...) trip
+        # The colon-named commands (secrets:*, reboot:windows, ...) trip
         # zsh's modifier completion: Tab after "name:" offers the
         # ''${var:h}-style modifier alphabet before the actual commands,
         # and accepting one builds nonsense like "secrets:c:c:c:".

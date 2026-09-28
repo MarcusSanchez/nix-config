@@ -46,8 +46,8 @@ in
   # Pairs with programs.swaylock in home/marcus/nixos/niri.nix.
   security.pam.services.swaylock = { };
 
-  # session apps that ignore SIGTERM once the compositor is gone
-  # (mpvpaper blocks on the dead Wayland socket) otherwise hold the
+  # a session app that ignores SIGTERM once the compositor is gone
+  # (anything blocking on the dead Wayland socket) otherwise holds the
   # user manager for its default 90s at shutdown — every session app
   # here stops in a second or two, so bound the wait and let the
   # SIGKILL land early
