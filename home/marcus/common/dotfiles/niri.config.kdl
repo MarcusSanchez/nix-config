@@ -844,3 +844,10 @@ window-rule {
     match app-id="google-chrome"
     open-fullscreen false
 }
+
+// Dynamic accent: DMS's matugen pass renders the active palette's
+// primary into this include on every wallpaper change and theme
+// switch (the template lives in home/marcus/nixos/dms.nix, which also
+// seeds the file — niri hard-errors on a missing include). Loaded
+// LAST so its layout values win.
+include "niri.accent.kdl"

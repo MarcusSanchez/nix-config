@@ -3,7 +3,9 @@
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-smart",
   "matugenSmartMode": true,
+  "cornerRadius": 12,
   "barElevationEnabled": false,
+  "terminalsAlwaysDark": true,
   "barConfigs": [
     {
       "id": "default",
@@ -40,12 +42,12 @@
       "widgetTransparency": 1,
       "squareCorners": false,
       "noBackground": false,
-      "gothCornersEnabled": false,
+      "gothCornersEnabled": true,
       "gothCornerRadiusOverride": false,
       "gothCornerRadiusValue": 12,
-      "borderEnabled": false,
+      "borderEnabled": true,
       "borderColor": "surfaceText",
-      "borderOpacity": 1,
+      "borderOpacity": 0.1,
       "borderThickness": 1,
       "fontScale": 1,
       "autoHide": false,
@@ -53,7 +55,13 @@
       "openOnOverview": false,
       "visible": true,
       "popupGapsAuto": true,
-      "popupGapsManual": 4
+      "popupGapsManual": 4,
+      "shadowIntensity": 0,
+      "attachToScreenEdge": true,
+      "island": false,
+      "useOverlayLayer": false,
+      "maximizeWidgetIcons": false,
+      "widgetOutlineEnabled": true
     }
   ],
   "desktopClockCustomColor": {
