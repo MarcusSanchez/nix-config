@@ -8,7 +8,7 @@
 # Two binaries from one pinned build: tryx-panorama-runtime (headless
 # D-Bus service org.tryx.Panorama, owns the device — the user service
 # below) and tryx-panorama-manager (the GUI, talks to the runtime; in
-# the spotlight via its desktop entry). Media upload, presets and
+# the launcher via its desktop entry). Media upload, presets and
 # sensor overlays all go through the GUI or the D-Bus API; state lives
 # under ~/.config. ffmpeg rides the service PATH for video conversion.
 #

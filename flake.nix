@@ -39,7 +39,7 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Secure Boot signing for the dual-boot desktops (Windows on the
+    # Secure Boot signing for the dual-boot desk (Windows on the
     # same machine effectively requires SB). Pinned to a
     # release tag on purpose; bump deliberately, not via flake update.
     lanzaboote = {
@@ -50,9 +50,9 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Ryoku, the desk PC's desktop (Hyprland + Quickshell;
-    # hosts/hero/ryoku.nix wires it and carries the whole story — the
-    # other bare-metal hosts stay niri + DMS). Deliberately NO follows:
+    # Ryoku, the bare-metal desktop (Hyprland + Quickshell;
+    # modules/nixos/ryoku.nix wires it and carries the whole
+    # story). Deliberately NO follows:
     # the port's design has Ryoku own its compositor ABI from its own
     # locked nixpkgs — the exact set its CI builds — and a follows also
     # trips our newer nixpkgs' EOL marking on the electron its
@@ -82,7 +82,7 @@
       # a hostname list hardcoded at the option it gates (the super tier in
       # secrets.nix, the rustdesk bridge in wsl/networking.nix); a fact
       # where each machine supplies its own VALUE is an option set in
-      # hosts/ (greeterScreens).
+      # hosts/ (homeEntryPoint).
       nixosConfigurations =
         nixpkgs.lib.mapAttrs
           (

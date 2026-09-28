@@ -13,10 +13,9 @@
   imports = [
     ./common
     ./nixos/ryoku.nix
-    # UI-managed-config links + drift auto-commit — zed/ghostty/
-    # .ideavimrc still ride it; the niri kdls and dms.settings.json do
-    # NOT reach this world (Ryoku materializes its own niri config, and
-    # the drift pathspec only matches files that exist as links)
+    # UI-managed-config links + drift auto-commit for zed/ghostty/
+    # .ideavimrc (Ryoku's own config is machine-local by design and
+    # never linked into the repo)
     ./common/dotfiles.nix
     ./nixos/apps.nix
   ];

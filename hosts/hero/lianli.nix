@@ -8,7 +8,7 @@
 # Split of responsibilities:
 #   - the DAEMON (built from the pinned source, daemon crate only)
 #     runs fans, RGB and LCD streaming as a user service;
-#   - the GUI (same source's Tauri app, in the spotlight as "Lian Li
+#   - the GUI (same source's Tauri app, in the launcher as "Lian Li
 #     Linux") talks to the daemon's socket for media upload, fan
 #     curves and RGB. Upstream ships no npm lockfile, so the vendored
 #     lianli-gui.package-lock.json beside this file pins the frontend

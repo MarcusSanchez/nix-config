@@ -105,9 +105,9 @@
     services.wake-side-monitors = {
       description = "Un-force the boot-disabled portrait connector before the greeter";
       wantedBy = [ "multi-user.target" ];
-      # display-manager.service, not greetd.service: SDDM carries the
-      # login screen here (hosts/hero/ryoku.nix), and every display
-      # manager provides this alias
+      # display-manager.service: SDDM carries the login screen
+      # (modules/nixos/ryoku.nix), and every display manager provides
+      # this alias
       before = [ "display-manager.service" ];
       after = [ "plymouth-quit.service" ];
       serviceConfig.Type = "oneshot";

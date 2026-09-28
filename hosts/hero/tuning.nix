@@ -11,7 +11,7 @@
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`,
 #     shell widgets and CoolerControl alike.
 #   - CoolerControl: fan curves driven off any hwmon sensor, with a
-#     GUI (in the spotlight); its daemon applies curves headlessly
+#     GUI (in the launcher); its daemon applies curves headlessly
 #     from then on, and finds the GPU's fans through the driver on
 #     its own.
 #   - LACT: the GPU tuning daemon + GUI (power limits, clocks, fan

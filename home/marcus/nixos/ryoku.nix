@@ -82,8 +82,8 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  # The DMS world spawns this from niri.config.kdl; Ryoku's session
-  # needs it running the same way for the FIDO2 key to answer.
+  # The retired DMS world spawned this from its niri config; Ryoku's
+  # session needs it running the same way for the FIDO2 key to answer.
   systemd.user.services.tpm-fido = {
     Unit = {
       Description = "TPM-backed virtual FIDO2 token";

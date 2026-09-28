@@ -7,7 +7,7 @@
 # osConfig.networking.hostName — the same value on NixOS and darwin,
 # both set from the flake's hostName specialArg.
 #
-# Imported EXPLICITLY by the desktop.nix and darwin.nix entry points,
+# Imported EXPLICITLY by the ryoku.nix and darwin.nix entry points,
 # and deliberately NOT aggregated by common/default.nix: the WSL boxes
 # manage none of these files — no GUI runs there, and the Windows sides
 # of those PCs are unmanaged on purpose.
@@ -39,9 +39,10 @@ in
 
     # ghostty: the platform entry file, with the shared base linked
     # BESIDE it — ghostty resolves the entry's config-file include
-    # against the entry's own directory (the same trap as niri's
-    # include). The package is elsewhere: home/marcus/nixos/apps.nix on
-    # the desktops, a brew cask on the mac.
+    # against the entry's own directory, not the target's (a symlink
+    # include trap; niri had the same one in its day). The package is
+    # elsewhere: home/marcus/nixos/apps.nix on the desktop, a brew cask
+    # on the mac.
     "ghostty/config".source = link (
       if pkgs.stdenv.hostPlatform.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
     );
