@@ -183,7 +183,7 @@
       "gothCornerRadiusValue": 2,
       "gothCornersEnabled": true,
       "id": "side",
-      "innerPadding": 4,
+      "innerPadding": 8,
       "leftWidgets": [
         "launcherButton",
         "workspaceSwitcher"
@@ -216,7 +216,7 @@
       "widgetOutlineColor": "surfaceText",
       "useOverlayLayer": true,
       "island": false,
-      "barInsetPadding": 4,
+      "barInsetPadding": 16,
       "barLengthPadding": 0,
       "widgetPadding": 8
     }
