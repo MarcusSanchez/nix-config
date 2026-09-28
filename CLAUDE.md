@@ -324,8 +324,11 @@ home/marcus/
                            niri.host.kdl, linked per hostname; a NEW
                            desktop host must commit its file BEFORE
                            first switch or HM links against nothing),
-                           dms.settings.json (starts empty — the DMS
-                           settings UI fills it as drift),
+                           dms.settings.json (the settings UI's
+                           accumulated drift — a few keys pair with
+                           dms.nix and ghostty.linux.config, see
+                           dms.nix's settings-link comment before
+                           wiping it),
                            xremap.yml,
                            hammerspoon.init.lua (the mac's xremap; watches
                            this directory and reloads itself on save, so

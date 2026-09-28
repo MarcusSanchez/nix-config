@@ -212,10 +212,10 @@
         ZSH_THEME_GIT_PROMPT_DIRTY="%F{#89b4fa}) %F{#f9e2af}✗%f"
         ZSH_THEME_GIT_PROMPT_CLEAN="%F{#89b4fa})%f"
 
-        # The colon-named commands (wallpaper:*, secrets:*, ...) trip
+        # The colon-named commands (secrets:*, mpvpaper:*, ...) trip
         # zsh's modifier completion: Tab after "name:" offers the
         # ''${var:h}-style modifier alphabet before the actual commands,
-        # and accepting one builds nonsense like "wallpaper:c:c:c:".
+        # and accepting one builds nonsense like "secrets:c:c:c:".
         # The modifiers tag is DISABLED outright ('!' excludes it, the
         # trailing '-' forbids the fallback attempt that would have
         # offered it anyway) — modifier syntax itself still works when

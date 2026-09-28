@@ -2,7 +2,6 @@
   "currentThemeName": "dynamic",
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-smart",
-  "matugenSmartMode": true,
   "matugenSourceMode": "wallpaper",
   "popupTransparency": 0.95,
   "dockTransparency": 0.5,
@@ -42,6 +41,11 @@
     },
     {
       "id": "idleInhibitor",
+      "enabled": true,
+      "width": 50
+    },
+    {
+      "id": "darkMode",
       "enabled": true,
       "width": 50
     }

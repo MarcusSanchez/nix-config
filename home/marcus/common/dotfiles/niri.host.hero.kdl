@@ -5,8 +5,8 @@
 // links against nothing). Output blocks belong in niri.outputs.kdl,
 // keyed by connector.
 
-// the animated middle layer, replayed from the last look's recorded
-// choice (mpvpaper:toggle persists on/off — see niri.nix). The video
+// the animated middle layer, replayed from the recorded on/off
+// choice (mpvpaper:toggle persists it — see niri.nix). The video
 // itself (~/Pictures/Wallpapers/live/spaceman.mp4) is machine-local,
 // NOT in the repo — until a copy lands at that path, an "on" replay
 // starts mpvpaper which exits instantly: harmless, and the static

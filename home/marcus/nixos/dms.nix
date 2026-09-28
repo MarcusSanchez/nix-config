@@ -22,9 +22,11 @@
   xdg.configFile = {
     # DMS caveat, same as the zed links: it may atomically replace
     # settings.json's link with a plain file on save; HM re-links and
-    # hm-backups it on the next switch. The target starts as an empty
-    # object — DMS runs on its defaults and writes choices back through
-    # the link.
+    # hm-backups it on the next switch. The target is the accumulated
+    # UI drift, and a few of its keys are LOAD-BEARING pairs with this
+    # file (launcherLogoSizeOffset with the dms-shell source patch
+    # below, terminalsAlwaysDark with ghostty.linux.config's dankcolors
+    # theme) — a wipe back to {} costs those, not just cosmetics.
     "DankMaterialShell/settings.json".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/dms.settings.json";
 

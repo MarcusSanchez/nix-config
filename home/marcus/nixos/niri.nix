@@ -87,15 +87,14 @@ in
     '')
 
     # kill/revive the animated wallpaper on demand (games, benchmarks,
-    # or just wanting the still), plus explicit on/off verbs so other
-    # tools (wallpaper:<name> in dms.nix) can command a known state.
-    # Every call PERSISTS its state to ~/.local/state/desk-mpvpaper, and
-    # the spawn-at-startup in niri.host.hero.kdl reads it back — so a
-    # reboot restores the last look's choice instead of blindly starting
-    # the video over a still-wallpaper look (galaxy/flake/swirls). With
-    # it off, the static layer beneath (swaybg/DMS) shows. Harmless on a
-    # host without that connector: mpvpaper just exits. Colon name = the
-    # reboot:windows file-inside-a-derivation shape.
+    # or just wanting the still), plus explicit on/off verbs so scripts
+    # can command a known state instead of blindly toggling. Every call
+    # PERSISTS its state to ~/.local/state/desk-mpvpaper, and the
+    # spawn-at-startup in niri.host.hero.kdl reads it back — so a
+    # reboot restores the last choice instead of blindly starting the
+    # video. With it off, the static layer beneath (swaybg/DMS) shows.
+    # Harmless on a host without that connector: mpvpaper just exits.
+    # Colon name = the reboot:windows file-inside-a-derivation shape.
     (pkgs.runCommand "mpvpaper-toggle" { } ''
       mkdir -p $out/bin
       install -m755 ${pkgs.writeShellScript "mpvpaper-toggle" ''
