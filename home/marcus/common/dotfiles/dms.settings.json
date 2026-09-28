@@ -2,6 +2,7 @@
   "currentThemeName": "dynamic",
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-smart",
+  "matugenSmartMode": true,
   "matugenSourceMode": "wallpaper",
   "cornerRadius": 12,
   "barElevationEnabled": false,
@@ -43,6 +44,7 @@
       "width": 50
     }
   ],
+  "launcherLogoMode": "os",
   "terminalsAlwaysDark": true,
   "screenPreferences": {
     "lockScreen": [
@@ -92,7 +94,7 @@
       "openOnOverview": false,
       "popupGapsAuto": true,
       "popupGapsManual": 4,
-      "position": 2,
+      "position": 0,
       "rightWidgets": [
         "systemTray",
         "cpuUsage",
