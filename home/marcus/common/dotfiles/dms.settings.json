@@ -44,14 +44,36 @@
       "width": 50
     }
   ],
+  "mediaUseAlbumArtAccent": true,
   "launcherStyle": "island",
+  "dashTabs": [
+    {
+      "id": "media",
+      "enabled": true
+    },
+    {
+      "id": "weather",
+      "enabled": true
+    },
+    {
+      "id": "overview",
+      "enabled": true
+    },
+    {
+      "id": "wallpaper",
+      "enabled": true
+    },
+    {
+      "id": "settings",
+      "enabled": true
+    }
+  ],
   "launcherLogoMode": "os",
   "launcherLogoCustomPath": "/home/marcus/.local/share/dms/nix-snowflake.svg",
   "launcherLogoColorOverride": "primary",
   "launcherLogoBrightness": 0,
   "terminalsAlwaysDark": true,
   "showDock": true,
-  "dockSmartAutoHide": true,
   "dockOpenOnOverview": true,
   "dockSpacing": 8,
   "dockMargin": 10,
