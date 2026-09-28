@@ -7,7 +7,7 @@
 # osConfig.networking.hostName — the same value on NixOS and darwin,
 # both set from the flake's hostName specialArg.
 #
-# Imported EXPLICITLY by the ryoku.nix and darwin.nix entry points,
+# Imported EXPLICITLY by the nixos.nix and darwin.nix entry points,
 # and deliberately NOT aggregated by common/default.nix: the WSL boxes
 # manage none of these files — no GUI runs there, and the Windows sides
 # of those PCs are unmanaged on purpose.
@@ -47,11 +47,6 @@ in
       if pkgs.stdenv.hostPlatform.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
     );
     "ghostty/ghostty.config".source = link "ghostty.config";
-    # the mocha mask the linux entry includes after ryoku-colors
-    # (background-only wallpaper theming — its header has the story);
-    # linked on the mac too, where nothing includes it — harmless, and
-    # the link set stays one list
-    "ghostty/ghostty.mocha-mask.config".source = link "ghostty.mocha-mask.config";
   };
 
   home.file.".ideavimrc".source = link ".ideavimrc";

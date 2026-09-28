@@ -1,0 +1,45 @@
+// Output layout, split out of niri.config.kdl — the session includes
+// this file (niri resolves relative includes against ~/.config/niri/,
+// where both files are linked). The GREETER's compositor does not read
+// it: its layout is the per-host greeterOutputs option in
+// modules/nixos/greeter.nix — keep the blocks there in step with these.
+//
+// Multi-machine convention: outputs are keyed by connector name, and a
+// block for a connector the machine doesn't have is inert — this ONE
+// file serves every host; add blocks, never fork it. On a machine with
+// other monitors, run `niri msg outputs` for their connector names and
+// add a block per monitor here (position/mode/scale — the commented
+// template in niri.config.kdl shows the fields); until then they
+// auto-place in connector order.
+
+// hero: two monitors, left to right — the 1440p VERTICAL on HDMI-A-1,
+// the 4K on DP-3. Modes are each
+// panel's maximum — the 1440p's preferred mode is a lazy 60 Hz, so
+// the 320 Hz mode must be pinned or that is what you get. The 4K is
+// centred against the portrait's 2048 logical height
+// ((2048-1234)/2 = 407) so the cursor crosses at a steady height.
+//
+// The desk works as: the portrait holds static/reading things, the 4K
+// is the scrollable workspace. Verify connector names with `niri msg
+// outputs` after any cable change — the layout follows the PORT, not
+// the panel.
+//
+// transform "270" is the rotation source (if text ever renders
+// upside down, the fix is "90" here). Do NOT add a panel_orientation
+// kernel param alongside it: niri COMPOSES the two.
+//
+// Portrait logical size at scale 1.25: 1440/1.25 = 1152 exactly, so
+// the 4K's x=1152 has no fractional-overlap trap — keep the division
+// exact if the scale ever changes.
+output "HDMI-A-1" {
+    mode "2560x1440@320.001"
+    transform "270"
+    scale 1.25
+    position x=0 y=0
+}
+
+output "DP-3" {
+    mode "3840x2160@240.000"
+    scale 1.75
+    position x=1152 y=407
+}

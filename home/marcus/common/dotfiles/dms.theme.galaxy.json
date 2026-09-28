@@ -1,0 +1,20 @@
+{
+  "name": "Galaxy Ice",
+  "primary": "#a9cbe8",
+  "primaryText": "#0d1117",
+  "primaryContainer": "#33506e",
+  "secondary": "#8da4bd",
+  "surface": "#111319",
+  "surfaceText": "#d3dae4",
+  "surfaceVariant": "#232733",
+  "surfaceVariantText": "#b9c2cf",
+  "surfaceTint": "#a9cbe8",
+  "background": "#111319",
+  "backgroundText": "#d3dae4",
+  "outline": "#6f7887",
+  "surfaceContainerLowest": "#090a0e",
+  "surfaceContainerLow": "#0e1015",
+  "surfaceContainer": "#151823",
+  "surfaceContainerHigh": "#232733",
+  "surfaceContainerHighest": "#323848"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Nix Flake Blue",
+  "primary": "#7ebae4",
+  "primaryText": "#101319",
+  "primaryContainer": "#33547f",
+  "secondary": "#5277c3",
+  "surface": "#14161f",
+  "surfaceText": "#ccd4e4",
+  "surfaceVariant": "#262a3a",
+  "surfaceVariantText": "#b7c0d4",
+  "surfaceTint": "#7ebae4",
+  "background": "#14161f",
+  "backgroundText": "#ccd4e4",
+  "outline": "#77809c",
+  "surfaceContainerLowest": "#0d0e15",
+  "surfaceContainerLow": "#12131c",
+  "surfaceContainer": "#191b2c",
+  "surfaceContainerHigh": "#262a3a",
+  "surfaceContainerHighest": "#363b52"
+}

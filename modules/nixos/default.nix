@@ -18,7 +18,7 @@
     # the desktop session
     ./boot.nix
     ./security.nix
-    ./ryoku.nix
+    ./niri.nix
     ./greeter.nix
     ./system.nix
     ./networking.nix

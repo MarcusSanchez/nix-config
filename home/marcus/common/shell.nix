@@ -33,13 +33,12 @@
     # dies with "platform mismatch: required x86_64-linux" — so the mac
     # loses its only way to check desktop changes. No-op on WSL/mac.
     swaylock.enable = false;
-    # GTK theming belongs to Ryoku on the desktops (adw-gtk3 + matugen
-    # follow the wallpaper) — no HM gtk module exists anywhere any more,
-    # so this is a dormant guard: if one ever returns, autoEnable's GTK
-    # port would force Papirus icons over it, and Papirus was rejected
-    # on looks (its restyled app icons replace the native ones — the
-    # breakage once blamed on it was Plasma-leftover fallout).
-    # No-op on WSL/mac.
+    # autoEnable's GTK port would force Papirus icons over the Adwaita
+    # set home/marcus/nixos/theme.nix pins — and with Adwaita named,
+    # apps fall through to their own hicolor icons (the native look).
+    # Papirus itself works (the breakage once blamed on it was
+    # Plasma-leftover fallout) — it stays off purely on looks, because
+    # its restyled app icons replace the native ones. No-op on WSL/mac.
     gtk.icon.enable = false;
   };
 

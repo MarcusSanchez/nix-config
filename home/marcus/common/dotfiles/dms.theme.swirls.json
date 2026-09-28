@@ -1,0 +1,20 @@
+{
+  "name": "Marble Rose",
+  "primary": "#de92a5",
+  "primaryText": "#1c1218",
+  "primaryContainer": "#7e4a5a",
+  "secondary": "#8fc6d8",
+  "surface": "#171a26",
+  "surfaceText": "#dcd8e0",
+  "surfaceVariant": "#2d3245",
+  "surfaceVariantText": "#c2c4d4",
+  "surfaceTint": "#de92a5",
+  "background": "#171a26",
+  "backgroundText": "#dcd8e0",
+  "outline": "#7d8299",
+  "surfaceContainerLowest": "#0e1017",
+  "surfaceContainerLow": "#131521",
+  "surfaceContainer": "#202538",
+  "surfaceContainerHigh": "#2d3245",
+  "surfaceContainerHighest": "#3d4359"
+}

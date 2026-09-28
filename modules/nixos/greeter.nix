@@ -1,16 +1,14 @@
-# The login screen: DMS's greetd-based greeter, recreated after a brief
-# SDDM interlude (Ryoku's theme couldn't rotate the portrait — SDDM's
-# compositor knows nothing of the session's machine-local monitor pins —
-# and had no per-screen story; this greeter solved both long ago). The
-# greeter is its own niri + quickshell world and hands off to whatever
-# wayland session is picked — Ryoku's niri by default. Greeter/display-
-# manager changes ship via `nixos-rebuild boot` + reboot, not `switch` —
-# switch would kill the live session out from under the user.
+# The login screen: DMS's greetd-based greeter — the greeter-only
+# monitor story (side monitors dark, one sign-in UI), the login-screen
+# half of the DMS desktop this session enters. Survived the Ryoku
+# interlude wholesale (SDDM was tried there and couldn't rotate the
+# portrait or filter screens; this machinery solved both long ago).
+# Greeter/display-manager changes ship via `nixos-rebuild boot` +
+# reboot, not `switch` — switch would kill the live session out from
+# under the user.
 #
 # Module and package both come from nixpkgs (the greeter split into its
 # own dank-greeter repo upstream, nixpkgs adopted both halves).
-# accounts-daemon, which persists the avatar below, is enabled in
-# ./ryoku.nix with the rest of the desktop's system services.
 {
   config,
   lib,
@@ -66,14 +64,14 @@ in
     '';
   };
 
-  # The session's monitor layout lives machine-local in Ryoku's
-  # ~/.config/niri/monitors_user.kdl, which the greeter's own niri
-  # cannot read (wrong user, and system config must not reach into a
-  # home) — so each host restates its output blocks here, the same
-  # per-machine-VALUE shape as greeterScreens. Unset, the greeter runs
-  # every monitor untransformed at scale 1: sideways on a vertical
-  # monitor, tiny on a 4K — exactly the SDDM failure this greeter
-  # replaced.
+  # The greeter compositor's output layout, restated per host — the
+  # same per-machine-VALUE shape as greeterScreens. The session's
+  # layout lives in home/marcus/common/dotfiles/niri.outputs.kdl; an
+  # earlier greeter read that file directly across the layers, and the
+  # option keeps the layers decoupled instead (the price is keeping
+  # the blocks in step by hand). Unset, the greeter runs every monitor
+  # untransformed at scale 1: sideways on a vertical monitor, tiny on
+  # a 4K.
   options.greeterOutputs = lib.mkOption {
     type = lib.types.lines;
     default = "";
@@ -84,8 +82,8 @@ in
     '';
     description = ''
       niri output blocks (connector-keyed kdl) for the greeter's
-      compositor — keep them in step with the machine's
-      monitors_user.kdl.
+      compositor — keep them in step with the machine's blocks in
+      niri.outputs.kdl.
     '';
   };
 
@@ -106,9 +104,14 @@ in
       };
 
       # No auto-login: boot lands on the greeter, and a login enters
-      # the picked wayland session — Ryoku's niri by default.
+      # the niri session, where DMS runs.
       defaultSession = "niri";
     };
+
+    # DMS persists the profile picture through AccountsService; without
+    # the daemon, a set avatar only lives in session memory and
+    # vanishes on reboot.
+    services.accounts-daemon.enable = true;
 
     # The greeter runs niri with its OWN generated config, so unaided it
     # drives every monitor untransformed at scale 1. The DMS launcher

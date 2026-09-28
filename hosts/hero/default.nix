@@ -41,15 +41,14 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  homeEntryPoint = ../../home/marcus/ryoku.nix;
+  homeEntryPoint = ../../home/marcus/nixos.nix;
 
   # Which connectors carry the greeter's sign-in UI, and the greeter
   # compositor's output layout: only the 4K runs at the login screen —
   # the portrait's SIGNAL is cut (`off`) until the session's niri
-  # lights it with the machine-local monitors_user.kdl pins (a fresh
-  # compositor inherits nothing from the greeter's). Keep the DP-3
-  # block in step with monitors_user.kdl, which the greeter cannot
-  # read.
+  # lights it from niri.outputs.kdl (a fresh compositor inherits
+  # nothing from the greeter's). Keep the DP-3 block in step with that
+  # file's.
   greeterScreens = [ "DP-3" ];
   greeterOutputs = ''
     output "HDMI-A-1" {
