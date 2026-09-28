@@ -845,21 +845,3 @@ window-rule {
     match app-id="google-chrome"
     open-fullscreen false
 }
-
-// Dynamic accent: matugen renders the wallpaper's primary color into
-// this include on every dynamic-theme regeneration (the template
-// lives in home/marcus/nixos/dms.nix, which also seeds the file —
-// niri hard-errors on a missing include). Loaded LAST so it outranks
-// the marked look-accent line in the layout section whenever dynamic
-// theming has written it.
-include "niri.accent.kdl"
-
-// DMS Include Configs
-include "dms/windowrules.kdl"
-include "dms/cursor.kdl"
-// wpblur: DMS's blurred-wallpaper overview backdrop — the rule file
-// is DMS-generated (place-within-backdrop for its dms:blurwallpaper
-// surface) and regenerates with the feature's settings toggle; the
-// include is ours to carry. Without it the overview backdrop is the
-// bare crust color above.
-include "dms/wpblur.kdl"

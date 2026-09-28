@@ -1,14 +1,8 @@
 {
-  "currentThemeName": "dynamic",
-  "currentThemeCategory": "dynamic",
+  "currentThemeName": "custom",
   "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.blue.json",
-  "matugenScheme": "scheme-smart",
-  "matugenSmartMode": true,
-  "matugenContrast": 0.02,
   "useFahrenheit": true,
   "barElevationEnabled": false,
-  "blurWallpaperOnOverview": true,
-  "wallpaperBackgroundCustomColor": "#8bc34a",
   "controlCenterWidgets": [
     {
       "id": "volumeSlider",
@@ -56,7 +50,6 @@
   "batteryLockTimeout": 600,
   "batterySuspendTimeout": 900,
   "lockBeforeSuspend": true,
-  "terminalsAlwaysDark": true,
   "lockScreenVideoPath": "/home/marcus/Pictures/Wallpapers/live/spaceman.mp4",
   "osdMediaVolumeEnabled": false,
   "osdMediaPlaybackEnabled": true,
@@ -80,9 +73,6 @@
     ],
     "toast": [
       "DP-3"
-    ],
-    "wallpaper": [
-      "all"
     ]
   },
   "barConfigs": [
@@ -90,8 +80,8 @@
       "autoHide": false,
       "autoHideDelay": 250,
       "borderColor": "surfaceText",
-      "borderEnabled": true,
-      "borderOpacity": 0.05,
+      "borderEnabled": false,
+      "borderOpacity": 1,
       "borderThickness": 1,
       "bottomGap": 0,
       "centerWidgets": [
@@ -100,8 +90,8 @@
       "enabled": true,
       "fontScale": 1,
       "gothCornerRadiusOverride": false,
-      "gothCornerRadiusValue": 2,
-      "gothCornersEnabled": true,
+      "gothCornerRadiusValue": 12,
+      "gothCornersEnabled": false,
       "id": "default",
       "innerPadding": 4,
       "leftWidgets": [
@@ -115,7 +105,7 @@
       "openOnOverview": false,
       "popupGapsAuto": true,
       "popupGapsManual": 4,
-      "position": 2,
+      "position": 0,
       "rightWidgets": [
         "systemTray",
         "cpuUsage",
@@ -132,16 +122,7 @@
       "squareCorners": false,
       "transparency": 1,
       "visible": true,
-      "widgetTransparency": 1,
-      "shadowIntensity": 0,
-      "attachToScreenEdge": true,
-      "maximizeWidgetIcons": false,
-      "maximizeWidgetText": false,
-      "removeWidgetPadding": false,
-      "widgetOutlineEnabled": true,
-      "widgetOutlineOpacity": 0.15,
-      "widgetOutlineColor": "surfaceText",
-      "useOverlayLayer": true
+      "widgetTransparency": 1
     },
     {
       "autoHide": false,
@@ -182,9 +163,7 @@
       "squareCorners": false,
       "transparency": 1,
       "visible": true,
-      "widgetTransparency": 1,
-      "shadowIntensity": 0,
-      "attachToScreenEdge": false
+      "widgetTransparency": 1
     }
   ],
   "desktopClockCustomColor": {
