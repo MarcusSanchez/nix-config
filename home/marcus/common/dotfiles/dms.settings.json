@@ -4,10 +4,10 @@
   "customThemeFile": "~/nix-config/home/marcus/common/dotfiles/dms.theme.blue.json",
   "matugenScheme": "scheme-smart",
   "matugenSmartMode": true,
-  "matugenSourceMode": "value",
-  "buttonColorMode": "primaryContainer",
+  "matugenContrast": 0.02,
   "useFahrenheit": true,
   "barElevationEnabled": false,
+  "blurWallpaperOnOverview": true,
   "wallpaperBackgroundCustomColor": "#8bc34a",
   "controlCenterWidgets": [
     {
@@ -80,6 +80,9 @@
     ],
     "toast": [
       "DP-3"
+    ],
+    "wallpaper": [
+      "all"
     ]
   },
   "barConfigs": [
@@ -87,8 +90,8 @@
       "autoHide": false,
       "autoHideDelay": 250,
       "borderColor": "surfaceText",
-      "borderEnabled": false,
-      "borderOpacity": 1,
+      "borderEnabled": true,
+      "borderOpacity": 0.05,
       "borderThickness": 1,
       "bottomGap": 0,
       "centerWidgets": [
@@ -97,8 +100,8 @@
       "enabled": true,
       "fontScale": 1,
       "gothCornerRadiusOverride": false,
-      "gothCornerRadiusValue": 12,
-      "gothCornersEnabled": false,
+      "gothCornerRadiusValue": 2,
+      "gothCornersEnabled": true,
       "id": "default",
       "innerPadding": 4,
       "leftWidgets": [
@@ -112,7 +115,7 @@
       "openOnOverview": false,
       "popupGapsAuto": true,
       "popupGapsManual": 4,
-      "position": 0,
+      "position": 2,
       "rightWidgets": [
         "systemTray",
         "cpuUsage",
@@ -131,7 +134,14 @@
       "visible": true,
       "widgetTransparency": 1,
       "shadowIntensity": 0,
-      "attachToScreenEdge": false
+      "attachToScreenEdge": true,
+      "maximizeWidgetIcons": false,
+      "maximizeWidgetText": false,
+      "removeWidgetPadding": false,
+      "widgetOutlineEnabled": true,
+      "widgetOutlineOpacity": 0.15,
+      "widgetOutlineColor": "surfaceText",
+      "useOverlayLayer": true
     },
     {
       "autoHide": false,
