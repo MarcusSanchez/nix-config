@@ -53,7 +53,6 @@
   ++
     lib.optionals
       (lib.elem config.networking.hostName [
-        "naut-dt"
         "hero"
       ])
       [

@@ -93,13 +93,10 @@
             }
           )
           {
-            naut-box = ./hosts/wsl;
             framework-dt = ./hosts/wsl;
             office-one = ./hosts/wsl;
             office-two = ./hosts/wsl;
 
-            naut-dt = ./hosts/naut-dt;
-            tuf-laptop = ./hosts/tuf-laptop;
             hero = ./hosts/hero;
           };
 
