@@ -71,7 +71,6 @@
     }
   ],
   "launcherLogoMode": "os",
-  "launcherLogoCustomPath": "/home/marcus/.local/share/dms/nix-snowflake.svg",
   "launcherLogoColorOverride": "primary",
   "launcherLogoBrightness": 0,
   "launcherLogoSizeOffset": 2,
