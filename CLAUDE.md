@@ -350,15 +350,21 @@ home/marcus/
     theme.nix              GTK/dconf theme names + pointer cursor
                            (Adwaita everywhere; see Constraints for why
                            not Papirus)
-    dms.nix                the shell stack, STOCK by choice (dms-shell/
-                           quickshell/dgop/matugen — dms-shell does NOT
-                           bundle the helpers; matugen missing = theme
-                           generation silently no-ops) + the
-                           out-of-store link for dms.settings.json
-                           (starts as {}; the settings UI fills it as
-                           git drift). The retired looks system —
-                           wallpaper:<name> commands, per-look theme
-                           jsons, shipped wallpapers/avatar, the niri
+    dms.nix                the shell stack (dms-shell/quickshell/dgop/
+                           matugen — dms-shell does NOT bundle the
+                           helpers; matugen missing = theme generation
+                           silently no-ops) + the out-of-store link for
+                           dms.settings.json (starts as {}; the settings
+                           UI fills it as git drift) + the wallpaper
+                           collection linked to ~/Pictures/Wallpapers +
+                           the matugen user config that renders the
+                           palette's primary into niri's focus ring
+                           (niri.accent.kdl — the toml's three landmines
+                           are commented at the config; the file also
+                           seeds the include so niri never hard-errors).
+                           Theme/wallpaper CHOICE stays in the UI; the
+                           retired looks system — wallpaper:<name>
+                           commands, per-look theme jsons, the niri
                            accent-sed — is whole in git history
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,

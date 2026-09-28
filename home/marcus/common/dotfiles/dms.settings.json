@@ -2,7 +2,6 @@
   "currentThemeName": "dynamic",
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-smart",
-  "matugenSmartMode": true,
   "cornerRadius": 12,
   "barElevationEnabled": false,
   "terminalsAlwaysDark": true,
@@ -61,7 +60,9 @@
       "island": false,
       "useOverlayLayer": false,
       "maximizeWidgetIcons": false,
-      "widgetOutlineEnabled": true
+      "widgetOutlineEnabled": true,
+      "widgetOutlineOpacity": 0.25,
+      "shadowOpacity": 60
     }
   ],
   "desktopClockCustomColor": {
@@ -89,6 +90,20 @@
     "hslSaturation": 0,
     "hslLightness": 1,
     "valid": true
+  },
+  "builtInPluginSettings": {
+    "dms_settings_search": {
+      "trigger": "?"
+    },
+    "dms_clipboard_search": {
+      "trigger": "cb"
+    },
+    "dms_power": {
+      "trigger": "pw"
+    },
+    "dms_qr_generator": {
+      "trigger": "qrg"
+    }
   },
   "configVersion": 18
 }
