@@ -85,7 +85,52 @@ in
     in
     {
       "DankMaterialShell/settings.json".source = link "dms.settings.json";
+
+      # Dynamic accent for niri: with the DMS theme on "dynamic"
+      # (currentThemeName in dms.settings.json), every wallpaper change
+      # regenerates the matugen palette AND runs the USER's matugen
+      # config after DMS's own (runUserMatugenTemplates, on by
+      # default). This template renders the wallpaper's primary into a
+      # tiny include that niri.config.kdl loads LAST — the focus ring
+      # follows the wallpaper the way the bar does, and niri
+      # hot-reloads when the include changes. The looks commands still
+      # sed the marked look-accent line, but this include outranks it
+      # (last include wins) whenever a matugen run has written it.
+      # The toml is deliberately comment-free plain ASCII: DMS re-parses
+      # the user config when merging it with its own templates, and a
+      # comment nixfmt rewrote with a \u{2014} escape broke that parse
+      # (matugen exit 1, logged only in the Theme worker). Rules that
+      # matter: the empty [config] table is mandatory ("missing field
+      # `config`" without it), and the paths must be ABSOLUTE — DMS
+      # skips a user template whose paths are ~-relative
+      # (danklinux.com application-themes doc).
+      "matugen/config.toml".text = ''
+        [config]
+
+        [templates.niri-accent]
+        input_path = "${config.home.homeDirectory}/.config/matugen/templates/niri-accent.kdl"
+        output_path = "${config.home.homeDirectory}/.config/niri/niri.accent.kdl"
+      '';
+      "matugen/templates/niri-accent.kdl".text = ''
+        layout {
+            focus-ring {
+                active-color "{{colors.primary.default.hex}}"
+            }
+        }
+      '';
     };
+
+  # niri hard-errors on a missing include, and matugen only writes the
+  # accent file on the first dynamic regeneration — so seed it once
+  # with the mocha-blue look accent. Write-if-absent: matugen owns the
+  # file from then on (which is also why it is NOT an xdg.configFile —
+  # HM would fight matugen's rewrites every switch).
+  home.activation.seedNiriAccent = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    f="$HOME/.config/niri/niri.accent.kdl"
+    # multiline on purpose: KDL rejects an inline child block whose last
+    # node lacks a `;` terminator
+    [ -e "$f" ] || printf 'layout {\n    focus-ring {\n        active-color "#89b4fa"\n    }\n}\n' > "$f"
+  '';
 
   # Wallpaper and avatar, carried in the repo so a fresh desktop machine
   # looks like the others without hand-setting anything. The images live
