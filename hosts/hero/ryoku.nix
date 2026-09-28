@@ -1,19 +1,18 @@
-# TRIAL: the Ryoku desktop (Hyprland + Quickshell, the maintained
-# NixOS port's module) — and FOR NOW it owns niri too: both greeter
-# doors (niri, Hyprland) land in Ryoku. niri reads exactly one config
-# entrypoint (~/.config/niri/config.kdl), so handing Ryoku the niri
-# session meant handing over that file — the HM half stops linking it
-# on this host and Ryoku's materializer lays and maintains its own.
-# DMS stays installed but dormant (its spawn-at-startup lived in the
-# repo's niri config, which nothing reads here now); the other
-# bare-metal hosts keep DMS-on-niri untouched. Giving niri back to
-# DMS = revert the commit that handed it over (restores the HM link,
-# a restore oneshot, and this header's previous form — git history
-# has all three). Full retirement additionally deletes this file +
-# import + the HM half (home/marcus/nixos/ryoku.nix) + flake input.
-# Per-user tweaks under Ryoku-niri belong in ~/.config/niri/user.kdl,
-# the machine-owned last word of their include chain; hand-pinned
-# display modes in monitors_user.kdl beside it.
+# The Ryoku desktop (Hyprland + Quickshell, the maintained NixOS
+# port's module) — THE desktop on this machine, promoted from trial
+# after the shell-variety era: it owns both sessions (niri and
+# Hyprland), the login screen (its SDDM theme below — the shared
+# dms-greeter is force-disabled here and keeps serving the DMS
+# desktops), the wallpaper, theming and locker. niri reads exactly one
+# config entrypoint (~/.config/niri/config.kdl), laid and maintained by
+# Ryoku's materializer; per-user tweaks belong in ~/.config/niri/
+# user.kdl (the machine-owned last word of their include chain —
+# hero's carries the transferred muscle-memory binds and the frosted
+# ghostty rule), hand-pinned display modes in monitors_user.kdl beside
+# it, and neutral settings in ~/.config/ryoku/desktop.json (the Hub's
+# store). The home half is home/marcus/ryoku.nix -> nixos/ryoku.nix.
+# The way back to DMS is git history: the trial-era commits carry the
+# link-restore machinery and the shared-entry wiring.
 #
 # What the module drags in and why it's accepted:
 #   - programs.niri.package gets mkForce'd to Ryoku's niri, built from
@@ -33,12 +32,11 @@
 #
 # The materializer (ryoku-materialize.service at every Ryoku session
 # start; also `ryoku materialize` by hand) lays its config payload
-# into ~/.config, REPLACING whatever sits at a shipped path. With
-# niri handed over that's now wanted for the entrypoint; the HM half
-# still force-restores the theming files it replaces (gtk settings,
-# btop) on every switch. Seeds like nvim/ and ghostty/config respect
-# existing files and symlinks by upstream's own design, so those
-# stay the repo's.
+# into ~/.config, REPLACING whatever sits at a shipped path — wanted,
+# now that Ryoku owns this desktop's config space. The one HM-managed
+# file it still collides with is btop.conf (force in the home half);
+# seeds like nvim/ and ghostty/config respect existing files and
+# symlinks by upstream's own design, so those stay the repo's.
 {
   inputs,
   lib,
@@ -64,5 +62,21 @@
   programs.ryoku = {
     enable = true;
     shell = "fish";
+  };
+
+  # Ryoku's login screen: SDDM wearing the module's "ryoku" theme (the
+  # module applies theme + Qt deps whenever sddm is enabled). The
+  # shared dms-greeter (modules/nixos/greeter.nix) is force-disabled on
+  # this host only; its niri_overrides/avatar plumbing stays inert.
+  # defaultSession "niri" from that same file still applies — SDDM
+  # preselects the niri session, which is Ryoku's. The plymouth
+  # retain-splash handoff in modules/nixos/boot.nix is
+  # greeter-agnostic and carries over.
+  services.displayManager = {
+    dms-greeter.enable = lib.mkForce false;
+    sddm = {
+      enable = true;
+      wayland.enable = true;
+    };
   };
 }

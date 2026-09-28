@@ -45,11 +45,10 @@
   # /etc/nixos` resolves.
   networking.hostName = hostName;
 
-  homeEntryPoint = ../../home/marcus/nixos.nix;
-
-  # Connectors that carry the greeter's sign-in UI on this machine — the
-  # 4K; the portrait 1440p stays blank at the login screen.
-  greeterScreens = [ "DP-3" ];
+  # The Ryoku world's entry, not the DMS desktops' nixos.nix — this
+  # desk committed to Ryoku (see ./ryoku.nix, which also swaps the
+  # login screen, so greeterScreens has no meaning here).
+  homeEntryPoint = ../../home/marcus/ryoku.nix;
 
   # The release this machine was installed under — set at install time
   # to whatever the installer produces, then never changes.
@@ -114,7 +113,10 @@
     services.wake-side-monitors = {
       description = "Un-force the boot-disabled portrait connector before the greeter";
       wantedBy = [ "multi-user.target" ];
-      before = [ "greetd.service" ];
+      # display-manager.service, not greetd.service: SDDM carries the
+      # login screen here (hosts/hero/ryoku.nix), and every display
+      # manager provides this alias
+      before = [ "display-manager.service" ];
       after = [ "plymouth-quit.service" ];
       serviceConfig.Type = "oneshot";
       script = ''
