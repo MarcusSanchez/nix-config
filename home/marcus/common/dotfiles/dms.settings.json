@@ -44,11 +44,15 @@
       "width": 50
     }
   ],
-  "launcherLogoMode": "os",
+  "launcherLogoMode": "custom",
+  "launcherLogoCustomPath": "/home/marcus/.local/share/dms/nix-snowflake.svg",
+  "launcherLogoColorOverride": "surface",
   "terminalsAlwaysDark": true,
   "showDock": true,
   "dockOpenOnOverview": true,
-  "dockIconSize": 38,
+  "dockSpacing": 8,
+  "dockMargin": 6,
+  "dockIconSize": 36,
   "dockLauncherEnabled": true,
   "dockLauncherLogoMode": "os",
   "dockLauncherLogoColorOverride": "primary",

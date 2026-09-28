@@ -83,6 +83,16 @@
     # sets one. (avatar-spaceman.png sits beside them in ./assets,
     # unlinked, for whenever a profile picture is wanted again.)
     file = {
+      # The bar's launcher glyph: launcherLogoMode "custom" in
+      # dms.settings.json points here. Custom over "os" mode on purpose —
+      # "os" renders the distro's Nerd Font glyph, whose ink sits
+      # off-center in its em box; an SVG through IconImage centers true.
+      # Same stable-path reasoning as the wallpapers below; the color
+      # override in settings recolors it, so white-vs-colored source is
+      # moot.
+      ".local/share/dms/nix-snowflake.svg".source =
+        "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg";
+
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
       "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
       "Pictures/Wallpapers/nix-flake.png".source = ./assets/nix-flake.png;
