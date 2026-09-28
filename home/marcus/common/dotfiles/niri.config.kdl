@@ -630,7 +630,10 @@ binds {
     Mod+BracketRight { consume-or-expel-window-right; }
 
     // Consume one window from the right to the bottom of the focused column.
-    Mod+Comma  { consume-window-into-column; }
+    // DMS settings on the comma (macOS preferences muscle memory);
+    // consume-window-into-column moved out — Mod+BracketLeft's
+    // consume-or-expel covers that job
+    Mod+Comma  { spawn "dms" "ipc" "call" "settings" "toggle"; }
     // Expel the bottom window from the focused column to the right.
     Mod+Period { expel-window-from-column; }
 
