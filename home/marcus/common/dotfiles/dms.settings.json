@@ -250,6 +250,30 @@
     "hslLightness": 1,
     "valid": true
   },
+  "desktopWidgetInstances": [
+    {
+      "id": "dw_modern_compare",
+      "widgetType": "modernClock",
+      "name": "Modern Clock",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          "DP-3"
+        ]
+      }
+    },
+    {
+      "id": "dw_lcd_compare",
+      "widgetType": "digitalClock",
+      "name": "LCD Clock",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          "DP-3"
+        ]
+      }
+    }
+  ],
   "builtInPluginSettings": {
     "dms_settings_search": {
       "trigger": "?"
