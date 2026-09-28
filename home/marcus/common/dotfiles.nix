@@ -47,6 +47,11 @@ in
       if pkgs.stdenv.hostPlatform.isDarwin then "ghostty.darwin.config" else "ghostty.linux.config"
     );
     "ghostty/ghostty.config".source = link "ghostty.config";
+    # the mocha mask the linux entry includes after ryoku-colors
+    # (background-only wallpaper theming — its header has the story);
+    # linked on the mac too, where nothing includes it — harmless, and
+    # the link set stays one list
+    "ghostty/ghostty.mocha-mask.config".source = link "ghostty.mocha-mask.config";
   };
 
   home.file.".ideavimrc".source = link ".ideavimrc";
