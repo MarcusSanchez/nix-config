@@ -362,6 +362,14 @@ home/marcus/
                            (niri.accent.kdl — the toml's three landmines
                            are commented at the config; the file also
                            seeds the include so niri never hard-errors).
+                           dms-shell itself carries a one-line pre-embed
+                           source patch (launcher-logo centering, the
+                           greeter's technique), so it builds from
+                           source and a DMS update that reshapes the
+                           anchored line fails the BUILD on purpose —
+                           the comment at the override explains, and its
+                           settings-side other half is
+                           launcherLogoSizeOffset in dms.settings.json.
                            Theme/wallpaper CHOICE stays in the UI; the
                            retired looks system — wallpaper:<name>
                            commands, per-look theme jsons, the niri

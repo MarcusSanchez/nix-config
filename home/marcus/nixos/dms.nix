@@ -68,15 +68,17 @@
       # dms-shell with one source patch (same pre-embed technique as the
       # greeter's screen filter in modules/nixos/greeter.nix — the QML
       # is embedded in the Go binary, so patches must land on SOURCE):
-      # the bar's custom launcher logo gets a 1px downward nudge. The
-      # icon item's integer snap consistently rounds it high in its
-      # pill, and nothing settings-side can move it — quickshell's SVG
-      # rendering auto-fits the artwork's ink bounds, so
-      # translate/viewBox/canvas edits in the SVG itself are all no-ops
-      # (proven empirically). launcherLogoSizeOffset 2 in settings fixes
-      # the same snap's horizontal half by flipping size parity. The
-      # --replace-fail anchor means a DMS update that reshapes the line
-      # breaks the BUILD, never the bar.
+      # the bar's launcher logo gets a 1px downward nudge, every mode.
+      # The glyph itself is stock DMS: launcherLogoMode "os" in
+      # dms.settings.json renders the distro's Nerd Font snowflake,
+      # tinted by launcherLogoColorOverride "primary" so it follows the
+      # wallpaper palette. Centering that glyph needs BOTH this patch
+      # (vertical — the icon item consistently rounds high in its pill,
+      # and no settings knob moves it) and launcherLogoSizeOffset 2 in
+      # settings (horizontal — the size parity decides where the
+      # rounding lands). Remeasure both if bar thickness or font scale
+      # moves. The --replace-fail anchor means a DMS update that
+      # reshapes the line breaks the BUILD, never the bar.
       (pkgs.dms-shell.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace ../quickshell/Modules/DankBar/Widgets/LauncherButton.qml \
@@ -102,26 +104,6 @@
     # sets one. (avatar-spaceman.png sits beside them in ./assets,
     # unlinked, for whenever a profile picture is wanted again.)
     file = {
-      # The bar's launcher glyph: launcherLogoMode "custom" in
-      # dms.settings.json points here. Custom over "os" mode on purpose —
-      # "os" renders the distro's Nerd Font glyph, whose ink sits
-      # off-center in its em box; an SVG through IconImage centers true.
-      # Same stable-path reasoning as the wallpapers below. Neither
-      # shipped variant works as-is: the settings color override
-      # colorizes by luminance, so the white SVG stays white no matter
-      # the tint, and the colored one's two lambda tones survive as two
-      # brightnesses — a lopsided-looking glyph. A uniform MID-GRAY ink
-      # is the fix: one luminance, so the tint lands evenly and exact.
-      # (launcherLogoSizeOffset 2 in settings is load-bearing too: the
-      # colorization layer snaps the icon texture to whole pixels, and
-      # at the default size that snap landed the glyph measurably left
-      # of the pill's center — the +2 size flips the parity so the snap
-      # lands centered. Remeasure if bar thickness or font scale moves.)
-      ".local/share/dms/nix-snowflake.svg".source = pkgs.runCommand "nix-snowflake-gray.svg" { } ''
-        sed 's/#ffffff/#808080/g' \
-          ${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg > $out
-      '';
-
       "Pictures/Wallpapers/astronaut-jellyfish.jpg".source = ./assets/astronaut-jellyfish.jpg;
       "Pictures/Wallpapers/galaxy-waves.jpg".source = ./assets/galaxy-waves.jpg;
       "Pictures/Wallpapers/nix-flake.png".source = ./assets/nix-flake.png;
