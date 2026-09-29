@@ -283,7 +283,8 @@
       "config": {
         "displayPreferences": [
           "DP-3"
-        ]
+        ],
+        "backgroundStyle": "dms"
       }
     }
   ],
