@@ -856,6 +856,13 @@ window-rule {
     clip-to-geometry true
 }
 
+// DMS-generated styling for niri's built-in recent-windows switcher
+// (the compiled-in Alt+Tab — no bind in this file): rounds the
+// switcher highlight to the desk's 12px like every other corner.
+// Machine-generated beside windowrules/cursor above; regenerated at
+// every shell start.
+include "dms/alttab.kdl"
+
 // The AudioFX plugin's surfaces (edge visualizer + wallpaper glow —
 // runtime deps and install story in home/marcus/nixos/dms.nix) stay
 // on the plain background layer. The plugin README's
