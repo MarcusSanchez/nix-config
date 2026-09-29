@@ -1,0 +1,14 @@
+{
+  "audioFx": {
+    "enabled": true
+  },
+  "modernClock": {
+    "useThemeColors": true,
+    "enabled": true
+  },
+  "depthscape": {
+    "threshold": 65,
+    "feather": 6,
+    "enabled": true
+  }
+}

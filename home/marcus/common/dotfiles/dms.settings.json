@@ -167,7 +167,6 @@
       "widgetOutlineOpacity": 0.15,
       "widgetOutlineColor": "surfaceText",
       "useOverlayLayer": false,
-      "island": false,
       "barInsetPadding": 4,
       "barLengthPadding": 0,
       "widgetPadding": 8
@@ -221,7 +220,6 @@
       "widgetOutlineOpacity": 0.15,
       "widgetOutlineColor": "surfaceText",
       "useOverlayLayer": false,
-      "island": false,
       "barInsetPadding": 16,
       "barLengthPadding": 0,
       "widgetPadding": 8

@@ -430,6 +430,8 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
+    // the xdg default via DMS, so changing browsers never touches this bind
+    Mod+B hotkey-overlay-title="Open the Browser" { spawn "dms" "ipc" "call" "defaultApp" "browser"; }
     // macOS spotlight muscle memory
     Alt+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     Mod+Space hotkey-overlay-title="Run an Application: spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
