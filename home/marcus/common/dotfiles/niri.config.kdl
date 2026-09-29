@@ -708,9 +708,13 @@ binds {
     // closes the CURRENT TAB inside it, not the window (Mod+Q / Alt+F4
     // do that). The column tabbed-display toggle moved to Mod+Shift+W.
     Mod+W { spawn "wtype" "-M" "ctrl" "-k" "w" "-m" "ctrl"; }
-    // tabbed-column toggle lives on T, not Shift+W: one slipped Shift
-    // next to the close-tab bind above cost real sessions
-    Mod+Shift+T { toggle-column-tabbed-display; }
+    // tabbed-display is deliberately UNBOUND (unused feature; its old
+    // Mod+Shift+T slot now spawns instead — `niri msg action
+    // toggle-column-tabbed-display` by hand if it's ever wanted).
+    // Terminal to the LEFT of the current column: niri has no
+    // open-left, so niri-spawn-left (home/marcus/nixos/niri.nix)
+    // spawns and moves the new column once it takes focus.
+    Mod+Shift+T hotkey-overlay-title="Terminal to the left: ghostty" { spawn "niri-spawn-left" "ghostty"; }
 
     // Actions to switch layouts.
     // Note: if you uncomment these, make sure you do NOT have
