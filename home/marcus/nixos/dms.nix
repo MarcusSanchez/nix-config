@@ -134,5 +134,20 @@
       ]))
     ];
 
+    # The depthscape plugin's QML imports Qt5Compat.GraphicalEffects,
+    # which quickshell's own closure doesn't ship — this hands the
+    # module (from the SAME nixpkgs qt6 set quickshell is built
+    # against; a mismatched Qt ABI would crash the shell) to the QML
+    # engine via the import-path vars. Both names on purpose: Qt reads
+    # QML_IMPORT_PATH, the plugin's startup check greps
+    # QML2_IMPORT_PATH. Session vars land at login — a change here
+    # needs a relogin before the shell sees it. Depthscape's Rust
+    # engine is built imperatively in the plugin checkout
+    # (engine/target/release — openssl via a transient pkg-config
+    # shell) and its model lives in ~/.local/share/depthscape.
+    sessionVariables = {
+      QML_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+      QML2_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+    };
   };
 }
