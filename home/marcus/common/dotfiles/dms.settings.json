@@ -263,6 +263,28 @@
         "syncPositionAcrossScreens": true,
         "useThemeColors": true
       }
+    },
+    {
+      "id": "dw_ddw_compare",
+      "widgetType": "dankDesktopWeather",
+      "name": "Desktop Weather",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          "DP-3"
+        ]
+      }
+    },
+    {
+      "id": "dw_wart_compare",
+      "widgetType": "weatherArt",
+      "name": "Weather Art",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          "DP-3"
+        ]
+      }
     }
   ],
   "builtInPluginSettings": {
