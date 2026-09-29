@@ -263,29 +263,6 @@
         "syncPositionAcrossScreens": true,
         "useThemeColors": true
       }
-    },
-    {
-      "id": "dw_conky",
-      "widgetType": "dmsconky",
-      "name": "DMS Conky",
-      "enabled": true,
-      "config": {
-        "displayPreferences": [
-          "DP-3"
-        ]
-      }
-    },
-    {
-      "id": "dw_frame",
-      "widgetType": "mediaFrame",
-      "name": "Media Frame",
-      "enabled": true,
-      "config": {
-        "displayPreferences": [
-          "DP-3"
-        ],
-        "imagePath": "~/Pictures/Wallpapers/wallhaven-ly2yg2.jpg"
-      }
     }
   ],
   "builtInPluginSettings": {
