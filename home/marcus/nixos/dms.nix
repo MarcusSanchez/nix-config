@@ -121,6 +121,12 @@
       #     playback below threshold and the canvas fades out
       #     entirely; auto-gain is what made the Ryoku visualizer
       #     dance at any volume.
+      # The modernClock plugin (desktop clock, both monitors) carries
+      # one too: ModernClock.qml's useThemeColors branch retargeted
+      # Theme.surfaceText -> Theme.primary, so the clock wears the
+      # wallpaper accent like the launcher snowflake instead of
+      # near-white. Its instance config (position sync, theme-colors
+      # flag) rides dms.settings.json's desktopWidgetInstances.
       pkgs.cava
       (pkgs.python3.withPackages (ps: [
         ps.numpy
