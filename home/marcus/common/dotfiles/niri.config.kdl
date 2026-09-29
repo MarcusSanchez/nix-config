@@ -148,9 +148,10 @@ layout {
     // worse than the wart.
     center-focused-column "never"
 
-    // a lone window sits centered instead of hugging the left edge;
-    // as soon as a second column appears, normal strip behavior resumes
-    always-center-single-column
+    // No automatic centering at all — a lone column hugs the left edge
+    // like the rest of the strip, and centering is always the explicit
+    // Mod+C (center-column, in binds below). The retired
+    // always-center-single-column line is one `git log -S` away.
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
     preset-column-widths {
