@@ -84,7 +84,7 @@
   "dockOpenOnOverview": true,
   "dockSpacing": 8,
   "dockMargin": 10,
-  "dockIconSize": 36,
+  "dockIconSize": 48,
   "dockLauncherEnabled": true,
   "dockLauncherLogoMode": "os",
   "dockLauncherLogoColorOverride": "primary",
