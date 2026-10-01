@@ -2,6 +2,7 @@
   "currentThemeName": "dynamic",
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-smart",
+  "matugenSmartMode": true,
   "matugenSourceMode": "colorful",
   "popupTransparency": 0.95,
   "dockTransparency": 0.5,
