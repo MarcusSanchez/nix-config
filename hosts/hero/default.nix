@@ -12,7 +12,11 @@
 # read-only Windows mount) and the one-monitor boot splash.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
-{ config, inputs, hostName, ... }:
+{
+  inputs,
+  hostName,
+  ...
+}:
 
 {
   imports = [
@@ -178,22 +182,18 @@
     };
   };
 
-  # FLICKER EXPERIMENT, temporary: content-dependent flicker on BOTH
-  # panels, proven earlier to live below the compositor (screen
-  # captures during it are pixel-identical). Both-monitors rules out
-  # panel firmware as the sole cause and points at the driver: the
-  # 595 series has a documented Wayland-compositor flicker regression
-  # (hyprwm/Hyprland discussion 13792 — "roll back to 590 or below";
-  # KDE unaffected), and this box runs 595.104.02 with a smithay
-  # compositor. Jumping FORWARD two majors instead of back, to keep
-  # Blackwell support fresh. If flicker persists on 615, the next
-  # discriminator is nvidiaPackages.legacy_580; if that's clean, it
-  # was the 595 regression. Delete when settled.
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.latest;
+  # (The screen-flicker hunt that briefly pinned the nvidia driver to
+  # `latest` here ended elsewhere: the depthscape plugin's foreground
+  # surface — a full-screen wallpaper copy whenever the depth model
+  # found no depth in an image — was the trigger, and the plugin is
+  # gone. Driver follows nixpkgs' default again.)
 
   # KNOWN BOOT WART, parked pending upstream (systemd 261.2): the
   # initrd udevd deadlocks SILENTLY in its own exit path at
-  # switch-root on EVERY boot of this machine — the debug boot proved
+  # switch-root on WARM boots of this machine (cold boots observed
+  # clean — the AIO screen's free-running reset state survives warm
+  # reboots, the same warm-vs-cold family as the combo card's BT
+  # latch in ./bluetooth.nix) — the debug boot proved
   # all workers exit cleanly in milliseconds, it logs "Serialized
   # configurations", then nothing until systemd SIGKILLs it at the
   # stop timeout. The kill poisons the initrd->host udev handoff, and
