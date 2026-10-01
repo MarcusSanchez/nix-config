@@ -11,8 +11,8 @@ keymap:
   # Alt+J/K are up/down arrows EVERYWHERE — vim apps included.
   # J=up / K=down follows the same swapped convention as the niri binds.
   # exact_match keeps chords with MORE modifiers out of these rules:
-  # xremap's default match allows extras and forwards them, so
-  # Super+Alt+L used to reach niri as Super+Right and eat the lock
+  # xremap's default match allows extra modifiers and forwards them,
+  # which would turn Super+Alt+L into Super+Right and eat the lock
   # bind. Same guard on both arrow keymaps.
   - name: vertical-arrows-always
     exact_match: true

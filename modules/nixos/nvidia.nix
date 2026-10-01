@@ -40,10 +40,10 @@
     # required for any Wayland compositor
     modesetting.enable = lib.mkDefault true;
 
-    # the open kernel module — NVIDIA's recommended path for Turing and
-    # newer, and the ONLY option on the newest generations (the legacy
-    # proprietary blob never learned them). A pre-Turing card sets
-    # open = false at host level.
+    # the open kernel module — NVIDIA's recommended path for every
+    # GSP-capable generation, and the ONLY option on the newest ones
+    # (the legacy proprietary blob never learned them). A card too old
+    # for it sets open = false at host level.
     open = lib.mkDefault true;
 
     nvidiaSettings = lib.mkDefault true;

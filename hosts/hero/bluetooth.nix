@@ -1,13 +1,13 @@
-# The onboard MediaTek MT7927 (MT6639) combo card's bluetooth half.
-# Kernels before 7.1 don't know the chip: btusb binds it by device
-# class only, never runs the MediaTek init that uploads firmware, and
-# the first HCI command dies with EBUSY — so this builds the
-# upstream-backport btusb/btmtk from the mediatek-mt7927-dkms release
-# artifact (which ships the kernel-7.1 bluetooth sources with its
-# compat patches pre-applied AND the BT_RAM_CODE_MT6639 firmware,
-# which linux-firmware does not carry — only the chip's WIFI blobs
-# are upstream). The modules land in updates/, which depmod prefers
-# over the in-tree pair, so modprobe resolves ours without blacklists.
+# The onboard MediaTek combo card's bluetooth half. Kernels before
+# 7.1 don't know the chip: btusb binds it by device class only, never
+# runs the MediaTek init that uploads firmware, and the first HCI
+# command dies with EBUSY — so this builds the upstream-backport
+# btusb/btmtk from the mediatek-mt7927-dkms release artifact (which
+# ships the kernel-7.1 bluetooth sources with its compat patches
+# pre-applied AND the chip's BT firmware blob, which linux-firmware
+# does not carry — only the WIFI blobs are upstream). The modules
+# land in updates/, which depmod prefers over the in-tree pair, so
+# modprobe resolves ours without blacklists.
 #
 # HOST-level like nvidia.nix: chip-specific hardware truth. The
 # module build self-retires when nixpkgs reaches kernel 7.1 (native
@@ -88,7 +88,7 @@ in
     # the M.2 slot's 3.3V standby rail preserves the corpse across
     # every warm reboot and soft-off, so only a PSU-off power drain
     # revives it. Keeping the half out of runtime suspend is the
-    # documented workaround for the same latch on the MT7922/25
+    # documented workaround for the same latch on the chip's older
     # siblings
     extraModprobeConfig = "options btusb enable_autosuspend=n";
 

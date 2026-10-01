@@ -6,9 +6,9 @@
 { inputs, ... }:
 
 {
-  # Positions preserved from the retired ./secrets.nix and ./home-manager.nix
-  # shims: darwin concatenates equal-priority activation-script text in
-  # definition order, so moving these imports moves the script and the drv.
+  # Import order is load-bearing: darwin concatenates equal-priority
+  # activation-script text in definition order, so reordering these
+  # imports changes the activation script and the drv.
   imports = [
     ../common
     ./nix.nix

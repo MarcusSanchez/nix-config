@@ -3,8 +3,7 @@
 # session, every concern named here, imported from ./common and
 # ./nixos. Any future bare-metal machine shares this entry the way the
 # WSL boxes share wsl.nix; it splits per-host the day a real
-# divergence appears (it did once, for the Ryoku adoption — git
-# history has that world's ryoku.nix entry).
+# divergence appears.
 { ... }:
 
 {

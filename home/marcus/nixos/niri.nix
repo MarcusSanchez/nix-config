@@ -134,8 +134,7 @@ in
   # feed, the per-app `not:` matchers pass vacuously, and the alt-hjkl
   # remaps capture inside neovim/Zed/JetBrains. Reading the CURRENT
   # manager environment (and waiting briefly for the import) at exec
-  # time makes the service immune to login ordering in every session
-  # that runs niri, the COSMIC one included.
+  # time makes the service immune to login ordering.
   systemd.user.services.xremap = {
     Unit = {
       Description = "Per-application key remapping (niri variant)";

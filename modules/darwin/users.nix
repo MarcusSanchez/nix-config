@@ -7,10 +7,10 @@
 }:
 
 let
-  # Source of truth for identity.username on darwin (the option lives in
-  # modules/common/identity.nix). marcus is the norm; the Air is the one
-  # legacy exception until its factory reset unifies it — at which point
-  # this map empties and every Mac is marcus. Keyed on the hostName
+  # Source of truth for identity.username on darwin (the option lives
+  # in modules/common/identity.nix). The default below is the norm;
+  # the Air is the one legacy exception until its factory reset
+  # unifies it — at which point this map empties. Keyed on the hostName
   # SPECIALARG, not config: it resolves outside the module fixpoint, so
   # the dynamic users.users attr name below is safe from the recursion
   # the identity.nix guard rail warns about (which only bites when the

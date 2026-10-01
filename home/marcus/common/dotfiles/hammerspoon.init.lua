@@ -1,5 +1,5 @@
 -- Hammerspoon: per-application key remapping — the macOS half of
--- dotfiles/xremap.yml, which does the same job on the laptop.
+-- dotfiles/xremap.yml, which does the same job on the Linux side.
 --
 -- Why Hammerspoon and not Karabiner-Elements, which is the obvious
 -- choice: the rules below need the FOCUSED WINDOW'S TITLE (to leave a

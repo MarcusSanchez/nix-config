@@ -691,18 +691,15 @@ binds {
 
     // Move the focused window between the floating and the tiling layout.
     // Mod+V is clipboard HISTORY (Windows Win+V muscle memory) — the
-    // DMS picker over what the cliphist watchers stored. Float toggle
-    // moved to Mod+Shift+V for it; layer-hop demoted to Mod+Ctrl+V.
+    // DMS picker over what the cliphist watchers stored; the float
+    // toggle and layer-hop take the shifted variants.
     Mod+V hotkey-overlay-title="Clipboard history" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
     Mod+Shift+V { toggle-window-floating; }
     Mod+Ctrl+V  { switch-focus-between-floating-and-tiling; }
 
-    // Toggle tabbed column display mode.
-    // Windows in this column will appear as vertical tabs,
-    // rather than stacked on top of each other.
     // browser-tab instinct: Mod+W forwards a real Ctrl+W to the app —
     // closes the CURRENT TAB inside it, not the window (Mod+Q / Alt+F4
-    // do that). The column tabbed-display toggle moved to Mod+Shift+W.
+    // do that).
     Mod+W { spawn "wtype" "-M" "ctrl" "-k" "w" "-m" "ctrl"; }
     // tabbed-display is deliberately unbound (unused; `niri msg
     // action toggle-column-tabbed-display` by hand if ever wanted).

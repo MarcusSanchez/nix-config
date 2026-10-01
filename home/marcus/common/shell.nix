@@ -124,8 +124,8 @@
       enable = true;
       nix-direnv.enable = true;
       # Silence the per-cd chatter; only log lines matching "error"
-      # survive, so a broken .envrc still shows up loud. (The old
-      # DIRENV_LOG_FORMAT="" trick no longer silences direnv 2.37+.)
+      # survive, so a broken .envrc still shows up loud. (direnv 2.37+
+      # ignores an empty DIRENV_LOG_FORMAT, so this is the only lever.)
       # devenv is deliberately NOT quieted the same way: its step lines
       # are the only sign a slow shell build is working, not idling.
       config.global.log_filter = "error";

@@ -33,7 +33,7 @@
   # before Apple's sshd ever sees it. This is the fallback for when
   # tailscaled is down (nix-darwin#1688): Apple's sshd answering on the
   # LAN, authenticating with the account password. No authorized_keys
-  # anywhere — the key that used to live here was deleted with ssh.nix.
+  # exist anywhere in this config — password auth is the only door.
   services.openssh.enable = true;
 
   # Spotlight's ⌘Space hotkey off, so Raycast can claim it. Symbolic hotkey

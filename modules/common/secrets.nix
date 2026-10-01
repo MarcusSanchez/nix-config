@@ -77,8 +77,8 @@ in
         # Bare values, all owner-read-only. What each one is:
         #   gh_token        rendered into gh-hosts.yml above; deliberately a
         #                   LOW-scope token (repo + workflow) so it is safe
-        #                   on every tier — admin scopes were retired with
-        #                   the tier split, not tiered
+        #                   on every tier — admin scopes belong in no
+        #                   tier at all
         #   croc_secret     croc's code phrase, exported as CROC_SECRET — same
         #                   value everywhere means bare `croc send`/`croc` pair
         #   atuin_key       E2E history key (programs.atuin key_path) — the one
