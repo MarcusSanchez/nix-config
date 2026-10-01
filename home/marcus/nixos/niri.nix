@@ -82,13 +82,11 @@ in
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
     '')
 
-    # spawn a command and land its window LEFT of the current column
-    # (Mod+Shift+T in niri.config.kdl) — niri has no open-left: new
-    # windows always open to the right, so this waits for the new
-    # window to take focus and moves its column once. The focus-change
-    # watch is the only reliable signal; the trade-off is that
-    # refocusing something else within the ~5s window moves THAT
-    # column instead — short enough in practice to accept.
+    # spawn a command and land its window left of the current column
+    # (Mod+Shift+T in niri.config.kdl). niri has no open-left, so this
+    # waits for the new window to take focus and moves its column
+    # once; refocusing elsewhere during the wait window moves that
+    # column instead — accepted for fast-launching apps.
     (pkgs.runCommand "niri-spawn-left" { } ''
       mkdir -p $out/bin
       install -m755 ${pkgs.writeShellScript "niri-spawn-left" ''

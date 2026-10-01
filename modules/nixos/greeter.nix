@@ -1,11 +1,8 @@
-# The login screen: DMS's greetd-based greeter — the greeter-only
-# monitor story (side monitors dark, one sign-in UI), the login-screen
-# half of the DMS desktop this session enters. Survived the Ryoku
-# interlude wholesale (SDDM was tried there and couldn't rotate the
-# portrait or filter screens; this machinery solved both long ago).
-# Greeter/display-manager changes ship via `nixos-rebuild boot` +
-# reboot, not `switch` — switch would kill the live session out from
-# under the user.
+# The login screen: DMS's greetd-based greeter — side monitors dark,
+# one sign-in UI on the main screen, the login-screen half of the DMS
+# desktop. Greeter/display-manager changes ship via `nixos-rebuild
+# boot` + reboot, not `switch` — switch would kill the live session
+# out from under the user.
 #
 # Module and package both come from nixpkgs (the greeter split into its
 # own dank-greeter repo upstream, nixpkgs adopted both halves).
@@ -108,33 +105,22 @@ in
       defaultSession = "niri";
     };
 
-    # The splash lives until the login screen is imminent — the GDM
-    # technique, hand-rolled because greetd has no plymouth
-    # integration: plymouth-quit/-quit-wait are unhooked from the boot
-    # transaction (nothing triggers them; greetd's stock
-    # After=plymouth-quit-wait orders against a unit that never runs,
-    # so it blocks nothing), and the quit instead fires as a SECOND
-    # greetd pre-start. Pre-starts run in order, so the spinner
-    # animates through the module's state sync above and the retained
-    # frame only yields for the greeter compositor's own paint — the
-    # measured gap drops from the whole greetd spawn to the final
-    # niri+QML seconds. --retain-splash pairs with the handoff story
-    # in boot.nix. Failure mode accepted: if greetd dies before its
-    # pre-start completes, the splash holds the screen — Esc drops
-    # plymouth to the boot log, and boot.shell_on_fail stays the
-    # deeper escape hatch.
+    # Splash-to-greeter handoff (greetd has no plymouth integration):
+    # plymouth-quit/-quit-wait are unhooked from the boot transaction
+    # — greetd's stock After=plymouth-quit-wait then orders against a
+    # unit that never runs — and greetd quits plymouth itself as its
+    # last pre-start, so the splash covers the module's state sync and
+    # the retained frame covers the greeter compositor's startup.
+    # mkAfter is load-bearing: the quit must follow the sync
+    # pre-start. If greetd dies before its pre-start, the splash holds
+    # the screen; Esc drops plymouth to the boot log.
     systemd.services = {
       plymouth-quit.wantedBy = lib.mkForce [ ];
       plymouth-quit-wait.wantedBy = lib.mkForce [ ];
-      # mkAfter pins this after the module's own sync pre-start — the
-      # spinner animates through the sync, not just the retained frame
       greetd.serviceConfig.ExecStartPre = lib.mkAfter [
         "-${pkgs.plymouth}/bin/plymouth quit --retain-splash"
       ];
     };
-    # (tmpfiles below stays its own top-level assignment — statix
-    # tolerates the services/tmpfiles pair; folding the purge into this
-    # block would bury its story under the handoff's.)
 
     # DMS persists the profile picture through AccountsService; without
     # the daemon, a set avatar only lives in session memory and
@@ -158,30 +144,22 @@ in
       spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
     '';
 
-    # No avatar is seeded right now (the old one retired, its
-    # replacement pending). When one lands: the greeter's avatar probe
-    # checks, in order, its own cache, /var/lib/AccountsService/
-    # icons/<user>, then ~/.face — but the dms-greeter user cannot
-    # read ~/.face through the 0700 home dir, and AccountsService only
-    # gets an icons/ copy when the avatar is set imperatively through
-    # a UI. So the declarative seed is a tmpfiles rule here: C+ the
+    # No avatar is currently seeded. To add one: the greeter's avatar
+    # probe checks its own cache, /var/lib/AccountsService/icons/
+    # <user>, then ~/.face — the dms-greeter user cannot read ~/.face
+    # through the 0700 home, so the seed is a tmpfiles rule: C+ the
     # asset onto /var/lib/AccountsService/icons/<identity.username>,
-    # 0644 root root (the removed rule's exact shape is in git
-    # history; C+ overwrites, so an asset change propagates at the
-    # next boot/activation instead of being blocked by an existing
-    # copy).
+    # 0644 root root. C+ overwrites, so an asset change propagates at
+    # the next boot/activation.
     systemd.tmpfiles.rules = [
       # The module's greetd pre-start syncs DMS state from configHome
-      # and REWRITES the synced session.json's wallpaper paths to its
-      # own /var/lib copies — that sync is what dresses the login
-      # screen in the user's current wallpaper and palette, refreshed
-      # at every greetd start. The purge guards the NO-home-state
-      # edge: there a stale synced session.json survives forever, and
-      # its rewritten path makes the next sync `cp` a file onto
-      # itself, which the script's set -e turns into greetd refusing
-      # to start — a BLACK login screen with no way in (seen on the
-      # first boot after a shell-stack swap). With real DMS state in
-      # the home, the purge just makes every sync start clean.
+      # (wallpaper, palette) and rewrites the synced session.json's
+      # wallpaper paths to its own /var/lib copies. Purge the sync
+      # products every boot: with no DMS state in the home, a stale
+      # synced session.json makes the next sync `cp` a file onto
+      # itself, and the script's set -e then keeps greetd from
+      # starting at all — a black login screen. With home state
+      # present, the purge just means a clean re-sync.
       "r! /var/lib/dms-greeter/session.json"
       "r! /var/lib/dms-greeter/settings.json"
       "r! /var/lib/dms-greeter/settings.orig.json"

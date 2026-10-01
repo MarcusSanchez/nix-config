@@ -182,37 +182,16 @@
     };
   };
 
-  # (The screen-flicker hunt that briefly pinned the nvidia driver to
-  # `latest` here ended elsewhere: the depthscape plugin's foreground
-  # surface — a full-screen wallpaper copy whenever the depth model
-  # found no depth in an image — was the trigger, and the plugin is
-  # gone. Driver follows nixpkgs' default again.)
-
-  # KNOWN BOOT WART, parked pending upstream (systemd 261.2): the
-  # initrd udevd deadlocks SILENTLY in its own exit path at
-  # switch-root on WARM boots of this machine (cold boots observed
-  # clean — the AIO screen's free-running reset state survives warm
-  # reboots, the same warm-vs-cold family as the combo card's BT
-  # latch in ./bluetooth.nix) — the debug boot proved
-  # all workers exit cleanly in milliseconds, it logs "Serialized
-  # configurations", then nothing until systemd SIGKILLs it at the
-  # stop timeout. The kill poisons the initrd->host udev handoff, and
-  # the main udevd's slow recovery leaves input devices unprocessed
-  # for 20-60s: the login screen renders (clock ticks) while keyboard
-  # and mouse sit dead. This config is innocent — the box's huge
-  # early-device zoo (RGB hubs, i2c, early-KMS nvidia; ~3000 events in
-  # the first five seconds) just hits the bug reliably. Capping the
-  # stop timeout was tried and REVERTED: killing the daemon mid-exit
-  # earlier only deepened the recovery stall (tryx.nix has that
-  # history).
-  #
-  # Fixed when a flake bump brings systemd > 261.2 with the exit-path
-  # fix. The check after any update + reboot:
-  #   journalctl -b | grep "stop-sigterm' timed out"
-  # Empty output + logind "Watching system buttons" on the Wooting
-  # within ~15s of boot = cured; then delete this whole block,
-  # including the diagnostic entry below (hold Space at power-on,
-  # pick "udev-debug" — normal boot plus udev debug logging).
+  # Known wart, upstream (systemd 261.2): on warm boots the initrd
+  # udevd deadlocks at stop after a clean worker shutdown and gets
+  # SIGKILLed, and the main udevd's recovery delays input coldplug —
+  # the login screen renders while keyboard and mouse stay dead for
+  # tens of seconds. Cold boots are unaffected. Do not cap the stop
+  # timeout; an earlier SIGKILL worsens the recovery. Cured by a
+  # future systemd bump — verify with
+  # `journalctl -b | grep stop-sigterm` coming back empty after a
+  # reboot, then delete this comment and the debug entry below
+  # (a boot-menu entry that adds udev debug logging).
   specialisation.udev-debug.configuration = {
     boot.kernelParams = [
       "rd.udev.log_level=debug"

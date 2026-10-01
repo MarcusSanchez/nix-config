@@ -106,12 +106,4 @@ in
     };
   };
 
-  # (A 3s cap on the initrd udevd stop timeout lived here for one
-  # boot and was reverted: the initrd udevd has wedged at stop on
-  # EVERY post-kernel-bump boot, and killing it mid-work earlier only
-  # deepened the main udevd's post-SIGKILL queue stall — input
-  # devices arrived at ~69s instead of ~29s. The wedge's root cause
-  # is under diagnosis via the udev-debug specialisation in
-  # ./default.nix; until it's found, the stock timeout loses the
-  # least.)
 }

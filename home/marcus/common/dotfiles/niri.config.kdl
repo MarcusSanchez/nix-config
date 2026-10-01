@@ -148,10 +148,8 @@ layout {
     // worse than the wart.
     center-focused-column "never"
 
-    // No automatic centering at all — a lone column hugs the left edge
-    // like the rest of the strip, and centering is always the explicit
-    // Mod+C (center-column, in binds below). The retired
-    // always-center-single-column line is one `git log -S` away.
+    // No automatic centering: a lone column hugs the left edge like
+    // the rest of the strip; centering is the explicit Mod+C.
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
     preset-column-widths {
@@ -199,12 +197,10 @@ layout {
         // - RGB hex: "#rgb", "#rgba", "#rrggbb", "#rrggbbaa"
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
-        // Color of the ring on the active monitor. INERT in practice:
-        // niri.accent.kdl (included at the end of this file, rendered
-        // by matugen on every DMS palette change — home/marcus/nixos/
-        // dms.nix has the wiring) loads later and wins the layout
-        // merge, so this static mocha blue only ever shows if that
-        // include's machinery is removed.
+        // Color of the ring on the active monitor. Overridden in
+        // practice: niri.accent.kdl (end of this file) loads later
+        // and wins the layout merge, so this static fallback only
+        // shows if that include's machinery is removed.
         active-color "#89b4fa"
 
         // Color of the ring on inactive monitors.
@@ -708,12 +704,11 @@ binds {
     // closes the CURRENT TAB inside it, not the window (Mod+Q / Alt+F4
     // do that). The column tabbed-display toggle moved to Mod+Shift+W.
     Mod+W { spawn "wtype" "-M" "ctrl" "-k" "w" "-m" "ctrl"; }
-    // tabbed-display is deliberately UNBOUND (unused feature; its old
-    // Mod+Shift+T slot now spawns instead — `niri msg action
-    // toggle-column-tabbed-display` by hand if it's ever wanted).
-    // Terminal to the LEFT of the current column: niri has no
-    // open-left, so niri-spawn-left (home/marcus/nixos/niri.nix)
-    // spawns and moves the new column once it takes focus.
+    // tabbed-display is deliberately unbound (unused; `niri msg
+    // action toggle-column-tabbed-display` by hand if ever wanted).
+    // Terminal to the left of the current column — niri has no
+    // open-left; niri-spawn-left (home/marcus/nixos/niri.nix) spawns
+    // and moves the new column once it takes focus.
     Mod+Shift+T hotkey-overlay-title="Terminal to the left: ghostty" { spawn "niri-spawn-left" "ghostty"; }
 
     // Actions to switch layouts.
@@ -864,26 +859,19 @@ window-rule {
 }
 
 // DMS-generated styling for niri's built-in recent-windows switcher
-// (the compiled-in Alt+Tab — no bind in this file): rounds the
-// switcher highlight to the desk's 12px like every other corner.
-// Machine-generated beside windowrules/cursor above; regenerated at
-// every shell start.
+// (the compiled-in Alt+Tab; no bind here) — rounds the switcher
+// highlight to match the 12px corners. Regenerated at shell start.
 include "dms/alttab.kdl"
 
-// The AudioFX plugin's surfaces (edge visualizer + wallpaper glow —
-// runtime deps and install story in home/marcus/nixos/dms.nix) stay
-// on the plain background layer. The plugin README's
-// place-within-backdrop rules are deliberately NOT used: they assume
-// a desktop whose wallpaper also lives in the backdrop behind a
-// transparent workspace background, and on this config (wallpaper on
-// the workspace's own layer over the opaque layout background-color)
-// they bury the visualizer where only the overview can see it —
-// proven by pixel diff. Trade-off: the surfaces ride along with
-// workspace switches instead of staying fixed.
+// The audioFx plugin's surfaces (runtime wiring in
+// home/marcus/nixos/dms.nix) stay on the plain background layer. Its
+// README's place-within-backdrop layer-rules assume a
+// backdrop-wallpaper desktop; here (wallpaper on the workspace layer
+// over an opaque background-color) they hide the visualizer outside
+// the overview. Trade-off: the surfaces ride workspace switches.
 
-// Dynamic accent: DMS's matugen pass renders the active palette's
-// primary into this include on every wallpaper change and theme
-// switch (the template lives in home/marcus/nixos/dms.nix, which also
-// seeds the file — niri hard-errors on a missing include). Loaded
-// LAST so its layout values win.
+// Dynamic accent: matugen renders the palette's primary into this
+// include on every wallpaper/theme change (template and seed in
+// home/marcus/nixos/dms.nix — niri hard-errors on a missing
+// include). Loaded last so its layout values win.
 include "niri.accent.kdl"

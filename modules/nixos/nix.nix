@@ -44,12 +44,10 @@
     options = "--delete-older-than 10d";
   };
 
-  # The timer's catch-up (Persistent) fires missed runs AT BOOT, and a
-  # fat GC there competes with the greeter's own startup I/O — measured
-  # stretching the splash -> login-screen gap from ~4s to ~12s of black
-  # whenever a big store delta had accumulated. Idle scheduling keeps
-  # the catch-up semantics and takes GC out of every foreground path's
-  # way instead of moving the problem to another time of day.
+  # The timer's Persistent catch-up fires missed runs at boot, where a
+  # large GC competes with the greeter's startup I/O. Idle scheduling
+  # keeps the catch-up semantics while keeping GC out of every
+  # foreground path's way.
   systemd.services.nix-gc.serviceConfig = {
     IOSchedulingClass = "idle";
     CPUSchedulingPolicy = "idle";
