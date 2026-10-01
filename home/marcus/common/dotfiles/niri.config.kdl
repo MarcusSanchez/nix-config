@@ -814,6 +814,14 @@ cursor {
     xcursor-size 24
 }
 
+// NVIDIA frame-pacing guard: without it, scanout can catch a frame
+// before rendering finishes, showing a brief gray band from the
+// panel's scanout edge — the flag holds each frame until it is fully
+// rendered before queueing it to DRM. Harmless on other GPUs.
+debug {
+    wait-for-frame-completion-before-queueing
+}
+
 // Output blocks (modes/scales/transforms/positions) live in
 // niri.outputs.kdl, because the DMS greeter's niri instance needs the
 // same layout (modules/nixos/greeter.nix hands it a store copy as
