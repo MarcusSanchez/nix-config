@@ -178,14 +178,28 @@
     };
   };
 
-  # TEMPORARY diagnostic boot entry (hold Space at power-on, pick
-  # "udev-debug"): since the kernel bump, the initrd udevd wedges at
-  # stop on every boot (SIGTERM ignored -> SIGKILL) and the main
-  # udevd's recovery coldplug stalls input devices for tens of
-  # seconds — the greeter renders fine while keyboard and mouse sit
-  # dead. One boot of this entry captures which device handler the
-  # initrd udevd is actually stuck on (journalctl -b, udev at debug).
-  # Delete this block once the culprit is found and fixed.
+  # KNOWN BOOT WART, parked pending upstream (systemd 261.2): the
+  # initrd udevd deadlocks SILENTLY in its own exit path at
+  # switch-root on EVERY boot of this machine — the debug boot proved
+  # all workers exit cleanly in milliseconds, it logs "Serialized
+  # configurations", then nothing until systemd SIGKILLs it at the
+  # stop timeout. The kill poisons the initrd->host udev handoff, and
+  # the main udevd's slow recovery leaves input devices unprocessed
+  # for 20-60s: the login screen renders (clock ticks) while keyboard
+  # and mouse sit dead. This config is innocent — the box's huge
+  # early-device zoo (RGB hubs, i2c, early-KMS nvidia; ~3000 events in
+  # the first five seconds) just hits the bug reliably. Capping the
+  # stop timeout was tried and REVERTED: killing the daemon mid-exit
+  # earlier only deepened the recovery stall (tryx.nix has that
+  # history).
+  #
+  # Fixed when a flake bump brings systemd > 261.2 with the exit-path
+  # fix. The check after any update + reboot:
+  #   journalctl -b | grep "stop-sigterm' timed out"
+  # Empty output + logind "Watching system buttons" on the Wooting
+  # within ~15s of boot = cured; then delete this whole block,
+  # including the diagnostic entry below (hold Space at power-on,
+  # pick "udev-debug" — normal boot plus udev debug logging).
   specialisation.udev-debug.configuration = {
     boot.kernelParams = [
       "rd.udev.log_level=debug"
