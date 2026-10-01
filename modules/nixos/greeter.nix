@@ -108,6 +108,34 @@ in
       defaultSession = "niri";
     };
 
+    # The splash lives until the login screen is imminent — the GDM
+    # technique, hand-rolled because greetd has no plymouth
+    # integration: plymouth-quit/-quit-wait are unhooked from the boot
+    # transaction (nothing triggers them; greetd's stock
+    # After=plymouth-quit-wait orders against a unit that never runs,
+    # so it blocks nothing), and the quit instead fires as a SECOND
+    # greetd pre-start. Pre-starts run in order, so the spinner
+    # animates through the module's state sync above and the retained
+    # frame only yields for the greeter compositor's own paint — the
+    # measured gap drops from the whole greetd spawn to the final
+    # niri+QML seconds. --retain-splash pairs with the handoff story
+    # in boot.nix. Failure mode accepted: if greetd dies before its
+    # pre-start completes, the splash holds the screen — Esc drops
+    # plymouth to the boot log, and boot.shell_on_fail stays the
+    # deeper escape hatch.
+    systemd.services = {
+      plymouth-quit.wantedBy = lib.mkForce [ ];
+      plymouth-quit-wait.wantedBy = lib.mkForce [ ];
+      # mkAfter pins this after the module's own sync pre-start — the
+      # spinner animates through the sync, not just the retained frame
+      greetd.serviceConfig.ExecStartPre = lib.mkAfter [
+        "-${pkgs.plymouth}/bin/plymouth quit --retain-splash"
+      ];
+    };
+    # (tmpfiles below stays its own top-level assignment — statix
+    # tolerates the services/tmpfiles pair; folding the purge into this
+    # block would bury its story under the handoff's.)
+
     # DMS persists the profile picture through AccountsService; without
     # the daemon, a set avatar only lives in session memory and
     # vanishes on reboot.

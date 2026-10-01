@@ -42,12 +42,14 @@
     ];
   };
 
-  # Bridge the splash -> login-screen gap: stock plymouth-quit clears
-  # the framebuffer to black before the display manager starts (it
-  # orders itself after plymouth-quit-wait). --retain-splash leaves the
-  # splash's last frame on screen until the login screen draws over it.
-  # Greeter-agnostic — proven under greetd/dms-greeter, carried over
-  # unchanged to SDDM.
+  # Bridge the splash -> login-screen gap. The HANDOFF itself lives in
+  # greeter.nix: plymouth-quit/-quit-wait are unhooked from the boot
+  # transaction there, and greetd's last pre-start fires the quit — so
+  # the spinner animates until the greeter is imminent instead of
+  # systemd cutting it loose seconds earlier. This override is the
+  # belt behind that: anything that ever does invoke plymouth-quit
+  # (manual start, a future DM that pulls it back in) retains the last
+  # frame instead of clearing to black.
   systemd.services.plymouth-quit.serviceConfig.ExecStart =
     lib.mkForce "-${pkgs.plymouth}/bin/plymouth quit --retain-splash";
 
