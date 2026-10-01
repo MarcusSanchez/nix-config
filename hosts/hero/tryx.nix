@@ -16,7 +16,7 @@
 # store paths, so the package installs the built artifacts by hand; the
 # udev rules grant uaccess on the device and keep systemd from treating
 # it as a printer.
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   tryx = pkgs.qt6Packages.callPackage (
@@ -106,14 +106,12 @@ in
     };
   };
 
-  # Until the runtime above holds it, the panel free-runs its ~70s
-  # reset cycle — including through EARLY BOOT, where a reset landing
-  # mid-switch-root wedges an initrd udev worker on the bouncing
-  # device: udevd then ignores SIGTERM for the stop timeout's full
-  # default, gets SIGKILLed, and the main udevd + input coldplug (and
-  # with them the greeter's mouse) arrive ten-plus seconds late.
-  # Cap the initrd udevd stop wait instead: the SIGKILL outcome is
-  # unchanged (the main udevd re-coldplugs everything regardless), it
-  # just lands seven seconds sooner on unlucky boots.
-  boot.initrd.systemd.services.systemd-udevd.serviceConfig.TimeoutStopSec = lib.mkForce 3;
+  # (A 3s cap on the initrd udevd stop timeout lived here for one
+  # boot and was reverted: the initrd udevd has wedged at stop on
+  # EVERY post-kernel-bump boot, and killing it mid-work earlier only
+  # deepened the main udevd's post-SIGKILL queue stall — input
+  # devices arrived at ~69s instead of ~29s. The wedge's root cause
+  # is under diagnosis via the udev-debug specialisation in
+  # ./default.nix; until it's found, the stock timeout loses the
+  # least.)
 }

@@ -177,4 +177,19 @@
       '';
     };
   };
+
+  # TEMPORARY diagnostic boot entry (hold Space at power-on, pick
+  # "udev-debug"): since the kernel bump, the initrd udevd wedges at
+  # stop on every boot (SIGTERM ignored -> SIGKILL) and the main
+  # udevd's recovery coldplug stalls input devices for tens of
+  # seconds — the greeter renders fine while keyboard and mouse sit
+  # dead. One boot of this entry captures which device handler the
+  # initrd udevd is actually stuck on (journalctl -b, udev at debug).
+  # Delete this block once the culprit is found and fixed.
+  specialisation.udev-debug.configuration = {
+    boot.kernelParams = [
+      "rd.udev.log_level=debug"
+      "udev.log_level=debug"
+    ];
+  };
 }
