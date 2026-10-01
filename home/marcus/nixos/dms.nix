@@ -57,19 +57,33 @@
     '';
 
     packages = [
-      # dms-shell with one source patch (QML is embedded in the Go
+      # dms-shell with source patches (QML is embedded in the Go
       # binary, so patches land pre-embed, as in
-      # modules/nixos/greeter.nix): the launcher logo renders 1px high
-      # in its pill and no settings knob moves it vertically — this
-      # nudges it down; launcherLogoSizeOffset in dms.settings.json is
-      # the horizontal half of the same centering. --replace-fail makes
-      # a DMS update that reshapes the anchored line fail the build.
+      # modules/nixos/greeter.nix); --replace-fail makes a DMS update
+      # that reshapes an anchored line fail the build:
+      #   - launcher logo: renders 1px high in its pill and no settings
+      #     knob moves it vertically — nudged down;
+      #     launcherLogoSizeOffset in dms.settings.json is the
+      #     horizontal half of the same centering.
+      #   - profile-image fallbacks: bare "person" resolves through the
+      #     icon theme, which Adwaita lacks, leaving an empty circle;
+      #     "material:person" renders the bundled font glyph (what the
+      #     greeter already uses).
       (pkgs.dms-shell.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace ../quickshell/Modules/DankBar/Widgets/LauncherButton.qml \
             --replace-fail 'anchors.centerIn: parent' \
             'anchors.centerIn: parent
                 anchors.verticalCenterOffset: 1'
+          for f in \
+            ../quickshell/Modules/ControlCenter/Components/HeaderPane.qml \
+            ../quickshell/Modules/Lock/LockScreenContent.qml \
+            ../quickshell/Modules/DankDash/Overview/UserInfoCard.qml \
+            ../quickshell/Modals/Settings/ProfileSection.qml
+          do
+            substituteInPlace "$f" \
+              --replace-fail 'fallbackIcon: "person"' 'fallbackIcon: "material:person"'
+          done
         '';
       }))
       # dms spawns `qs` from PATH; its package doesn't bundle quickshell
