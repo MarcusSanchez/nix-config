@@ -84,6 +84,7 @@
   "lockBeforeSuspend": true,
   "terminalsAlwaysDark": true,
   "showDock": true,
+  "dockAutoHide": true,
   "dockGroupByApp": true,
   "dockOpenOnOverview": true,
   "dockSpacing": 8,
