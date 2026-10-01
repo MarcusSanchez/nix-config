@@ -12,7 +12,7 @@
 # read-only Windows mount) and the one-monitor boot splash.
 # The two platform modules are the sops-nix/home-manager halves that
 # make the sops.* and home-manager.* options exist for modules/common.
-{ inputs, hostName, ... }:
+{ config, inputs, hostName, ... }:
 
 {
   imports = [
@@ -177,6 +177,19 @@
       '';
     };
   };
+
+  # FLICKER EXPERIMENT, temporary: content-dependent flicker on BOTH
+  # panels, proven earlier to live below the compositor (screen
+  # captures during it are pixel-identical). Both-monitors rules out
+  # panel firmware as the sole cause and points at the driver: the
+  # 595 series has a documented Wayland-compositor flicker regression
+  # (hyprwm/Hyprland discussion 13792 — "roll back to 590 or below";
+  # KDE unaffected), and this box runs 595.104.02 with a smithay
+  # compositor. Jumping FORWARD two majors instead of back, to keep
+  # Blackwell support fresh. If flicker persists on 615, the next
+  # discriminator is nvidiaPackages.legacy_580; if that's clean, it
+  # was the 595 regression. Delete when settled.
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.latest;
 
   # KNOWN BOOT WART, parked pending upstream (systemd 261.2): the
   # initrd udevd deadlocks SILENTLY in its own exit path at
