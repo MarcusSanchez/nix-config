@@ -52,6 +52,17 @@
   };
 
   home = {
+    # plugins written against Qt5Compat.GraphicalEffects (the
+    # materialPlayer desktop widget) need the module on the QML import
+    # path; quickshell's closure doesn't ship it. From the same nixpkgs
+    # qt6 set quickshell is built against — a mismatched Qt ABI crashes
+    # the shell. Both names: Qt reads QML_IMPORT_PATH, plugin startup
+    # checks grep QML2_IMPORT_PATH. Session vars land at login.
+    sessionVariables = {
+      QML_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+      QML2_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+    };
+
     # niri hard-errors on a missing include, and matugen only writes the
     # accent file on its first run — seed it once (multiline on purpose:
     # KDL rejects an inline child block whose last node lacks a `;`).
