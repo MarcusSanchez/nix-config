@@ -82,6 +82,29 @@ in
       ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
     '')
 
+    # save a PNG from stdin under ~/Pictures/Screenshots and hand the
+    # FILE to DMS's clipboard (Print and Mod+Shift+S in niri.config.kdl).
+    # DMS offers a file as path text + file URI + image, so the shot
+    # pastes into text fields and file pickers as well as image targets;
+    # a plain wl-copy offers only image/png, which those paste as
+    # nothing. The daemon owns the offer, so nothing here has to outlive
+    # the bind.
+    (pkgs.runCommand "screenshot-copy" { } ''
+      mkdir -p $out/bin
+      install -m755 ${pkgs.writeShellScript "screenshot-copy" ''
+        dir="$HOME/Pictures/Screenshots"
+        mkdir -p "$dir"
+        f="$dir/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png"
+        cat > "$f"
+        [ -s "$f" ] || { rm -f "$f"; exit 0; }
+        sock=$(ls "$XDG_RUNTIME_DIR"/danklinux*.sock 2>/dev/null | head -1)
+        ${pkgs.jq}/bin/jq -nc --arg p "$f" \
+          '{id: 1, method: "clipboard.copyFile", params: {filePath: $p}}' \
+          | ${pkgs.socat}/bin/socat -t 2 - "UNIX-CONNECT:$sock" >/dev/null
+        notify-send -i "$f" Screenshot 'Copied to clipboard + saved' 2>/dev/null
+      ''} "$out/bin/screenshot-copy"
+    '')
+
     # spawn a command and land its window left of the current column
     # (Mod+Shift+T in niri.config.kdl). niri has no open-left, so this
     # waits for the new window to take focus and moves its column
