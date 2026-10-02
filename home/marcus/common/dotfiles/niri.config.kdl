@@ -306,7 +306,9 @@ layout {
 // milliseconds; DMS's own wallpaper layer stacks above it once ready.
 // The path comes from DMS's session state so the two can't disagree.
 spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
-spawn-at-startup "dms" "run"
+// the shell's log (plugin load errors, wallpaper watchdogs) is read
+// with `journalctl --user -t dms`; a bare spawn would discard it
+spawn-at-startup "systemd-cat" "-t" "dms" "dms" "run"
 
 // per-app key remapping (see dotfiles/xremap.yml) is NOT spawned here:
 // niri's spawn children escape to user@.service/app.slice and outlive
