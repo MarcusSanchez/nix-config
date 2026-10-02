@@ -331,6 +331,10 @@ home/marcus/
                            dms.nix and ghostty.linux.config, see
                            dms.nix's settings-link comment before
                            wiping it),
+                           dms.clsettings.json (the clipboard daemon's
+                           config — its entry-size cap must exceed a
+                           4K screenshot, the comment at its link says
+                           why),
                            xremap.yml,
                            hammerspoon.init.lua (the mac's xremap; watches
                            this directory and reloads itself on save, so

@@ -21,6 +21,12 @@
     # ghostty.linux.config — so don't wipe the target casually.
     "DankMaterialShell/settings.json".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/dms.settings.json";
+    # the clipboard daemon's own config (`dms clipboard config`), same
+    # link shape. maxEntrySize is raised above the 5 MiB default because
+    # the screenshot binds copy their files through this daemon and a 4K
+    # full-screen PNG is larger than that; it refuses oversized files.
+    "DankMaterialShell/clsettings.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/dms.clsettings.json";
 
     # niri's focus ring follows the palette: DMS runs this user matugen
     # config after its own on every wallpaper/theme change, rendering
