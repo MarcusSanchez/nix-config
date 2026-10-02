@@ -52,7 +52,6 @@
     }
   ],
   "mediaUseAlbumArtAccent": true,
-  "launcherStyle": "spotlight",
   "dashTabs": [
     {
       "id": "media",
@@ -156,9 +155,9 @@
       "showOnLastDisplay": true,
       "spacing": 4,
       "squareCorners": false,
-      "transparency": 1,
+      "transparency": 0.9,
       "visible": true,
-      "widgetTransparency": 1,
+      "widgetTransparency": 0.9,
       "shadowIntensity": 0,
       "attachToScreenEdge": true,
       "maximizeWidgetIcons": false,
@@ -170,7 +169,8 @@
       "useOverlayLayer": false,
       "barInsetPadding": 4,
       "barLengthPadding": 0,
-      "widgetPadding": 8
+      "widgetPadding": 8,
+      "island": false
     },
     {
       "autoHide": false,
@@ -264,6 +264,36 @@
         ],
         "syncPositionAcrossScreens": true,
         "useThemeColors": true
+      }
+    },
+    {
+      "id": "dw_1790923695392_qp0bqgf5h",
+      "widgetType": "systemMonitor",
+      "name": "System Monitor",
+      "enabled": false,
+      "config": {
+        "showHeader": true,
+        "transparency": 0.8,
+        "colorMode": "primary",
+        "customColor": "#ffffff",
+        "showCpu": true,
+        "showCpuGraph": true,
+        "showCpuTemp": true,
+        "showGpuTemp": false,
+        "gpuPciId": "",
+        "showMemory": true,
+        "showMemoryGraph": true,
+        "showNetwork": true,
+        "showNetworkGraph": true,
+        "showDisk": true,
+        "showTopProcesses": false,
+        "topProcessCount": 3,
+        "topProcessSortBy": "cpu",
+        "layoutMode": "auto",
+        "graphInterval": 60,
+        "displayPreferences": [
+          "all"
+        ]
       }
     }
   ],
