@@ -21,6 +21,10 @@ let
   # niri variant: tracks the focused window over niri IPC to gate the
   # per-app remaps
   xremapNiri = pkgs.xremap.override { withVariant = "niri"; };
+
+  # where every screenshot lands; must stay the directory of
+  # screenshot-path in niri.config.kdl, which screenshot-niri watches
+  screenshotDir = "$HOME/Pictures/Screenshots";
 in
 {
   # Everything the session expects on PATH: what niri.config.kdl's
@@ -37,10 +41,11 @@ in
     # with the path read from DMS's session state)
     pkgs.swaybg
 
-    # the snipping tool (Mod+Shift+S in niri.config.kdl): slurp picks a
-    # region, grim captures it, satty annotates (arrows/text/blur) and
-    # copies via wl-clipboard. niri's built-in Print overlay stays for
-    # quick unannotated shots; flameshot fights niri's portal situation.
+    # the screenshot binds (Print, Mod+Shift+S in niri.config.kdl):
+    # slurp picks a region, grim captures it, satty annotates
+    # (arrows/text/blur); both hand the result to screenshot-copy below.
+    # wl-clipboard is nvim's clipboard provider under Wayland
+    # (home/marcus/common/neovim.nix).
     pkgs.grim
     pkgs.slurp
     pkgs.satty
@@ -48,11 +53,6 @@ in
     # notify-send, for the screenshot binds' best-effort toast (DMS is
     # the notification daemon that renders it)
     pkgs.libnotify
-
-    # clipboard history: wl-paste watchers (spawned in niri.config.kdl)
-    # store every copy; DMS's clipboard view (Mod+V) reads it back via
-    # `cliphist list`
-    pkgs.cliphist
 
     # MPRIS media control — the XF86AudioPlay/Prev/Next binds in
     # niri.config.kdl call this; without it media keys are wired to
@@ -83,62 +83,59 @@ in
     '')
 
     # hand a screenshot FILE to DMS's clipboard: a PNG on stdin is saved
-    # under ~/Pictures/Screenshots first, an argument names an existing
-    # file. DMS offers a file as path text + file URI + image, so the
-    # shot pastes into text fields and file pickers as well as image
-    # targets; a plain wl-copy (and niri's own screenshot actions) offer
-    # only image/png, which those paste as nothing. The daemon owns the
-    # offer, so nothing here has to outlive the bind. -q skips the
-    # notification, for callers whose capture tool already posted one.
-    (pkgs.runCommand "screenshot-copy" { } ''
-      mkdir -p $out/bin
-      install -m755 ${pkgs.writeShellScript "screenshot-copy" ''
-        quiet=
-        if [ "$1" = "-q" ]; then quiet=1; shift; fi
-        if [ $# -gt 0 ]; then
-          f="$1"
-        else
-          dir="$HOME/Pictures/Screenshots"
-          mkdir -p "$dir"
-          f="$dir/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png"
-          cat > "$f"
-          [ -s "$f" ] || { rm -f "$f"; exit 0; }
-        fi
-        sock=$(ls "$XDG_RUNTIME_DIR"/danklinux*.sock 2>/dev/null | head -1)
+    # under the screenshot directory first, an argument names an
+    # existing file. DMS offers a file as path text + file URI + image,
+    # so the shot pastes into text fields and file pickers as well as
+    # image targets; a plain wl-copy (and niri's own screenshot actions)
+    # offer only image/png, which those paste as nothing. The daemon
+    # owns the offer, so nothing here has to outlive the bind. -q skips
+    # the notification, for callers whose capture tool already posted
+    # one.
+    (pkgs.writeShellScriptBin "screenshot-copy" ''
+      quiet=
+      if [ "$1" = "-q" ]; then quiet=1; shift; fi
+      if [ $# -gt 0 ]; then
+        f="$1"
+      else
+        mkdir -p "${screenshotDir}"
+        f="${screenshotDir}/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png"
+        cat > "$f"
+        [ -s "$f" ] || { rm -f "$f"; exit 0; }
+      fi
+      # the daemon's socket carries its pid; a stale one from a previous
+      # instance refuses the connection and is skipped
+      for sock in "$XDG_RUNTIME_DIR"/danklinux*.sock; do
         ${pkgs.jq}/bin/jq -nc --arg p "$f" \
           '{id: 1, method: "clipboard.copyFile", params: {filePath: $p}}' \
-          | ${pkgs.socat}/bin/socat -t 2 - "UNIX-CONNECT:$sock" >/dev/null
-        [ -n "$quiet" ] || notify-send -i "$f" Screenshot 'Copied to clipboard + saved' 2>/dev/null
-      ''} "$out/bin/screenshot-copy"
+          | ${pkgs.socat}/bin/socat -t 2 - "UNIX-CONNECT:$sock" 2>/dev/null \
+          | grep -q '"success":true' && break
+      done
+      [ -n "$quiet" ] || notify-send -i "$f" Screenshot 'Copied to clipboard + saved' 2>/dev/null
     '')
 
     # run one of niri's own screenshot actions (interactive picker,
     # screen, window) and route the file it saves through
     # screenshot-copy. niri gives no completion signal, so this waits for
-    # a new PNG to appear in niri's screenshot-path directory and settle;
-    # cancelling the picker produces no file and the wait simply expires.
-    # niri posts its own "Screenshot captured" notification, so the copy
-    # runs quiet.
-    (pkgs.runCommand "screenshot-niri" { } ''
-      mkdir -p $out/bin
-      install -m755 ${pkgs.writeShellScript "screenshot-niri" ''
-        dir="$HOME/Pictures/Screenshots"
-        mkdir -p "$dir"
-        before=$(ls -t "$dir" | head -1)
-        niri msg action "$1" || exit 1
-        for _ in $(seq 1 600); do
+    # a new, non-empty, no-longer-growing PNG to appear in the screenshot
+    # directory; cancelling the picker produces no file and the wait
+    # simply expires. niri posts its own "Screenshot captured"
+    # notification, so the copy runs quiet.
+    (pkgs.writeShellScriptBin "screenshot-niri" ''
+      mkdir -p "${screenshotDir}"
+      before=$(ls -t "${screenshotDir}" | head -1)
+      niri msg action "$1" || exit 1
+      for _ in $(seq 1 600); do
+        sleep 0.1
+        newest=$(ls -t "${screenshotDir}" | head -1)
+        [ -n "$newest" ] && [ "$newest" != "$before" ] || continue
+        f="${screenshotDir}/$newest"
+        size=0
+        while [ "$size" = 0 ] || [ "$(stat -c %s "$f")" != "$size" ]; do
+          size=$(stat -c %s "$f")
           sleep 0.1
-          newest=$(ls -t "$dir" | head -1)
-          if [ -n "$newest" ] && [ "$newest" != "$before" ]; then
-            f="$dir/$newest"
-            size=0
-            while [ "$(stat -c %s "$f")" != "$size" ]; do
-              size=$(stat -c %s "$f"); sleep 0.1
-            done
-            exec screenshot-copy -q "$f"
-          fi
         done
-      ''} "$out/bin/screenshot-niri"
+        exec screenshot-copy -q "$f"
+      done
     '')
 
     # spawn a command and land its window left of the current column
@@ -146,20 +143,17 @@ in
     # waits for the new window to take focus and moves its column
     # once; refocusing elsewhere during the wait window moves that
     # column instead — accepted for fast-launching apps.
-    (pkgs.runCommand "niri-spawn-left" { } ''
-      mkdir -p $out/bin
-      install -m755 ${pkgs.writeShellScript "niri-spawn-left" ''
-        prev=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
-        "$@" >/dev/null 2>&1 &
-        for _ in $(seq 1 50); do
-          sleep 0.1
-          cur=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
-          if [ -n "$cur" ] && [ "$cur" != "$prev" ]; then
-            niri msg action move-column-left
-            exit 0
-          fi
-        done
-      ''} "$out/bin/niri-spawn-left"
+    (pkgs.writeShellScriptBin "niri-spawn-left" ''
+      prev=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
+      "$@" >/dev/null 2>&1 &
+      for _ in $(seq 1 50); do
+        sleep 0.1
+        cur=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
+        if [ -n "$cur" ] && [ "$cur" != "$prev" ]; then
+          niri msg action move-column-left
+          exit 0
+        fi
+      done
     '')
   ];
 

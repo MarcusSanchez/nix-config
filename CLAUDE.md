@@ -387,8 +387,11 @@ home/marcus/
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
                            swaylock fallback + everything the binds and
-                           spawns expect on PATH — snipping
-                           (grim/slurp/satty, Mod+Shift+S), cliphist,
+                           spawns expect on PATH — screenshots
+                           (grim/slurp/satty + the screenshot-copy and
+                           screenshot-niri helpers that route every
+                           shot through DMS's clipboard as a FILE, so
+                           it pastes as image, path or URI),
                            playerctl, swaybg (the startup wallpaper
                            under DMS's layer),
                            xremap, tpm-fido, xwayland-satellite. The
