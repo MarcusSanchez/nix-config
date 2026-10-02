@@ -718,15 +718,16 @@ binds {
 
     // Region screenshot, the grim+slurp flow: the capture lands on the
     // clipboard and on disk the instant the drag ends — no overlay,
-    // nothing to confirm. Esc during selection cancels. screenshot-copy
-    // (home/marcus/nixos/niri.nix) saves the PNG and copies it through
-    // DMS so it pastes as an image, a path or a file. niri's own
-    // freeze-frame picker stays on Shift+Print for when a frozen screen
-    // helps (tooltips, menus); its copies are image-only.
+    // nothing to confirm. Esc during selection cancels. Every
+    // screenshot copies through screenshot-copy (home/marcus/nixos/
+    // niri.nix), which hands DMS the file so it pastes as an image, a
+    // path or a file. niri's own actions (freeze-frame picker for
+    // tooltips/menus, screen, window) run through screenshot-niri, which
+    // routes the file they save the same way.
     Print hotkey-overlay-title="Screenshot region → clipboard" { spawn "sh" "-c" "grim -g \"$(slurp)\" - | screenshot-copy"; }
-    Shift+Print { screenshot; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
+    Shift+Print hotkey-overlay-title="Screenshot (freeze-frame picker)" { spawn "screenshot-niri" "screenshot"; }
+    Ctrl+Print hotkey-overlay-title="Screenshot screen" { spawn "screenshot-niri" "screenshot-screen"; }
+    Alt+Print hotkey-overlay-title="Screenshot window" { spawn "screenshot-niri" "screenshot-window"; }
     // the snipping tool (same chord as Windows'): slurp selects the
     // region, satty opens it for arrows/text/blur, and its copy action
     // feeds the result to screenshot-copy. Esc in the region picker
