@@ -7,6 +7,7 @@
   "popupTransparency": 0.95,
   "dockTransparency": 0.5,
   "cornerRadius": 12,
+  "useFahrenheit": true,
   "barElevationEnabled": false,
   "controlCenterWidgets": [
     {
@@ -88,6 +89,8 @@
   "dockSpacing": 8,
   "dockMargin": 10,
   "dockIconSize": 48,
+  "dockBorderColor": "primary",
+  "dockBorderThickness": 6,
   "dockLauncherEnabled": true,
   "dockLauncherLogoMode": "os",
   "dockLauncherLogoColorOverride": "primary",
@@ -155,7 +158,7 @@
       "showOnLastDisplay": true,
       "spacing": 4,
       "squareCorners": false,
-      "transparency": 0.75,
+      "transparency": 0.95,
       "visible": true,
       "widgetTransparency": 0.75,
       "shadowIntensity": 0,
@@ -260,7 +263,10 @@
       "enabled": true,
       "config": {
         "displayPreferences": [
-          "all"
+          {
+            "name": "DP-3",
+            "model": "PG32UCDM3"
+          }
         ],
         "syncPositionAcrossScreens": true,
         "useThemeColors": true
@@ -300,11 +306,99 @@
       "id": "dw_1790924095396_gg6hb4upy",
       "widgetType": "materialPlayer",
       "name": "Material Player & Lyrics",
-      "enabled": true,
+      "enabled": false,
+      "config": {
+        "displayPreferences": [
+          "all"
+        ],
+        "showLyrics": true
+      }
+    },
+    {
+      "id": "dw_1790924552327_rys3y8oht",
+      "widgetType": "mediaPlayer",
+      "name": "Media Player",
+      "enabled": false,
       "config": {
         "displayPreferences": [
           "all"
         ]
+      }
+    },
+    {
+      "id": "dw_1790924706439_dd8tozigx",
+      "widgetType": "modernClock",
+      "name": "Modern Clock (Copy)",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          {
+            "name": "DP-3",
+            "model": "PG32UCDM3"
+          }
+        ],
+        "syncPositionAcrossScreens": true,
+        "useThemeColors": true,
+        "showDay": false,
+        "showDate": true,
+        "uppercase": true,
+        "scaleWithWidget": false,
+        "showSeconds": false,
+        "use24Hour": false,
+        "alignment": "right"
+      }
+    },
+    {
+      "id": "dw_1790925048940_sgd628qoq",
+      "widgetType": "materialWeather",
+      "name": "Material Weather",
+      "enabled": false,
+      "config": {
+        "displayPreferences": [],
+        "shapeMode": "pill",
+        "tempUnit": "fahrenheit",
+        "showSourceFooter": false,
+        "cookieOpacity": 50,
+        "backgroundOpacity": 51
+      }
+    },
+    {
+      "id": "dw_1790925385828_9d3tly8ms",
+      "widgetType": "modernClock",
+      "name": "Modern Clock (Copy) (Copy)",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          {
+            "name": "HDMI-A-1",
+            "model": "XG27ACMS"
+          }
+        ],
+        "syncPositionAcrossScreens": true,
+        "useThemeColors": true,
+        "showDay": false,
+        "showDate": true,
+        "uppercase": true,
+        "scaleWithWidget": false,
+        "showSeconds": false,
+        "use24Hour": false,
+        "alignment": "right"
+      }
+    },
+    {
+      "id": "dw_1790925897208_nv3sybgs5",
+      "widgetType": "modernClock",
+      "name": "Modern Clock (Copy)",
+      "enabled": true,
+      "config": {
+        "displayPreferences": [
+          {
+            "name": "HDMI-A-1",
+            "model": "XG27ACMS"
+          }
+        ],
+        "syncPositionAcrossScreens": true,
+        "useThemeColors": true
       }
     }
   ],
