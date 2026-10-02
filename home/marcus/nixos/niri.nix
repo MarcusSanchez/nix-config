@@ -88,10 +88,13 @@ in
     # shot pastes into text fields and file pickers as well as image
     # targets; a plain wl-copy (and niri's own screenshot actions) offer
     # only image/png, which those paste as nothing. The daemon owns the
-    # offer, so nothing here has to outlive the bind.
+    # offer, so nothing here has to outlive the bind. -q skips the
+    # notification, for callers whose capture tool already posted one.
     (pkgs.runCommand "screenshot-copy" { } ''
       mkdir -p $out/bin
       install -m755 ${pkgs.writeShellScript "screenshot-copy" ''
+        quiet=
+        if [ "$1" = "-q" ]; then quiet=1; shift; fi
         if [ $# -gt 0 ]; then
           f="$1"
         else
@@ -105,7 +108,7 @@ in
         ${pkgs.jq}/bin/jq -nc --arg p "$f" \
           '{id: 1, method: "clipboard.copyFile", params: {filePath: $p}}' \
           | ${pkgs.socat}/bin/socat -t 2 - "UNIX-CONNECT:$sock" >/dev/null
-        notify-send -i "$f" Screenshot 'Copied to clipboard + saved' 2>/dev/null
+        [ -n "$quiet" ] || notify-send -i "$f" Screenshot 'Copied to clipboard + saved' 2>/dev/null
       ''} "$out/bin/screenshot-copy"
     '')
 
@@ -114,6 +117,8 @@ in
     # screenshot-copy. niri gives no completion signal, so this waits for
     # a new PNG to appear in niri's screenshot-path directory and settle;
     # cancelling the picker produces no file and the wait simply expires.
+    # niri posts its own "Screenshot captured" notification, so the copy
+    # runs quiet.
     (pkgs.runCommand "screenshot-niri" { } ''
       mkdir -p $out/bin
       install -m755 ${pkgs.writeShellScript "screenshot-niri" ''
@@ -130,7 +135,7 @@ in
             while [ "$(stat -c %s "$f")" != "$size" ]; do
               size=$(stat -c %s "$f"); sleep 0.1
             done
-            exec screenshot-copy "$f"
+            exec screenshot-copy -q "$f"
           fi
         done
       ''} "$out/bin/screenshot-niri"
