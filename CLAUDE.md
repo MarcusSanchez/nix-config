@@ -110,7 +110,11 @@ hosts/hero/          the desk PC, INSTALLED and live
                            build in updates/ (this board postdates the
                            in-tree DMI table — drop when the kernel
                            catches up), CoolerControl + LACT daemons
-                           with GUIs in the launcher, lm_sensors
+                           with GUIs in the launcher, lm_sensors, and
+                           the GPU memory-clock floor service (the
+                           deep-idle step starves two high-refresh
+                           panels — frame-band flicker; its header says
+                           which step holds)
   tryx.nix                 the AIO's AMOLED (a USB printer-class device
                            that resets every ~70s unless the runtime
                            holds it): community Qt manager, pinned —

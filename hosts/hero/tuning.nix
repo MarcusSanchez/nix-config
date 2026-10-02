@@ -18,6 +18,11 @@
 #     control). Its voltage-curve editor leans on undocumented driver
 #     paths — the power-limit and PowerMizer knobs are the safe
 #     everyday surface.
+#   - Memory-clock floor: at desktop idle the driver parks the memory
+#     clock at its lowest step, which cannot feed the desk's two
+#     high-refresh panels — the display pipe starves and a band of
+#     the frame drops out for a refresh. The service below holds the
+#     lowest step that keeps scanout fed; LACT leaves it alone.
 { config, pkgs, ... }:
 
 let
@@ -57,4 +62,17 @@ in
   programs.coolercontrol.enable = true;
 
   services.lact.enable = true;
+
+  systemd.services.nvidia-memory-clock-floor = {
+    description = "Hold the GPU memory clock above the deep-idle step";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-modules-load.service" ];
+    unitConfig.ConditionPathExists = "/dev/nvidiactl";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,7001";
+      ExecStop = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --reset-memory-clocks";
+    };
+  };
 }
