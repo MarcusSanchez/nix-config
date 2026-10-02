@@ -308,11 +308,6 @@ layout {
 spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
 spawn-at-startup "dms" "run"
 
-// clipboard-history store side: every copy (text and images) lands in
-// cliphist's db; Mod+V opens DMS's picker over it. Watchers, not a
-// daemon — wl-paste re-runs cliphist per copy event.
-spawn-at-startup "sh" "-c" "wl-paste --type text --watch cliphist store"
-spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
 // per-app key remapping (see dotfiles/xremap.yml) is NOT spawned here:
 // niri's spawn children escape to user@.service/app.slice and outlive
 // the session, so a spawn-started xremap kept its keyboard grab past
@@ -690,9 +685,9 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    // Mod+V is clipboard HISTORY (Windows Win+V muscle memory) — the
-    // DMS picker over what the cliphist watchers stored; the float
-    // toggle and layer-hop take the shifted variants.
+    // Mod+V is clipboard HISTORY (Windows Win+V muscle memory) — DMS's
+    // picker over its own clipboard store; the float toggle and
+    // layer-hop take the shifted variants.
     Mod+V hotkey-overlay-title="Clipboard history" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
     Mod+Shift+V { toggle-window-floating; }
     Mod+Ctrl+V  { switch-focus-between-floating-and-tiling; }
