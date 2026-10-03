@@ -71,7 +71,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,7001";
+      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,14001";
       ExecStop = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --reset-memory-clocks";
     };
   };
