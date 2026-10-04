@@ -21,8 +21,11 @@
 #   - Memory-clock floor: at desktop idle the driver parks the memory
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
-#     the frame drops out for a refresh. The service below holds the
-#     lowest step that keeps scanout fed; LACT leaves it alone.
+#     the frame drops out for a refresh, and so does every memory-clock
+#     transition. The service below pins the lowest step that keeps
+#     scanout fed (a floor-to-max range still flickers on each jump);
+#     GPU-heavy work on this OS runs at that bandwidth unless the
+#     service is stopped for the job. LACT leaves it alone.
 { config, pkgs, ... }:
 
 let
@@ -71,7 +74,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,14001";
+      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,7001";
       ExecStop = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --reset-memory-clocks";
     };
   };
