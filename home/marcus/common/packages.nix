@@ -11,7 +11,13 @@
 # (LazyVim dependencies); fzf's SHELL side lives here (Ctrl+T file
 # picker, Alt+C cd — Ctrl+R stays atuin's, whose hook loads after
 # fzf's and wins).
-{ inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   home.packages = with pkgs; [
@@ -86,4 +92,22 @@
   };
 
   home.shellAliases.cat = "bat";
+
+  # the catppuccin yazi port paints an opaque base colour over the
+  # whole UI, hiding ghostty's translucent background; the module's
+  # link is replaced by the same file with that one fill reset, so the
+  # terminal shows through. The rewrite happens at build time: reading
+  # the port at evaluation time would turn the mac's eval into a mac
+  # build. The build fails if the port no longer carries the line.
+  xdg.configFile."yazi/theme.toml".source =
+    let
+      cat = config.catppuccin;
+      port = "${cat.sources.yazi}/${cat.yazi.flavor}/catppuccin-${cat.yazi.flavor}-${cat.yazi.accent}.toml";
+    in
+    lib.mkForce (
+      pkgs.runCommand "yazi-theme-transparent" { } ''
+        sed -E 's/^overall = \{ bg = "#[0-9a-fA-F]{6}" \}$/overall = { bg = "reset" }/' ${port} > $out
+        grep -q '^overall = { bg = "reset" }$' $out
+      ''
+    );
 }
