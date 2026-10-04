@@ -4,8 +4,10 @@
 # machine's hardware truth.
 #
 # How each one is reached:
-#   - motherboard zones: the board's Aura controller over the AMD FCH
-#     SMBus (i2c-piix4, loaded by the module's motherboard = "amd");
+#   - motherboard: the board's Aura controller is a USB HID device
+#     carrying the onboard lighting and the RGB/ARGB headers (patched
+#     below so the onboard zone appears); the module's motherboard =
+#     "amd" loads i2c-piix4 for the SMBus the DRAM sits on;
 #   - GPU: an ENE controller on the card's internal I2C bus, exposed
 #     through the NVIDIA driver;
 #   - RAM: ENE controllers at 0x70-0x77 on the SMBus — which the
