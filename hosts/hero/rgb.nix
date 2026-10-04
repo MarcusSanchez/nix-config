@@ -21,12 +21,29 @@
 # A device OpenRGB "cannot see" is usually that map, not a driver.
 # Prefer hardware modes over continuous software effects on the GPU —
 # each frame is dozens of blocking I2C transfers.
-{ ... }:
+{ pkgs, ... }:
 
 {
   services.hardware.openrgb = {
     enable = true;
     motherboard = "amd";
+    # this board's Aura controller reports its onboard LED count one
+    # byte past where OpenRGB reads it (0x1B is 0, 0x1C holds the
+    # count), so stock OpenRGB builds no mainboard zone and the onboard
+    # lighting only ever receives colour-less effects. The fallback
+    # read gives it a zone; --replace-fail makes a release that moves
+    # the line fail the build rather than silently drop the zone.
+    package = pkgs.openrgb.overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+            substituteInPlace Controllers/AsusAuraUSBController/AsusAuraUSBController/AsusAuraMainboardController.cpp \
+              --replace-fail 'unsigned char num_total_mainboard_leds  = config_table[0x1B];' \
+              'unsigned char num_total_mainboard_leds  = config_table[0x1B];
+        if(num_total_mainboard_leds == 0)
+        {
+            num_total_mainboard_leds = config_table[0x1C];
+        }'
+      '';
+    });
   };
 
   boot.blacklistedKernelModules = [ "spd5118" ];
