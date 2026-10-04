@@ -13,12 +13,14 @@
 #     i2cdetect), so it is blacklisted below. The trade: no DDR5
 #     temperature sensors, lighting control instead.
 #
-# OpenRGB's known NVIDIA-on-Linux quirk lives in machine-local user
-# config, not here: ~/.config/OpenRGB/OpenRGB.json wants
-# "NvidiaLinuxPatch": {"usePatch": true} (an SMBus packet off-by-one
-# swaps red and blue on this vendor's cards without it). Prefer
-# hardware modes over continuous software effects on the GPU — each
-# frame is dozens of blocking I2C transfers.
+# Which devices the server detects is machine-local state, not here:
+# the Detectors map in /var/lib/OpenRGB/OpenRGB.json (the server runs
+# as root). The Lian Li screen and the Wooting are switched off there
+# on purpose — each has its own owner (the lianli daemon, Wootility)
+# and a second controller fighting over them undoes their settings.
+# A device OpenRGB "cannot see" is usually that map, not a driver.
+# Prefer hardware modes over continuous software effects on the GPU —
+# each frame is dozens of blocking I2C transfers.
 { ... }:
 
 {
