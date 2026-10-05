@@ -60,9 +60,11 @@ let
 
       # the lrelease qmake feature hardcodes a tool path inside qtbase
       # that doesn't exist in the split Qt packaging; drop the
-      # translation build (the only catalog is a Russian locale)
+      # translation build (the only catalog is a Russian locale). The
+      # project asks for C++17, but the abseil headers behind its
+      # protobuf dependency need C++20.
       postPatch = ''
-        sed -i 's/ lrelease embed_translations//' \
+        sed -i 's/ lrelease embed_translations//; s/c++17/c++20/' \
           tryx-panorama.pro tryx-panorama-quick.pro
       '';
 
