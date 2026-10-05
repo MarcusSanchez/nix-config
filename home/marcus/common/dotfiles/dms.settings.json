@@ -180,7 +180,7 @@
       "autoHideDelay": 250,
       "borderColor": "surfaceText",
       "borderEnabled": true,
-      "borderOpacity": 0.05,
+      "borderOpacity": 0.07,
       "borderThickness": 1,
       "bottomGap": 0,
       "centerWidgets": [
@@ -212,9 +212,9 @@
       "showOnLastDisplay": false,
       "spacing": 4,
       "squareCorners": false,
-      "transparency": 1,
+      "transparency": 0.95,
       "visible": true,
-      "widgetTransparency": 1,
+      "widgetTransparency": 0.75,
       "shadowIntensity": 0,
       "attachToScreenEdge": true,
       "maximizeWidgetIcons": false,
@@ -226,7 +226,8 @@
       "useOverlayLayer": false,
       "barInsetPadding": 16,
       "barLengthPadding": 0,
-      "widgetPadding": 8
+      "widgetPadding": 8,
+      "island": false
     }
   ],
   "desktopClockCustomColor": {
