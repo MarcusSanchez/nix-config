@@ -12,10 +12,14 @@
   wsl = {
     enable = true;
     defaultUser = config.identity.username;
-    # systemd-binfmt can wipe WSL's own handler for Windows .exe files,
-    # which breaks interop (powershell.exe: "Exec format error", wsl-open
-    # dies). Registering it declaratively keeps it in place.
-    interop.register = true;
+    # Deliberately off. WSL >= 2.5.7 registers the .exe handler itself
+    # and locks binfmt_misc/status read-only, so nothing can flush it.
+    # Registering it here would install systemd-binfmt.service, which
+    # fails on that read-only lock at every boot and switch and makes
+    # every autoUpgrade report failed. With no registrations nixpkgs
+    # installs no binfmt unit at all. Must become true the day any other
+    # registration appears (emulatedSystems) — NixOS-WSL asserts on it.
+    interop.register = false;
   };
 
   # Make xdg-open / $BROWSER reach the Windows browser, so CLI auth flows
