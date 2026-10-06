@@ -5,67 +5,71 @@
 { ... }:
 
 {
-  nix.settings = {
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-    auto-optimise-store = true;
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      auto-optimise-store = true;
 
-    # Single-user machines: wheel is already root-equivalent (passwordless
-    # sudo), so let it talk to the daemon fully — extra substituters and
-    # devenv's caches work without per-flag trust prompts.
-    trusted-users = [
-      "root"
-      "@wheel"
-    ];
+      # Single-user machines: wheel is already root-equivalent (passwordless
+      # sudo), so let it talk to the daemon fully — extra substituters and
+      # devenv's caches work without per-flag trust prompts.
+      trusted-users = [
+        "root"
+        "@wheel"
+      ];
 
-    # Pull claude-code and devenv-built artifacts from their cachix caches
-    # instead of rebuilding locally. Purely build-vs-download: versions
-    # still come from the lockfiles, and a cache miss just builds locally.
-    # Can't live in modules/common (darwin has nix.enable = false) — the
-    # mac gets the same lines in /etc/nix/nix.custom.conf instead.
-    substituters = [
-      "https://cache.nixos.org"
-      "https://claude-code.cachix.org"
-      "https://devenv.cachix.org"
-    ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
-      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-    ];
+      # Pull claude-code and devenv-built artifacts from their cachix caches
+      # instead of rebuilding locally. Purely build-vs-download: versions
+      # still come from the lockfiles, and a cache miss just builds locally.
+      # Can't live in modules/common (darwin has nix.enable = false) — the
+      # mac gets the same lines in /etc/nix/nix.custom.conf instead.
+      substituters = [
+        "https://cache.nixos.org"
+        "https://claude-code.cachix.org"
+        "https://devenv.cachix.org"
+      ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      ];
+
+      # Channels are off (below); this keeps nix-shell -p and <nixpkgs>
+      # resolving through the flake registry.
+      nix-path = [ "nixpkgs=flake:nixpkgs" ];
+    };
+
+    # The NixOS-WSL image ships with root channels (nixos, nixos-wsl) that
+    # fed the installer's configuration.nix; every input now comes from
+    # flake.lock and nothing resolves through them. autoUpgrade runs
+    # `nixos-rebuild --upgrade`, which refreshes channels first, and the
+    # stale nixos-wsl channel fails that step on every run (a non-fatal
+    # nix-env error in each weekly log). Off, the channel profile is
+    # ignored and nix-channel leaves the system path.
+    channel.enable = false;
+
+    # Automatic cleanup
+    gc = {
+      automatic = true;
+      dates = "daily";
+      options = "--delete-older-than 10d";
+    };
   };
 
-  # The NixOS-WSL image ships with root channels (nixos, nixos-wsl) that
-  # fed the installer's configuration.nix; every input now comes from
-  # flake.lock and nothing resolves through them. autoUpgrade runs
-  # `nixos-rebuild --upgrade`, which refreshes channels first, and the
-  # stale nixos-wsl channel fails that step on every run (a non-fatal
-  # nix-env error in each weekly log). Off, that step is a no-op and
-  # the channel profile is ignored; nix-shell -p keeps working through
-  # the nixpkgs=flake:nixpkgs entry below.
-  nix.channel.enable = false;
-  nix.settings.nix-path = [ "nixpkgs=flake:nixpkgs" ];
   # The option alone leaves the image's channel state on disk (root's
   # .nix-channels, .nix-defexpr, the channels profile): NixOS only warns
   # about it at activation, and nixos-rebuild --upgrade still walks the
-  # profile directory and runs nix-channel on whatever it finds — proven
-  # on office-one 2026-10-06, the nix-env error survived the option.
-  # Sweep it here so one push cleans every box; idempotent, and the
-  # generations are store paths that never depended on it.
+  # profile directory and runs nix-channel on whatever it finds. Sweep
+  # it here so one push cleans every box; idempotent, and generations
+  # are store paths that never depended on it.
   system.activationScripts.dropInstallerChannels = ''
     rm -rf /root/.nix-channels /root/.nix-defexpr \
       /nix/var/nix/profiles/per-user/root/channels \
       /nix/var/nix/profiles/per-user/root/channels-*-link
   '';
-
-  # Automatic cleanup
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-    options = "--delete-older-than 10d";
-  };
 
   # Automatic updating, WSL boxes only: rebuilds weekly from pushed
   # main, honouring the pushed flake.lock. Run `nix flake update` to
