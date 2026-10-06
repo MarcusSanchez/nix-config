@@ -37,6 +37,29 @@
     ];
   };
 
+  # The NixOS-WSL image ships with root channels (nixos, nixos-wsl) that
+  # fed the installer's configuration.nix; every input now comes from
+  # flake.lock and nothing resolves through them. autoUpgrade runs
+  # `nixos-rebuild --upgrade`, which refreshes channels first, and the
+  # stale nixos-wsl channel fails that step on every run (a non-fatal
+  # nix-env error in each weekly log). Off, that step is a no-op and
+  # the channel profile is ignored; nix-shell -p keeps working through
+  # the nixpkgs=flake:nixpkgs entry below.
+  nix.channel.enable = false;
+  nix.settings.nix-path = [ "nixpkgs=flake:nixpkgs" ];
+  # The option alone leaves the image's channel state on disk (root's
+  # .nix-channels, .nix-defexpr, the channels profile): NixOS only warns
+  # about it at activation, and nixos-rebuild --upgrade still walks the
+  # profile directory and runs nix-channel on whatever it finds — proven
+  # on office-one 2026-10-06, the nix-env error survived the option.
+  # Sweep it here so one push cleans every box; idempotent, and the
+  # generations are store paths that never depended on it.
+  system.activationScripts.dropInstallerChannels = ''
+    rm -rf /root/.nix-channels /root/.nix-defexpr \
+      /nix/var/nix/profiles/per-user/root/channels \
+      /nix/var/nix/profiles/per-user/root/channels-*-link
+  '';
+
   # Automatic cleanup
   nix.gc = {
     automatic = true;
