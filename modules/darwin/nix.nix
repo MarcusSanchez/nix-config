@@ -12,6 +12,9 @@
 #    ignores for untrusted clients — the whole devenv shell then fails to
 #    build. Determinate's default is trusted-users = root only.
 #  - the cachix substituters the devenv/cachix installers appended.
+#  - keep-derivations = false. Determinate's default (true) keeps every
+#    live output's .drv and source inputs alive across GC, pinning
+#    source tarballs the store never serves again.
 #
 # Consequences:
 #  - nix.settings / nix.gc / nix.optimise are unavailable here; user-level
