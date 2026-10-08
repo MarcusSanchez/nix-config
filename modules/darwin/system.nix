@@ -44,11 +44,21 @@
   # other customized shortcut). activateSettings applies it without a
   # logout. Re-asserted on every rebuild — flipping Spotlight back on in
   # System Settings won't stick; delete this block to hand ⌘Space back.
+  #
+  # Siri and Apple Intelligence off, the same way: both are user defaults
+  # (the Siri toggle in System Settings > Apple Intelligence & Siri, and
+  # the auto-enrolment the Intelligence features perform on first sign-in),
+  # so they ride the same primaryUser run. Plain keys, so a direct write
+  # is safe — no dict to clobber.
   system = {
     activationScripts.postActivation.text = lib.mkAfter ''
       sudo -u ${config.system.primaryUser} /usr/bin/defaults write \
         com.apple.symbolichotkeys AppleSymbolicHotKeys \
         -dict-add 64 '<dict><key>enabled</key><false/></dict>'
+      sudo -u ${config.system.primaryUser} /usr/bin/defaults write \
+        com.apple.assistant.support "Assistant Enabled" -bool false
+      sudo -u ${config.system.primaryUser} /usr/bin/defaults write \
+        com.apple.CloudSubscriptionFeatures.optIn auto_opt_in -bool false
       sudo -u ${config.system.primaryUser} \
         /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
     '';
