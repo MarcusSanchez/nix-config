@@ -63,6 +63,8 @@
     ];
 
     casks = [
+      # throttles or pauses background apps' CPU use
+      "app-tamer"
       "ghostty"
       "google-chrome"
       # per-application key remapping; its config and the launchd agent
@@ -80,6 +82,8 @@
       "raycast"
       "rustdesk"
       "spotify"
+      # menu bar system monitor (CPU/GPU/memory/network/sensors)
+      "stats"
       "stremio"
       "zed"
       "zen"
