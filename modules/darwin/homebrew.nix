@@ -80,8 +80,6 @@
       "raycast"
       "rustdesk"
       "spotify"
-      # menu bar system monitor (CPU/GPU/memory/network/sensors)
-      "stats"
       "stremio"
       "zed"
       "zen"
