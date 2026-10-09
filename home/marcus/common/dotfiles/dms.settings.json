@@ -274,59 +274,6 @@
       }
     },
     {
-      "id": "dw_1790923695392_qp0bqgf5h",
-      "widgetType": "systemMonitor",
-      "name": "System Monitor",
-      "enabled": false,
-      "config": {
-        "showHeader": true,
-        "transparency": 0.8,
-        "colorMode": "primary",
-        "customColor": "#ffffff",
-        "showCpu": true,
-        "showCpuGraph": true,
-        "showCpuTemp": true,
-        "showGpuTemp": false,
-        "gpuPciId": "",
-        "showMemory": true,
-        "showMemoryGraph": true,
-        "showNetwork": true,
-        "showNetworkGraph": true,
-        "showDisk": true,
-        "showTopProcesses": false,
-        "topProcessCount": 3,
-        "topProcessSortBy": "cpu",
-        "layoutMode": "auto",
-        "graphInterval": 60,
-        "displayPreferences": [
-          "all"
-        ]
-      }
-    },
-    {
-      "id": "dw_1790924095396_gg6hb4upy",
-      "widgetType": "materialPlayer",
-      "name": "Material Player & Lyrics",
-      "enabled": false,
-      "config": {
-        "displayPreferences": [
-          "all"
-        ],
-        "showLyrics": true
-      }
-    },
-    {
-      "id": "dw_1790924552327_rys3y8oht",
-      "widgetType": "mediaPlayer",
-      "name": "Media Player",
-      "enabled": false,
-      "config": {
-        "displayPreferences": [
-          "all"
-        ]
-      }
-    },
-    {
       "id": "dw_1790924706439_dd8tozigx",
       "widgetType": "modernClock",
       "name": "Modern Clock (Copy)",
@@ -347,20 +294,6 @@
         "showSeconds": false,
         "use24Hour": false,
         "alignment": "right"
-      }
-    },
-    {
-      "id": "dw_1790925048940_sgd628qoq",
-      "widgetType": "materialWeather",
-      "name": "Material Weather",
-      "enabled": false,
-      "config": {
-        "displayPreferences": [],
-        "shapeMode": "pill",
-        "tempUnit": "fahrenheit",
-        "showSourceFooter": false,
-        "cookieOpacity": 50,
-        "backgroundOpacity": 51
       }
     },
     {

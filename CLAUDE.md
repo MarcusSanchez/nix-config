@@ -231,7 +231,7 @@ modules/nixos/             the bare-metal machine's world, aggregated by
   system.nix               machine-level settings and services:
                            timezone/locale, fonts, pipewire (allowed-rates
                            is a device-intersected MENU, not a forced
-                           rate), bluetooth, CUPS, gvfs, fwupd, upower +
+                           rate), bluetooth, gvfs, fwupd, upower +
                            power-profiles-daemon (shell widgets fail
                            QUIETLY without them), wooting udev rules
                            (deliberately not hardware.wooting.enable —
