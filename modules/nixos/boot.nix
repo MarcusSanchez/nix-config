@@ -1,7 +1,7 @@
-# Bootloader and the graphical boot experience. The ESP is only 1 GB,
-# so cap retained generations — each one's kernel+initrd runs ~200 MB
-# with the nvidia modules and firmware included (see nvidia.nix for the
-# early-KMS initrd).
+# Bootloader and the graphical boot experience. configurationLimit is
+# sized for a 1 GB ESP: an early-KMS initrd (nvidia.nix) runs ~120 MB
+# per generation, which is why the limit is 10. hosts/hero/lanzaboote.nix
+# reads the same value for the signed loader.
 { lib, pkgs, ... }:
 
 {

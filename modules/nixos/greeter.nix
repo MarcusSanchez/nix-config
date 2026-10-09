@@ -4,8 +4,7 @@
 # boot` + reboot, not `switch` — switch would kill the live session
 # out from under the user.
 #
-# Module and package both come from nixpkgs (the greeter split into its
-# own dank-greeter repo upstream, nixpkgs adopted both halves).
+# Module and package both come from nixpkgs.
 {
   config,
   lib,
@@ -24,12 +23,11 @@ let
   # black background. Whether a side monitor stays on-but-blank or
   # loses its signal entirely is the host's greeterOutputs call (an
   # `off` block cuts it; the session's own compositor lights it again
-  # at login). The list is
-  # BAKED in at build time — an env var does not survive the
-  # greetd -> script -> niri -> quickshell inheritance chain, and the
-  # greeter's QML rides INSIDE the Go binary (`make sync-shell`
-  # embeds quickshell/ before the build), so the filter is patched
-  # into the source rather than the installed tree. Safety:
+  # at login). The list is BAKED in at build time — an env var does
+  # not survive the greetd -> script -> niri -> quickshell inheritance
+  # chain, and the greeter's QML rides INSIDE the Go binary (`make
+  # sync-shell` embeds quickshell/ before the build), so the filter is
+  # patched into the source rather than the installed tree. Safety:
   # single-screen machines and a filter that matches nothing both
   # fall back to every screen — no config state can produce a greeter
   # with nowhere to type. The substitution uses --replace-fail on
@@ -63,10 +61,10 @@ in
 
   # The greeter compositor's output layout, restated per host — the
   # same per-machine-VALUE shape as greeterScreens. The session's
-  # layout lives in home/marcus/common/dotfiles/niri.outputs.kdl; an
-  # earlier greeter read that file directly across the layers, and the
-  # option keeps the layers decoupled instead (the price is keeping
-  # the blocks in step by hand). Unset, the greeter runs every monitor
+  # layout lives in home/marcus/common/dotfiles/niri.outputs.kdl; the
+  # option keeps the layers decoupled rather than reading that file
+  # across them (the price is keeping the blocks in step by hand).
+  # Unset, the greeter runs every monitor
   # untransformed at scale 1: sideways on a vertical monitor, tiny on
   # a 4K.
   options.greeterOutputs = lib.mkOption {
@@ -133,8 +131,8 @@ in
     # generated config when that file exists; hand it the host's
     # greeterOutputs plus one greeter-only extra: idle management. None
     # exists at the greeter otherwise (the session's belongs to the
-    # shell, which only runs after login), so a remote wake-on-lan used
-    # to leave every monitor burning at the sign-in screen all night —
+    # shell, which only runs after login), so a remote wake-on-lan would
+    # otherwise leave every monitor burning at the sign-in screen —
     # swayidle powers the panels off after five idle minutes and any
     # input wakes them (niri behavior).
     environment.etc."greetd/niri_overrides.kdl".text = ''
@@ -144,13 +142,15 @@ in
       spawn-at-startup "${pkgs.swayidle}/bin/swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
     '';
 
-    # No avatar is currently seeded. To add one: the greeter's avatar
+    # The avatar slot, empty: no profile picture is seeded. To seed
+    # one, add a tmpfiles rule to the list below — the greeter's avatar
     # probe checks its own cache, /var/lib/AccountsService/icons/
-    # <user>, then ~/.face — the dms-greeter user cannot read ~/.face
-    # through the 0700 home, so the seed is a tmpfiles rule: C+ the
-    # asset onto /var/lib/AccountsService/icons/<identity.username>,
-    # 0644 root root. C+ overwrites, so an asset change propagates at
-    # the next boot/activation.
+    # <user>, then ~/.face, and the dms-greeter user cannot read
+    # ~/.face through the 0700 home, so the rule C+'s the asset onto
+    # /var/lib/AccountsService/icons/<identity.username>, 0644 root
+    # root. C+ overwrites, so an asset change propagates at the next
+    # boot/activation.
+
     systemd.tmpfiles.rules = [
       # The module's greetd pre-start syncs DMS state from configHome
       # (wallpaper, palette) and rewrites the synced session.json's

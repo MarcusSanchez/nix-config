@@ -14,8 +14,9 @@ let
   # SPECIALARG, not config: it resolves outside the module fixpoint, so
   # the dynamic users.users attr name below is safe from the recursion
   # the identity.nix guard rail warns about (which only bites when the
-  # name derives from config). home-manager.nix already keys its
-  # users.${...} the same way.
+  # name derives from config). modules/common/home-manager.nix keys its
+  # users.${...} on config.identity.username, which resolves to this
+  # same literal.
   username = { macbook-air = "marcussanchez"; }.${hostName} or "marcus";
 in
 {
@@ -24,7 +25,7 @@ in
   programs.zsh.enable = true;
 
   # Several darwin options (homebrew, system.defaults, ...) act on one user.
-  system.primaryUser = config.identity.username;
+  system.primaryUser = username;
 
   users.users.${username} = {
     name = username;

@@ -1,7 +1,8 @@
 # The shared darwin host KIND — every Mac in the flake points here (like
 # the WSL boxes share hosts/wsl). Per-machine values resolve from the
-# hostName specialArg; the account name is the other one, in
-# modules/darwin/users.nix. Reusable config lives in modules/darwin.
+# hostName specialArg through two hostName-keyed maps: computerName
+# here, the account name in modules/darwin/users.nix. Reusable config
+# lives in modules/darwin.
 { hostName, ... }:
 
 {
@@ -22,8 +23,8 @@
     }
     .${hostName};
 
-  # nix-darwin's stateVersion is a single era-wide integer (currently 6),
-  # NOT a per-machine date like the NixOS hosts — both Macs installed in
+  # nix-darwin's stateVersion is a single era-wide integer, NOT a
+  # per-machine date like the NixOS hosts — both Macs installed in
   # the same era legitimately share it. Do not change after install.
   system.stateVersion = 6;
 }

@@ -1,11 +1,12 @@
 # Credentials, so no machine ever needs a CLI login. One file for both
-# platforms — only the sops module import differs, and that lives in each
-# platform aggregator (which is what makes the sops.* options exist here
-# at all).
+# platforms — only the sops platform module import differs: the host
+# modules carry it on NixOS (hosts/wsl, hosts/hero),
+# modules/darwin/default.nix on the mac. That import is what makes the
+# sops.* options exist here at all.
 #
 # Identity lives at /var/lib/sops-nix/key.txt on every machine, but WHICH
 # identity is tiered (.sops.yaml is the authority):
-#   * lite/temporary boxes hold the roaming master key from Bitwarden
+#   * ordinary boxes hold the roaming master key from Bitwarden
 #     (placed by age:place) — it decrypts secrets/secrets.yaml only, so
 #     adding or losing such a box never edits .sops.yaml.
 #   * the trusted machines (hardcoded at the fly_token declaration
@@ -17,7 +18,7 @@
 #
 # The keyfile has to be there before a switch that installs secrets —
 # sops-install-secrets treats a missing keyFile as fatal, not as a
-# fallback, so it aborts the whole step. On a fresh lite box the first
+# fallback, so it aborts the whole step. On a fresh ordinary box the first
 # switch fails it harmlessly, then age:place closes the loop.
 #
 # Secrets are decrypted to /run/secrets (tmpfs) owned by the user; the home
@@ -36,6 +37,33 @@
 let
   user = config.identity.username;
   home = config.identity.home;
+
+  # The super tier, trusted machines only: the hardcoded list is the
+  # tier, and it must track .sops.yaml's recipients and key reality on
+  # the box — sops-install-secrets aborts the WHOLE install on the first
+  # file it cannot decrypt, so listing a master-key box here would cost
+  # it every secret, not just the super ones. fly_token: a fly ORG token
+  # (`fly tokens create org`), static unlike the session macaroon `fly
+  # auth login` leaves behind; exported as FLY_API_TOKEN by
+  # home/marcus/common/secrets.nix, whose read-guard makes boxes without
+  # it skip the export with no home-layer branching. Nothing
+  # unreissuable ever goes in super.yaml — a lost super secret must be
+  # re-creatable at its provider (atuin_key stays in the lower tier,
+  # Bitwarden-recoverable, for exactly this reason).
+  superTier =
+    lib.optionalAttrs
+      (builtins.elem config.networking.hostName [
+        "macbook-air"
+        "mac-mini"
+        "hero"
+      ])
+      {
+        fly_token = {
+          sopsFile = ../../secrets/super.yaml;
+          owner = user;
+          mode = "0400";
+        };
+      };
 in
 {
   config = lib.mkMerge [
@@ -101,33 +129,7 @@ in
               owner = user;
               mode = "0400";
             })
-          # The super tier, trusted machines only: the hardcoded list is
-          # the tier, and it must track .sops.yaml's recipients and key
-          # reality on the box — sops-install-secrets aborts the WHOLE
-          # install on the first file it cannot decrypt, so listing a
-          # master-key box here would cost it every secret, not just the
-          # super ones. fly_token: a fly ORG token (`fly tokens create
-          # org`), static unlike the session macaroon `fly auth login`
-          # leaves behind; exported as FLY_API_TOKEN by
-          # home/marcus/common/secrets.nix, whose read-guard makes boxes
-          # without it skip the export with no home-layer branching.
-          # Nothing unreissuable ever goes in super.yaml — a lost super
-          # secret must be re-creatable at its provider (atuin_key stays
-          # above, Bitwarden-recoverable, for exactly this reason).
-          //
-            lib.optionalAttrs
-              (builtins.elem config.networking.hostName [
-                "macbook-air"
-                "mac-mini"
-                "hero"
-              ])
-              {
-                fly_token = {
-                  sopsFile = ../../secrets/super.yaml;
-                  owner = user;
-                  mode = "0400";
-                };
-              };
+          // superTier;
       };
     }
 

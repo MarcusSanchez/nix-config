@@ -18,8 +18,8 @@
   # whenever the machine last self-updated.
   nix-homebrew = {
     enable = true;
-    # Owner of the prefix — the same account nix-darwin acts on, from
-    # system.primaryUser in ./users.nix.
+    # Owner of the prefix — the account from identity.username (assigned
+    # in ./users.nix, which also makes it system.primaryUser).
     user = config.identity.username;
     # Adopts the brew that is already on this machine instead of demanding
     # a clean prefix. Harmless once adopted; it is what makes the switch to

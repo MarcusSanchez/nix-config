@@ -19,11 +19,9 @@
   # Early KMS: load the driver in the initrd so the panel is driven at
   # native mode from the first splash frame — without this, plymouth
   # starts on the firmware framebuffer and the screen mode-switches
-  # (black flash) when the real driver loads mid-boot. Each unique
-  # early-KMS initrd costs on the order of 60-200 MB on the ESP, shared
-  # across the generations that use it — why the desktop install runbook
-  # calls for a 1 GB ESP, and why configurationLimit 10 in ./boot.nix
-  # bounds the total.
+  # (black flash) when the real driver loads mid-boot. The driver makes
+  # each generation's initrd large on the ESP, which is what the
+  # configurationLimit in ./boot.nix is sized for.
   boot.initrd.kernelModules = [
     "nvidia"
     "nvidia_modeset"

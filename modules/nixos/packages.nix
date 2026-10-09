@@ -20,19 +20,18 @@
     # shell-integration-features = ssh-terminfo in the shared ghostty base, home/marcus/common/dotfiles/ghostty.config.)
     ghostty.terminfo
 
-    # libsecret's secret-tool probes the org.freedesktop.secrets
-    # provider by hand: secret-tool store/lookup. watchman's
-    # folly/fbthrift closure is ~87 MiB — a desk can afford it (the mac
-    # gets its own from brew). ethtool reads and sets the NIC's own
-    # hardware flags — `ethtool <iface>` is how you confirm the
-    # Wake-on-LAN state a host's link file arms (`Wake-on: g` armed,
-    # `d` disabled).
+    # reads and sets the NIC's own hardware flags — `ethtool <iface>`
+    # is how you confirm the Wake-on-LAN state a host's link file arms
+    # (`Wake-on: g` armed, `d` disabled)
     ethtool
+    # secret-tool probes the org.freedesktop.secrets provider by hand:
+    # secret-tool store/lookup
     libsecret
+    # file-watching daemon; its folly/fbthrift closure is large, which
+    # a desk can afford (the mac gets its own from brew)
     watchman
     # lspci/lsusb — the first questions hardware diagnosis asks (which
-    # chip is this, which driver bound); their absence was felt the day
-    # a wedged bluetooth combo card needed identifying
+    # chip is this, which driver bound)
     pciutils
     usbutils
   ];

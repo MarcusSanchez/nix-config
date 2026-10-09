@@ -5,7 +5,7 @@
 { pkgs, ... }:
 
 {
-  # Timezone and locale, carried over from the installer's config.
+  # Timezone and locale.
   time.timeZone = "America/New_York";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -42,10 +42,8 @@
     # MTP phones, network shares (nautilus in home/marcus/nixos/apps.nix)
     gvfs.enable = true;
 
-    # firmware updates (LVFS), and specifically the UEFI dbx revocation
-    # database: the firmware's true-Setup-Mode reset (the only path to custom
-    # Secure Boot keys on that board) wipes dbx, and fwupd is what
-    # restores it — `fwupdmgr update` offers "UEFI dbx" as a device
+    # firmware updates (LVFS), including the UEFI dbx revocation
+    # database — `fwupdmgr update` offers "UEFI dbx" as a device
     fwupd.enable = true;
 
     # the shell reads battery state through UPower — without it the
@@ -62,38 +60,39 @@
     # desktop app, which the web version replaces here. Inert without
     # the hardware plugged in.
     udev.packages = [ pkgs.wooting-udev-rules ];
-  };
 
-  # PipeWire, with PulseAudio emulation for the apps that expect it;
-  # rtkit provides real-time scheduling priority for the audio graph.
-
-  services.pulseaudio.enable = false;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # Follow the content's sample rate instead of resampling all to
-    # 48k. The list is a MENU, not a demand: PipeWire intersects it
-    # with each device's own capabilities, so this is safe flavor-wide
-    # — a laptop codec that only does 44.1/48 picks between those,
-    # while a hi-res DAC (the desk's Fosi K7 does 24-bit/192k) gets
-    # the full range. Bit depth needs no config: mixing is float32
-    # internally and each device negotiates its best format itself.
-    extraConfig.pipewire."10-clock-rates" = {
-      "context.properties" = {
-        "default.clock.rate" = 48000;
-        "default.clock.allowed-rates" = [
-          44100
-          48000
-          88200
-          96000
-          176400
-          192000
-        ];
+    # PipeWire, with PulseAudio emulation for the apps that expect it
+    # (security.rtkit below gives the audio graph real-time scheduling
+    # priority).
+    pulseaudio.enable = false;
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      # Follow the content's sample rate instead of resampling all to
+      # 48k. The list is a MENU, not a demand: PipeWire intersects it
+      # with each device's own capabilities, so this is safe for every
+      # desktop host — a laptop codec that only does 44.1/48 picks
+      # between those, while a hi-res USB DAC (24-bit/192k) gets the
+      # full range. Bit depth needs no config: mixing is float32
+      # internally and each device negotiates its best format itself.
+      extraConfig.pipewire."10-clock-rates" = {
+        "context.properties" = {
+          "default.clock.rate" = 48000;
+          "default.clock.allowed-rates" = [
+            44100
+            48000
+            88200
+            96000
+            176400
+            192000
+          ];
+        };
       };
     };
   };
 
+  # real-time scheduling priority for PipeWire's audio graph
   security.rtkit.enable = true;
 }

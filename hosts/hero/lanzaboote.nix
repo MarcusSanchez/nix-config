@@ -7,15 +7,14 @@
 # /var/lib/sbctl absent, the bootloader-install step fails, which
 # would break nixos-install itself.
 #
-# The ceremony for THIS board's firmware, as actually performed —
-# NOT the documented sbctl path:
-# this firmware DISCARDS runtime-written key variables at POST (the
-# AMI NVRAM_Verify tamper check) and quietly reinstates its factory
-# keys, so `sbctl enroll-keys` "succeeds" and then the first enforced
-# boot hits a Secure Boot Violation against a db that no longer holds
-# the key. Setup Mode, PK deletion and the admin-password dance are
-# all dead ends here. The path the firmware DOES honor is its own
-# Key Management UI, appending one cert to the factory db:
+# The ceremony for THIS board's firmware, which is NOT the sbctl
+# `enroll-keys` path: this firmware DISCARDS runtime-written key
+# variables at POST (the AMI NVRAM_Verify tamper check) and quietly
+# reinstates its factory keys, so `sbctl enroll-keys` "succeeds" and
+# then the first enforced boot hits a Secure Boot Violation against a
+# db that no longer holds the key. Setup Mode, PK deletion and an
+# admin password do not change that. The path the firmware DOES honor
+# is its own Key Management UI, appending one cert to the factory db:
 #   sudo sbctl create-keys            # writes /var/lib/sbctl
 #   (import this file, switch — sbctl verify shows everything signed)
 #   openssl x509 -in /var/lib/sbctl/keys/db/db.pem \
@@ -39,6 +38,7 @@
 #   (or Key Management -> "Install Default Secure Boot keys" for a
 #   full factory reset of the policy — which drops the appended cert).
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -51,17 +51,17 @@
   # for debugging and the enrollment ceremony
   environment.systemPackages = [ pkgs.sbctl ];
 
-  # lanzaboote replaces the systemd-boot module wholesale — the flavor's
-  # boot.nix enables it, so force it off here; lanzaboote installs its own
-  # (signed) systemd-boot underneath
+  # lanzaboote replaces the systemd-boot module wholesale —
+  # modules/nixos/boot.nix enables it, so force it off here; lanzaboote
+  # installs its own (signed) systemd-boot underneath
   boot.loader.systemd-boot.enable = lib.mkForce false;
 
   boot.lanzaboote = {
     enable = true;
     pkiBundle = "/var/lib/sbctl";
-    # same ESP budget as the flavor's systemd-boot setting (1 GB ESP,
-    # early-KMS initrds) — the systemd-boot copy of this option is inert
-    # once that module is forced off
-    configurationLimit = 10;
+    # the same ESP budget as modules/nixos/boot.nix's systemd-boot
+    # setting (the sizing is explained there) — the systemd-boot copy of
+    # the option is inert once that module is forced off
+    configurationLimit = config.boot.loader.systemd-boot.configurationLimit;
   };
 }

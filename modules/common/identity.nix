@@ -1,10 +1,11 @@
 # The one human account's name and home directory as a shared option:
-# assigned once per platform (modules/nixos/users.nix, modules/darwin/
-# users.nix, beside the account definitions they describe) and read by
-# every module that would otherwise hardcode the name or branch on
-# isDarwin. Deliberately NOT a rename knob — the users.users attr names
-# at the two definition sites stay literal on purpose; this option
-# removes duplication, not the account name.
+# assigned once per world (modules/nixos/users.nix, modules/wsl/
+# users.nix, modules/darwin/users.nix, beside the account definitions
+# they describe) and read by every module that would otherwise hardcode
+# the name or branch on isDarwin. Deliberately NOT a rename knob — the
+# assigned VALUE is an unconditional literal at every site (the attr
+# names that consume it may be dynamic); this option removes
+# duplication, not the account name.
 #
 # Guard rails: the username value must not derive from CONFIG.
 # Consumers use it in dynamic attr names (users.users.${...},

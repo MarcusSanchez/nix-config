@@ -25,10 +25,10 @@
 # NixOS doesn't have — only /bin/sh — and it rewrites them on every IDE
 # update, so patching the shebang by hand never sticks.
 #
-# Desktop flavor only, deliberately: the WSL boxes rebuild themselves
+# Desktop only, deliberately: the WSL boxes rebuild themselves
 # unattended from pushed main every week, and a FUSE mount over /bin is
 # not something to hand them without testing on a machine someone is
-# looking at. Promote envfs to modules/nixos if the WSL side ever wants it.
+# looking at. Give modules/wsl its own envfs if the WSL side ever wants it.
 { pkgs, ... }:
 
 {

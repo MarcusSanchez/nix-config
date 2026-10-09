@@ -15,11 +15,13 @@
     ./packages.nix
     ./users.nix
 
-    # the desktop session
+    # the desktop stack: boot splash, login screen, session
     ./boot.nix
     ./security.nix
     ./niri.nix
     ./greeter.nix
+
+    # machine-level settings, network, non-nix binaries
     ./system.nix
     ./networking.nix
     ./nix-ld.nix

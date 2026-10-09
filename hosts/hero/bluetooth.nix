@@ -25,9 +25,9 @@
 }:
 
 let
-  # 2.16-1 carries the btmtk missing-firmware reset fix (pending
-  # upstream) — aimed at the half-wedged boots where firmware init
-  # fails and the chip stays hung instead of being reset
+  # 2.16-1 carries the btmtk missing-firmware reset fix (here until
+  # the kernel ships it): a boot whose firmware init fails resets the
+  # chip instead of leaving it hung
   version = "2.16-1";
   deb = pkgs.fetchurl {
     url = "https://github.com/jetm/mediatek-mt7927-dkms/releases/download/v${version}/mediatek-mt7927-dkms_${version}_all.deb";
@@ -84,7 +84,7 @@ in
 
     # the chip family's runtime PM is broken (leaked PM references and
     # dead-on-resume remote wakeup; the btusb/mediatek fix series is
-    # still in review upstream), and a suspended BT half can latch —
+    # not in this kernel), and a suspended BT half can latch —
     # the M.2 slot's 3.3V standby rail preserves the corpse across
     # every warm reboot and soft-off, so only a PSU-off power drain
     # revives it. Keeping the half out of runtime suspend is the

@@ -1,6 +1,6 @@
 # Dev toolchains and CLI basics for every machine. Platform-only packages
-# (build essentials the mac gets from Xcode CLT) live in the platform's own
-# packages.nix.
+# (build essentials the mac gets from Xcode CLT) live in modules/nixos/
+# packages.nix and modules/wsl/packages.nix; darwin has none.
 { inputs, pkgs, ... }:
 
 {
@@ -40,9 +40,8 @@
     # detach` from any shell is the deterministic fallback — on the mac,
     # TUI output coalescing can swallow the chord) so a dropped link or
     # closed laptop doesn't kill the work. The lightweight answer where
-    # tmux would be a full multiplexer; replaced abduco, whose client
-    # only ever tested the first byte of each read for its detach key.
-    # A bare attach spawns a login $SHELL, so no command export needed.
+    # tmux would be a full multiplexer. A bare attach spawns a login
+    # $SHELL, so no command export needed.
     zmx
 
     # what did a rebuild actually change: nvd diff <old-gen> <new-gen>
@@ -83,8 +82,9 @@
     deadnix
 
     # `sops secrets/secrets.yaml` to edit credentials; age is what it
-    # encrypts to. One key decrypts everywhere, so onboarding a machine is
-    # placing that key, not converting a host key (README's Secrets section).
+    # encrypts to. Two key tiers (modules/common/secrets.nix): an ordinary
+    # box gets the roaming master key placed, a trusted box holds its own
+    # machine key (README's Secrets section).
     sops
     age
 

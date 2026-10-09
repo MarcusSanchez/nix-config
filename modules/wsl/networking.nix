@@ -1,7 +1,9 @@
 # Tailscale, so the machines reach each other from any network rather than
-# only over the LAN.
+# only over the LAN — plus what it needs on WSL: the systemd-resolved
+# override MagicDNS depends on, mosh's UDP range through the firewall,
+# and the tailscale-serve bridge to the Windows side's RustDesk port.
 #
-# **Imported by the host modules, never by modules/nixos/default.nix.**
+# **Imported by the host modules, never by modules/wsl/default.nix.**
 # Every WSL2 distro on a Windows PC shares ONE network namespace: same IP,
 # same ports, same routing table (microsoft/WSL#4304). Two tailscaled
 # instances there would fight over tailscale0, UDP 41641, and the
@@ -29,12 +31,13 @@
 #
 # Enrolment is interactive and stores nothing in the repo:
 #
-#   sudo tailscale up --ssh
+#   sudo tailscale up
 #
-# (An authKeyFile from sops would allow unattended enrolment, but auth keys
-# expire after 90 days max, so it'd be a recurring rotation for two
-# interactively-used machines. Note extraUpFlags only applies when
-# authKeyFile is set — hence passing --ssh by hand above.)
+# (--ssh is already handled: extraSetFlags creates tailscaled-set.service,
+# which runs `tailscale set --ssh` after tailscaled starts. An authKeyFile
+# from sops would allow unattended enrolment, but auth keys expire after
+# 90 days max, so it'd be a recurring rotation for three
+# interactively-used machines.)
 {
   config,
   lib,
@@ -77,7 +80,7 @@
   };
 
   # Stop WSL owning /etc/resolv.conf so resolved can. Read only at distro
-  # start, so this needs `wsl -t nixos` from PowerShell after the switch —
+  # start, so this needs `wsl -t NixOS` from PowerShell after the switch —
   # a rebuild alone changes nothing.
   wsl.wslConf.network.generateResolvConf = false;
 
@@ -98,8 +101,9 @@
   ];
 
   # Tailnet doorway to the Windows side's RustDesk receiver, on the
-  # remotely-controlled PCs only (the `bridged` list): the account-free
-  # "direct IP access" mode (the public rendezvous now gates ID-based
+  # remotely-controlled PCs only — the hardcoded hostname list below is
+  # the gate, and it must track the Windows-side setup: the account-free
+  # "direct IP access" mode (the public rendezvous gates ID-based
   # connections behind an account login). RustDesk runs on WINDOWS on
   # these PCs, but the tailnet node lives inside the distro — traffic
   # to this host's tailnet name terminates in WSL, where nothing
@@ -124,9 +128,6 @@
   # working. On a machine not yet enrolled the unit fails after its
   # retries — expected until first enrolment; it heals on the next boot
   # or a restart of rustdesk-tailnet-bridge.
-  # ...on the PCs whose Windows side runs a RustDesk receiver — the
-  # hardcoded list is the gate, and it must track that Windows-side
-  # setup; the PC this desk sits at needs no doorway to itself.
   systemd.services.rustdesk-tailnet-bridge =
     lib.mkIf
       (builtins.elem config.networking.hostName [

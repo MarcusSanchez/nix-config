@@ -1,4 +1,5 @@
-# Aggregator for all system-level modules.
+# Aggregator for the darwin world: the mac's own modules, plus ../common
+# for the cross-platform ones.
 #
 # The two sops-nix/home-manager imports are the platform halves of
 # modules/common/secrets.nix and modules/common/home-manager.nix: they are

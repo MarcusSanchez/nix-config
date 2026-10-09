@@ -43,11 +43,11 @@ let
     fetchSubmodules = true;
   };
   cargoHash = "sha256-K4GOsGLleC/pNqKznK1kBq0/DpDrKMCohhVnQUD9pzE=";
+  version = "0-unstable-2026-08-26";
 
   lianli-daemon = pkgs.rustPlatform.buildRustPackage {
     pname = "lianli-daemon";
-    version = "0-unstable-2026-08-26";
-    inherit src cargoHash;
+    inherit src version cargoHash;
 
     nativeBuildInputs = with pkgs; [
       pkg-config
@@ -68,8 +68,8 @@ let
     # the evdi crate links -levdi directly, no pkg-config lookup
     RUSTFLAGS = "-L ${evdi}/lib";
 
-    # daemon only — the workspace's GUI crate would pull the whole
-    # Tauri/webkit tree
+    # the daemon crate alone; the GUI crate is its own derivation below
+    # (Tauri app with the vendored npm lockfile)
     buildAndTestSubdir = "crates/lianli-daemon";
 
     # wireless discovery can finish AFTER start_fan_control at startup;
@@ -105,8 +105,7 @@ let
 
   lianli-gui = pkgs.rustPlatform.buildRustPackage {
     pname = "lianli-gui";
-    version = "0-unstable-2026-08-26";
-    inherit src cargoHash;
+    inherit src version cargoHash;
 
     npmDeps = pkgs.fetchNpmDeps {
       name = "lianli-gui-npm-deps";

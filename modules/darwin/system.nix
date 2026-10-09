@@ -1,6 +1,6 @@
 # Machine-level system settings and services for the mac: fonts, Touch
-# ID, Remote Login, and the imperative tweaks rediscovered over time —
-# declare them here instead of clicking through System Settings.
+# ID, Remote Login, and the settings otherwise clicked through System
+# Settings — declared here instead.
 {
   config,
   lib,
@@ -9,12 +9,10 @@
 }:
 
 {
-  # Fonts, installed to /Library/Fonts/Nix Fonts. Replaces the manually
-  # downloaded copies in ~/Library/Fonts.
+  # Fonts, installed to /Library/Fonts/Nix Fonts.
   fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
 
-  # Touch ID for sudo (works in tmux/iTerm too via pam_reattach behavior
-  # of sudo_local). The one deliberate addition over the pre-nix machine.
+  # Touch ID for sudo.
   security.pam.services.sudo_local.touchIdAuth = true;
 
   # Passwordless sudo, matching the Linux boxes — what lets
@@ -88,7 +86,4 @@
       dock.autohide = true;
     };
   };
-
-  # Examples for later, all under system.defaults:
-  #   system.defaults.finder.AppleShowAllExtensions = true;
 }

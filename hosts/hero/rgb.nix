@@ -37,9 +37,9 @@
     # the line fail the build rather than silently drop the zone.
     package = pkgs.openrgb.overrideAttrs (old: {
       postPatch = (old.postPatch or "") + ''
-            substituteInPlace Controllers/AsusAuraUSBController/AsusAuraUSBController/AsusAuraMainboardController.cpp \
-              --replace-fail 'unsigned char num_total_mainboard_leds  = config_table[0x1B];' \
-              'unsigned char num_total_mainboard_leds  = config_table[0x1B];
+        substituteInPlace Controllers/AsusAuraUSBController/AsusAuraUSBController/AsusAuraMainboardController.cpp \
+          --replace-fail 'unsigned char num_total_mainboard_leds  = config_table[0x1B];' \
+          'unsigned char num_total_mainboard_leds  = config_table[0x1B];
         if(num_total_mainboard_leds == 0)
         {
             num_total_mainboard_leds = config_table[0x1C];

@@ -37,8 +37,7 @@ in
     package = niriQuiet;
   };
 
-  # backs HM's dconf.settings and gsettings for GTK apps (arrived with
-  # GNOME before, left with it)
+  # backs HM's dconf.settings and gsettings for GTK apps
   programs.dconf.enable = true;
 
   # swaylock is the session's fallback locker (DMS's is primary); it

@@ -22,14 +22,16 @@
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
 #     the frame drops out for a refresh, and so does every memory-clock
-#     transition. The service below pins the lowest step that keeps
-#     scanout fed (a floor-to-max range still flickers on each jump);
+#     transition. The service below pins 7001 MHz, the lowest step
+#     above deep idle (the supported steps are 405/810/7001/13801/
+#     14001; a floor-to-max range still flickers on each jump);
 #     GPU-heavy work on this OS runs at that bandwidth unless the
 #     service is stopped for the job. LACT leaves it alone.
 { config, pkgs, ... }:
 
 let
   kernel = config.boot.kernelPackages.kernel;
+  nvidiaSmi = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi";
 
   asus-ec-sensors = pkgs.stdenv.mkDerivation {
     pname = "asus-ec-sensors";
@@ -74,8 +76,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --lock-memory-clocks=7001,7001";
-      ExecStop = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi --reset-memory-clocks";
+      ExecStart = "${nvidiaSmi} --lock-memory-clocks=7001,7001";
+      ExecStop = "${nvidiaSmi} --reset-memory-clocks";
     };
   };
 }

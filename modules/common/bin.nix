@@ -24,9 +24,6 @@
         (name: ''
             cat > "$out/bin/${name}" <<'WRAP'
           #!/usr/bin/env bash
-          # the cd is invisible to the caller: this wrapper is a child
-          # process, and a child's working directory never touches the
-          # invoking shell's
           cd ${config.identity.home}/nix-config || exit 1
           exec ./bin/${name} "$@"
           WRAP

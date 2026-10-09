@@ -1,6 +1,6 @@
 # Tailscale on the mac: the open-source daemon via nix-darwin, NOT the GUI
-# cask — deliberately the opposite call from before, made so this machine can
-# be a Tailscale SSH *server* like the WSL boxes. The SSH server cannot run
+# cask, so the mac can be a Tailscale SSH *server* like the WSL boxes.
+# The SSH server cannot run
 # in the sandboxed GUI builds (App Store or Standalone pkg); only the
 # unsandboxed OSS tailscaled can spawn login shells. The cost is that there
 # is no menu bar app at all — the CLI (usable without sudo thanks to
@@ -21,7 +21,7 @@
 #
 # Known wart, accepted: nix-darwin#1688 (open) — after some switches the
 # daemon needs a manual restart, and a switch performed *over Tailscale SSH*
-# can kill its own session when tailscaled restarts. On a laptop rebuilt
+# can kill its own session when tailscaled restarts. On a Mac rebuilt
 # locally that degrades to "run one command":
 #   sudo launchctl kickstart -k system/com.tailscale.tailscaled
 # Remote Login (system.nix) stays on as the password-auth fallback path.

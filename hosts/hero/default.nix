@@ -26,10 +26,8 @@
     ../../modules/nixos
     ../../modules/nixos/nvidia.nix
     ./hardware-configuration.nix
-    # Secure Boot, live since the sbctl ceremony. On a REINSTALL,
-    # comment this out until `sudo sbctl create-keys` has run — enabled
-    # without keys on disk, the bootloader install (and therefore
-    # nixos-install) fails. Full ceremony: lanzaboote.nix header.
+    # Secure Boot. On a REINSTALL, comment this out until `sudo sbctl
+    # create-keys` has run — lanzaboote.nix's header has the ceremony.
     ./lanzaboote.nix
     ./bluetooth.nix
     ./lianli.nix
@@ -112,8 +110,8 @@
   # splash — compositors do NOT resurrect a forced-off connector (the
   # session would come up single-monitor) — so the wake-side-monitors
   # oneshot below un-forces it via sysfs right before the display
-  # manager, which lights it. The portrait's rotation lives in the
-  # machine-local ~/.config/niri/monitors_user.kdl as transform "270";
+  # manager, which lights it. The portrait's rotation is niri's
+  # transform "270" in home/marcus/common/dotfiles/niri.outputs.kdl;
   # a panel_orientation param would only rotate a plymouth that never
   # draws there (and niri composing param + transform flips the
   # image). The SHUTDOWN splash is the mirror problem — by
@@ -128,7 +126,7 @@
       description = "Un-force the boot-disabled portrait connector before the greeter";
       wantedBy = [ "multi-user.target" ];
       # both spellings so the ordering holds whichever unit the login
-      # screen runs as (greetd.service today — modules/nixos/greeter.nix;
+      # screen runs as (greetd.service — modules/nixos/greeter.nix;
       # a nonexistent unit in an ordering list is simply ignored)
       before = [
         "display-manager.service"
@@ -182,16 +180,16 @@
     };
   };
 
-  # Known wart, upstream (systemd 261.2): on warm boots the initrd
-  # udevd deadlocks at stop after a clean worker shutdown and gets
+  # Upstream systemd wart (261.2): on warm boots the initrd udevd
+  # deadlocks at stop after a clean worker shutdown and gets
   # SIGKILLed, and the main udevd's recovery delays input coldplug —
   # the login screen renders while keyboard and mouse stay dead for
   # tens of seconds. Cold boots are unaffected. Do not cap the stop
-  # timeout; an earlier SIGKILL worsens the recovery. Cured by a
-  # future systemd bump — verify with
-  # `journalctl -b | grep stop-sigterm` coming back empty after a
-  # reboot, then delete this comment and the debug entry below
-  # (a boot-menu entry that adds udev debug logging).
+  # timeout; an earlier SIGKILL worsens the recovery. After a systemd
+  # bump, `journalctl -b | grep stop-sigterm` coming back empty on a
+  # warm reboot means the wedge is gone: remove this comment and the
+  # specialisation below (a boot-menu entry that adds udev debug
+  # logging).
   specialisation.udev-debug.configuration = {
     boot.kernelParams = [
       "rd.udev.log_level=debug"

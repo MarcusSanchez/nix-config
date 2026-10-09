@@ -1,10 +1,11 @@
 # Bridges Home Manager into the system build; per-user config lives in
-# home/. One bridge for both platforms — only the HM module import differs,
-# and that lives in each platform aggregator.
+# home/. One bridge for both platforms — only the HM platform module
+# import differs: the host modules carry it on NixOS (hosts/wsl,
+# hosts/hero), modules/darwin/default.nix on the mac.
 #
 # Which entry point this host's user gets is per-host via homeEntryPoint,
-# set in hosts/ (or defaulted by a flavor) — every WSL box shares one
-# entry point, the desktop hosts another, the mac its own.
+# set by every host in hosts/ — every WSL box shares one entry point,
+# the desktop hosts another, the mac its own.
 {
   inputs,
   config,

@@ -88,8 +88,9 @@ in
   services.udev.packages = [ tryx ];
   environment.systemPackages = [ tryx ];
 
-  # the upstream unit's shape: D-Bus-activated identity, and stop
-  # timeouts that defer to an in-flight firmware write
+  # the upstream unit's shape: bus-name readiness (Type=dbus + BusName,
+  # not D-Bus activation), and stop timeouts that defer to an in-flight
+  # firmware write
   systemd.user.services.tryx-panorama = {
     description = "Tryx Panorama display runtime";
     after = [ "graphical-session.target" ];
@@ -107,5 +108,4 @@ in
       TimeoutStopSec = "infinity";
     };
   };
-
 }
