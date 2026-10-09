@@ -392,11 +392,6 @@ binds {
     XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
-    // Example brightness key mappings for brightnessctl.
-    // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
-    // but you need to manually put each argument in separate "" quotes.
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
 
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,
@@ -647,11 +642,6 @@ binds {
     Shift+Print hotkey-overlay-title="Screenshot (freeze-frame picker)" { spawn "screenshot-niri" "screenshot"; }
     Ctrl+Print hotkey-overlay-title="Screenshot screen" { spawn "screenshot-niri" "screenshot-screen"; }
     Alt+Print hotkey-overlay-title="Screenshot window" { spawn "screenshot-niri" "screenshot-window"; }
-    // the snipping tool (same chord as Windows'): slurp selects the
-    // region, satty opens it for arrows/text/blur, and its copy action
-    // feeds the result to screenshot-copy. Esc in the region picker
-    // cancels the whole pipeline.
-    Mod+Shift+S hotkey-overlay-title="Snip + annotate" { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty --filename - --fullscreen --early-exit --copy-command screenshot-copy"; }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
