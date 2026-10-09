@@ -10,10 +10,8 @@ keymap:
 
   # Alt+J/K are up/down arrows EVERYWHERE — vim apps included.
   # J=up / K=down follows the same swapped convention as the niri binds.
-  # exact_match keeps chords with MORE modifiers out of these rules:
-  # xremap's default match allows extra modifiers and forwards them,
-  # which would turn Super+Alt+L into Super+Right and eat the lock
-  # bind. Same guard on both arrow keymaps.
+  # exact_match keeps chords with MORE modifiers out of these rules
+  # (same guard on both arrow keymaps; the horizontal rule says why).
   - name: vertical-arrows-always
     exact_match: true
     remap:
@@ -25,7 +23,9 @@ keymap:
   # terminals whose title says nvim is running (ghostty's shell
   # integration titles the window after the foreground command; plain
   # shells keep the remap). exact_match keeps the shifted and plain
-  # chords from colliding — and Super/Ctrl combos out entirely.
+  # chords from colliding — and Super/Ctrl combos out entirely: xremap's
+  # default match allows extra modifiers and forwards them, which would
+  # turn Super+Alt+L into Super+Right and eat the lock bind.
   - name: horizontal-arrows-dynamic
     exact_match: true
     application:

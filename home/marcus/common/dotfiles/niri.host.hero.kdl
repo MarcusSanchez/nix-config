@@ -1,14 +1,15 @@
 // Host-specific niri config for hero — niri.config.kdl includes the
-// stable name niri.host.kdl, which desktop/niri.nix links at this file
+// stable name niri.host.kdl, which home/marcus/nixos/niri.nix links at this file
 // per hostname; the file exists so that include resolves (a new
 // desktop host must commit its tail BEFORE the first switch or HM
 // links against nothing). Output blocks belong in niri.outputs.kdl,
 // keyed by connector.
 
-// music takes the portrait's whole width (it lands there via the
-// open-on-output rule in niri.config.kdl); a single window in the
-// column already gets the full height
+// music lands on the portrait (open-on-output takes a connector name,
+// hence a host-tail rule) and takes its whole width; a single window
+// in the column already gets the full height
 window-rule {
     match app-id="spotify"
+    open-on-output "HDMI-A-1"
     default-column-width { proportion 1.0; }
 }

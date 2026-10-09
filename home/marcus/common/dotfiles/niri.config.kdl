@@ -2,8 +2,8 @@
 // each commented at its site — ghostty + DankMaterialShell wiring
 // (spawns, launcher, lock, power menu), macOS/Windows muscle-memory
 // binds (Alt+Space, Alt+F4, Ctrl+Alt+Delete), J/K and Mod+Shift <->
-// Mod+Ctrl swapped from upstream, input tuning, the boot-only lock,
-// and the frosted-ghostty window rule.
+// Mod+Ctrl swapped from upstream, input tuning, and the
+// frosted-ghostty window rule.
 //
 // Live-editable: niri hot-reloads this file on save (linked
 // out-of-store, no rebuild). Keybind cheatsheet: Mod+Shift+Slash.
@@ -49,8 +49,7 @@ input {
         // drag false
         // drag-lock
         natural-scroll
-        // tame the default 1.0 — trackpad scrolling covered way too much
-        // distance; edit + save to tune live (niri hot-reloads)
+        // below the 1.0 default; edit + save to tune live (niri hot-reloads)
         scroll-factor 0.24
         // accel-speed 0.2
         // accel-profile "flat"
@@ -145,11 +144,9 @@ layout {
     // a gap on the right until a manual Mod+H/Mod+L. The wanted
     // fill-the-gap-on-close behavior is NOT a niri option as of 26.04
     // (niri#1642); "always" is no stand-in — constant centering is
-    // worse than the wart.
+    // worse than the wart. A lone column hugs the left edge like the
+    // rest of the strip; centering is the explicit Mod+C.
     center-focused-column "never"
-
-    // No automatic centering: a lone column hugs the left edge like
-    // the rest of the strip; centering is the explicit Mod+C.
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
     preset-column-widths {
@@ -301,7 +298,6 @@ layout {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 
-// This line starts waybar, a commonly used bar for Wayland compositors.
 // instant wallpaper while quickshell is still starting: swaybg maps in
 // milliseconds; DMS's own wallpaper layer stacks above it once ready.
 // The path comes from DMS's session state so the two can't disagree.
@@ -310,21 +306,11 @@ spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/
 // with `journalctl --user -t dms`; a bare spawn would discard it
 spawn-at-startup "systemd-cat" "-t" "dms" "dms" "run"
 
-// per-app key remapping (see dotfiles/xremap.yml) is NOT spawned here:
-// niri's spawn children escape to user@.service/app.slice and outlive
-// the session, so a spawn-started xremap kept its keyboard grab past
-// logout and killed the next login's input. It's a session-bound
-// systemd user service instead (home/marcus/nixos/niri.nix).
+// per-app key remapping (dotfiles/xremap.yml) is a session-bound
+// systemd user service, not a spawn — home/marcus/nixos/niri.nix says why.
 // TPM-backed virtual FIDO2 key (Windows-Hello-ish); pinentry prompts
 // on use. Plumbing in modules/nixos/security.nix.
 spawn-at-startup "tpm-fido"
-// Windows-style boot: auto-login lands on the LOCK screen, with the
-// session already warm behind it. ONLY for the boot session — greetd
-// gives the auto-login session id 1; sessions started by the greeter
-// get higher ids and must not re-lock right after the user typed
-// their password. Retries until dms confirms isLocked (its ipc exits
-// 0 even when the call lands too early); ~30 s bound.
-spawn-at-startup "sh" "-c" "[ \"$XDG_SESSION_ID\" = 1 ] || exit 0; for i in $(seq 1 150); do dms ipc call lock lock >/dev/null 2>&1; [ \"$(dms ipc call lock isLocked 2>/dev/null)\" = true ] && break; sleep 0.2; done"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
@@ -335,11 +321,6 @@ hotkey-overlay {
     skip-at-startup
 }
 
-// Uncomment this line to ask the clients to omit their client-side decorations if possible.
-// If the client will specifically ask for CSD, the request will be honored.
-// Additionally, clients will be informed that they are tiled, removing some client-side rounded corners.
-// This option will also fix border/focus ring drawing behind some semitransparent windows.
-// After enabling or disabling this, you need to restart the apps for this to take effect.
 // Ask clients to skip client-side decorations. Apps that can comply
 // (Chromium/CEF — notably spotify, whose own CSD is a broken retro
 // frame) go frameless; GTK apps (ghostty) can't do SSD and keep their
@@ -368,44 +349,7 @@ animations {
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Window-Rules
-
-// Work around WezTerm's initial configure bug
-// by setting an empty default-column-width.
-window-rule {
-    // This regular expression is intentionally made as specific as possible,
-    // since this is the default config, and we want no false positives.
-    // You can get away with just app-id="wezterm" if you want.
-    match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width {}
-}
-
-// Open the Firefox picture-in-picture player as floating by default.
-window-rule {
-    // This app-id regular expression will work for both:
-    // - host Firefox (app-id is "firefox")
-    // - Flatpak Firefox (app-id is "org.mozilla.firefox")
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
-    open-floating true
-}
-
-// Example: block out two password managers from screen capture.
-// (This example rule is commented out with a "/-" in front.)
-/-window-rule {
-    match app-id=r#"^org\.keepassxc\.KeePassXC$"#
-    match app-id=r#"^org\.gnome\.World\.Secrets$"#
-
-    block-out-from "screen-capture"
-
-    // Use this instead if you want them visible on third-party screenshot tools.
-    // block-out-from "screencast"
-}
-
-// Example: enable rounded corners for all windows.
-// (This example rule is commented out with a "/-" in front.)
-/-window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
-}
+// The live rules sit at the end of this file.
 
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
@@ -435,8 +379,6 @@ binds {
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
-    // For example, this is a standard bind to toggle the screen reader (orca).
-    Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
 
     // Example volume keys mappings for PipeWire & WirePlumber.
     // The allow-when-locked=true property makes them work even when the session is locked.
@@ -486,13 +428,6 @@ binds {
     Mod+Shift+J     { move-window-up; }
     Mod+Shift+L     { move-column-right; }
 
-    // Alternative commands that move across workspaces when reaching
-    // the first or last window in a column.
-    // Mod+J     { focus-window-or-workspace-down; }
-    // Mod+K     { focus-window-or-workspace-up; }
-    // Mod+Ctrl+J     { move-window-down-or-to-workspace-down; }
-    // Mod+Ctrl+K     { move-window-up-or-to-workspace-up; }
-
     Mod+Home { focus-column-first; }
     Mod+End  { focus-column-last; }
     Mod+Shift+Home { move-column-to-first; }
@@ -532,8 +467,7 @@ binds {
 
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
-    // U = Up, D = Down — mnemonic beats upstream's U/I pair. Mod+D
-    // was the spotlight launcher; Alt+Space and Mod+Space still are.
+    // U = Up, D = Down — mnemonic beats upstream's U/I pair.
     Mod+U              { focus-workspace-up; }
     Mod+D              { focus-workspace-down; }
     Mod+I              { focus-workspace-down; }
@@ -626,7 +560,6 @@ binds {
     Mod+BracketLeft  { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
 
-    // Consume one window from the right to the bottom of the focused column.
     // DMS settings on the comma (macOS preferences muscle memory);
     // consume-window-into-column moved out — Mod+BracketLeft's
     // consume-or-expel covers that job
@@ -645,14 +578,7 @@ binds {
     // near-maximize: 95% width so a neighbor still peeks at the edge
     Mod+F { set-column-width "95%"; }
     // the F ladder: 95% -> 100% -> edge-to-edge. No exclusive
-    // fullscreen bind — videos and games request it themselves, and
-    // fullscreen-window (covers the bar) earned no manual use.
-    // Reference, measured on a 1745x981 output:
-    //   maximize-window-to-edges  1745x942  edge to edge, bar still there
-    //   maximize-column           1712x905  full width but gaps all round
-    //   fullscreen-window         1745x982  covers the bar too
-    //   toggle-windowed-fullscreen          no size change AT ALL — it only
-    //                                       tells the client it is fullscreen
+    // fullscreen bind — videos and games request it themselves.
     Mod+Shift+F { set-column-width "100%"; }
     Mod+Ctrl+Shift+F { maximize-window-to-edges; }
 
@@ -757,27 +683,24 @@ overview {
 }
 
 // Browser OAuth popups deliberately tile — no title heuristic floats
-// them. Real dialogs (file
-// pickers) declare a parent and float regardless; Mod+Shift+V floats
-// anything by hand. Zed's settings UI keeps its float rule: tiled, it
-// opens as a plain toplevel and inherits the 95% default-column-width
-// from the host tail (niri.host.kdl) — a giant settings pane.
+// them. Real dialogs (file pickers) declare a parent and float
+// regardless; Mod+Shift+V floats anything by hand. Zed's settings UI
+// keeps its float rule: tiled, it opens as a plain toplevel at the 2/3
+// default-column-width — a giant settings pane.
 window-rule {
     match app-id="dev.zed.Zed" title="^Zed — "
     open-floating true
 }
 
-// Frosted-glass terminal: niri 26.04 grew blur support, so ghostty's
-// 0.75 background-opacity (set in ghostty.nix) gets real blur behind
-// it instead of the tinted-glass look that made us go opaque. xray
+// Frosted-glass terminal: ghostty's 0.75 background-opacity
+// (dotfiles/ghostty.config) gets compositor blur behind it. xray
 // blurs the wallpaper only — the stable variant; non-xray blur of
 // other windows is still experimental (vanishes during animations).
 window-rule {
     match app-id="com.mitchellh.ghostty"
     // the focus ring defaults to a solid rect BEHIND the window, which
     // shines the accent through a translucent terminal — draw it as a
-    // border
-    // around instead
+    // border around instead
     draw-border-with-background false
     background-effect {
         blur true
@@ -815,28 +738,20 @@ debug {
 }
 
 // Output blocks (modes/scales/transforms/positions) live in
-// niri.outputs.kdl, because the DMS greeter's niri instance needs the
-// same layout (modules/nixos/greeter.nix hands it a store copy as
-// /etc/greetd/niri_overrides.kdl) — edit outputs THERE. The include is
-// resolved relative to ~/.config/niri/, where desktop/niri.nix links
-// both files side by side.
+// niri.outputs.kdl, keyed by connector so one file serves every
+// machine — edit outputs THERE. The greeter does not read it; its
+// layout is the greeterOutputs option in modules/nixos/greeter.nix,
+// kept in step by hand. The include is resolved relative to
+// ~/.config/niri/, where home/marcus/nixos/niri.nix links both files
+// side by side.
 include "niri.outputs.kdl"
 
-// Host-specific tail: desktop/niri.nix links this stable name at the
+// Host-specific tail: home/marcus/nixos/niri.nix links this stable name at the
 // niri.host.<hostname>.kdl matching the machine (per-app default
 // widths, spawns — whatever only that host wants). A new desktop
 // host needs its niri.host.<hostname>.kdl committed or HM breaks the
 // link at first switch.
 include "niri.host.kdl"
-
-// Static-content apps land on their own screen instead of the working
-// strip. Inert where those connectors don't exist, so the laptop is
-// unaffected. open-on-output takes a connector name; add rules here as
-// the desk settles.
-window-rule {
-    match app-id="spotify"
-    open-on-output "HDMI-A-1"
-}
 
 // Chrome remembers a fullscreen exit state and reopens claiming the
 // whole output; deny the fullscreen state at open so it always lands
@@ -857,7 +772,8 @@ window-rule {
 
 // DMS-generated styling for niri's built-in recent-windows switcher
 // (the compiled-in Alt+Tab; no bind here) — rounds the switcher
-// highlight to match the 12px corners. Regenerated at shell start.
+// highlight to match the 12px corners. Regenerated at shell start;
+// DMS writes it on first run, nothing seeds it.
 include "dms/alttab.kdl"
 
 // The audioFx plugin's surfaces (runtime wiring in

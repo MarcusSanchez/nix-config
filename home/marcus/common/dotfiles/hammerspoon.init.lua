@@ -4,15 +4,15 @@
 -- Why Hammerspoon and not Karabiner-Elements, which is the obvious
 -- choice: the rules below need the FOCUSED WINDOW'S TITLE (to leave a
 -- terminal alone while nvim is running in it), and Karabiner matches on
--- bundle identifiers only — a window-title condition has been an open
--- request there for years. Karabiner also drives a DriverKit virtual
--- keyboard, and that driver has open breakage on macOS 26 (remaps
--- silently not applying even with the extension loaded). Hammerspoon
+-- bundle identifiers only. Karabiner also drives a DriverKit virtual
+-- keyboard, and that driver is broken on macOS 26 (remaps silently not
+-- applying even with the extension loaded). Hammerspoon
 -- works through a CGEventTap instead: no kernel driver, and it can read
 -- both the bundle id and the window title itself.
 --
--- Live-editable, like xremap's --watch=config: this file is symlinked
--- out of the nix store, and the watcher at the bottom reloads on save.
+-- Live-editable, like xremap's --watch=config: this file is an
+-- out-of-store link into the repo, and the watcher at the bottom
+-- reloads on save.
 -- No rebuild needed to change a binding.
 --
 -- Needs Accessibility (System Settings > Privacy & Security >
@@ -81,7 +81,8 @@ end
 -- always = false -> suppressed wherever speaksVim() is true
 --
 -- J is UP and K is DOWN. That is inverted from the usual vim habit and
--- it is deliberate: it matches the laptop's xremap.yml and niri binds.
+-- it is deliberate: it matches xremap.yml and the niri binds on the
+-- Linux desktop.
 local RULES = {
   { mods = { "alt" },          key = "j", send = "up",    always = true },
   { mods = { "alt" },          key = "k", send = "down",  always = true },
