@@ -11,7 +11,7 @@
 # Accessibility permission is required and cannot be granted from a
 # config: System Settings > Privacy & Security > Accessibility. The
 # config announces on load whether it has it.
-{ config, ... }:
+{ config, osConfig, ... }:
 
 {
   # Out of the store, so edits apply on save without a rebuild — the
@@ -20,7 +20,7 @@
   # common/dotfiles.nix, whose pathspec already covers this directory.
   # (Hammerspoon reads ~/.hammerspoon/init.lua; it is not XDG-aware.)
   home.file.".hammerspoon/init.lua".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/hammerspoon.init.lua";
+    config.lib.file.mkOutOfStoreSymlink "${osConfig.identity.dotfiles}/hammerspoon.init.lua";
 
   # Start at login and stay up — a keyboard remapper that quietly dies
   # is worse than one that was never running, since the keys just go

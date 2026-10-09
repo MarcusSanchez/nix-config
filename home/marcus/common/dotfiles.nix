@@ -26,7 +26,7 @@
 }:
 
 let
-  repo = "${config.home.homeDirectory}/nix-config";
+  repo = osConfig.identity.repo;
   dotfiles = "${repo}/home/marcus/common/dotfiles";
   link = name: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${name}";
   pathspec = "home/marcus/common/dotfiles";

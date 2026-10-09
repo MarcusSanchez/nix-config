@@ -6,7 +6,12 @@
     # darwin rides nixpkgs-unstable: same trunk as nixos-unstable, but the
     # darwin binary caches populate here first
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+    # follows so the WSL modules build against the same nixpkgs as the
+    # systems they configure (no second nixpkgs in the lock)
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";

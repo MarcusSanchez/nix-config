@@ -45,6 +45,17 @@ let
   cargoHash = "sha256-K4GOsGLleC/pNqKznK1kBq0/DpDrKMCohhVnQUD9pzE=";
   version = "0-unstable-2026-08-26";
 
+  # the evdi crate links -levdi directly, no pkg-config lookup
+  evdiLink = "-L ${evdi}/lib";
+  # both binaries NEED soname libevdi.so.1, but the evdi package installs
+  # only the unversioned .so — shim it and point the rpath there (after
+  # fixup, so shrink-rpath cannot drop the entry)
+  evdiShim = bin: ''
+    mkdir -p $out/lib
+    ln -s ${evdi}/lib/libevdi.so $out/lib/libevdi.so.1
+    patchelf --add-rpath $out/lib $out/bin/${bin}
+  '';
+
   lianli-daemon = pkgs.rustPlatform.buildRustPackage {
     pname = "lianli-daemon";
     inherit src version cargoHash;
@@ -65,8 +76,7 @@ let
       evdi
     ];
 
-    # the evdi crate links -levdi directly, no pkg-config lookup
-    RUSTFLAGS = "-L ${evdi}/lib";
+    RUSTFLAGS = evdiLink;
 
     # the daemon crate alone; the GUI crate is its own derivation below
     # (Tauri app with the vendored npm lockfile)
@@ -94,13 +104,7 @@ let
       install -Dm644 packaging/udev/60-lianli.rules $out/lib/udev/rules.d/60-lianli.rules
     '';
 
-    # the binary NEEDs soname libevdi.so.1, but the evdi package
-    # installs only the unversioned .so — shim it and point the rpath
-    # here (after fixup, so shrink-rpath cannot drop the entry)
-    postFixup = ''
-      ln -s ${evdi}/lib/libevdi.so $out/lib/libevdi.so.1
-      patchelf --add-rpath $out/lib $out/bin/lianli-daemon
-    '';
+    postFixup = evdiShim "lianli-daemon";
   };
 
   lianli-gui = pkgs.rustPlatform.buildRustPackage {
@@ -147,7 +151,7 @@ let
       evdi
     ];
 
-    RUSTFLAGS = "-L ${evdi}/lib";
+    RUSTFLAGS = evdiLink;
 
     # build the frontend once; tauri's build.rs then sees dist/ newer
     # than the sources and skips its own npm invocation
@@ -166,11 +170,7 @@ let
         $out/share/icons/hicolor/scalable/apps/com.sgtaziz.lianlilinux.svg
     '';
 
-    postFixup = ''
-      mkdir -p $out/lib
-      ln -s ${evdi}/lib/libevdi.so $out/lib/libevdi.so.1
-      patchelf --add-rpath $out/lib $out/bin/lianli-gui
-    '';
+    postFixup = evdiShim "lianli-gui";
   };
 
 in

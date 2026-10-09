@@ -113,7 +113,13 @@ in
     # pre-start. If greetd dies before its pre-start, the splash holds
     # the screen; Esc drops plymouth to the boot log.
     systemd.services = {
-      plymouth-quit.wantedBy = lib.mkForce [ ];
+      plymouth-quit = {
+        wantedBy = lib.mkForce [ ];
+        # any other invocation of plymouth-quit (a manual stop, a
+        # greeter restart) also retains the last frame instead of
+        # clearing the framebuffer to black
+        serviceConfig.ExecStart = lib.mkForce "-${pkgs.plymouth}/bin/plymouth quit --retain-splash";
+      };
       plymouth-quit-wait.wantedBy = lib.mkForce [ ];
       greetd.serviceConfig.ExecStartPre = lib.mkAfter [
         "-${pkgs.plymouth}/bin/plymouth quit --retain-splash"

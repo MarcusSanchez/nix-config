@@ -2,7 +2,7 @@
 # sized for a 1 GB ESP: an early-KMS initrd (nvidia.nix) runs ~120 MB
 # per generation, which is why the limit is 10. hosts/hero/lanzaboote.nix
 # reads the same value for the signed loader.
-{ lib, pkgs, ... }:
+{ ... }:
 
 {
   boot = {
@@ -42,14 +42,10 @@
     ];
   };
 
-  # The splash -> login-screen handoff lives in greeter.nix (greetd
-  # quits plymouth itself; plymouth-quit is unhooked there). This
-  # override backs it: any invocation of plymouth-quit retains the
-  # last frame instead of clearing the framebuffer to black.
-  systemd.services.plymouth-quit.serviceConfig.ExecStart =
-    lib.mkForce "-${pkgs.plymouth}/bin/plymouth quit --retain-splash";
+  # The splash -> login-screen handoff (plymouth-quit unhooked and
+  # re-run with --retain-splash) is owned entirely by greeter.nix.
 
-  # Independent of the splash machinery above. Compressed swap in RAM:
+  # Independent of the splash machinery. Compressed swap in RAM:
   # no disk swap exists on these machines, and RAM at this size makes
   # zram effectively free headroom that keeps the OOM killer away from
   # a browser+IDE workload. Default memoryPercent (50) is fine. No disk

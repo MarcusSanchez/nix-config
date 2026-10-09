@@ -8,7 +8,12 @@
 #     exist. The system module decrypts before any user activation.
 #
 # So this file holds only the parts that are genuinely user-scoped.
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  osConfig,
+  ...
+}:
 
 {
   # ── rbw: Bitwarden from the terminal ─────────────────────────────────
@@ -34,7 +39,7 @@
   programs.rbw = {
     enable = true;
     settings = {
-      email = "marcussanchez031@gmail.com";
+      email = osConfig.identity.email;
       # pinentry-curses on BOTH platforms — one prompt, drawn on the tty of
       # whatever terminal ran the rbw command (rbw forwards it to the
       # agent-spawned pinentry).

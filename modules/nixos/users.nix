@@ -23,6 +23,8 @@
 
   users.users.marcus = {
     isNormalUser = true;
+    # pinned so mounts can reference it (hosts/hero/windows.nix)
+    uid = 1000;
     description = "Marcus Sanchez";
     shell = pkgs.zsh;
     extraGroups = [

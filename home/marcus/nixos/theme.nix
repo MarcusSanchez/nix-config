@@ -8,7 +8,7 @@
 # Papirus replaces them with its restyled set and stays off purely on
 # looks. Flip catppuccin.gtk.icon.enable in common/shell.nix to re-try
 # it.
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   gtk = {
@@ -18,13 +18,9 @@
       package = pkgs.adwaita-icon-theme;
     };
   };
-  # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini —
-  # icon-theme follows whichever theme won gtk.iconTheme above
-  dconf.settings."org/gnome/desktop/interface" = {
-    icon-theme = config.gtk.iconTheme.name;
-    cursor-theme = config.home.pointerCursor.name;
-    cursor-size = config.home.pointerCursor.size;
-  };
+  # libadwaita apps (ghostty) read gsettings/dconf, not settings.ini;
+  # Home Manager writes icon-theme, cursor-theme and cursor-size there
+  # from gtk.iconTheme and home.pointerCursor.gtk.
 
   # Cursor theme everywhere: HM covers GTK settings, ~/.icons and the
   # XCURSOR_* session vars; the niri config's cursor block covers the

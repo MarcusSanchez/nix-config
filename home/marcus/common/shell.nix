@@ -57,7 +57,7 @@ in
       # repo lives at ~/nix-config on every machine; /etc/nixos and
       # /etc/nix-darwin are symlinks to it, so pointing nh at the working
       # tree directly is the same target on both platforms.
-      NH_FLAKE = "${config.home.homeDirectory}/nix-config";
+      NH_FLAKE = osConfig.identity.repo;
 
       # Pin where zmx keeps its session sockets (and logs, nested
       # underneath). Unpinned it derives $TMPDIR/zmx-<uid>, and TMPDIR

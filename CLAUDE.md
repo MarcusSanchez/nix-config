@@ -82,18 +82,25 @@ hosts/hero/          the desk PC, INSTALLED and live
                            don't edit); the
                            desk is the 4K (DP-3) with the 1440p
                            portrait (HDMI-A-1) on its LEFT
-  default.nix              the machine's statement: the same
-                           boot-splash-on-one-monitor machinery the old
-                           desk proved (portrait kernel-forced off
-                           through plymouth, wake/hide oneshots) keyed
-                           to hero's connector, the WoL link file
-                           keyed to the wired NIC's MAC, the
-                           read-only /mnt/windows mount, and the
+  default.nix              the machine's statement: imports, the
+                           greeter screen/output options, the WoL link
+                           file keyed to the wired NIC's MAC, and the
                            `udev-debug` specialisation (a boot-menu
                            entry with udev tracing on — temporary,
                            deleted once the initrd udevd stop no
                            longer wedges after a systemd bump; the
                            comment there has the verify command)
+  splash.nix               boot/shutdown splash on the main monitor
+                           only: the portrait connector kernel-forced
+                           off through plymouth, un-forced by a oneshot
+                           before the display manager and forced off
+                           again before the shutdown splash — keyed to
+                           hero's connector name
+  windows.nix              the dual-boot's Windows side: the read-only
+                           /mnt/windows mount (uid/gid from the pinned
+                           account) and the reboot:windows command
+                           (BootNext to the Windows Boot Manager entry,
+                           looked up by label)
   lanzaboote.nix           Secure Boot, LIVE — a separate file ON
                            PURPOSE: a reinstall must comment its import
                            out until `sbctl create-keys` has run (one
@@ -170,11 +177,11 @@ modules/common/            default.nix packages.nix (cross-platform CLIs
                            wrappers cd to the repo and exec the LIVE
                            working tree (edits need no rebuild; the cd
                            is a child process's, invisible to the
-                           caller's shell); also the
-                           reboot:windows command, hostname-gated to
-                           the dual-boot desk
+                           caller's shell)
                            identity.nix secrets.nix home-manager.nix —
-                           the identity option, the shared sops config
+                           the identity options (username, home, repo,
+                           dotfiles, email — HM reads them via
+                           osConfig), the shared sops config
                            and the HM bridge (the sops-nix/HM platform
                            module imports live in hosts/wsl, hosts/hero
                            and modules/darwin/default.nix)
@@ -191,9 +198,11 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            sessions ssh-ing *into* this box) + the
                            desk-only tools (ethtool/libsecret/watchman/
                            pciutils/usbutils)
-  users.nix                the account, groups included (input/uinput for
-                           xremap, networkmanager pairing with
-                           ./networking.nix) + hardware.uinput
+  users.nix                the account (uid pinned — hosts/hero/
+                           windows.nix reads it), groups included
+                           (input/uinput for xremap, networkmanager
+                           pairing with ./networking.nix) +
+                           hardware.uinput
   nix.nix                  daemon settings + daily GC (no ssh module —
                            one existed only to make the host key that
                            sops used before the single-key move)
@@ -231,11 +240,13 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            ports) + the tailscale block whose
                            trustedInterfaces catch-all the tight LAN
                            port list leans on
-  boot.nix                 Plymouth + retain-splash handoff to the login
-                           screen — several cooperating tricks, see its
-                           header and Constraints before touching ANY of
-                           it (also carries zramSwap, independent of
-                           that web)
+  boot.nix                 Plymouth, the quiet-boot kernel params and
+                           the ESP-sized configurationLimit — the
+                           splash->greeter handoff itself (plymouth-quit
+                           unhooked and re-run with --retain-splash) is
+                           owned by greeter.nix; see Constraints before
+                           touching either (also carries zramSwap,
+                           independent of that web)
   nix-ld.nix               the two shims for non-nix binaries, both for
                            the JetBrains/Toolbox story: nix-ld (enable +
                            the X11/GTK/NSS/JCEF library list —

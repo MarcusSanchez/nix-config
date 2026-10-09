@@ -155,7 +155,7 @@ in
 
   xdg.configFile =
     let
-      dotfiles = "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles";
+      dotfiles = osConfig.identity.dotfiles;
       link = f: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${f}";
     in
     {
@@ -202,7 +202,7 @@ in
           else
             echo "xremap: NIRI_SOCKET never appeared — running without focused-window tracking" >&2
           fi
-          exec ${xremapNiri}/bin/xremap --watch=config,device ${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/xremap.yml
+          exec ${xremapNiri}/bin/xremap --watch=config,device ${osConfig.identity.dotfiles}/xremap.yml
         ''
       );
       Restart = "on-failure";
