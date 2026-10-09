@@ -1,5 +1,5 @@
 # Thermals and GPU tuning for this desk's silicon. HOST-level: the
-# sensor modules are board-specific, the tuning daemon GPU-specific.
+# sensor modules are board-specific, the clock floor GPU-specific.
 #
 #   - asus_ec_sensors reads the board's EC (chipset/VRM temps, the
 #     water-flow and T_Sensor headers, extra fan RPMs) — but this
@@ -11,10 +11,6 @@
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`
 #     and the shell widgets; the case fans' curves live in the Lian Li
 #     daemon (lianli.nix), not here.
-#   - LACT: the GPU tuning daemon + GUI (power limits, clocks, fan
-#     control). Its voltage-curve editor leans on undocumented driver
-#     paths — the power-limit and PowerMizer knobs are the safe
-#     everyday surface.
 #   - Memory-clock floor: at desktop idle the driver parks the memory
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
@@ -23,7 +19,7 @@
 #     above deep idle (the supported steps are 405/810/7001/13801/
 #     14001; a floor-to-max range still flickers on each jump);
 #     GPU-heavy work on this OS runs at that bandwidth unless the
-#     service is stopped for the job. LACT leaves it alone.
+#     service is stopped for the job.
 { config, pkgs, ... }:
 
 let
@@ -60,8 +56,6 @@ in
 
   # the `sensors` CLI over the hwmon nodes the modules above populate
   environment.systemPackages = [ pkgs.lm_sensors ];
-
-  services.lact.enable = true;
 
   systemd.services.nvidia-memory-clock-floor = {
     description = "Hold the GPU memory clock above the deep-idle step";

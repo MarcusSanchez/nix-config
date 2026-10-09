@@ -82,12 +82,7 @@
       ];
     };
 
-    # git TUI: hunk staging, interactive rebase, branch surgery —
-    # visual and keyboard-driven
-    lazygit.enable = true;
-
-    # htop's successor: GPU stats, per-process I/O, mouse support (the
-    # system layer still ships htop for root/ssh muscle memory)
+    # system monitor: GPU stats, per-process I/O, mouse support
     btop.enable = true;
   };
 

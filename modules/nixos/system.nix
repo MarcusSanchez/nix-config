@@ -39,10 +39,6 @@
     # MTP phones, network shares (nautilus in home/marcus/nixos/apps.nix)
     gvfs.enable = true;
 
-    # firmware updates (LVFS), including the UEFI dbx revocation
-    # database — `fwupdmgr update` offers "UEFI dbx" as a device
-    fwupd.enable = true;
-
     # the shell reads battery state through UPower — without it the
     # bar's battery widget silently hides — and drives its power-mode
     # performance/balanced/saver switch through power-profiles-daemon.

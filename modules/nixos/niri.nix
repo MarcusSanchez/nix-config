@@ -40,11 +40,6 @@ in
   # backs HM's dconf.settings and gsettings for GTK apps
   programs.dconf.enable = true;
 
-  # swaylock is the session's fallback locker (DMS's is primary); it
-  # authenticates via PAM, and without this entry unlocking fails.
-  # Pairs with programs.swaylock in home/marcus/nixos/niri.nix.
-  security.pam.services.swaylock = { };
-
   # a session app that ignores SIGTERM once the compositor is gone
   # (anything blocking on the dead Wayland socket) otherwise holds the
   # user manager for its default 90s at shutdown — every session app

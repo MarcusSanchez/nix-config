@@ -13,10 +13,9 @@
     tree
     jq
     file
-    htop
 
     # the no-config modern-unix staples (the ones with shell hooks or
-    # theming — fzf/bat/eza/yazi/lazygit/btop — live in
+    # theming — fzf/bat/eza/yazi/btop — live in
     # home/marcus/common/packages.nix instead)
     dust # du, readable
     duf # df, readable

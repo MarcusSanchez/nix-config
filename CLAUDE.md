@@ -128,8 +128,7 @@ hosts/hero/          the desk PC, INSTALLED and live
                            asus_ec_sensors as a pinned out-of-tree
                            build in updates/ (this board postdates the
                            in-tree DMI table — drop when the kernel
-                           catches up), the LACT daemon with its GUI
-                           in the launcher, lm_sensors, and
+                           catches up), lm_sensors, and
                            the GPU memory-clock floor service: pins
                            7001 MHz, the lowest supported step above
                            deep idle (that step starves two
@@ -231,7 +230,7 @@ modules/nixos/             the bare-metal machine's world, aggregated by
   system.nix               machine-level settings and services:
                            timezone/locale, fonts, pipewire (allowed-rates
                            is a device-intersected MENU, not a forced
-                           rate), bluetooth, gvfs, fwupd, upower +
+                           rate), bluetooth, gvfs, upower +
                            power-profiles-daemon (shell widgets fail
                            QUIETLY without them), wooting udev rules
                            (deliberately not hardware.wooting.enable —
@@ -344,7 +343,7 @@ home/marcus/
                            see Constraints)
     packages.nix           user CLIs + comma with its prebuilt nix-index
                            db + the modern-unix staples that carry shell hooks,
-                           aliases or theming (fzf/bat/eza/yazi/lazygit/
+                           aliases or theming (fzf/bat/eza/yazi/
                            btop as programs.* — catppuccin themes them via
                            the HM modules; ls->eza, cat->bat aliases,
                            interactive-only). The no-config siblings live
@@ -449,9 +448,9 @@ home/marcus/
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
-                           swaylock fallback + everything the binds and
+                           everything the binds and
                            spawns expect on PATH — screenshots
-                           (grim/slurp/satty + the screenshot-copy and
+                           (grim/slurp + the screenshot-copy and
                            screenshot-niri helpers that route every
                            shot through DMS's clipboard as a FILE, so
                            it pastes as image, path or URI),

@@ -40,12 +40,10 @@ in
     # with the path read from DMS's session state)
     pkgs.swaybg
 
-    # the screenshot binds (Print, Mod+Shift+S in niri.config.kdl):
-    # slurp picks a region, grim captures it, satty annotates
-    # (arrows/text/blur); both hand the result to screenshot-copy below.
+    # the Print bind in niri.config.kdl: slurp picks a region, grim
+    # captures it, screenshot-copy below takes the result.
     pkgs.grim
     pkgs.slurp
-    pkgs.satty
     # notify-send, for the screenshot binds' best-effort toast (DMS is
     # the notification daemon that renders it)
     pkgs.libnotify
@@ -54,8 +52,6 @@ in
     # niri.config.kdl call this; without it media keys are wired to
     # nothing (the Wooting's skip keys included)
     pkgs.playerctl
-    # same story for XF86MonBrightness keys, where a panel has them
-    pkgs.brightnessctl
 
     # synthetic keystrokes via the virtual-keyboard protocol; Mod+W in
     # niri.config.kdl forwards Ctrl+W to the focused app (close tab)
@@ -199,8 +195,4 @@ in
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
-
-  # fallback lock (PAM entry in modules/nixos/niri.nix) in case the
-  # DMS lock ever misbehaves — run `swaylock` from a terminal
-  programs.swaylock.enable = true;
 }
