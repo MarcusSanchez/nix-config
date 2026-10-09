@@ -1,4 +1,4 @@
-# Push-to-main is the deploy for both WSL boxes (system.autoUpgrade builds
+# Push-to-main is the deploy for the three WSL boxes (system.autoUpgrade builds
 # pushed main weekly on each), so catch a broken commit here — days before
 # the Saturday timer meets it. Mirrors the local verification story:
 # `nix flake check` fully evaluates every NixOS host, then the mac system
@@ -8,9 +8,9 @@ name: check
 on:
   push:
     branches: [main]
-    # win-sync (WSL) and the dotfiles auto-commit hook (mac + desktop,
-    # home/marcus/common/dotfiles.nix) auto-push chore commits
-    # touching only these mirrored config files; nix copies them without
+    # the dotfiles auto-commit hook (mac + desktop,
+    # home/marcus/common/dotfiles.nix) auto-pushes chore commits
+    # touching only these mirrored config files; nix links them without
     # parsing, so they can't affect the build — skip the run
     paths-ignore:
       - "home/marcus/common/dotfiles/**"

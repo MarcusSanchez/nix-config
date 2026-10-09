@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# The same gate CI runs, locally: format, lint, evaluate every host.
+# The local gate: CI (check.yml) runs lint + the evals; this additionally
+# runs nix fmt — which REWRITES files rather than checking them — and the
+# CLAUDE.md file-map gate below.
 set -e
+set -o pipefail
 cd "$(git rev-parse --show-toplevel)"
 nix fmt
 statix check .
@@ -9,7 +12,8 @@ statix check .
 # every tracked .nix file's full basename must appear in the map (a new
 # file or rename can't be forgotten). Reverse: every .nix token the map
 # mentions must resolve to a tracked file (a rename can't leave a
-# corpse — the failure mode that actually happened).
+# corpse). Both passes match by BASENAME only — a same-named file in two
+# directories (users.nix, nix.nix) satisfies either.
 mapsec=$(sed -n '/^## File map/,/^## Constraints/p' CLAUDE.md)
 fail=0
 while IFS= read -rd '' f; do
@@ -39,7 +43,8 @@ done < <(tr -c 'A-Za-z0-9._/-' '\n' < README.md | grep -E '[A-Za-z0-9_-]\.nix$' 
 deadnix --fail --exclude hosts/*/hardware-configuration.nix -- .
 nix flake check
 # flake check never touches darwinConfigurations — evaluate them the
-# same enumerated way CI does (a hostname rename broke a named eval once)
+# same enumerated way CI does, so a hostname rename cannot leave a stale
+# named eval behind
 nix eval --raw '.#darwinConfigurations' --apply \
   'cfgs: builtins.concatStringsSep "\n" (map (n: "${n}: ${cfgs.${n}.system.drvPath}") (builtins.attrNames cfgs))'
 echo

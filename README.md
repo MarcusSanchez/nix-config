@@ -7,10 +7,8 @@ hostname** — `nixos-rebuild --flake /etc/nixos` with no `#attr` builds
 
 | host | machine | user | repo symlinked to |
 |---|---|---|---|
-| `naut-box`, `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
-| `naut-dt` | bare-metal desktop, dual-boot beside the PC that hosts `naut-box` | `marcus` | `/etc/nixos` |
-| `tuf-laptop` | bare-metal laptop, same desktop stack as `naut-dt` | `marcus` | `/etc/nixos` |
-| `hero` | bare-metal desktop, `naut-dt`'s successor | `marcus` | `/etc/nixos` |
+| `framework-dt`, `office-one`, `office-two` | WSL, headless — one config, one instance per PC | `marcus` | `/etc/nixos` |
+| `hero` | bare-metal desktop, dual-boot beside a gaming-only Windows; trusted sops machine | `marcus` | `/etc/nixos` |
 | `macbook-air` | nix-darwin, Determinate Nix | `marcussanchez` | `/etc/nix-darwin` |
 | `mac-mini` | nix-darwin, Determinate Nix; trusted sops machine | `marcus` | `/etc/nix-darwin` |
 
@@ -214,8 +212,8 @@ To confirm it worked, check the tools rather than the directory — atuin logs
 itself in during activation, so nothing is typed:
 
 ```sh
-secrets:status    # gh auth status + atuin status + fly auth whoami,
-                  # with the fly token read straight from /run/secrets
+secrets:status    # gh auth status + atuin status + fly auth whoami (token
+                  # read straight from /run/secrets) + croc's secret present
 ```
 
 `ls /run/secrets/` is *denied by design* (mode `751`, so nothing can enumerate

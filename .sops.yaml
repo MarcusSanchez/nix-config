@@ -2,9 +2,9 @@
 #
 #   master        Bitwarden ("sops age key - nix-config (all machines)");
 #                 placed on lite/temporary boxes by age:place. Lower tier
-#                 only — a lite box can never open super.yaml. Stays FIRST
-#                 under keys:, age:place verifies against the first age1
-#                 string in this file.
+#                 only — a lite box can never open super.yaml. age:place
+#                 verifies the placed key against the &master anchor
+#                 under keys: (by anchor name, not position).
 #   macbook-air   each trusted machine's own key, generated on-box and
 #   mac-mini      backed up nowhere (so a vault compromise cannot open
 #   hero          super.yaml). Recipients of BOTH files. Enrolling or
@@ -13,7 +13,7 @@
 #                 modules/common/secrets.nix must name exactly these
 #                 hosts, or a host declared super but absent here aborts
 #                 its whole secrets install.)
-#   super         recovery if both trusted machines die at once: Bitwarden
+#   super         recovery if all three trusted machines die at once: Bitwarden
 #                 ("sops age key - super recovery (nix-config)") plus a
 #                 paper printout. Never placed on any machine.
 #
