@@ -257,10 +257,9 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            resolving shebangs against PATH, so Toolbox's
                            generated #!/bin/bash launchers run; desktop
                            only — not handed to the unattended WSL boxes)
-  security.nix        tpm-fido + libfido2 udev rules;
-                           the tpm-fido rules must sort BEFORE
-                           70-uaccess.rules — numbered package file, NOT
-                           services.udev.extraRules (lands at 99-, too late)
+  security.nix             libfido2's udev rules, so a physical
+                           security key's hidraw device is usable from
+                           the browser
   nvidia.nix               NOT in the aggregator — host-level, like
                            wsl/networking.nix: it hardcodes the video
                            driver and the early-KMS initrd, so a host
@@ -458,7 +457,7 @@ home/marcus/
                            it pastes as image, path or URI),
                            playerctl, swaybg (the startup wallpaper
                            under DMS's layer),
-                           xremap, tpm-fido, xwayland-satellite. The
+                           xremap, xwayland-satellite. The
                            xremap service reads the live manager env at
                            exec — the NIRI_SOCKET race story is in its
                            comment. (The shell-variety era — noctalia,

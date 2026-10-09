@@ -67,17 +67,6 @@ in
     # spawn-at-startup — see its comment for why.
     xremapNiri
 
-    # TPM-backed virtual FIDO2 key (system plumbing in
-    # modules/nixos/security.nix, spawned in niri.config.kdl). It
-    # shells out to a bare `pinentry` for the touch-confirmation
-    # prompt — the alias beside it points that name at the gnome3 flavor,
-    # which prompts via gcr.
-    pkgs.tpm-fido
-    (pkgs.runCommand "pinentry-alias" { } ''
-      mkdir -p $out/bin
-      ln -s ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 $out/bin/pinentry
-    '')
-
     # hand a screenshot FILE to DMS's clipboard: a PNG on stdin is saved
     # under the screenshot directory first, an argument names an
     # existing file. DMS offers a file as path text + file URI + image,
