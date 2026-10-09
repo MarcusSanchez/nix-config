@@ -308,10 +308,6 @@ spawn-at-startup "systemd-cat" "-t" "dms" "dms" "run"
 
 // per-app key remapping (dotfiles/xremap.yml) is a session-bound
 // systemd user service, not a spawn — home/marcus/nixos/niri.nix says why.
-// TPM-backed virtual FIDO2 key (Windows-Hello-ish); pinentry prompts
-// on use. Plumbing in modules/nixos/security.nix.
-spawn-at-startup "tpm-fido"
-
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
 
