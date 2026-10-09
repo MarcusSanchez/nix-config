@@ -11,11 +11,8 @@
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`
 #     and the shell widgets; the case fans' curves live in the Lian Li
 #     daemon (lianli.nix), not here.
-#   - LACT: the GPU tuning daemon + GUI (power limit, clocks, fan
-#     control). The power cap is declared below at 75 % of the card's
-#     600 W default — this OS never games; the daemon applies it at
-#     boot. The voltage-curve editor leans on undocumented driver
-#     paths; the power-limit and PowerMizer knobs are the safe surface.
+#   - LACT: the GPU power limit, declared below and applied by its
+#     daemon at boot; the GUI monitors.
 #   - Memory-clock floor: at desktop idle the driver parks the memory
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
@@ -64,11 +61,10 @@ in
 
   services.lact = {
     enable = true;
-    # a declared config makes /etc/lact/config.yaml a read-only link:
-    # the GUI shows and monitors but cannot save, which is the point.
-    # The daemon refuses a file without its framing keys, so the
-    # defaults are restated; the card is keyed vendor:device-subvendor:
-    # subdevice-pci address.
+    # declared settings make /etc/lact/config.yaml a read-only link, so
+    # the GUI cannot save; new knobs go here. The daemon rejects a file
+    # without version/daemon/profile keys. The card key is
+    # vendor:device-subvendor:subdevice-pci address (`lact cli list-gpus`).
     settings = {
       version = 7;
       daemon = {
@@ -79,6 +75,7 @@ in
       apply_settings_timer = 5;
       current_profile = null;
       auto_switch_profiles = false;
+      # 75 % of the card's 600 W default
       gpus."10DE:2B85-1043:89E3-0000:01:00.0".power_cap = 450;
     };
   };
