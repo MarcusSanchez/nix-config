@@ -63,7 +63,7 @@
     ];
 
     casks = [
-      "ghostty"
+      "ghostty@tip"
       "google-chrome"
       # per-application key remapping; its config and the launchd agent
       # that keeps it running live in home/marcus/darwin/hammerspoon.nix
