@@ -128,8 +128,8 @@ hosts/hero/          the desk PC, INSTALLED and live
                            asus_ec_sensors as a pinned out-of-tree
                            build in updates/ (this board postdates the
                            in-tree DMI table — drop when the kernel
-                           catches up), CoolerControl + LACT daemons
-                           with GUIs in the launcher, lm_sensors, and
+                           catches up), the LACT daemon with its GUI
+                           in the launcher, lm_sensors, and
                            the GPU memory-clock floor service: pins
                            7001 MHz, the lowest supported step above
                            deep idle (that step starves two

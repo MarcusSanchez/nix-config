@@ -8,12 +8,9 @@
 #     until a kernel that knows the board arrives; drop the package
 #     when `modinfo asus_ec_sensors` grows this board's alias.
 #     nct6775 reads the Nuvoton super-I/O (fan headers and voltage
-#     rails) and is in-tree. Everything lands in hwmon for `sensors`,
-#     shell widgets and CoolerControl alike.
-#   - CoolerControl: fan curves driven off any hwmon sensor, with a
-#     GUI (in the launcher); its daemon applies curves headlessly
-#     from then on, and finds the GPU's fans through the driver on
-#     its own.
+#     rails) and is in-tree. Everything lands in hwmon for `sensors`
+#     and the shell widgets; the case fans' curves live in the Lian Li
+#     daemon (lianli.nix), not here.
 #   - LACT: the GPU tuning daemon + GUI (power limits, clocks, fan
 #     control). Its voltage-curve editor leans on undocumented driver
 #     paths — the power-limit and PowerMizer knobs are the safe
@@ -63,8 +60,6 @@ in
 
   # the `sensors` CLI over the hwmon nodes the modules above populate
   environment.systemPackages = [ pkgs.lm_sensors ];
-
-  programs.coolercontrol.enable = true;
 
   services.lact.enable = true;
 
