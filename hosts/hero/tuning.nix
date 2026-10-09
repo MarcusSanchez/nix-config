@@ -11,8 +11,8 @@
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`
 #     and the shell widgets; the case fans' curves live in the Lian Li
 #     daemon (lianli.nix), not here.
-#   - LACT: the GPU power limit, declared below and applied by its
-#     daemon at boot; the GUI monitors.
+#   - LACT: the GPU power limit and VF-curve undervolt, applied by its
+#     daemon at boot from its own config.
 #   - Memory-clock floor: at desktop idle the driver parks the memory
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
@@ -59,26 +59,10 @@ in
   # the `sensors` CLI over the hwmon nodes the modules above populate
   environment.systemPackages = [ pkgs.lm_sensors ];
 
-  services.lact = {
-    enable = true;
-    # declared settings make /etc/lact/config.yaml a read-only link, so
-    # the GUI cannot save; new knobs go here. The daemon rejects a file
-    # without version/daemon/profile keys. The card key is
-    # vendor:device-subvendor:subdevice-pci address (`lact cli list-gpus`).
-    settings = {
-      version = 7;
-      daemon = {
-        log_level = "info";
-        admin_group = "wheel";
-        disable_clocks_cleanup = false;
-      };
-      apply_settings_timer = 5;
-      current_profile = null;
-      auto_switch_profiles = false;
-      # 75 % of the card's 600 W default
-      gpus."10DE:2B85-1043:89E3-0000:01:00.0".power_cap = 450;
-    };
-  };
+  # the power cap and the VF-curve undervolt live in LACT's own
+  # config (/etc/lact/config.yaml, written through its daemon) so the
+  # GUI can change them
+  services.lact.enable = true;
 
   systemd.services.nvidia-memory-clock-floor = {
     description = "Hold the GPU memory clock above the deep-idle step";
