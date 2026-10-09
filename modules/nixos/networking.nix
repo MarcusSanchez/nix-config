@@ -48,7 +48,7 @@
       # below, so those packets never consult this list. The LAN
       # opening is forward-looking only — mosh bootstraps over SSH and
       # nothing serves SSH on the LAN here (Tailscale SSH only, per
-      # the block below), so a LAN-side session cannot start today.
+      # the block below), so a LAN-side session cannot start.
       allowedUDPPortRanges = [
         {
           from = 60000;

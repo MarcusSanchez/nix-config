@@ -108,11 +108,8 @@
     in
     {
       btop = hide "btop";
-      htop = hide "htop";
       yazi = hide "Yazi";
       nvim = hide "Neovim wrapper";
-      satty = hide "Satty";
-      cups = hide "Manage Printing";
       nixos-manual = hide "NixOS Manual";
       "org.quickshell" = hide "Quickshell";
     };

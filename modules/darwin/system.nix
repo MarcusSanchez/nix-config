@@ -16,7 +16,7 @@
   security.pam.services.sudo_local.touchIdAuth = true;
 
   # Passwordless sudo, matching the Linux boxes — what lets
-  # non-interactive sessions (Claude, scripts over ssh) run
+  # non-interactive sessions (agents, scripts over ssh) run
   # darwin-rebuild themselves instead of handing the command back to a
   # human. NOPASSWD skips authentication entirely, so it also works
   # where Touch ID can't reach (no tty, ssh, launchd Background

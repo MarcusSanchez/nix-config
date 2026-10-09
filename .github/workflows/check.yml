@@ -31,7 +31,7 @@ jobs:
       # evaluates every nixosConfigurations entry
       - name: nix flake check
         run: nix flake check
-      # enumerated, not named: a hostname rename broke this once already,
+      # enumerated, not named: a renamed host must not silently drop out,
       # and flake check does not cover darwinConfigurations
       - name: evaluate the darwin systems
         run: |

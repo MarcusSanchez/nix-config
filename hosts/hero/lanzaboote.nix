@@ -28,7 +28,7 @@
 #     db stay factory (MS 2011 + 2023 certs already present — Windows,
 #     the GPU option ROM and MS-signed dbx updates all keep working,
 #     and the near-stock policy is friendlier to anti-cheat), and the
-#     dbx is never dropped, so no fwupd restore dance.
+#     dbx is never dropped.
 #   BIOS: OS Type = "Windows UEFI Mode" — the actual enforcement
 #     switch ("Other OS" leaves Secure Boot effectively off). F10.
 #   bootctl status = "enabled (user)"; efi-readvar -v db shows the
