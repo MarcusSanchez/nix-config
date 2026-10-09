@@ -316,14 +316,19 @@ modules/darwin/
                            switch) + Remote Login (the password-auth
                            fallback for when tailscaled is down — no
                            authorized_keys exist anywhere any more) +
-                           the defaults: Spotlight's hotkey off (Raycast
-                           claims it; re-asserted every rebuild), key
-                           repeat at the slider maximums, natural
-                           scrolling off on the mini only (one global
-                           toggle — safe because it has no trackpad),
-                           Siri and Apple Intelligence off (user
-                           defaults, re-asserted every rebuild),
-                           dock autohide
+                           the defaults that stick: key repeat at the
+                           slider maximums, natural scrolling off on
+                           the mini only (one global toggle — safe
+                           because it has no trackpad), dock autohide
+  guards.nix               the settings macOS resets, re-asserted on
+                           every switch as idempotent activation text:
+                           Spotlight's ⌘Space hotkey off (Raycast),
+                           Siri + Apple Intelligence off (the System
+                           Settings toggle stays authoritative), the
+                           Spotlight Privacy exclusions (plain paths
+                           only; mds is restarted, never re-indexed),
+                           and Zoom's updater agents/helper removed
+                           (paired with its ZAutoUpdate default)
   users.nix
 
 home/marcus/

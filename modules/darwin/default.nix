@@ -18,6 +18,7 @@
     ./homebrew.nix
     ./users.nix
     ./system.nix
+    ./guards.nix
     inputs.home-manager.darwinModules.home-manager
     # Last on purpose: appending leaves every position above unmoved, and
     # the ordering note at the top of this file makes that matter. Settings
