@@ -128,7 +128,9 @@ hosts/hero/          the desk PC, INSTALLED and live
                            asus_ec_sensors as a pinned out-of-tree
                            build in updates/ (this board postdates the
                            in-tree DMI table — drop when the kernel
-                           catches up), lm_sensors, and
+                           catches up), LACT with its GUI in the
+                           launcher and a declared 450 W power cap,
+                           lm_sensors, and
                            the GPU memory-clock floor service: pins
                            7001 MHz, the lowest supported step above
                            deep idle (that step starves two

@@ -1,5 +1,5 @@
 # Thermals and GPU tuning for this desk's silicon. HOST-level: the
-# sensor modules are board-specific, the clock floor GPU-specific.
+# sensor modules are board-specific, the GPU knobs GPU-specific.
 #
 #   - asus_ec_sensors reads the board's EC (chipset/VRM temps, the
 #     water-flow and T_Sensor headers, extra fan RPMs) — but this
@@ -11,6 +11,11 @@
 #     rails) and is in-tree. Everything lands in hwmon for `sensors`
 #     and the shell widgets; the case fans' curves live in the Lian Li
 #     daemon (lianli.nix), not here.
+#   - LACT: the GPU tuning daemon + GUI (power limit, clocks, fan
+#     control). The power cap is declared below at 75 % of the card's
+#     600 W default — this OS never games; the daemon applies it at
+#     boot. The voltage-curve editor leans on undocumented driver
+#     paths; the power-limit and PowerMizer knobs are the safe surface.
 #   - Memory-clock floor: at desktop idle the driver parks the memory
 #     clock at its lowest step, which cannot feed the desk's two
 #     high-refresh panels — the display pipe starves and a band of
@@ -56,6 +61,27 @@ in
 
   # the `sensors` CLI over the hwmon nodes the modules above populate
   environment.systemPackages = [ pkgs.lm_sensors ];
+
+  services.lact = {
+    enable = true;
+    # a declared config makes /etc/lact/config.yaml a read-only link:
+    # the GUI shows and monitors but cannot save, which is the point.
+    # The daemon refuses a file without its framing keys, so the
+    # defaults are restated; the card is keyed vendor:device-subvendor:
+    # subdevice-pci address.
+    settings = {
+      version = 7;
+      daemon = {
+        log_level = "info";
+        admin_group = "wheel";
+        disable_clocks_cleanup = false;
+      };
+      apply_settings_timer = 5;
+      current_profile = null;
+      auto_switch_profiles = false;
+      gpus."10DE:2B85-1043:89E3-0000:01:00.0".power_cap = 450;
+    };
+  };
 
   systemd.services.nvidia-memory-clock-floor = {
     description = "Hold the GPU memory clock above the deep-idle step";
