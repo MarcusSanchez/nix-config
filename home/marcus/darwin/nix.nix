@@ -15,22 +15,21 @@
   #
   # manual.manpages (default true) builds `man home-configuration.nix` through
   # nixpkgs' nixosOptionsDoc, whose options.json embeds the nixpkgs source path
-  # as a context-stripped string. Nix 2.34 warns about that on every eval:
+  # as a context-stripped string. Nix warns about that on every eval:
   #
   #   warning: Using 'builtins.derivation' to create a derivation named
   #   'options.json' that references the store path '/nix/store/…-source'
   #   without a proper context.
   #
-  # An upstream bug, and cosmetic today — but the reference never gets
+  # An upstream bug, and cosmetic on its own — but the reference never gets
   # registered, so a GC that collects that nixpkgs source breaks the next
   # rebuild of the manpage. This is the only trigger:
   # nix-darwin's documentation.man/doc.enable and Determinate's lazy-trees are
   # both innocent.
   #
-  # Mac only because the warning is mac only: checked from WSL the same day —
-  # neither a full toplevel eval nor `nix flake check` emits it there — so the
-  # trigger is Determinate's Nix, not the option. The WSL hosts keep their
-  # manpages. If a WSL rebuild ever does die on options.json, this file is the
-  # fix to copy (GC runs daily there vs weekly here, so it would bite sooner).
+  # Mac only because the warning is mac only: the trigger is Determinate's
+  # Nix, not the option — a NixOS eval does not emit it. The NixOS hosts
+  # keep their manpages; if a rebuild there ever dies on options.json, this
+  # is the fix to copy.
   manual.manpages.enable = false;
 }

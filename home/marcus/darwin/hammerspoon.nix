@@ -4,9 +4,9 @@
 # config and keeps the app running.
 #
 # The app itself is a cask (modules/darwin/homebrew.nix): Hammerspoon is
-# not in nixpkgs at all, and the nix-darwin karabiner module — the other
-# route to this job — has been broken since Karabiner v15 moved its
-# launch agents.
+# not in nixpkgs. Not Karabiner-Elements, the other route to this job:
+# it matches bundle ids only (the rules need the focused window's title
+# too), and its DriverKit virtual keyboard is broken on macOS 26.
 #
 # Accessibility permission is required and cannot be granted from a
 # config: System Settings > Privacy & Security > Accessibility. The
@@ -17,7 +17,7 @@
   # Out of the store, so edits apply on save without a rebuild — the
   # config's own path watcher reloads Hammerspoon. Same live-editing loop
   # as xremap's --watch=config, and the drift is committed by the hook in
-  # darwin/dotfiles.nix, whose pathspec already covers this directory.
+  # common/dotfiles.nix, whose pathspec already covers this directory.
   # (Hammerspoon reads ~/.hammerspoon/init.lua; it is not XDG-aware.)
   home.file.".hammerspoon/init.lua".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/marcus/common/dotfiles/hammerspoon.init.lua";

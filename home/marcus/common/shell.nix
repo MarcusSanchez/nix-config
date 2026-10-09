@@ -10,6 +10,13 @@
   ...
 }:
 
+let
+  # `npm install -g` prefix: a writable location instead of the
+  # read-only store. Deliberately impure — global npm CLIs are
+  # throwaway convenience tools here, and nix-ld covers any native
+  # binaries they ship.
+  npmGlobal = "${config.home.homeDirectory}/.npm-global";
+in
 {
   imports = [ inputs.catppuccin.homeModules.default ];
 
@@ -19,8 +26,7 @@
   # (Constraints).
   catppuccin = {
     enable = true;
-    # Explicit to match the upcoming default; today `enable = true` already
-    # auto-enrolls every port (hence the nvim opt-out below).
+    # every port enrolled unless opted out below
     autoEnable = true;
     flavor = "mocha";
     accent = "blue";
@@ -36,9 +42,8 @@
     # autoEnable's GTK port would force Papirus icons over the Adwaita
     # set home/marcus/nixos/theme.nix pins — and with Adwaita named,
     # apps fall through to their own hicolor icons (the native look).
-    # Papirus itself works (the breakage once blamed on it was
-    # Plasma-leftover fallout) — it stays off purely on looks, because
-    # its restyled app icons replace the native ones. No-op on WSL/mac.
+    # Papirus stays off purely on looks: its restyled app icons replace
+    # the native ones. No-op on WSL/mac.
     gtk.icon.enable = false;
   };
 
@@ -59,19 +64,15 @@
       # is environment-dependent — set for GUI/login shells, absent in
       # a bare ssh exec — so two shells can disagree about where
       # sessions live and `zmx list` misses what `zmx attach` created.
-      # Same failure shape as an abduco socket split bitten here
-      # before; pinning makes create and lookup agree in
-      # every shell these exports reach — all of them, via
-      # hm-session-vars in .zshenv.
+      # Pinning makes create and lookup agree in every shell these
+      # exports reach — all of them, via hm-session-vars in .zshenv.
       ZMX_DIR = "${config.home.homeDirectory}/.local/state/zmx";
 
-      # Let `npm install -g` work natively: install into a writable prefix
-      # instead of the read-only nix store. Deliberately impure — global npm
-      # CLIs are throwaway convenience tools here, and nix-ld covers any
-      # native binaries they ship.
-      NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+      NPM_CONFIG_PREFIX = npmGlobal;
     };
-    sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
+    sessionPath = [ "${npmGlobal}/bin" ];
+
+    shellAliases.cls = "clear";
 
     # Silence login(1)'s "Last login: ..." banner — macOS terminals start
     # every tab through /usr/bin/login, which prints it unless
@@ -118,7 +119,8 @@
     };
 
     # Auto-load per-project dev shells: a project with an .envrc saying
-    # `use flake` gets its devShell on cd-in, dropped on cd-out.
+    # `use devenv` (or `use flake` for a plain flake devShell) gets its
+    # shell on cd-in, dropped on cd-out.
     # nix-direnv caches the shell so re-entry is instant.
     direnv = {
       enable = true;
@@ -155,7 +157,6 @@
       # Ordered after tool integrations (zoxide/atuin, order 1000) so the
       # keybindings below always win, regardless of module import order.
       initContent = lib.mkOrder 1200 ''
-        alias cls='clear'
         # Blank line between command outputs — but not as the FIRST
         # line of a fresh screen (new terminal, clear/cls), where it
         # just pushed the prompt down. The flag arms after each prompt
@@ -171,17 +172,11 @@
         #   (NixOS) marcus@framework-dt         (nix-darwin, in green, on the mac)
         #   ➜  nix-config git:(main) ✗
         #
-        # The platform label is plain text on purpose — a third attempt at
-        # this slot. Nerd Font glyphs vanished when hand-typed and depended
-        # on the terminal's font; text needs neither. Sky for bare-metal
-        # NixOS, yellow for the WSL boxes (osConfig.wsl.enable — set by
-        # NixOS-WSL, absent elsewhere), green for the mac, resolved at
-        # eval so each .zshrc carries only its own.
-        #
-        # The OS glyph is picked at eval time and is a monochrome Nerd Font
-        # codepoint — U+F179 apple / U+F17C tux — NOT starship's default ❄,
-        # whose emoji presentation renders in colour and reads badly against
-        # text.
+        # The platform label is plain text on purpose: a Nerd Font glyph
+        # depends on the terminal's font, text needs nothing. Sky for
+        # bare-metal NixOS, yellow for the WSL boxes (osConfig.wsl.enable
+        # — set by NixOS-WSL, absent elsewhere), green for the mac,
+        # resolved at eval so each .zshrc carries only its own.
         #
         # Reassigned here rather than forked into a custom theme file: omz
         # sets these when it sources the theme, and this block is ordered

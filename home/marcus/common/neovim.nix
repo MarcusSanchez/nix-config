@@ -10,11 +10,10 @@
     [
       neovim
 
-      # lazyvim deps
+      # lazyvim deps (fzf arrives via programs.fzf in packages.nix)
       tree-sitter
       ripgrep
       fd
-      fzf
     ]
     # macOS's clipboard is pbcopy, built in; Linux ships BOTH providers —
     # nvim picks wl-copy when $WAYLAND_DISPLAY is set (the niri desktop)

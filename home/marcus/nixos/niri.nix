@@ -6,8 +6,7 @@
 # niri hot-reloads its files on save; linked out-of-store so edits
 # apply without a rebuild and land in the repo as ordinary git drift.
 # niri.outputs.kdl must sit BESIDE config.kdl: its include is resolved
-# relative to the symlink's directory, not the target's (verified on
-# niri 26.04). The greeter's compositor does NOT read it — its layout
+# relative to the symlink's directory, not the target's. The greeter's compositor does NOT read it — its layout
 # is the per-host greeterOutputs option (modules/nixos/greeter.nix),
 # kept in step by hand.
 {
@@ -44,12 +43,9 @@ in
     # the screenshot binds (Print, Mod+Shift+S in niri.config.kdl):
     # slurp picks a region, grim captures it, satty annotates
     # (arrows/text/blur); both hand the result to screenshot-copy below.
-    # wl-clipboard is nvim's clipboard provider under Wayland
-    # (home/marcus/common/neovim.nix).
     pkgs.grim
     pkgs.slurp
     pkgs.satty
-    pkgs.wl-clipboard
     # notify-send, for the screenshot binds' best-effort toast (DMS is
     # the notification daemon that renders it)
     pkgs.libnotify
@@ -68,7 +64,7 @@ in
     # per-application key remapping (alt+hjkl -> arrows outside vim-y
     # apps). Config: dotfiles/xremap.yml. On PATH for hand-runs; the
     # SESSION copy is the systemd user service below, NOT a
-    # spawn-at-startup — see its comment for why that mattered.
+    # spawn-at-startup — see its comment for why.
     xremapNiri
 
     # TPM-backed virtual FIDO2 key (system plumbing in
@@ -144,11 +140,11 @@ in
     # once; refocusing elsewhere during the wait window moves that
     # column instead — accepted for fast-launching apps.
     (pkgs.writeShellScriptBin "niri-spawn-left" ''
-      prev=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
+      prev=$(niri msg --json focused-window 2>/dev/null | ${pkgs.jq}/bin/jq -r '.id // empty')
       "$@" >/dev/null 2>&1 &
       for _ in $(seq 1 50); do
         sleep 0.1
-        cur=$(niri msg --json focused-window 2>/dev/null | jq -r '.id // empty')
+        cur=$(niri msg --json focused-window 2>/dev/null | ${pkgs.jq}/bin/jq -r '.id // empty')
         if [ -n "$cur" ] && [ "$cur" != "$prev" ]; then
           niri msg action move-column-left
           exit 0
@@ -172,14 +168,13 @@ in
     };
 
   # xremap as a session-bound user service, NOT a niri
-  # spawn-at-startup. niri scopes its spawn children into
-  # user@.service/app.slice, which OUTLIVES the niri session — so a
-  # spawn-started xremap kept its exclusive evdev grab (EVIOCGRAB) past
-  # logout, and the next login came up with a dead keyboard (the stale
-  # grabber still owned it). PartOf graphical-session.target makes
-  # logind stop it exactly when the session ends, releasing the grab;
-  # WantedBy starts it with the session. Restart on-failure covers a
-  # transient IPC hiccup.
+  # spawn-at-startup: niri's spawn children land in
+  # user@.service/app.slice and outlive the session, so a spawn-started
+  # xremap would keep its exclusive evdev grab (EVIOCGRAB) past logout
+  # and leave the next login without a keyboard. PartOf
+  # graphical-session.target stops it when the session ends, releasing
+  # the grab; WantedBy starts it with the session. Restart on-failure
+  # covers a transient IPC hiccup.
   #
   # The wrapper exists because a user service snapshots the manager
   # environment at SPAWN, and at login xremap can win the race against

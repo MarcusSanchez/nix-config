@@ -3,7 +3,7 @@
 # modules/common/packages.nix; RustRover refuses standalone toolchains,
 # hence rustup at all — see CLAUDE.md.)
 #
-# Linux (WSL): rustup-downloaded toolchains are patched against one specific
+# Linux: rustup-downloaded toolchains are patched against one specific
 # store glibc; when an upgrade bumps glibc and GC deletes the old one, every
 # rust binary dies with ENOENT. Reinstall stable whenever glibc changes —
 # the stamp also covers first activation on a fresh machine.
@@ -21,7 +21,7 @@
 # — it exits with "unavailable for the active toolchain". So the editor's LSP
 # never starts, while mason's own perfectly good rust-analyzer sits further
 # down PATH and never gets reached. A fresh `toolchain install` does not carry
-# hand-added components either, so the WSL glibc repair above would drop them.
+# hand-added components either, so the Linux glibc repair above would drop them.
 { pkgs, lib, ... }:
 
 let

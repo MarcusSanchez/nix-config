@@ -1,6 +1,7 @@
-# GUI apps — the Linux render of the mac's homebrew casks (minus stremio,
-# minus raycast, which has no Linux build; the shell's launcher covers
-# that slot).
+# Desktop GUI apps: the packages, the rustdesk and spotify wrappers,
+# the launcher's NoDisplay hiding, zen as the default browser, and the
+# zed alias. (No raycast — it has no Linux build; the shell's launcher
+# covers that slot.)
 {
   inputs,
   lib,
@@ -31,15 +32,11 @@
     nautilus
 
     # remote desktop (TeamViewer-style, self-hostable) — used OUTBOUND,
-    # to control other machines; nothing here runs at startup, and
+    # to control other machines; nothing here runs at startup.
     # RECEIVING cannot work on this desktop: niri's screencast offers
-    # dmabuf-only buffers with the modifier marked MANDATORY
-    # (pw_utils.rs, unchanged on niri main), while the capture pipeline
-    # here (pipewiresrc ! videoconvert) speaks only mappable system
-    # memory — the format intersection is empty, "no more input
-    # formats" on every connect. Input was never the problem
-    # (/dev/uinput worked). Graphical access INTO this box needs a
-    # KMS-capture tool (sunshine-class) instead.
+    # dmabuf-only buffers, which rustdesk's capture pipeline cannot
+    # map, so graphical access INTO this box needs a KMS-capture tool
+    # (sunshine-class) instead.
     # `rustdesk`, not `rustdesk-flutter`: same upstream app, newer
     # release (the unfree mark is upstream's relicense, and unfree is
     # allowed here anyway).

@@ -7,10 +7,10 @@
 #
 # Interactive-shell ALIASES only (ls -> eza, cat -> bat) — aliases
 # never expand inside scripts, so anything calling the real coreutils
-# keeps them. ripgrep/fd/fzf binaries already arrive via neovim.nix
-# (LazyVim dependencies); fzf's SHELL side lives here (Ctrl+T file
-# picker, Alt+C cd — Ctrl+R stays atuin's, whose hook loads after
-# fzf's and wins).
+# keeps them. ripgrep/fd binaries arrive via neovim.nix (LazyVim
+# dependencies); fzf's package and SHELL side live here (Ctrl+T file
+# picker, Alt+C cd — no Ctrl+R widget, so atuin owns that key
+# uncontested).
 {
   config,
   inputs,
@@ -40,9 +40,9 @@
     nix-index-database.comma.enable = true;
 
     # fuzzy-anything: Ctrl+T files, Alt+C directories, **<Tab> completion.
-    # No history widget: atuin owns Ctrl-R (shell.nix), and leaving
-    # fzf's competing binding declared made every eval warn about the
-    # collision — this is the warning's own prescribed fix.
+    # No history widget: atuin owns Ctrl-R (shell.nix). An empty
+    # command is the module's documented way to leave the key unbound;
+    # a declared fzf widget beside atuin's warns on every eval.
     fzf = {
       enable = true;
       historyWidget.command = "";
@@ -82,8 +82,8 @@
       ];
     };
 
-    # the most-loved git TUI: hunk staging, interactive rebase, branch
-    # surgery — visual and keyboard-driven
+    # git TUI: hunk staging, interactive rebase, branch surgery —
+    # visual and keyboard-driven
     lazygit.enable = true;
 
     # htop's successor: GPU stats, per-process I/O, mouse support (the

@@ -12,6 +12,11 @@
   ...
 }:
 
+let
+  # from the same nixpkgs qt6 set quickshell is built against — a
+  # mismatched Qt ABI crashes the shell
+  qt5compatQml = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+in
 {
   xdg.configFile = {
     # DMS may atomically replace the link with a plain file on save
@@ -54,13 +59,12 @@
   home = {
     # plugins written against Qt5Compat.GraphicalEffects (the
     # materialPlayer desktop widget) need the module on the QML import
-    # path; quickshell's closure doesn't ship it. From the same nixpkgs
-    # qt6 set quickshell is built against — a mismatched Qt ABI crashes
-    # the shell. Both names: Qt reads QML_IMPORT_PATH, plugin startup
-    # checks grep QML2_IMPORT_PATH. Session vars land at login.
+    # path; quickshell's closure doesn't ship it. Both names: Qt reads
+    # QML_IMPORT_PATH, plugin startup checks grep QML2_IMPORT_PATH.
+    # Session vars land at login.
     sessionVariables = {
-      QML_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
-      QML2_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
+      QML_IMPORT_PATH = qt5compatQml;
+      QML2_IMPORT_PATH = qt5compatQml;
     };
 
     # niri hard-errors on a missing include, and matugen only writes the
@@ -103,18 +107,7 @@
           done
         '';
       }))
-      # dms spawns `qs` from PATH; its package doesn't bundle quickshell
-      pkgs.quickshell
-      # backs dms's system-monitor widgets (cpu/mem/process list)
-      pkgs.dgop
-      # backs dms's wallpaper-driven dynamic theming; without it on PATH,
-      # theme generation silently does nothing
-      pkgs.matugen
-
-      # runtime for the audioFx plugin: cava (spectrum analyser) and
-      # the python env (wallpaper glow analysis). The plugin probes
-      # both from PATH and silently loses features when missing.
-      # Plugins themselves are imperative checkouts under
+      # Plugins are imperative checkouts under
       # ~/.config/DankMaterialShell/plugins (dms plugins
       # install/lock/restore); the audioFx and modernClock checkouts
       # carry local patches that a plugin update silently reverts and
@@ -129,12 +122,23 @@
       #     the visualizer fades out entirely.
       #   - ModernClock.qml: useThemeColors branch Theme.surfaceText ->
       #     Theme.primary, so the clock takes the palette accent.
+
+      # dms spawns `qs` from PATH; its package doesn't bundle quickshell
+      pkgs.quickshell
+      # backs dms's system-monitor widgets (cpu/mem/process list)
+      pkgs.dgop
+      # backs dms's wallpaper-driven dynamic theming; without it on PATH,
+      # theme generation silently does nothing
+      pkgs.matugen
+
+      # runtime for the audioFx plugin: cava (spectrum analyser) and
+      # the python env (wallpaper glow analysis). The plugin probes
+      # both from PATH and silently loses features when missing.
       pkgs.cava
       (pkgs.python3.withPackages (ps: [
         ps.numpy
         ps.pillow
       ]))
     ];
-
   };
 }

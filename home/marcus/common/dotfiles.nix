@@ -1,8 +1,8 @@
-# The UI-managed configs, both directions: symlinked out of the store
-# into ./dotfiles/ so edits made from inside Zed / the IDEs land in the
-# repo as ordinary git drift, and that drift committed + pushed at
-# activation (pathspec-scoped so unrelated dirty work never rides
-# along; activation never fails over git; a failed push warns and
+# The UI-managed configs, both directions: out-of-store links pointing
+# into ./dotfiles/ in the repo, so edits made from inside Zed / the
+# IDEs land there as ordinary git drift, and that drift committed +
+# pushed at activation (pathspec-scoped so unrelated dirty work never
+# rides along; activation never fails over git; a failed push warns and
 # leaves the commit). The commit message names the machine via
 # osConfig.networking.hostName — the same value on NixOS and darwin,
 # both set from the flake's hostName specialArg.
@@ -29,8 +29,7 @@ let
   repo = "${config.home.homeDirectory}/nix-config";
   dotfiles = "${repo}/home/marcus/common/dotfiles";
   link = name: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${name}";
-  paths = [ "home/marcus/common/dotfiles" ];
-  pathArgs = lib.concatMapStringsSep " " (p: "\"${p}\"") paths;
+  pathspec = "home/marcus/common/dotfiles";
 in
 {
   xdg.configFile = {
@@ -40,7 +39,7 @@ in
     # ghostty: the platform entry file, with the shared base linked
     # BESIDE it — ghostty resolves the entry's config-file include
     # against the entry's own directory, not the target's (a symlink
-    # include trap; niri had the same one in its day). The package is
+    # include trap; niri's include has the same one). The package is
     # elsewhere: home/marcus/nixos/apps.nix on the desktop, a brew cask
     # on the mac.
     "ghostty/config".source = link (
@@ -53,11 +52,11 @@ in
 
   home.activation.configAutoCommit = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -d "${repo}/.git" ]; then
-      run ${pkgs.git}/bin/git -C "${repo}" add -A -- ${pathArgs} || true
-      if ! ${pkgs.git}/bin/git -C "${repo}" diff --cached --quiet -- ${pathArgs}; then
+      run ${pkgs.git}/bin/git -C "${repo}" add -A -- "${pathspec}" || true
+      if ! ${pkgs.git}/bin/git -C "${repo}" diff --cached --quiet -- "${pathspec}"; then
         echo "config: ui drift — committing" >&2
         if run ${pkgs.git}/bin/git -C "${repo}" commit -q \
-          -m "chore(config): sync ui-managed files from ${osConfig.networking.hostName}" -- ${pathArgs}; then
+          -m "chore(config): sync ui-managed files from ${osConfig.networking.hostName}" -- "${pathspec}"; then
           run ${pkgs.git}/bin/git -C "${repo}" push -q \
             || echo "config: committed, but push failed (offline/behind?) — push manually" >&2
         else
