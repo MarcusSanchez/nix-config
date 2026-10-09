@@ -6,6 +6,7 @@
   imports = [
     ./common
     ./darwin/nix.nix
+    ./darwin/shell.nix
     # UI-managed-config links + drift auto-commit (the desktop entry
     # point imports the same file; WSL manages none of these)
     ./common/dotfiles.nix
