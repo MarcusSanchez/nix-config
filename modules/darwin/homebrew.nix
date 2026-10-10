@@ -57,9 +57,6 @@
     brews = [
       # real gcc (not clang-pretending); nixpkgs gcc on darwin is awkward
       "gcc"
-
-      # file-watching daemon; nixpkgs watchman has a rocky history on darwin
-      "watchman"
     ];
 
     casks = [
