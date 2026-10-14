@@ -79,10 +79,19 @@
       '';
     })
 
-    # media center (torrent-streaming frontend). stremio-linux-shell is
-    # the current packaging — plain `stremio` was removed from nixpkgs
-    # over its outdated qt5 webengine.
-    stremio-linux-shell
+    # media center (torrent-streaming frontend) without its header bar;
+    # the .desktop Exec resolves `stremio` via PATH, so wrapping bin/
+    # covers both launch paths
+    (symlinkJoin {
+      name = "stremio-undecorated";
+      paths = [ stremio-linux-shell ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        rm $out/bin/stremio
+        makeWrapper ${stremio-linux-shell}/bin/stremio $out/bin/stremio \
+          --add-flags "--no-window-decorations"
+      '';
+    })
 
     zed-editor
 
