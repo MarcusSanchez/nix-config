@@ -53,6 +53,9 @@
     }
   ],
   "mediaUseAlbumArtAccent": true,
+  "spotlightSectionViewModes": {
+    "apps": "list"
+  },
   "dashTabs": [
     {
       "id": "media",
