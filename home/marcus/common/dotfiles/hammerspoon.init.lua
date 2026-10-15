@@ -55,9 +55,13 @@ local TERMINAL_BUNDLES = {
 -- \b, so this matches "nvim foo.txt" but not "nvimrc".
 local NVIM_TITLE = "^nvim%f[%W]"
 
-local function speaksVim()
+local function frontBundle()
   local app = hs.application.frontmostApplication()
-  local bundle = app and app:bundleID() or ""
+  return app and app:bundleID() or ""
+end
+
+local function speaksVim()
+  local bundle = frontBundle()
 
   if VIM_BUNDLES[bundle] then
     return true
@@ -93,8 +97,18 @@ local RULES = {
   -- unshifted h/l above — those bind alt+shift+h/l themselves.
   -- containExactly is what keeps the two apart, so alt+shift+l is End
   -- and never Right.
-  { mods = { "alt", "shift" }, key = "h", send = "home",  always = false },
-  { mods = { "alt", "shift" }, key = "l", send = "end",   always = false },
+  --
+  -- `native` is what non-terminal apps get instead of `send`: AppKit
+  -- binds Home/End to scrolling the document, not to moving the caret,
+  -- so a bare Home does nothing in a browser field or Raycast. Ctrl+A/E
+  -- are AppKit's line-start/end chords, honored by native text fields
+  -- and browsers alike. Not Cmd+Left/Right: browsers read those as
+  -- Back/Forward whenever no text field has focus. Terminals keep
+  -- Home/End, which they hand to the program running inside.
+  { mods = { "alt", "shift" }, key = "h", send = "home",  always = false,
+    native = { mods = { "ctrl" }, key = "a" } },
+  { mods = { "alt", "shift" }, key = "l", send = "end",   always = false,
+    native = { mods = { "ctrl" }, key = "e" } },
 }
 
 -- Exposed as a global for `hs -c "hs.inspect(remapRules)"`, so what is
@@ -102,12 +116,13 @@ local RULES = {
 remapRules = RULES
 
 -- Replace the keystroke: swallow the original and post the substitute
--- with no modifiers held, so the receiving app sees a bare arrow/Home/End
--- rather than alt+arrow (which would be word-wise navigation on macOS).
-local function replacement(keyName)
+-- with only its own modifiers, so the receiving app sees a bare
+-- arrow/Home/End rather than alt+arrow (which would be word-wise
+-- navigation on macOS).
+local function replacement(mods, keyName)
   return true, {
-    hs.eventtap.event.newKeyEvent({}, keyName, true),
-    hs.eventtap.event.newKeyEvent({}, keyName, false),
+    hs.eventtap.event.newKeyEvent(mods, keyName, true),
+    hs.eventtap.event.newKeyEvent(mods, keyName, false),
   }
 end
 
@@ -125,7 +140,10 @@ remapTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
     -- the plain alt+l rule.
     if key == rule.key and flags:containExactly(rule.mods) then
       if rule.always or not speaksVim() then
-        return replacement(rule.send)
+        if rule.native and not TERMINAL_BUNDLES[frontBundle()] then
+          return replacement(rule.native.mods, rule.native.key)
+        end
+        return replacement({}, rule.send)
       end
       return false
     end
