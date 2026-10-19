@@ -205,6 +205,16 @@
     "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha",
   },
+  // Linux means the niri desktop only (WSL links no Zed settings): the
+  // DMS-generated wallpaper palette, translucent like ghostty — niri's
+  // window rule supplies the blur behind it.
+  "linux": {
+    "theme": {
+      "mode": "dark",
+      "light": "DankShell Light Transparent",
+      "dark": "DankShell Dark Transparent",
+    },
+  },
 
   "vertical_scroll_margin": 5,
   "scroll_beyond_last_line": "vertical_scroll_margin",
