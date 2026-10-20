@@ -434,12 +434,14 @@ home/marcus/
                            (niri.accent.kdl — the toml's three landmines
                            are commented at the config; the file also
                            seeds the include so niri never hard-errors).
-                           dms-shell itself carries TWO pre-embed
-                           source patches (launcher-logo centering, the
+                           dms-shell itself carries pre-embed source
+                           patches (launcher-logo centering, the
                            greeter's technique, whose settings-side
                            other half is launcherLogoSizeOffset in
-                           dms.settings.json; and the profile-image
-                           fallbacks -> the material "person" glyph),
+                           dms.settings.json; the profile-image
+                           fallbacks -> the material "person" glyph;
+                           and dms-vertical-stats.patch beside it: the
+                           vertical bar's CPU as "20%", RAM as used GiB),
                            so it builds from source and a DMS update
                            that reshapes an anchored line fails the
                            BUILD on purpose — the comment at the

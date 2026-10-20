@@ -91,6 +91,10 @@ in
       #     icon theme, which Adwaita lacks, leaving an empty circle;
       #     "material:person" renders the bundled font glyph (what the
       #     greeter already uses).
+      #   - vertical-bar CPU/RAM text (./dms-vertical-stats.patch): CPU
+      #     as "20%", RAM as used GiB over a small "GiB" line, both at
+      #     0.8x size to fit the bar's width and nudged down to even
+      #     their padding; a hunk that no longer applies fails the build.
       (pkgs.dms-shell.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace ../quickshell/Modules/DankBar/Widgets/LauncherButton.qml \
@@ -106,6 +110,8 @@ in
             substituteInPlace "$f" \
               --replace-fail 'fallbackIcon: "person"' 'fallbackIcon: "material:person"'
           done
+          chmod -R u+w ../quickshell/Modules/DankBar/Widgets
+          patch -p1 -d .. < ${./dms-vertical-stats.patch}
         '';
       }))
       # Plugins are imperative checkouts under
