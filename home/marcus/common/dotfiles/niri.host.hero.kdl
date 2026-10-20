@@ -13,14 +13,3 @@ window-rule {
     open-on-output "HDMI-A-1"
     default-column-width { proportion 1.0; }
 }
-
-// Zed's DankShell Transparent theme leaves the window translucent; blur
-// what shows through, as for ghostty
-window-rule {
-    match app-id=r#"^dev\.zed\.Zed$"#
-    draw-border-with-background false
-    background-effect {
-        blur true
-        xray true
-    }
-}
