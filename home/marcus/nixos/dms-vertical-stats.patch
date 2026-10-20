@@ -52,7 +52,7 @@ diff --color -ru a/quickshell/Modules/DankBar/Widgets/RamMonitor.qml b/quickshel
                  NumericText {
 +                    isMonospace: false
 +                    text: "GiB"
-+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText) * 0.5
++                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText) * 0.6
 +                    color: Theme.surfaceVariantText
 +                    anchors.horizontalCenter: parent.horizontalCenter
 +                    topPadding: -2
