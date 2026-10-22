@@ -2,14 +2,24 @@
 # management is off (Determinate Nix owns the daemon — see
 # modules/darwin/nix.nix), so GC runs as the user (launchd agent); the
 # daemon still deletes unreferenced store paths on its behalf.
-{ ... }:
+{ lib, ... }:
 
 {
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 10d";
   };
+
+  # The age limit goes in as separate argv words, not through
+  # nix.gc.options: the launchd agent appends that string as ONE argument
+  # and shell-quotes it, so nix-collect-garbage receives
+  # '--delete-older-than 10d' and rejects it as an unrecognised flag —
+  # the job exits non-zero every run. mkAfter keeps the words behind the
+  # binary path in the merged list.
+  launchd.agents.nix-gc.config.ProgramArguments = lib.mkAfter [
+    "--delete-older-than"
+    "10d"
+  ];
 
   # HM's own manual stays off, mac only:
   #
