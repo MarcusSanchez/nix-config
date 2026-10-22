@@ -1,8 +1,8 @@
 // niri config: upstream v26.04's default-config.kdl plus local deltas,
-// each commented at its site — ghostty + DankMaterialShell wiring
-// (spawns, launcher, lock, power menu), macOS/Windows muscle-memory
-// binds (Alt+Space, Alt+F4, Ctrl+Alt+Delete), J/K and Mod+Shift <->
-// Mod+Ctrl swapped from upstream, input tuning, and the
+// each commented at its site — ghostty + Dux Shell wiring (launcher,
+// lock, power menu, screenshots, the palette accent), macOS/Windows
+// muscle-memory binds (Alt+Space, Alt+F4, Ctrl+Alt+Delete), J/K and
+// Mod+Shift <-> Mod+Ctrl swapped from upstream, input tuning, and the
 // frosted-ghostty window rule.
 //
 // Live-editable: niri hot-reloads this file on save (linked
@@ -195,9 +195,9 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor. Overridden in
-        // practice: niri.accent.kdl (end of this file) loads later
-        // and wins the layout merge, so this static fallback only
-        // shows if that include's machinery is removed.
+        // practice: dms/colors.kdl (end of this file) loads later and
+        // wins the layout merge; this static fallback shows only
+        // before the shell first writes it.
         active-color "#89b4fa"
 
         // Color of the ring on inactive monitors.
@@ -299,12 +299,13 @@ layout {
 // See the binds section below for more spawn examples.
 
 // instant wallpaper while quickshell is still starting: swaybg maps in
-// milliseconds; DMS's own wallpaper layer stacks above it once ready.
-// The path comes from DMS's session state so the two can't disagree.
-spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/DankMaterialShell/session.json)\""
-// the shell's log (plugin load errors, wallpaper watchdogs) is read
-// with `journalctl --user -t dms`; a bare spawn would discard it
-spawn-at-startup "systemd-cat" "-t" "dms" "dms" "run"
+// milliseconds; the shell's own wallpaper layer stacks above it once
+// ready. The path comes from the shell's session state so the two
+// can't disagree.
+spawn-at-startup "sh" "-c" "swaybg -m fill -i \"$(jq -r .wallpaperPath ~/.local/state/dms/session.json)\""
+// the shell itself is the session-bound dms.service
+// (home/marcus/nixos/dux.nix), not a spawn; its log is
+// `journalctl --user -u dms`
 
 // per-app key remapping (dotfiles/xremap.yml) is a session-bound
 // systemd user service, not a spawn — home/marcus/nixos/niri.nix says why.
@@ -630,18 +631,14 @@ binds {
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
 
-    // Region screenshot, the grim+slurp flow: the capture lands on the
-    // clipboard and on disk the instant the drag ends — no overlay,
-    // nothing to confirm. Esc during selection cancels. Every
-    // screenshot copies through screenshot-copy (home/marcus/nixos/
-    // niri.nix), which hands DMS the file so it pastes as an image, a
-    // path or a file. niri's own actions (freeze-frame picker for
-    // tooltips/menus, screen, window) run through screenshot-niri, which
-    // routes the file they save the same way.
-    Print hotkey-overlay-title="Screenshot region → clipboard" { spawn "sh" "-c" "grim -g \"$(slurp)\" - | screenshot-copy"; }
-    Shift+Print hotkey-overlay-title="Screenshot (freeze-frame picker)" { spawn "screenshot-niri" "screenshot"; }
-    Ctrl+Print hotkey-overlay-title="Screenshot screen" { spawn "screenshot-niri" "screenshot-screen"; }
-    Alt+Print hotkey-overlay-title="Screenshot window" { spawn "screenshot-niri" "screenshot-window"; }
+    // Screenshots through the shell's own tool: each one is saved
+    // under ~/Pictures/Screenshots and copied as a FILE, so it pastes
+    // as an image, a path or a file. In the region picker Esc cancels
+    // and Ctrl+C copies without saving.
+    Print hotkey-overlay-title="Screenshot region" { spawn "dms" "screenshot" "region"; }
+    Shift+Print hotkey-overlay-title="Screenshot last region" { spawn "dms" "screenshot" "last"; }
+    Ctrl+Print hotkey-overlay-title="Screenshot screen" { spawn "dms" "screenshot" "full"; }
+    Alt+Print hotkey-overlay-title="Screenshot window" { spawn "dms" "screenshot" "window"; }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
@@ -747,8 +744,9 @@ window-rule {
     open-fullscreen false
 }
 
-// Rounded corners on every window, matched to DMS's cornerRadius (12
-// in dms.settings.json) so windows and shell chrome share one curve.
+// Rounded corners on every window, matched to the shell chrome's 12px
+// corners (radiusStrength 38 in dux.settings.json) so windows and
+// shell chrome share one curve.
 // clip-to-geometry makes apps that paint square corners (terminals,
 // chromium) actually get cut to the radius instead of poking through.
 window-rule {
@@ -763,14 +761,16 @@ window-rule {
 include "dms/alttab.kdl"
 
 // The audioFx plugin's surfaces (runtime wiring in
-// home/marcus/nixos/dms.nix) stay on the plain background layer. Its
+// home/marcus/nixos/dux.nix) stay on the plain background layer. Its
 // README's place-within-backdrop layer-rules assume a
 // backdrop-wallpaper desktop; here (wallpaper on the workspace layer
 // over an opaque background-color) they hide the visualizer outside
 // the overview. Trade-off: the surfaces ride workspace switches.
 
-// Dynamic accent: matugen renders the palette's primary into this
-// include on every wallpaper/theme change (template and seed in
-// home/marcus/nixos/dms.nix — niri hard-errors on a missing
-// include). Loaded last so its layout values win.
-include "niri.accent.kdl"
+// The shell's palette for niri, rewritten on every wallpaper/theme
+// change: focus ring (focused, inactive, urgent), borders, shadow, tab
+// indicators, insert hint, the recent-windows highlight, and a
+// transparent background-color. Loaded last so its values win over the
+// static ones above; optional so a fresh home, before the shell's first
+// run, still parses.
+include optional=true "dms/colors.kdl"
