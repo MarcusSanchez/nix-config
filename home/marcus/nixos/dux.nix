@@ -36,21 +36,21 @@ in
     # package copies the QML at install time, so postPatch would miss
     # it); a hunk that no longer applies fails the build, never the
     # bar:
-    #   - ./dux-bar.patch: the launcher logo, which renders 1px high in
-    #     its pill with no settings knob to move it vertically, nudged
-    #     down (launcherLogoSizeOffset in dux.settings.json is the
+    #   - ./patches/dux-bar.patch: the launcher logo, which renders 1px
+    #     high in its pill with no settings knob to move it vertically,
+    #     nudged down (launcherLogoSizeOffset in dux.settings.json is the
     #     horizontal half of that centering); on a vertical bar, CPU
     #     as "20%" and RAM (with the widget's built-in show-in-GB
     #     option) over a small "GiB" line, both at 0.8x to fit the
     #     bar's width; and the stacked clock without its AM/PM line.
-    #   - ./dux-dock.patch: an "outline" color choice for the dock
-    #     border beside primary/secondary/surfaceText, so the dock's
+    #   - ./patches/dux-dock.patch: an "outline" color choice for the
+    #     dock border beside primary/secondary/surfaceText, so the dock's
     #     1px border in dux.settings.json can take the muted tone of
     #     the popups' border (blurBorderEnabled).
     package = options.programs.dank-material-shell.package.default.overrideAttrs (old: {
       postInstall = old.postInstall + ''
-        patch -p1 -d $out/share/quickshell/dms < ${./dux-bar.patch}
-        patch -p1 -d $out/share/quickshell/dms < ${./dux-dock.patch}
+        patch -p1 -d $out/share/quickshell/dms < ${./patches/dux-bar.patch}
+        patch -p1 -d $out/share/quickshell/dms < ${./patches/dux-dock.patch}
       '';
     });
   };
@@ -112,9 +112,9 @@ in
     # save; HM re-links on the next switch. The module's `settings`
     # option stays unset: set, it writes a read-only file and the UI's
     # changes stop sticking. Some keys pair with config elsewhere —
-    # launcherLogoSizeOffset with ./dux-bar.patch, terminalsAlwaysDark
+    # launcherLogoSizeOffset with ./patches/dux-bar.patch, terminalsAlwaysDark
     # with ghostty.linux.config, the dock border with
-    # ./dux-dock.patch — so don't wipe the target casually.
+    # ./patches/dux-dock.patch — so don't wipe the target casually.
     "dms/settings.json".source = link "dux.settings.json";
     # the clipboard daemon's config (`dms clipboard config`).
     # maxEntrySize is raised above the 5 MiB default: screenshots are

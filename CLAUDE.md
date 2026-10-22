@@ -427,11 +427,12 @@ home/marcus/
                            the module name predates the rename): the
                            shell, dms.service running it (`systemctl
                            --user restart dms`; `journalctl --user -u
-                           dms`), its two QML patches (dux-bar.patch,
-                           dux-dock.patch beside it, applied to the
-                           INSTALLED tree in postInstall — this package
-                           copies the QML at install time, so postPatch
-                           would miss it), the plugins' runtime and
+                           dms`), its two QML patches in patches/
+                           beside it (dux-bar.patch, dux-dock.patch:
+                           build inputs, not dotfiles; applied to the
+                           INSTALLED tree in postInstall, since this
+                           package copies the QML at install time and
+                           postPatch would miss it), the plugins' runtime and
                            their local-patch list, QS_ICON_THEME (skips
                            the shell's icon-file index, which renders
                            raster app icons soft at fractional scale),
