@@ -1,0 +1,12 @@
+diff -ru a/Modules/Dock/DockBody.qml b/Modules/Dock/DockBody.qml
+--- a/Modules/Dock/DockBody.qml
++++ b/Modules/Dock/DockBody.qml
+@@ -840,6 +840,8 @@
+                             return Theme.withAlpha(Theme.secondary, opacity);
+                         case "primary":
+                             return Theme.withAlpha(Theme.primary, opacity);
++                        case "outline":
++                            return Theme.withAlpha(Theme.outline, opacity);
+                         default:
+                             return Theme.withAlpha(Theme.surfaceText, opacity);
+                         }

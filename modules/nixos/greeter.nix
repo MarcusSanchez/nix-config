@@ -1,13 +1,15 @@
-# The login screen: DMS's greetd-based greeter — side monitors dark,
-# one sign-in UI on the main screen, the login-screen half of the DMS
-# desktop. Greeter/display-manager changes ship via `nixos-rebuild
-# boot` + reboot, not `switch` — switch would kill the live session
-# out from under the user.
+# The login screen: Dux's greetd-based greeter (dms-greeter) — side
+# monitors dark, one sign-in UI on the main screen, the login-screen
+# half of the Dux Shell desktop. Greeter/display-manager changes ship
+# via `nixos-rebuild boot` + reboot, not `switch` — switch would kill
+# the live session out from under the user.
 #
-# Module and package both come from nixpkgs.
+# Module and package both come from the dux-greeter flake input.
 {
   config,
+  inputs,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -33,15 +35,18 @@ let
   # with nowhere to type. The substitution uses --replace-fail on
   # purpose: an update that moves the line breaks the BUILD, never
   # the login screen.
-  greeterShell = pkgs.dms-greeter.overrideAttrs (old: {
+  greeterShell = options.programs.dms-greeter.package.default.overrideAttrs (old: {
     env = (old.env or { }) // {
       wantList = builtins.toJSON config.greeterScreens;
     };
-    postPatch = (old.postPatch or "") + ''
+    # Prepended: the module's own postPatch copies quickshell/ into
+    # the embed directory, so the filter must land before that copy.
+    postPatch = ''
       substituteInPlace quickshell/Modules/Greetd/GreeterSurface.qml \
         --replace-fail 'model: Quickshell.screens' \
         "model: (function () { var want = $wantList; if (Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()"
-    '';
+    ''
+    + (old.postPatch or "");
   });
 in
 {
@@ -82,26 +87,25 @@ in
     '';
   };
 
-  config = {
-    services.displayManager = {
-      # DMS's greetd-based greeter. configHome points it at the user's
-      # config for wallpaper/colors when present; the package is the
-      # screen-filtered dms-greeter build above.
-      dms-greeter = {
-        enable = true;
-        compositor.name = "niri";
-        configHome = config.identity.home;
-        package = greeterShell;
-        # without this the greeter's niri/quickshell startup output
-        # goes to the VT — a flash of yellow WARN lines on every
-        # logout/login
-        logs.save = true;
-      };
+  imports = [ inputs.dux-greeter.nixosModules.default ];
 
-      # No auto-login: boot lands on the greeter, and a login enters
-      # the niri session, where DMS runs.
-      defaultSession = "niri";
+  config = {
+    # configHome points the greeter at the user's shell config for
+    # wallpaper/colors when present; the package is the
+    # screen-filtered build above.
+    programs.dms-greeter = {
+      enable = true;
+      compositor.name = "niri";
+      configHome = config.identity.home;
+      package = greeterShell;
+      # without this the greeter's niri/quickshell startup output goes
+      # to the VT — a flash of yellow WARN lines on every logout/login
+      logs.save = true;
     };
+
+    # No auto-login: boot lands on the greeter, and a login enters the
+    # niri session, where the shell runs.
+    services.displayManager.defaultSession = "niri";
 
     # Splash-to-greeter handoff (greetd has no plymouth integration):
     # plymouth-quit/-quit-wait are unhooked from the boot transaction
@@ -126,13 +130,13 @@ in
       ];
     };
 
-    # DMS persists the profile picture through AccountsService; without
-    # the daemon, a set avatar only lives in session memory and
+    # The shell persists the profile picture through AccountsService;
+    # without the daemon, a set avatar only lives in session memory and
     # vanishes on reboot.
     services.accounts-daemon.enable = true;
 
     # The greeter runs niri with its OWN generated config, so unaided it
-    # drives every monitor untransformed at scale 1. The DMS launcher
+    # drives every monitor untransformed at scale 1. The greeter launcher
     # appends `include "/etc/greetd/niri_overrides.kdl"` to its
     # generated config when that file exists; hand it the host's
     # greeterOutputs plus one greeter-only extra: idle management. None
@@ -158,10 +162,10 @@ in
     # boot/activation.
 
     systemd.tmpfiles.rules = [
-      # The module's greetd pre-start syncs DMS state from configHome
+      # The module's greetd pre-start syncs shell state from configHome
       # (wallpaper, palette) and rewrites the synced session.json's
       # wallpaper paths to its own /var/lib copies. Purge the sync
-      # products every boot: with no DMS state in the home, a stale
+      # products every boot: with no shell state in the home, a stale
       # synced session.json makes the next sync `cp` a file onto
       # itself, and the script's set -e then keeps greetd from
       # starting at all — a black login screen. With home state
