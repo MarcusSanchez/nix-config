@@ -28,10 +28,6 @@
     # claude-code deliberately does NOT follow the flake's nixpkgs: its binary cache
     # is built against its own pin, and a follows would force local rebuilds
     claude-code.url = "github:sadjow/claude-code-nix";
-    # Same rule as claude-code: nix-community's cache builds the nightly
-    # against the overlay's own pin, so a follows would mean compiling
-    # neovim on every machine
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
