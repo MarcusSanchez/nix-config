@@ -81,7 +81,7 @@
   "lsp": {
     "gopls": {
       "initialization_options": {
-        // match nvim (LazyVim lang.go: goimports+gofumpt) and goland:
+        // match nvim (goimports+gofumpt) and goland:
         // stricter formatting incl. stdlib imports as their own group
         "gofumpt": true
       }
