@@ -1,15 +1,13 @@
-# The login screen: Dux's greetd-based greeter (dms-greeter) — side
-# monitors dark, one sign-in UI on the main screen, the login-screen
-# half of the Dux Shell desktop. Greeter/display-manager changes ship
-# via `nixos-rebuild boot` + reboot, not `switch` — switch would kill
-# the live session out from under the user.
+# The login screen: DMS's greetd-based greeter — side monitors dark,
+# one sign-in UI on the main screen, the login-screen half of the DMS
+# desktop. Greeter/display-manager changes ship via `nixos-rebuild
+# boot` + reboot, not `switch` — switch would kill the live session
+# out from under the user.
 #
-# Module and package both come from the dux-greeter flake input.
+# Module and package both come from nixpkgs.
 {
   config,
-  inputs,
   lib,
-  options,
   pkgs,
   ...
 }:
@@ -35,18 +33,15 @@ let
   # with nowhere to type. The substitution uses --replace-fail on
   # purpose: an update that moves the line breaks the BUILD, never
   # the login screen.
-  greeterShell = options.programs.dms-greeter.package.default.overrideAttrs (old: {
+  greeterShell = pkgs.dms-greeter.overrideAttrs (old: {
     env = (old.env or { }) // {
       wantList = builtins.toJSON config.greeterScreens;
     };
-    # Prepended: the module's own postPatch copies quickshell/ into
-    # the embed directory, so the filter must land before that copy.
-    postPatch = ''
+    postPatch = (old.postPatch or "") + ''
       substituteInPlace quickshell/Modules/Greetd/GreeterSurface.qml \
         --replace-fail 'model: Quickshell.screens' \
         "model: (function () { var want = $wantList; if (Quickshell.screens.length <= 1) return Quickshell.screens; var f = Quickshell.screens.filter(function (s) { return want.indexOf(s.name) >= 0; }); return f.length > 0 ? f : Quickshell.screens; })()"
-    ''
-    + (old.postPatch or "");
+    '';
   });
 in
 {
@@ -87,31 +82,32 @@ in
     '';
   };
 
-  imports = [ inputs.dux-greeter.nixosModules.default ];
-
   config = {
-    # configHome points the greeter at the user's shell config for
-    # wallpaper/colors when present; the package is the
-    # screen-filtered build above.
-    programs.dms-greeter = {
-      enable = true;
-      compositor.name = "niri";
-      configHome = config.identity.home;
-      package = greeterShell;
-      # without this the greeter's niri/quickshell startup output goes
-      # to the VT — a flash of yellow WARN lines on every logout/login
-      logs.save = true;
-      # in the greeter's own state dir, not the module's /tmp default:
-      # the launch script opens the log with a shell redirect before
-      # starting the greeter, so a file left by a different user (a
-      # persistent /tmp, a changed greeter account) is a permission
-      # denied and a greeter that never starts
-      logs.path = "/var/lib/dms-greeter/greeter.log";
-    };
+    services.displayManager = {
+      # DMS's greetd-based greeter. configHome points it at the user's
+      # config for wallpaper/colors when present; the package is the
+      # screen-filtered dms-greeter build above.
+      dms-greeter = {
+        enable = true;
+        compositor.name = "niri";
+        configHome = config.identity.home;
+        package = greeterShell;
+        # without this the greeter's niri/quickshell startup output
+        # goes to the VT — a flash of yellow WARN lines on every
+        # logout/login
+        logs.save = true;
+        # in the greeter's own state dir, not the module's /tmp default:
+        # the launch script opens the log with a shell redirect before
+        # starting the greeter, so a file left by a different user (a
+        # persistent /tmp, a changed greeter account) is a permission
+        # denied and a greeter that never starts
+        logs.path = "/var/lib/dms-greeter/greeter.log";
+      };
 
-    # No auto-login: boot lands on the greeter, and a login enters the
-    # niri session, where the shell runs.
-    services.displayManager.defaultSession = "niri";
+      # No auto-login: boot lands on the greeter, and a login enters
+      # the niri session, where DMS runs.
+      defaultSession = "niri";
+    };
 
     # Splash-to-greeter handoff (greetd has no plymouth integration):
     # plymouth-quit/-quit-wait are unhooked from the boot transaction
@@ -136,13 +132,13 @@ in
       ];
     };
 
-    # The shell persists the profile picture through AccountsService;
-    # without the daemon, a set avatar only lives in session memory and
+    # DMS persists the profile picture through AccountsService; without
+    # the daemon, a set avatar only lives in session memory and
     # vanishes on reboot.
     services.accounts-daemon.enable = true;
 
     # The greeter runs niri with its OWN generated config, so unaided it
-    # drives every monitor untransformed at scale 1. The greeter launcher
+    # drives every monitor untransformed at scale 1. The DMS launcher
     # appends `include "/etc/greetd/niri_overrides.kdl"` to its
     # generated config when that file exists; hand it the host's
     # greeterOutputs plus one greeter-only extra: idle management. None
@@ -168,10 +164,10 @@ in
     # boot/activation.
 
     systemd.tmpfiles.rules = [
-      # The module's greetd pre-start syncs shell state from configHome
+      # The module's greetd pre-start syncs DMS state from configHome
       # (wallpaper, palette) and rewrites the synced session.json's
       # wallpaper paths to its own /var/lib copies. Purge the sync
-      # products every boot: with no shell state in the home, a stale
+      # products every boot: with no DMS state in the home, a stale
       # synced session.json makes the next sync `cp` a file onto
       # itself, and the script's set -e then keeps greetd from
       # starting at all — a black login screen. With home state
@@ -183,6 +179,12 @@ in
       "r! /var/lib/dms-greeter/dms-colors.json"
       "r! /var/lib/dms-greeter/custom-theme.json"
       "r! /var/lib/dms-greeter/wallpaper*"
+
+      # The module's own rule only sets the state dir's top-level
+      # owner; this one re-owns everything under it, so state left by
+      # a different greeter account (the greeter's cache and config
+      # dirs live here) can't lock the greeter out of its own home.
+      "Z /var/lib/dms-greeter - dms-greeter dms-greeter"
     ];
   };
 }

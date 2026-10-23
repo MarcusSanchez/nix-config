@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), one bare-metal NixOS desktop (host `hero`, the daily desk, dual-booted beside a gaming-only Windows) running niri + Dux Shell (DankMaterialShell until its 2.0 rename; migrated on 2026-10-21 onto its own flake modules with the 1.6 desktop carried over — the 1.6 wiring is tagged `pre-dux` in git, and the original machine state stays in ~/.local/share/dms-1.6-stash) — DMS was restored in late 2026-09 after a month of shell trials (iNiR, noctalia, COSMIC-on-niri, and a full Ryoku adoption whose complete wiring lives in git history, as do the decommissioned hosts naut-dt/naut-box on the SOLD predecessor PC and the retired tuf-laptop, and the rejected Plasma/GNOME/SDDM experiments from the archived `marcussanchez/tuf-nix-config` repo; modules/nixos still reads as a fleet world on purpose — a second desktop is one hosts/ dir away), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The macs and hero have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
+Flake-based Nix configuration for a family of WSL NixOS boxes sharing one config (`framework-dt`, `office-one`, `office-two` — user `marcus`, same toolchains, headless: a terminal into the fleet on whatever PC hosts the distro; the Windows sides are unmanaged on purpose), one bare-metal NixOS desktop (host `hero`, the daily desk, dual-booted beside a gaming-only Windows) running niri + DankMaterialShell 1.6 — restored in late 2026-09 after a month of shell trials (iNiR, noctalia, COSMIC-on-niri, and a full Ryoku adoption whose complete wiring lives in git history, as do the decommissioned hosts naut-dt/naut-box on the SOLD predecessor PC and the retired tuf-laptop, and the rejected Plasma/GNOME/SDDM experiments from the archived `marcussanchez/tuf-nix-config` repo; modules/nixos still reads as a fleet world on purpose — a second desktop is one hosts/ dir away) and kept on 1.6 over its own 2.0 release (renamed Dux Shell — a full migration on 2026-10-21 was reverted the next day for regressions; its complete wiring is tagged `dux-final` in git, its machine state left in ~/.local/share/dux-state-stash), and two Macs on nix-darwin + Determinate Nix sharing `hosts/darwin` the way the WSL boxes share `hosts/wsl` (host `macbook-air`, user `marcussanchez`; host `mac-mini`, user `marcus` — the account name is keyed on the hostName specialArg in `modules/darwin/users.nix`, with `marcus` the norm and the Air the lone legacy exception until its factory reset unifies it; the mini is a trusted sops machine, a super.yaml recipient). On every machine the repo lives at `~/nix-config`; on Linux `/etc/nixos` is symlinked to it (what bare `nixos-rebuild` relies on), on the mac `/etc/nix-darwin` is. The GitHub repo is `MarcusSanchez/nix-config`; the weekly `system.autoUpgrade` on every WSL box builds from pushed main there, never from the working tree — so one push deploys to all of them. The macs and hero have no autoUpgrade (`nh darwin switch -u` / `nh os switch -u` by hand — a desktop should never swap its compositor mid-session). GC runs daily on the Linux boxes and weekly as a launchd agent on the mac; every one of these timers catches up after downtime rather than skipping.
 
 **Each NixOS host resolves its config by hostname**: `nixos-rebuild --flake /etc/nixos` with no `#attr` builds `nixosConfigurations.<hostname>`, as do `system.autoUpgrade` and `NH_FLAKE`. The flake attribute and `networking.hostName` must therefore stay equal — `flake.nix` keys each entry by hostname and passes it to the host module as `hostName` via `specialArgs`, so they cannot drift. Several attributes may point at the same host module; that's how an identical second box is added, as one line in `flake.nix` and nothing else. The Windows-side WSL distro name (`wsl -d <name>`) is a separate identifier NixOS never sees; installs keep the `.wsl` file's default name `NixOS`, since parameterizing it bought nothing (`--name` only matters if one PC hosts two distros — WSL refuses duplicates).
 
@@ -209,14 +209,11 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            sops used before the single-key move)
   niri.nix                 the compositor + portals; session Exec routed
                            through systemd-cat (journalctl -t niri-session)
-  greeter.nix              the whole login-screen story: the
-                           dux-greeter flake's programs.dms-greeter
-                           module + the screen-filtered
+  greeter.nix              the whole login-screen story: nixpkgs'
+                           dms-greeter module + the screen-filtered
                            overrideAttrs (the QML is embedded in the Go
                            binary, so the filter patches SOURCE,
-                           pre-embed — PREPENDED to the package's own
-                           postPatch, which does the embed copy),
-                           accounts-daemon + the avatar-seed
+                           pre-embed), accounts-daemon + the avatar-seed
                            slot (currently EMPTY, replacement pending —
                            the comment there has the probe order and
                            the rule shape; the greeter can't read
@@ -227,10 +224,14 @@ modules/nixos/             the bare-metal machine's world, aggregated by
                            niri.outputs.kdl, which the greeter
                            deliberately no longer reads cross-layer),
                            the generated /etc/greetd/niri_overrides.kdl,
-                           and the tmpfiles purge of the module
-                           pre-start's synced shell state (stale state
+                           the tmpfiles purge of the module
+                           pre-start's synced DMS state (stale state
                            once made greetd refuse to start — a BLACK
-                           login screen; the comment has the story).
+                           login screen; the comment has the story),
+                           and the log in the state dir + a recursive
+                           re-own of that dir (a /tmp log or state left
+                           by another greeter account = permission
+                           denied, a greeter that never starts).
                            Ships via `nixos-rebuild boot`, never switch
   system.nix               machine-level settings and services:
                            timezone/locale, fonts, pipewire (allowed-rates
@@ -386,9 +387,12 @@ home/marcus/
                            niri.host.kdl, linked per hostname; a NEW
                            desktop host must commit its file BEFORE
                            first switch or HM links against nothing),
-                           dux.settings.json (the Dux settings UI's
-                           accumulated drift),
-                           dux.clsettings.json (the clipboard daemon's
+                           dms.settings.json (the settings UI's
+                           accumulated drift — a few keys pair with
+                           dms.nix and ghostty.linux.config, see
+                           dms.nix's settings-link comment before
+                           wiping it),
+                           dms.clsettings.json (the clipboard daemon's
                            config — its entry-size cap must exceed a
                            4K screenshot, the comment at its link says
                            why),
@@ -422,47 +426,49 @@ home/marcus/
     theme.nix              GTK/dconf theme names + pointer cursor
                            (Adwaita everywhere; see Constraints for why
                            not Papirus)
-    dux.nix                Dux Shell through the dux-shell flake's
-                           HM module (programs.dank-material-shell —
-                           the module name predates the rename): the
-                           shell, dms.service running it (`systemctl
-                           --user restart dms`; `journalctl --user -u
-                           dms`), its two QML patches in patches/
-                           beside it (dux-bar.patch, dux-dock.patch:
-                           build inputs, not dotfiles; applied to the
-                           INSTALLED tree in postInstall, since this
-                           package copies the QML at install time and
-                           postPatch would miss it), the plugins' runtime and
-                           their local-patch list, QS_ICON_THEME (skips
-                           the shell's icon-file index, which renders
-                           raster app icons soft at fractional scale),
-                           and the settings links.
-                           THE RULE for this desktop: the 1.6-era LOOK
-                           is pinned, Dux's new features stay on —
-                           except the bar music widget's cover art and
-                           the stacked clock's AM/PM line, both off by
-                           preference. JSON can't carry comments, so
-                           the pinned keys in dux.settings.json are
-                           recorded HERE — each restores a 1.6 default
-                           that Dux changed: fontFamily "Inter
-                           Variable", widgetBackgroundColor "sch",
-                           blurBorderEnabled + blurLayerOutlineOpacity
-                           0.12 (popup/dock outlines), the dock's 1px
-                           "outline" border (needs dux-dock.patch) and
-                           itemSpacing 13.6 (1.6's 1.2x icon slots).
-                           niri.config.kdl includes only alttab and
-                           colors (the palette: rings, shadow, tab
-                           indicators, a transparent background) from
-                           the shell's ~/.config/niri/dms/ — its
-                           layout.kdl would set 4px gaps over the 16
+    dms.nix                the shell stack (dms-shell/quickshell/dgop/
+                           matugen — dms-shell does NOT bundle the
+                           helpers; matugen missing = theme generation
+                           silently no-ops) + the out-of-store link for
+                           dms.settings.json (the settings UI's git
+                           drift; a few keys pair load-bearingly with
+                           this file — see its settings-link comment) +
+                           the matugen user config that renders the
+                           palette's primary into niri's focus ring
+                           (niri.accent.kdl — the toml's three landmines
+                           are commented at the config; the file also
+                           seeds the include so niri never hard-errors).
+                           dms-shell itself carries pre-embed source
+                           patches (launcher-logo centering, the
+                           greeter's technique, whose settings-side
+                           other half is launcherLogoSizeOffset in
+                           dms.settings.json; the profile-image
+                           fallbacks -> the material "person" glyph;
+                           and dms-vertical-stats.patch beside it: the
+                           vertical bar's CPU as "20%", RAM as used GiB),
+                           so it builds from source and a DMS update
+                           that reshapes an anchored line fails the
+                           BUILD on purpose — the comment at the
+                           override explains. Also the audioFx plugin's
+                           runtime (cava + python with numpy/pillow)
+                           and the QML_IMPORT_PATH/QML2_IMPORT_PATH
+                           session variables that let plugins find the
+                           Qt5Compat modules.
+                           Theme/wallpaper CHOICE stays in the UI; the
+                           retired looks system — wallpaper:<name>
+                           commands, per-look theme jsons, the niri
+                           accent-sed — is whole in git history
     niri.nix               the session: out-of-store links for
                            niri/config.kdl, niri.outputs.kdl,
                            niri.host.kdl (target picked by hostname) +
                            everything the binds and
-                           spawns expect on PATH — playerctl, swaybg
-                           (the startup wallpaper under the shell's
-                           layer), wtype, niri-spawn-left (screenshots
-                           are the shell's own `dms screenshot`),
+                           spawns expect on PATH — screenshots
+                           (grim/slurp + the screenshot-copy and
+                           screenshot-niri helpers that route every
+                           shot through DMS's clipboard as a FILE, so
+                           it pastes as image, path or URI),
+                           playerctl, swaybg (the startup wallpaper
+                           under DMS's layer),
                            xremap, xwayland-satellite. The
                            xremap service reads the live manager env at
                            exec — the NIRI_SOCKET race story is in its
@@ -499,12 +505,12 @@ home/marcus/
 - **Desktop-stack rules, distilled from the absorbed repo's two hard-won days** — the full briefing is MERGE-NOTES.md in the archived `marcussanchez/tuf-nix-config`:
   - **Greeter/display-manager changes ship via `nixos-rebuild boot`, not `switch`** — switch kills the live session out from under the user. (nixpkgs' greetd unit is `restartIfChanged = false`, so `nixos-rebuild dry-activate` listing greetd under "would NOT stop" is the evidence a mixed switch is safe; a greeter whose system user changed then needs a REBOOT, not a logout, before the new one runs.)
   - **`niri validate` does NOT catch duplicate keybinds**; the compositor rejects the whole live reload instead. After editing niri.config.kdl check the journal, not just the validator. Session logs: `journalctl -t niri-session`.
-  - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `systemctl --user restart dms`. Verify pixels with `dms screenshot output -o <output> --no-clipboard --no-notify -d <dir>`, not by asking state again.
+  - **`dms ipc` exit codes lie** (0 even when a call lands before the shell is ready, SUCCESS while persisting nothing). Verify outcomes by querying state back, never by exit code or process existence. **And correct state can still render stale** (2026-08-06: session.json + `wallpaper getFor` both right while every monitor painted the old wallpaper) — when state and pixels disagree, restart the shell: `pkill quickshell`, then `niri msg action spawn -- dms run` (the supervisor may be long dead, so respawn explicitly). Verify pixels with `grim -o <output>` over SSH, not by asking state again.
   - The boot experience is several cooperating tricks (early-KMS nvidia initrd, plymouth `--retain-splash`, niriQuiet's systemd-cat rewrite, `systemd.show_status=false`, greeter `logs.save`) — `modules/nixos/boot.nix` + the hosts' headers explain the web; change pieces together or not at all. `configurationLimit 10` is load-bearing (1 GB ESP, ~120 MB per early-KMS initrd).
   - **Group membership changes (input/uinput) need a relogin** — the session that ran the switch doesn't have them yet.
-  - **A switch that bumps glibc breaks the RUNNING shell's lock screen**: the lock authenticates through PAM inside the shell's own process, and the new generation's PAM modules refuse to dlopen into the old-glibc process (`PAM unable to dlopen … pam_unix.so` in the journal) — every password reads as wrong. The session itself is fine; respawn the shell from the new generation (`systemctl --user restart dms`) or relogin before locking.
+  - **A switch that bumps glibc breaks the RUNNING shell's lock screen**: the lock authenticates through PAM inside the shell's own process, and the new generation's PAM modules refuse to dlopen into the old-glibc process (`PAM unable to dlopen … pam_unix.so` in the journal) — every password reads as wrong. The session itself is fine; respawn the shell from the new generation (kill `dms run` + quickshell, start `dms run` again inside the session) or relogin before locking.
   - **Adwaita icons are a PREFERENCE, not a workaround.** `home/marcus/common/shell.nix` keeps `catppuccin.gtk.icon.enable = false` and `nixos/theme.nix` pins Adwaita: with Adwaita named, apps fall through to their own hicolor icons (native look). Papirus proved technically fine in an earlier trial but its restyled app icons were rejected on looks — a taste decision, not a stability one.
-  - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a shell restart (`systemctl --user restart dms`) to be indexed.
+  - Toolbox rewrites its `jetbrains-*.desktop` files on every IDE update — never hand-edit them; new IDEs need a DMS restart to be indexed.
   - When a GUI app misbehaves, run it from a terminal and read its output before theorizing about the launcher.
 - **hero cannot build nixos-unstable past fe13242 yet (2026-10-21).** From 02c087f on, nixpkgs' module aggregator (`pkgs/os-specific/linux/kmod/aggregator.nix`) concatenates a per-module `<module>.ko.cer` for every out-of-tree module, and only modules installed through the kernel's own `modules_install` ship one — nixpkgs' evdi and hero's hand-installed btmtk/asus-ec-sensors (`hosts/hero/bluetooth.nix`, `tuning.nix`) don't, so `linux-*-modules` fails with `cat: …ko.cer: No such file or directory`. The lock's Linux `nixpkgs` (node `nixpkgs_2`) is held at fe13242 with `nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/<rev>`; any input update (a mac `-u` switch, CI's weekly bump) moves it forward again, so rebuild hero before pushing a bump and re-hold until nixpkgs or the modules catch up. The macs build from `nixpkgs-darwin` and are unaffected.
 - The zsh `initContent` in `home/marcus/common/shell.nix` is wrapped in `lib.mkOrder 1200` on purpose, so marcus's keybindings land after zoxide/atuin's shell hooks. Don't drop the ordering when editing it.

@@ -52,17 +52,6 @@
       url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Dux Shell (the desktop shell) and its greeter, each through the
-    # flake's own Home Manager / NixOS module. Pinned to a release tag;
-    # bump deliberately, not via flake update.
-    dux-shell = {
-      url = "github:duxlabs-dev/dux-shell/v2.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    dux-greeter = {
-      url = "github:duxlabs-dev/dux-greeter/v2.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";

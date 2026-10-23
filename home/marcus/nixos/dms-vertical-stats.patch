@@ -1,0 +1,64 @@
+diff --color -ru a/quickshell/Modules/DankBar/Widgets/CpuMonitor.qml b/quickshell/Modules/DankBar/Widgets/CpuMonitor.qml
+--- a/quickshell/Modules/DankBar/Widgets/CpuMonitor.qml
++++ b/quickshell/Modules/DankBar/Widgets/CpuMonitor.qml
+@@ -32,6 +32,7 @@
+                 id: cpuColumn
+                 visible: root.isVerticalOrientation
+                 anchors.centerIn: parent
++                anchors.verticalCenterOffset: 0.5
+                 spacing: 1
+ 
+                 DankIcon {
+@@ -58,9 +59,9 @@
+                             return "--";
+                         }
+ 
+-                        return DgopService.cpuUsage.toFixed(0);
++                        return DgopService.cpuUsage.toFixed(0) + "%";
+                     }
+-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
++                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText) * 0.8
+                     color: Theme.widgetTextColor
+                     anchors.horizontalCenter: parent.horizontalCenter
+                 }
+diff --color -ru a/quickshell/Modules/DankBar/Widgets/RamMonitor.qml b/quickshell/Modules/DankBar/Widgets/RamMonitor.qml
+--- a/quickshell/Modules/DankBar/Widgets/RamMonitor.qml
++++ b/quickshell/Modules/DankBar/Widgets/RamMonitor.qml
+@@ -35,6 +35,7 @@
+                 id: ramColumn
+                 visible: root.isVerticalOrientation
+                 anchors.centerIn: parent
++                anchors.verticalCenterOffset: 1
+                 spacing: 1
+ 
+                 DankIcon {
+@@ -61,18 +62,23 @@
+                             return "--";
+                         }
+ 
+-                        if (root.showInGb) {
+-                            return (DgopService.usedMemoryMB / 1024).toFixed(1);
+-                        }
+-
+-                        return DgopService.memoryUsage.toFixed(0);
++                        return (DgopService.usedMemoryMB / 1024).toFixed(1);
+                     }
+-                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
++                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText) * 0.8
+                     color: Theme.widgetTextColor
+                     anchors.horizontalCenter: parent.horizontalCenter
+                 }
+ 
+                 NumericText {
++                    isMonospace: false
++                    text: "GiB"
++                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText) * 0.6
++                    color: Theme.surfaceVariantText
++                    anchors.horizontalCenter: parent.horizontalCenter
++                    topPadding: -2
++                }
++
++                NumericText {
+                     isMonospace: false
+                     visible: root.showSwap && DgopService.totalSwapKB > 0
+                     text: root.swapUsage.toFixed(0)

@@ -10,10 +10,10 @@
   imports = [
     ./common
     ./nixos/theme.nix
-    ./nixos/dux.nix
+    ./nixos/dms.nix
     ./nixos/niri.nix
     # UI-managed-config links + drift auto-commit. Desktop note: the
-    # niri kdls (nixos/niri.nix), dux.settings.json (nixos/dux.nix)
+    # niri kdls (nixos/niri.nix), dms.settings.json (nixos/dms.nix)
     # and xremap.yml live under the same pathspec, so their drift rides
     # the same hook.
     ./common/dotfiles.nix
