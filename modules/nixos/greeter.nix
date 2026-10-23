@@ -101,6 +101,12 @@ in
       # without this the greeter's niri/quickshell startup output goes
       # to the VT — a flash of yellow WARN lines on every logout/login
       logs.save = true;
+      # in the greeter's own state dir, not the module's /tmp default:
+      # the launch script opens the log with a shell redirect before
+      # starting the greeter, so a file left by a different user (a
+      # persistent /tmp, a changed greeter account) is a permission
+      # denied and a greeter that never starts
+      logs.path = "/var/lib/dms-greeter/greeter.log";
     };
 
     # No auto-login: boot lands on the greeter, and a login enters the
