@@ -71,7 +71,7 @@
     # first-run bootstrap on the mac).
     rustup
 
-    # nix: LSP + formatter (the lang.nix LazyVim extra uses these)
+    # nix: LSP + formatter (the editor's nix language setup uses these)
     nixd
     nixfmt
 

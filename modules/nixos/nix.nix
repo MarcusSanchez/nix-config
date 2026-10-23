@@ -21,7 +21,7 @@
         "@wheel"
       ];
 
-      # Pull claude-code and devenv-built artifacts from their cachix caches
+      # Pull claude-code, devenv and neovim-nightly artifacts from their caches
       # instead of rebuilding locally. Purely build-vs-download: versions
       # still come from the lockfiles, and a cache miss just builds locally.
       # Can't live in modules/common (darwin has nix.enable = false) — the
@@ -30,11 +30,13 @@
         "https://cache.nixos.org"
         "https://claude-code.cachix.org"
         "https://devenv.cachix.org"
+        "https://nix-community.cachix.org"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
 
       # Channels are off (below); this keeps nix-shell -p and <nixpkgs>

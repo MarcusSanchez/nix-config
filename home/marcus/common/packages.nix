@@ -7,7 +7,7 @@
 #
 # Interactive-shell ALIASES only (ls -> eza, cat -> bat) — aliases
 # never expand inside scripts, so anything calling the real coreutils
-# keeps them. ripgrep/fd binaries arrive via neovim.nix (LazyVim
+# keeps them. ripgrep/fd binaries arrive via neovim.nix (editor
 # dependencies); fzf's package and SHELL side live here (Ctrl+T file
 # picker, Alt+C cd — no Ctrl+R widget, so atuin owns that key
 # uncontested).

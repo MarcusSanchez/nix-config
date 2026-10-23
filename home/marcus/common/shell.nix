@@ -20,7 +20,7 @@ in
 {
   imports = [ inputs.catppuccin.homeModules.default ];
 
-  # Catppuccin across CLI tools. nvim is themed by LazyVim itself — that
+  # Catppuccin across CLI tools. nvim carries its own theme — that
   # opt-out is load-bearing (the neovim constraint in CLAUDE.md). So is
   # starship's, if that ever returns: its port breaks cross-platform eval
   # (Constraints).
