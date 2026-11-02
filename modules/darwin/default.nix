@@ -13,6 +13,7 @@
   imports = [
     ../common
     ./nix.nix
+    ./atuin.nix
     ./networking.nix
     inputs.sops-nix.darwinModules.sops
     ./homebrew.nix
