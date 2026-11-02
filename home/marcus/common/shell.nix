@@ -217,6 +217,19 @@ in
         # errors out with "cannot bind to an empty key sequence" on every
         # login, so only bind it when the terminal actually has one.
         [[ -n "$terminfo[kcbt]" ]] && bindkey "$terminfo[kcbt]" expand-or-complete
+
+        # Rex opens its terminals with the directory of its server's `rex`
+        # CLI at the front of PATH and names it in REX_BIN_DIR; the fixed
+        # PATH this file starts from drops it, so it goes back in front.
+        # Outside Rex the variable is empty and nothing changes.
+        if [ -n "$REX_BIN_DIR" ]; then
+          export PATH="$REX_BIN_DIR:$PATH"
+        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+          # Terminals not opened by Rex get the CLI from the app's current
+          # server bundle — appended, so a Rex-provided copy stays ahead
+          elif [ -d "$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS" ]; then
+            export PATH="$PATH:$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS"
+        ''}fi
       '';
     };
   };
