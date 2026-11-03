@@ -47,6 +47,7 @@ local VIM_BUNDLE_PREFIX = "com.jetbrains."
 -- fetched for these. Everything else decides on the bundle id alone.
 local TERMINAL_BUNDLES = {
   ["com.mitchellh.ghostty"] = true,
+  ["com.superlogical.rex"] = true,
 }
 
 -- ghostty's shell integration titles the window after the foreground
