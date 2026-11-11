@@ -60,6 +60,8 @@
     ];
 
     casks = [
+      # the desktop app; the CLI is the claude-code package, not a cask
+      "claude"
       "ghostty@tip"
       "google-chrome"
       # per-application key remapping; its config and the launchd agent
